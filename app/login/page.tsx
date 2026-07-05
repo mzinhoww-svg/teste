@@ -45,6 +45,11 @@ export default function LoginPage({
         <p className="mt-4 text-center text-xs text-slate-400">
           Ao criar a conta, seu funil e os 9 agentes já vêm configurados automaticamente.
         </p>
+        <div className="mt-4 flex items-center justify-center gap-3 text-xs">
+          <a href="/" className="text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline">← Página inicial</a>
+          <span className="text-slate-300">·</span>
+          <a href="/admin" className="text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline">Sou admin da plataforma</a>
+        </div>
         <p className="mt-2 text-center text-[11px] leading-relaxed text-slate-400">
           Seus dados ficam isolados por organização e são tratados conforme a LGPD (Lei 13.709/2018).
           Você pode exportá-los a qualquer momento em Relatórios → Exportar dados.

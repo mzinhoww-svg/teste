@@ -30,11 +30,14 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isPublic =
+    path === "/" ||
     path === "/login" ||
+    path.startsWith("/convite") ||
     path.startsWith("/api/health") ||
     path.startsWith("/api/webhooks") ||
     path.startsWith("/_next") ||
-    path.startsWith("/favicon");
+    path.startsWith("/favicon") ||
+    path.startsWith("/icon");
 
   // Não logado tentando acessar área privada → login
   if (!user && !isPublic) {
@@ -43,10 +46,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Logado indo para /login → manda pro board
+  // Logado indo para /login → manda pro CRM
   if (user && path === "/login") {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/app";
     return NextResponse.redirect(url);
   }
 

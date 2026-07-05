@@ -11,7 +11,7 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) redirect(`/login?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/app");
 }
 
 export async function signup(formData: FormData) {
@@ -28,7 +28,7 @@ export async function signup(formData: FormData) {
     redirect(`/login?message=${encodeURIComponent("Conta criada. Confirme seu e-mail para entrar.")}`);
   }
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/app");
 }
 
 export async function logout() {

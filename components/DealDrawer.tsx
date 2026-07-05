@@ -104,7 +104,7 @@ function AgentResult({ kind, r }: { kind: string; r: any }) {
             </div>
           ))}
         </div>
-        <p className="text-xs text-slate-400">Gerir em <a href="/contracts" className="text-brand-600 underline">Contratos</a> · {r.signatureProvider}</p>
+        <p className="text-xs text-slate-400">Gerir em <a href="/app/contracts" className="text-brand-600 underline">Contratos</a> · {r.signatureProvider}</p>
       </div>
     );
   }
