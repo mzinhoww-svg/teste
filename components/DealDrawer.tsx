@@ -44,7 +44,7 @@ function AgentResult({ kind, r }: { kind: string; r: any }) {
       <div className="mt-3 space-y-2">
         <p className="text-sm font-medium text-slate-800">→ {r.nextAction}<SourceTag source={r.source} /></p>
         <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-400">Mensagem · {r.channel}</div>
+          <div className="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">Mensagem · {r.channel}</div>
           {r.message}
         </div>
         {r.waLink && (
