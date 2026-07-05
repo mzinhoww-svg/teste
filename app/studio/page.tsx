@@ -1,6 +1,7 @@
 import { Nav } from "@/components/Nav";
 import { AgentEditor } from "@/components/AgentEditor";
-import { getAgents } from "@/lib/db";
+import { getAgents, getAuthContext } from "@/lib/db";
+import { PermissionDenied } from "@/components/PermissionDenied";
 import type { Agent } from "@/lib/types";
 
 export const metadata = { title: "Studio de Agentes — CRM AI Studio" };
@@ -13,6 +14,15 @@ const groupMeta: Record<Agent["group"], { label: string; color: string }> = {
 const order: Agent["group"][] = ["aquisição", "vendas", "pós-venda"];
 
 export default async function StudioPage() {
+  const ctx = await getAuthContext();
+  if (ctx && ctx.orgId && ctx.role === "member") {
+    return (
+      <div className="min-h-screen">
+        <Nav active="studio" />
+        <PermissionDenied orgName={ctx.orgName} role={ctx.role} />
+      </div>
+    );
+  }
   const agents = await getAgents();
 
   return (
@@ -25,6 +35,10 @@ export default async function StudioPage() {
             Edite, no-code, os {agents.length} agentes que atuam do marketing ao pós-venda. Alterações são salvas por
             organização e o prompt anterior fica versionado.
           </p>
+          <p className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700">
+            As alterações feitas aqui afetam toda a organização {ctx?.orgName ? `"${ctx.orgName}"` : "ativa"} — todos os
+            deals passam a usar os agentes como configurados.
+          </p>
         </div>
 
         {order.map((g) => {
@@ -33,7 +47,7 @@ export default async function StudioPage() {
           return (
             <section key={g} className="mb-8">
               <h2 className={`mb-3 text-sm font-semibold uppercase tracking-wide ${groupMeta[g].color}`}>{groupMeta[g].label}</h2>
-              <div className="grid gap-4">{list.map((a) => <AgentEditor key={a.id} agent={a} />)}</div>
+              <div className="grid gap-4">{list.map((a) => <AgentEditor key={a.id} agent={a} orgName={ctx?.orgName ?? ""} />)}</div>
             </section>
           );
         })}

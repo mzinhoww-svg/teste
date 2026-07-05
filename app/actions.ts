@@ -11,6 +11,20 @@ async function orgOrThrow() {
   return orgId;
 }
 
+/**
+ * Guarda server-side por papel. A UI esconde o que o papel não pode fazer,
+ * mas a autorização REAL acontece aqui — chamadas diretas às actions por um
+ * `member` são rejeitadas mesmo que a UI seja contornada.
+ */
+async function requireRole(allowed: Array<"owner" | "admin" | "member">) {
+  const ctx = await getAuthContext();
+  if (!ctx?.orgId) throw new Error("Sem organização / não autenticado");
+  if (!allowed.includes(ctx.role)) {
+    throw new Error("Permissão insuficiente: esta ação exige papel owner/admin nesta organização");
+  }
+  return ctx;
+}
+
 // --- Tenant ativo ----------------------------------------------------------
 
 export async function switchOrg(orgId: string) {
@@ -141,7 +155,7 @@ export async function addActivity(dealId: string, type: string, summary: string,
 export async function updateAgent(uuid: string, fields: {
   instructions?: string; model?: string; enabled?: boolean; triggers?: string[]; temperature?: number;
 }) {
-  const orgId = await orgOrThrow();
+  const { orgId } = await requireRole(["owner", "admin"]);
   const supabase = createClient();
 
   // Versiona o prompt antes de sobrescrever.
@@ -169,7 +183,7 @@ export async function updateAgent(uuid: string, fields: {
 // --- Automações ------------------------------------------------------------
 
 export async function createAutomation(formData: FormData) {
-  const orgId = await orgOrThrow();
+  const { orgId } = await requireRole(["owner", "admin"]);
   const supabase = createClient();
   const name = String(formData.get("name") ?? "").trim();
   const stageId = String(formData.get("stageId") ?? "");
@@ -185,7 +199,7 @@ export async function createAutomation(formData: FormData) {
 }
 
 export async function toggleAutomation(id: string, enabled: boolean) {
-  await orgOrThrow();
+  await requireRole(["owner", "admin"]);
   const supabase = createClient();
   const { error } = await supabase.from("automations").update({ enabled }).eq("id", id);
   if (error) throw error;
@@ -193,7 +207,7 @@ export async function toggleAutomation(id: string, enabled: boolean) {
 }
 
 export async function deleteAutomation(id: string) {
-  await orgOrThrow();
+  await requireRole(["owner", "admin"]);
   const supabase = createClient();
   const { error } = await supabase.from("automations").delete().eq("id", id);
   if (error) throw error;
@@ -203,7 +217,7 @@ export async function deleteAutomation(id: string) {
 // --- Contratos -----------------------------------------------------------
 
 export async function updateContractStatus(contractId: string, status: string) {
-  await orgOrThrow();
+  await requireRole(["owner", "admin"]);
   const supabase = createClient();
   const { error } = await supabase
     .from("contracts")
@@ -215,7 +229,7 @@ export async function updateContractStatus(contractId: string, status: string) {
 }
 
 export async function updateContractClauses(contractId: string, clauses: { heading: string; body: string }[]) {
-  await orgOrThrow();
+  await requireRole(["owner", "admin"]);
   const supabase = createClient();
   const { error } = await supabase
     .from("contracts")

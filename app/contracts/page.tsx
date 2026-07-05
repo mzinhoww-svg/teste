@@ -1,11 +1,11 @@
 import { Nav } from "@/components/Nav";
 import { ContractCard } from "@/components/ContractCard";
-import { getContracts } from "@/lib/db";
+import { getAuthContext, getContracts } from "@/lib/db";
 
 export const metadata = { title: "Contratos — CRM AI Studio" };
 
 export default async function ContractsPage() {
-  const contracts = await getContracts();
+  const [contracts, ctx] = await Promise.all([getContracts(), getAuthContext()]);
 
   return (
     <div className="min-h-screen">
@@ -24,7 +24,7 @@ export default async function ContractsPage() {
           </div>
         ) : (
           <div className="grid gap-4">
-            {contracts.map((c) => <ContractCard key={c.id} c={c} />)}
+            {contracts.map((c) => <ContractCard key={c.id} c={c} orgName={ctx?.orgName ?? ""} />)}
           </div>
         )}
       </main>

@@ -18,6 +18,11 @@ const tabs: { id: Tab; href: string; label: string }[] = [
 // TenantBadge (organização ativa — switcher com 2+ orgs) e UserMenu (escopo pessoal).
 export async function Nav({ active }: { active: Tab }) {
   const ctx = await getAuthContext();
+  // Studio e Automações alteram o comportamento da org inteira — visíveis só
+  // para owner/admin (a autorização real é server-side, nas actions/páginas).
+  const visibleTabs = ctx?.role === "member"
+    ? tabs.filter((t) => t.id !== "studio" && t.id !== "automations")
+    : tabs;
 
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur">
@@ -34,7 +39,7 @@ export async function Nav({ active }: { active: Tab }) {
 
         <div className="flex items-center gap-1">
           <nav className="hidden items-center gap-1 text-sm md:flex" aria-label="Navegação principal">
-            {tabs.map((t) => (
+            {visibleTabs.map((t) => (
               <Link
                 key={t.id}
                 href={t.href}
@@ -45,7 +50,7 @@ export async function Nav({ active }: { active: Tab }) {
               </Link>
             ))}
           </nav>
-          <MobileNav tabs={tabs} active={active} />
+          <MobileNav tabs={visibleTabs} active={active} />
           {ctx && <UserMenu email={ctx.email} role={ctx.role} orgName={ctx.orgName || "—"} />}
         </div>
       </div>
