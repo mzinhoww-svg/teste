@@ -11,8 +11,9 @@ async function runAgent(dealId: string, kind: string) {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ dealId, kind }),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body?.error ?? `Erro ${res.status}`);
+  return body;
 }
 
 function SourceTag({ source }: { source?: string }) {
@@ -119,15 +120,17 @@ export function DealDrawer({ deal, contact, agents, stages, onClose }: {
 }) {
   const [loading, setLoading] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, any>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [, startMove] = useTransition();
 
   async function run(kind: string) {
     setLoading(kind);
+    setErrors((prev) => ({ ...prev, [kind]: "" }));
     try {
       const r = await runAgent(deal.id, kind);
       setResults((prev) => ({ ...prev, [kind]: r }));
-    } catch {
-      /* silencioso */
+    } catch (e) {
+      setErrors((prev) => ({ ...prev, [kind]: e instanceof Error ? e.message : "Falha ao executar" }));
     } finally {
       setLoading(null);
     }
@@ -181,6 +184,9 @@ export function DealDrawer({ deal, contact, agents, stages, onClose }: {
                   {loading === agent.id ? "Executando…" : agent.enabled ? "Executar" : "inativo"}
                 </button>
               </div>
+              {errors[agent.id] && (
+                <p className="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-600">{errors[agent.id]}</p>
+              )}
               {results[agent.id] && <AgentResult kind={agent.id} r={results[agent.id]} />}
             </section>
           ))}

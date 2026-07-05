@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { logout } from "@/app/login/actions";
 
-type Tab = "board" | "contracts" | "studio" | "how";
+type Tab = "board" | "contracts" | "automations" | "reports" | "studio" | "how";
 
 const tabs: { id: Tab; href: string; label: string }[] = [
   { id: "board", href: "/", label: "Funil" },
   { id: "contracts", href: "/contracts", label: "Contratos" },
-  { id: "studio", href: "/studio", label: "Studio de Agentes" },
+  { id: "automations", href: "/automacoes", label: "Automações" },
+  { id: "reports", href: "/relatorios", label: "Relatórios" },
+  { id: "studio", href: "/studio", label: "Studio" },
   { id: "how", href: "/como-funciona", label: "Como funciona" },
 ];
 
