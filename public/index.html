@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CRM AI Studio — Local</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◆</span>
+      <div>
+        <strong>CRM AI Studio</strong>
+        <span class="tag">local &amp; privado</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <select id="pipelineSelect" title="Pipeline"></select>
+      <span id="aiStatus" class="ai-status" title="Status do LLM local">IA…</span>
+      <button id="newCardBtn" class="btn primary">+ Novo lead</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-view="board">Funil</button>
+    <button class="tab" data-view="dash">Dashboard</button>
+    <button class="tab" data-view="agents">Agentes &amp; Automações</button>
+  </nav>
+
+  <main>
+    <section id="view-board" class="view active">
+      <div id="board" class="board"></div>
+    </section>
+
+    <section id="view-dash" class="view">
+      <div id="dash" class="dash"></div>
+    </section>
+
+    <section id="view-agents" class="view">
+      <div id="agents" class="agents-view"></div>
+    </section>
+  </main>
+
+  <!-- Drawer de card -->
+  <div id="drawer" class="drawer">
+    <div class="drawer-panel" id="drawerPanel"></div>
+  </div>
+  <div id="scrim" class="scrim"></div>
+
+  <!-- Modal novo card -->
+  <div id="modal" class="modal">
+    <div class="modal-panel">
+      <h3>Novo lead / deal</h3>
+      <form id="newCardForm" class="form-grid">
+        <label>Título*<input name="title" required placeholder="Ex.: CRM para time comercial" /></label>
+        <label>Empresa<input name="company" /></label>
+        <label>Contato<input name="contact_name" /></label>
+        <label>E-mail<input name="email" type="email" /></label>
+        <label>Telefone<input name="phone" /></label>
+        <label>Origem<input name="source" placeholder="Site, Indicação, Evento…" /></label>
+        <label>Valor (R$)<input name="value" type="number" min="0" step="100" value="0" /></label>
+        <label>Prioridade
+          <select name="priority"><option value="baixa">Baixa</option><option value="media" selected>Média</option><option value="alta">Alta</option></select>
+        </label>
+        <label class="full">Notas<textarea name="notes" rows="2"></textarea></label>
+        <div class="modal-actions full">
+          <button type="button" class="btn" id="cancelNew">Cancelar</button>
+          <button type="submit" class="btn primary">Criar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
