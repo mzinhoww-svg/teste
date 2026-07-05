@@ -127,6 +127,32 @@ export async function getAgentByKind(kind: string): Promise<Agent | null> {
   return data ? mapAgent(data) : null;
 }
 
+export interface AutomationView {
+  id: string;
+  name: string;
+  stageId: string;
+  stageName: string;
+  agentKind: string;
+  agentName: string;
+  enabled: boolean;
+}
+
+export async function getAutomations(): Promise<AutomationView[]> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("automations")
+    .select("*, stage:stages(name)")
+    .order("created_at", { ascending: false });
+  const agents = await getAgents();
+  const nameByKind = new Map(agents.map((a) => [a.id, a.name]));
+  return (data ?? []).map((r: any) => ({
+    id: r.id, name: r.name, stageId: r.trigger_stage_id,
+    stageName: r.stage?.name ?? "—", agentKind: r.agent_kind ?? "",
+    agentName: nameByKind.get(r.agent_kind) ?? r.agent_kind ?? "—",
+    enabled: r.enabled,
+  }));
+}
+
 export interface ContractView {
   id: string;
   reference: string;

@@ -47,13 +47,43 @@ export async function createLead(formData: FormData) {
 }
 
 export async function moveDeal(dealId: string, stageId: string) {
-  await orgOrThrow();
+  const orgId = await orgOrThrow();
   const supabase = createClient();
   const { error } = await supabase
     .from("deals")
     .update({ stage_id: stageId, updated_at: new Date().toISOString() })
     .eq("id", dealId);
   if (error) throw error;
+
+  // Registra a mudança de estágio na timeline
+  const { data: stage } = await supabase.from("stages").select("name").eq("id", stageId).maybeSingle();
+  await supabase.from("activities").insert({
+    org_id: orgId, deal_id: dealId, type: "note",
+    summary: `Movido para "${stage?.name ?? "novo estágio"}"`, author: "Você",
+  });
+
+  // Automações: regras "ao entrar no estágio X, executar agente Y"
+  const { data: autos } = await supabase
+    .from("automations")
+    .select("agent_kind")
+    .eq("trigger_stage_id", stageId)
+    .eq("trigger_type", "stage_enter")
+    .eq("enabled", true);
+
+  if (autos?.length) {
+    const { runAgentForDeal } = await import("@/lib/run-agent");
+    const { data: { user } } = await createClient().auth.getUser();
+    // Executa em sequência; falha de um agente não bloqueia o movimento nem os demais.
+    for (const a of autos) {
+      if (!a.agent_kind) continue;
+      try {
+        await runAgentForDeal(a.agent_kind, dealId, { orgId, userId: user?.id ?? null, via: "automation" });
+      } catch {
+        // registrado via ausência em agent_runs; não propaga
+      }
+    }
+  }
+
   revalidatePath("/");
 }
 
@@ -106,6 +136,40 @@ export async function updateAgent(uuid: string, fields: {
   const { error } = await supabase.from("agents").update(patch).eq("id", uuid);
   if (error) throw error;
   revalidatePath("/studio");
+}
+
+// --- Automações ------------------------------------------------------------
+
+export async function createAutomation(formData: FormData) {
+  const orgId = await orgOrThrow();
+  const supabase = createClient();
+  const name = String(formData.get("name") ?? "").trim();
+  const stageId = String(formData.get("stageId") ?? "");
+  const agentKind = String(formData.get("agentKind") ?? "");
+  if (!stageId || !agentKind) throw new Error("Estágio e agente são obrigatórios");
+
+  const { error } = await supabase.from("automations").insert({
+    org_id: orgId, name: name || `Automação`, trigger_type: "stage_enter",
+    trigger_stage_id: stageId, agent_kind: agentKind, enabled: true,
+  });
+  if (error) throw error;
+  revalidatePath("/automacoes");
+}
+
+export async function toggleAutomation(id: string, enabled: boolean) {
+  await orgOrThrow();
+  const supabase = createClient();
+  const { error } = await supabase.from("automations").update({ enabled }).eq("id", id);
+  if (error) throw error;
+  revalidatePath("/automacoes");
+}
+
+export async function deleteAutomation(id: string) {
+  await orgOrThrow();
+  const supabase = createClient();
+  const { error } = await supabase.from("automations").delete().eq("id", id);
+  if (error) throw error;
+  revalidatePath("/automacoes");
 }
 
 // --- Contratos -----------------------------------------------------------

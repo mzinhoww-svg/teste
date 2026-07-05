@@ -1,0 +1,96 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { createAutomation, deleteAutomation, toggleAutomation } from "@/app/actions";
+import type { AutomationView } from "@/lib/db";
+import type { Agent, Stage } from "@/lib/types";
+
+export function AutomationManager({ automations, stages, agents }: {
+  automations: AutomationView[]; stages: Stage[]; agents: Agent[];
+}) {
+  const [pending, start] = useTransition();
+  const [formOpen, setFormOpen] = useState(false);
+
+  function submit(fd: FormData) {
+    start(async () => {
+      await createAutomation(fd);
+      setFormOpen(false);
+    });
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-slate-500">
+          Regras do tipo <strong className="text-slate-700">“ao entrar no estágio X, executar o agente Y”</strong>.
+          Disparam automaticamente quando um card muda de estágio.
+        </p>
+        <button onClick={() => setFormOpen((o) => !o)}
+          className="shrink-0 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
+          {formOpen ? "Cancelar" : "+ Nova automação"}
+        </button>
+      </div>
+
+      {formOpen && (
+        <form action={submit} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-4">
+          <label className="text-xs font-medium text-slate-500">Nome
+            <input name="name" placeholder="ex.: Proposta automática" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400" />
+          </label>
+          <label className="text-xs font-medium text-slate-500">Quando entrar em…
+            <select name="stageId" required className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400">
+              {stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </label>
+          <label className="text-xs font-medium text-slate-500">Executar o agente…
+            <select name="agentKind" required className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400">
+              {agents.filter((a) => a.enabled).map((a) => <option key={a.id} value={String(a.id)}>{a.name}</option>)}
+            </select>
+          </label>
+          <div className="flex items-end">
+            <button disabled={pending} className="w-full rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50">
+              {pending ? "Criando…" : "Criar"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {automations.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
+          Nenhuma automação ainda. Crie a primeira — ex.: ao entrar em <em>Proposta</em>, executar o <em>Agente de Proposta Comercial</em>.
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-400">
+                <th className="px-4 py-2.5">Nome</th>
+                <th className="px-4 py-2.5">Gatilho</th>
+                <th className="px-4 py-2.5">Agente</th>
+                <th className="px-4 py-2.5">Status</th>
+                <th className="px-4 py-2.5" />
+              </tr>
+            </thead>
+            <tbody>
+              {automations.map((a) => (
+                <tr key={a.id} className="border-b border-slate-50">
+                  <td className="px-4 py-2.5 font-medium text-slate-700">{a.name}</td>
+                  <td className="px-4 py-2.5 text-slate-500">entrar em <span className="font-medium text-slate-700">{a.stageName}</span></td>
+                  <td className="px-4 py-2.5 text-slate-500">{a.agentName}</td>
+                  <td className="px-4 py-2.5">
+                    <button onClick={() => start(() => toggleAutomation(a.id, !a.enabled))}
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${a.enabled ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+                      {a.enabled ? "ativa" : "pausada"}
+                    </button>
+                  </td>
+                  <td className="px-4 py-2.5 text-right">
+                    <button onClick={() => start(() => deleteAutomation(a.id))} className="text-xs text-rose-400 hover:text-rose-600">remover</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
