@@ -1,98 +1,75 @@
-# CRM AI Studio — Local & Privado
+# CRM AI Studio — versão privada
 
-Uma versão **privada e 100% local** inspirada no [Pipefy CRM AI Studio](https://www.pipefy.com/pt-br/produtos/crm-ai-studio/).
-Roda inteiramente na sua máquina: os dados ficam num arquivo SQLite local e os
-**agentes de IA rodam num LLM local (Ollama)** — nada é enviado para a nuvem.
+Réplica privada do conceito **CRM AI Studio** (Pipefy): funis de vendas conectando
+Marketing, Vendas e Customer Success em um único fluxo, orquestrado por **agentes de IA**.
 
-> Se o Ollama não estiver rodando, os agentes continuam funcionando usando
-> **heurísticas locais**, então o CRM nunca depende de internet.
+Construído em **Next.js 14 (App Router) + TypeScript + Tailwind**, pronto para deploy na **Vercel**.
 
-## O que ele faz
+## Agentes
 
-Reproduz os conceitos centrais do CRM AI Studio:
+Roster completo, do marketing ao pós-venda. Cada agente resolve dores específicas e
+automatiza atividades (detalhes no **Studio de Agentes**). Os marcados com ⚡ têm
+**execução ao vivo** no funil.
 
-- **Pipelines / funil Kanban** (Marketing → Vendas → Pós-venda) com fases e arraste de cards.
-- **Cards (leads/deals)** com contato, empresa, valor, origem, prioridade, notas e campos extras.
-- **Agentes de IA embutidos**, executados localmente:
-  - **Lead Scoring** — pontua o lead (0–100) e define prioridade.
-  - **Qualificação (SDR)** — qualifica com raciocínio BANT/GPCT e sugere próximos passos.
-  - **Nutrição / Enriquecimento** — gera insights e plano de follow-up.
-  - **Gerador de Propostas** — redige uma proposta comercial em Markdown.
-  - **Copilot de Vendas** — chat por deal para e-mails, objeções e próximos passos.
-- **Canal WhatsApp (wa.me)** — o agente redige a mensagem e o card abre o WhatsApp
-  via link click-to-chat `https://wa.me/<telefone>?text=<mensagem>`. Sem API, sem
-  número de negócio, sem nuvem — usa o WhatsApp já instalado.
-- **Automações por fase** — ao mover um card para uma fase, o agente vinculado roda sozinho.
-- **Dashboard** — pipeline aberto, ganho, taxa de conversão, score médio e funil por fase.
-- **Histórico/timeline** por card com tudo que os agentes produziram.
+| Agente | Fase | O que faz |
+| --- | --- | --- |
+| **Agente de Nutrição de Leads** | Aquisição | Enriquece dados de empresa/contato e deduplica leads |
+| ⚡ **Agente de Lead Scoring** | Aquisição | Pontua por ICP + comportamento → score 0-100, temperatura e roteamento |
+| ⚡ **Agente Copiloto de Vendas** | Vendas | Sugere próximo passo e escreve a mensagem no canal certo |
+| ⚡ **Agente de Proposta Comercial** | Vendas | Gera e precifica a proposta respeitando a política de desconto (teto 15%) |
+| ⚡ **Agente Jurídico / de Contratos** | Vendas | Gera contrato personalizado por proposta e coleta assinatura digital válida |
+| **Agente de Atividades e Follow-ups** | Vendas | Cria tarefas, lembretes e alertas de SLA |
+| **Agente de Coaching** | Vendas | Analisa interações e sugere melhorias de abordagem |
+| **Agente de Feedback de Vendas** | Vendas | Registra resultados e realimenta o modelo de scoring |
+| **Copiloto de Atendimento** | Pós-venda | Handoff, onboarding e acompanhamento de entregas |
 
-## Arquitetura (tudo local)
+Os agentes executáveis rodam no **GLM 5.2 via OpenRouter** quando `OPENROUTER_API_KEY`
+está definida (ou no **Claude** via `ANTHROPIC_API_KEY`); caso contrário usam uma
+**heurística determinística**, então o app sobe e funciona sem nenhuma configuração.
+
+## Resultados-alvo (arquitetura de referência)
+
+- **75%** mais rápido na qualificação de leads
+- **53%** de redução no ciclo de vendas (de ~3 meses para 42 dias)
+- **Até 300%** mais vendas com centralização e padronização
+
+## Arquitetura
 
 ```
-Navegador (SPA vanilla) ──HTTP──► Node/Express (localhost:4321)
-                                     │
-                                     ├─ SQLite  (./data/crm.db)   ← seus dados
-                                     └─ Ollama  (localhost:11434) ← LLM local
-                                          └─ fallback heurístico se offline
+app/
+  page.tsx                 Board Kanban do funil (KPIs + estágios + deals)
+  studio/page.tsx          Studio no-code dos agentes (dores + atividades)
+  como-funciona/page.tsx   Métricas, workflow de 8 passos e maturidade
+  api/agents/*             Endpoints (lead-scoring, copilot, proposal, contract)
+  api/health               Healthcheck (informa se a IA ao vivo está ativa)
+components/                Nav, DealCard, DealDrawer
+lib/
+  types.ts            Domínio (Pipeline, Stage, Deal, Contact, Agent, Proposal, Contract)
+  seed.ts             Dados-semente (troque por Postgres/Supabase em produção)
+  product.ts          Conteúdo estratégico (métricas, workflow, maturidade)
+  ai.ts               Cliente do Claude API + parser de JSON
+  agents.ts           Lógica dos agentes (Claude + fallback heurístico)
+  lookup.ts           Resolução de deal/contato/agente
+  format.ts           Formatação (BRL, temperatura)
 ```
 
-- **Backend:** Node.js + Express + `better-sqlite3`. Sem serviços externos.
-- **Frontend:** HTML/CSS/JS puro, servido pelo próprio backend. Sem build.
-- **IA:** cliente HTTP para o Ollama; prompts e fallback em `server/ai.js`.
-
-## Como rodar
-
-Pré-requisitos: **Node.js 18+**. (Opcional, para IA de verdade: [Ollama](https://ollama.com).)
+## Rodando localmente
 
 ```bash
 npm install
-npm start
-# abra http://localhost:4321
+npm run dev        # http://localhost:3000
 ```
 
-Na primeira execução um pipeline de exemplo ("Funil de Vendas") é criado com
-leads de demonstração, agentes e automações.
+## Deploy na Vercel
 
-### Ativando a IA local (opcional)
+O repositório já traz `vercel.json` (framework `nextjs`). Basta importar o repo
+na Vercel. Para IA ao vivo, adicione a variável de ambiente `OPENROUTER_API_KEY`
+(modelo padrão `z-ai/glm-5.2`, configurável via `OPENROUTER_MODEL`).
 
-```bash
-# instale o Ollama (https://ollama.com), depois baixe um modelo:
-ollama pull llama3.2
-# o CRM detecta o Ollama automaticamente; troque o modelo via OLLAMA_MODEL
-```
+## Roadmap para produção
 
-Sem o Ollama, o selo no topo mostra **"IA: heurística"** e os agentes usam regras locais.
-
-## Configuração
-
-Copie `.env.example` para `.env` (todas as variáveis são opcionais):
-
-| Variável | Padrão | Descrição |
-|---|---|---|
-| `PORT` | `4321` | Porta do servidor local |
-| `OLLAMA_URL` | `http://localhost:11434` | Endpoint do Ollama |
-| `OLLAMA_MODEL` | `llama3.2` | Modelo local usado pelos agentes |
-| `CRM_DATA_DIR` | `./data` | Pasta do banco SQLite |
-
-## API (resumo)
-
-| Método | Rota | Descrição |
-|---|---|---|
-| GET | `/api/status` | Status + disponibilidade do LLM |
-| GET | `/api/pipelines` | Lista pipelines |
-| POST | `/api/pipelines` | Cria pipeline (com fases padrão) |
-| GET | `/api/pipelines/:id/board` | Fases + cards |
-| GET | `/api/pipelines/:id/metrics` | Métricas do dashboard |
-| POST | `/api/cards` | Cria card |
-| PATCH | `/api/cards/:id` | Edita card |
-| POST | `/api/cards/:id/move` | Move de fase (dispara automações) |
-| POST | `/api/cards/:id/agents/:key` | Roda um agente (`scorer`/`qualifier`/`enricher`/`proposal`/`copilot`/`whatsapp`) |
-
-O agente `whatsapp` retorna `{ text, url }`, onde `url` é o link `wa.me` pronto
-(telefone normalizado só com dígitos + mensagem URL-encoded).
-
-## Privacidade
-
-- Nenhuma chamada de rede além do Ollama **na sua própria máquina**.
-- Os dados vivem apenas em `./data/crm.db` (ignorado pelo Git).
-- Zero telemetria, zero contas, zero nuvem.
+- Persistência real (Postgres/Supabase) no lugar de `lib/seed.ts`
+- Autenticação e multi-tenant
+- Integrações omnichannel (WhatsApp, e-mail, voz) para disparo real das mensagens
+- E-signature e workflow de aprovação nas propostas
+- Versionamento e A/B dos prompts de agentes no Studio
