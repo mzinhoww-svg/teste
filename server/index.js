@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { db, logActivity } from './db.js';
 import { seedIfEmpty } from './seed.js';
 import {
-  runScorer, runQualifier, runEnricher, runProposal, runCopilot,
+  runScorer, runQualifier, runEnricher, runProposal, runCopilot, runWhatsapp,
   ollamaAvailable, aiConfig,
 } from './ai.js';
 
@@ -27,6 +27,7 @@ function runAgent(key, card, extra = {}) {
     case 'enricher': return runEnricher(card);
     case 'proposal': return runProposal(card);
     case 'copilot': return runCopilot(card, extra.question, extra.history);
+    case 'whatsapp': return runWhatsapp(card);
     default: throw new Error(`Agente desconhecido: ${key}`);
   }
 }
@@ -161,6 +162,10 @@ app.post('/api/cards/:id/agents/:key', wrap(async (req, res) => {
   const key = req.params.key;
   const result = await runAgent(key, card, { question: req.body?.question, history: req.body?.history });
   if (key === 'copilot') return res.json(result); // não registra automaticamente
+  if (key === 'whatsapp') {
+    logActivity(card.id, 'message', `WhatsApp${result.phone ? ` para ${result.phone}` : ''}:\n${result.text}`, 'WhatsApp');
+    return res.json({ result, card: getCard(card.id) });
+  }
   applyAgentResult(card.id, key, result);
   res.json({ result, card: getCard(card.id) });
 }));

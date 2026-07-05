@@ -19,6 +19,9 @@ Reproduz os conceitos centrais do CRM AI Studio:
   - **Nutrição / Enriquecimento** — gera insights e plano de follow-up.
   - **Gerador de Propostas** — redige uma proposta comercial em Markdown.
   - **Copilot de Vendas** — chat por deal para e-mails, objeções e próximos passos.
+- **Canal WhatsApp (wa.me)** — o agente redige a mensagem e o card abre o WhatsApp
+  via link click-to-chat `https://wa.me/<telefone>?text=<mensagem>`. Sem API, sem
+  número de negócio, sem nuvem — usa o WhatsApp já instalado.
 - **Automações por fase** — ao mover um card para uma fase, o agente vinculado roda sozinho.
 - **Dashboard** — pipeline aberto, ganho, taxa de conversão, score médio e funil por fase.
 - **Histórico/timeline** por card com tudo que os agentes produziram.
@@ -83,7 +86,10 @@ Copie `.env.example` para `.env` (todas as variáveis são opcionais):
 | POST | `/api/cards` | Cria card |
 | PATCH | `/api/cards/:id` | Edita card |
 | POST | `/api/cards/:id/move` | Move de fase (dispara automações) |
-| POST | `/api/cards/:id/agents/:key` | Roda um agente (`scorer`/`qualifier`/`enricher`/`proposal`/`copilot`) |
+| POST | `/api/cards/:id/agents/:key` | Roda um agente (`scorer`/`qualifier`/`enricher`/`proposal`/`copilot`/`whatsapp`) |
+
+O agente `whatsapp` retorna `{ text, url }`, onde `url` é o link `wa.me` pronto
+(telefone normalizado só com dígitos + mensagem URL-encoded).
 
 ## Privacidade
 

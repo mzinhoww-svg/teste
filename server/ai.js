@@ -185,6 +185,34 @@ export async function runProposal(card) {
   };
 }
 
+// Monta um link wa.me (click-to-chat). Lógica sempre via wa.me: telefone só com
+// dígitos (DDI+DDD+número, sem "+", espaços ou símbolos) e texto URL-encoded.
+// É 100% local — abre o WhatsApp do usuário, sem API nem nuvem.
+export function waLink(phone, text) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  return `https://wa.me/${digits}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
+}
+
+export async function runWhatsapp(card) {
+  let text = '';
+  let engine = 'heuristic';
+  if (await ollamaAvailable()) {
+    try {
+      const out = await ollamaChat(
+        'Você redige mensagens curtas de WhatsApp para prospecção/follow-up B2B em português. Tom cordial e objetivo, no máximo 3 frases, terminando com uma pergunta ou CTA claro. Não use emojis em excesso.',
+        `Escreva a mensagem de WhatsApp para ${card.contact_name || 'o contato'}${card.company ? ` (${card.company})` : ''} sobre o negócio "${card.title}".\n\n${cardSummary(card)}`
+      );
+      if (out.trim()) { text = out.trim(); engine = 'ollama'; }
+    } catch { /* fallback */ }
+  }
+  if (!text) {
+    text = `Olá ${card.contact_name || ''}! Aqui é da equipe comercial. Sobre "${card.title}"${card.company ? ` para a ${card.company}` : ''}, conseguimos conversar rapidamente esta semana? Fico à disposição.`
+      .replace(/\s+/g, ' ').trim();
+  }
+  return { engine, text, phone: card.phone, url: waLink(card.phone, text) };
+}
+
 export async function runCopilot(card, question, history = []) {
   if (await ollamaAvailable()) {
     try {

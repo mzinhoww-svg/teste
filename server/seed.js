@@ -36,6 +36,7 @@ export function seed() {
     insertAgent.run('enricher', 'Nutrição / Enriquecimento', 'Gera insights e plano de follow-up.', null);
     insertAgent.run('proposal', 'Gerador de Propostas', 'Redige uma proposta comercial.', phaseIds[2]);
     insertAgent.run('copilot', 'Copilot de Vendas', 'Assistente de chat por deal.', null);
+    insertAgent.run('whatsapp', 'WhatsApp (wa.me)', 'Redige a mensagem e abre o chat via link wa.me.', null);
 
     // Automação: ao entrar em "Novos Leads" roda o Lead Scoring; em "Qualificação" roda o Qualifier.
     insertAuto.run(pipelineId, 'Score automático de novos leads', phaseIds[0], 'scorer');

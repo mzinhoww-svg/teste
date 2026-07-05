@@ -134,7 +134,9 @@ async function openCard(id) {
       <button class="btn sm ghost" id="delCard" style="margin-left:auto;color:var(--red)">Excluir</button></div>
 
     <div class="section-title">Agentes de IA ${state.ollama ? '' : '· (heurística local)'}</div>
-    <div class="agent-btns">${agentBtns}</div>
+    <div class="agent-btns">${agentBtns}
+      <button class="btn sm wa" id="waBtn" title="Gera a mensagem e abre o WhatsApp via wa.me">💬 WhatsApp</button>
+    </div>
 
     <div class="section-title">Copilot de Vendas</div>
     <div class="copilot">
@@ -162,6 +164,20 @@ async function openCard(id) {
     await api(`/api/cards/${id}`, { method: 'DELETE' }); closeDrawer(); await renderBoard();
   };
   $$('[data-agent]', $('#drawerPanel')).forEach((btn) => btn.onclick = () => runAgent(id, btn));
+
+  // WhatsApp — lógica wa.me: gera a mensagem e abre o chat click-to-chat.
+  $('#waBtn').onclick = async () => {
+    const btn = $('#waBtn'); const orig = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+    try {
+      const { result } = await api(`/api/cards/${id}/agents/whatsapp`, { method: 'POST', body: JSON.stringify({}) });
+      const cc = await api(`/api/cards/${id}`);
+      $('#timeline').innerHTML = (cc.activities || []).map(eventHtml).join('');
+      if (result.url) { window.open(result.url, '_blank', 'noopener'); toast('WhatsApp aberto (wa.me)'); }
+      else toast('Adicione um telefone ao card para usar o wa.me');
+    } catch (e) { toast('Erro: ' + e.message); }
+    btn.disabled = false; btn.innerHTML = orig;
+  };
 
   // Copilot
   const cop = { history: [] };
