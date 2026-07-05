@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { Building2, Check, ChevronDown, LogOut, UserRound } from "lucide-react";
+import { Building2, Check, ChevronDown, ListChecks, LogOut, Settings2, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { logout } from "@/app/login/actions";
 import { switchOrg } from "@/app/actions";
@@ -72,7 +72,7 @@ export function TenantBadge({ orgName, memberships, activeOrgId }: {
   );
 }
 
-export function UserMenu({ email, role, orgName }: { email: string; role: MemberRole; orgName: string }) {
+export function UserMenu({ email, role, orgName, isTenantAdmin }: { email: string; role: MemberRole; orgName: string; isTenantAdmin?: boolean }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -90,6 +90,17 @@ export function UserMenu({ email, role, orgName }: { email: string; role: Member
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {isTenantAdmin && (
+          <>
+            <DropdownMenuItem asChild>
+              <a href="/app/org"><Settings2 className="h-4 w-4" aria-hidden /> Organização e membros</a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href="/app/auditoria"><ListChecks className="h-4 w-4" aria-hidden /> Auditoria de agentes</a>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <form action={logout}>
           <button type="submit" className="w-full">
             <DropdownMenuItem className="text-rose-600 data-[highlighted]:bg-rose-50">
