@@ -1,9 +1,29 @@
 # CRM AI Studio — versão privada
 
-Réplica privada do conceito **CRM AI Studio** (Pipefy): funis de vendas conectando
-Marketing, Vendas e Customer Success em um único fluxo, orquestrado por **agentes de IA**.
+CRM multi-tenant inspirado no **CRM AI Studio** (Pipefy): funis conectando Marketing,
+Vendas e Customer Success, orquestrados por **9 agentes de IA**.
 
-Construído em **Next.js 14 (App Router) + TypeScript + Tailwind**, pronto para deploy na **Vercel**.
+Stack: **Next.js 14 (App Router) + TypeScript + Tailwind + Supabase (Postgres, Auth, RLS)**,
+com IA em **GLM 5.2 via OpenRouter**. Deploy na **Vercel**.
+
+## Funcionalidades
+
+- **Autenticação + multi-tenant** (Supabase Auth + RLS — cada org só vê seus dados).
+- **Onboarding automático**: ao cadastrar, a org já vem com funil e 9 agentes configurados.
+- **Funil Kanban** com criação de leads, mover cards entre estágios e KPIs.
+- **9 agentes executáveis** persistindo resultado e timeline (auditados em `agent_runs`).
+- **Studio editável**: alterar prompt/modelo/triggers/ativação de cada agente, com versionamento.
+- **Gestão de contratos**: editar cláusulas, status de assinatura e signatários.
+- **WhatsApp** (MVP): mensagem do Copiloto vira botão click-to-chat (wa.me).
+
+## Setup
+
+1. Crie um projeto Supabase e rode as migrations em `supabase/migrations` (ou via painel).
+2. Defina as variáveis de ambiente (veja `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`,
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`.
+3. Em Supabase → Authentication → Providers → Email, desative "Confirm email" para
+   cadastro sem fricção (ou mantenha e confirme por e-mail).
+4. `npm install && npm run dev`.
 
 ## Agentes
 

@@ -32,9 +32,11 @@ function tempFromScore(score: number): "hot" | "warm" | "cold" {
   return "cold";
 }
 
-function daysSince(iso: string): number {
+function daysSince(iso?: string | null): number {
+  if (!iso) return 0;
   const then = new Date(iso).getTime();
-  const now = new Date("2026-07-05").getTime();
+  if (Number.isNaN(then)) return 0;
+  const now = Date.now();
   return Math.max(0, Math.round((now - then) / 86_400_000));
 }
 
@@ -52,7 +54,7 @@ export async function runLeadScoring(
       const text = await callLLM({
         system: `Você é o "${agent.name}" de um CRM. ${agent.instructions} Responda SOMENTE com JSON no formato {"score": number, "temperature": "hot|warm|cold", "reason": string}.`,
         prompt: JSON.stringify({
-          deal: { title: deal.title, amount: deal.amount, stage: deal.stageId, engagement: deal.engagement, diasSemContato: daysSince(deal.lastTouch), tags: deal.tags },
+          deal: { title: deal.title, amount: deal.amount, stage: deal.stageKey, engagement: deal.engagement, diasSemContato: daysSince(deal.lastTouch), tags: deal.tags },
           contact: { company: contact.company, role: contact.role, channel: contact.channel },
         }),
         maxTokens: 400,
@@ -131,7 +133,7 @@ export async function runCopilot(
       msg: `${firstName}, que ótimo ter a ${contact.company} com a gente! Já aciono o time de CS para o onboarding — te apresento a pessoa responsável ainda hoje.`,
     },
   };
-  const rec = byStage[deal.stageId] ?? byStage.proposal;
+  const rec = byStage[deal.stageKey] ?? byStage.proposal;
   return { nextAction: rec.action, message: rec.msg, channel: channelLabel[contact.channel], source: "heuristic" };
 }
 
@@ -251,4 +253,100 @@ function defaultSignatories(contact: Contact): Contract["signatories"] {
     { name: contact.name, role: contact.role ?? "Representante", party: "contratante", email: contact.email },
     { name: "Diretoria Comercial", role: "Representante legal", party: "contratada", email: "juridico@crmaistudio.com" },
   ];
+}
+
+// ---------------------------------------------------------------------------
+// Agentes consultivos: Nutrição, Atividades, Coaching, Feedback, Atendimento
+// Retornam um cabeçalho + lista de itens acionáveis.
+// ---------------------------------------------------------------------------
+
+export interface AdvisoryResult {
+  headline: string;
+  items: string[];
+  source: "llm" | "heuristic";
+}
+
+export async function runAdvisory(deal: Deal, contact: Contact, agent: Agent): Promise<AdvisoryResult> {
+  if (hasLiveAI() && agent.enabled) {
+    try {
+      const text = await callLLM({
+        system: `Você é o "${agent.name}" de um CRM. ${agent.instructions} Responda SOMENTE com JSON {"headline": string, "items": string[]} com 3 a 5 itens curtos e acionáveis, em português.`,
+        prompt: JSON.stringify({
+          deal: { title: deal.title, stage: deal.stageKey, amount: deal.amount, engagement: deal.engagement, diasSemContato: daysSince(deal.lastTouch), tags: deal.tags, ultimasAtividades: deal.activities.slice(0, 3) },
+          contact: { name: contact.name, company: contact.company, role: contact.role, channel: contact.channel },
+        }),
+        maxTokens: 600,
+      });
+      const parsed = extractJson<{ headline: string; items: string[] }>(text);
+      if (parsed && Array.isArray(parsed.items) && parsed.items.length) {
+        return { headline: parsed.headline, items: parsed.items.slice(0, 6), source: "llm" };
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return heuristicAdvisory(deal, contact, agent);
+}
+
+function heuristicAdvisory(deal: Deal, contact: Contact, agent: Agent): AdvisoryResult {
+  return { ...heuristicAdvisoryBase(deal, contact, agent), source: "heuristic" };
+}
+
+function heuristicAdvisoryBase(deal: Deal, contact: Contact, agent: Agent): Omit<AdvisoryResult, "source"> {
+  const dias = daysSince(deal.lastTouch);
+  const first = contact.name.split(" ")[0];
+  switch (agent.id) {
+    case "lead-nurturing":
+      return {
+        headline: `Enriquecimento de ${contact.company || contact.name}`,
+        items: [
+          `Empresa: ${contact.company || "—"} · Contato: ${contact.name} (${contact.role || "cargo n/d"}).`,
+          `Canal preferido detectado: ${contact.channel}. Priorizar contato por esse canal.`,
+          deal.engagement >= 70 ? "Sinal de intenção ALTO — encaminhar como lead quente ao SDR." : "Sinal de intenção médio — incluir em cadência de nutrição.",
+          "Verificar duplicidade por e-mail/telefone antes de criar novo card.",
+        ],
+      };
+    case "activities":
+      return {
+        headline: `Plano de follow-up (${dias} dia(s) sem contato)`,
+        items: [
+          dias > 5 ? `⚠️ Deal parado há ${dias} dias — acima do SLA. Follow-up hoje.` : `Próximo follow-up sugerido em 2 dias.`,
+          `Tarefa: registrar resumo da última interação com ${first}.`,
+          `Tarefa: confirmar próximo passo e data com o cliente.`,
+          deal.amount > 100000 ? "Alta prioridade (ticket alto) — acionar gerente." : "Prioridade normal.",
+        ],
+      };
+    case "coaching":
+      return {
+        headline: `Coaching para o deal ${deal.title}`,
+        items: [
+          `Estágio ${deal.stageKey}: reforce prova de valor antes de avançar.`,
+          "Use pergunta de descoberta para mapear critério de decisão e orçamento.",
+          "Antecipe a objeção de preço com ancoragem de ROI (retorno em ~20 dias).",
+          "Confirme os próximos passos por escrito ao final da call.",
+        ],
+      };
+    case "sales-feedback":
+      return {
+        headline: deal.stageKey === "won" ? "Registro de ganho" : deal.stageKey === "lost" ? "Registro de perda" : "Feedback em andamento",
+        items: [
+          `Resultado: ${deal.stageKey === "won" ? "GANHO ✅" : deal.stageKey === "lost" ? "PERDIDO ❌" : "em aberto"}.`,
+          `Ticket: R$${(deal.amount / 1000).toFixed(0)}k · Engajamento final: ${deal.engagement}/100.`,
+          deal.engagement >= 70 ? "Alto engajamento reforça peso desse critério no scoring." : "Baixo engajamento: revisar critério de qualificação para casos assim.",
+          "Sugestão: ajustar ICP com base neste desfecho.",
+        ],
+      };
+    case "support-copilot":
+      return {
+        headline: `Handoff e onboarding de ${contact.company || contact.name}`,
+        items: [
+          `Criar card de onboarding com contexto completo do deal ${deal.title}.`,
+          `Apresentar ${first} ao CS responsável em até 24h.`,
+          "Definir plano de implementação com marcos e SLAs.",
+          "Agendar kickoff e configurar dashboard de acompanhamento.",
+        ],
+      };
+    default:
+      return { headline: agent.name, items: ["Sem recomendação específica para este estágio."] };
+  }
 }
