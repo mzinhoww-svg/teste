@@ -1,19 +1,26 @@
 {
-  "name": "crm-ai-studio-local",
+  "name": "crm-ai-studio",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "description": "CRM AI Studio local e privado — roda 100% na sua máquina, com agentes de IA rodando em LLM local (Ollama).",
+  "description": "CRM AI Studio — versão privada. Funis de vendas orquestrados por agentes de IA (Lead Scoring, Sales Copilot, Proposal, Activities).",
   "scripts": {
-    "start": "node server/index.js",
-    "dev": "node --watch server/index.js",
-    "seed": "node server/seed.js"
-  },
-  "engines": {
-    "node": ">=18"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "better-sqlite3": "^11.8.1",
-    "express": "^4.21.2"
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.10",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "autoprefixer": "10.4.19",
+    "postcss": "8.4.39",
+    "tailwindcss": "3.4.6",
+    "typescript": "5.5.3"
   }
 }
