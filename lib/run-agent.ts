@@ -92,10 +92,11 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
       result = await runAdvisory(deal, contact, agent);
   }
 
+  const persisted = { ...result, ...extra };
   await supabase.from("agent_runs").insert({
     org_id: ctx.orgId, agent_kind: kind, deal_id: dealId,
     input: { title: deal.title, stage: deal.stageKey, via: ctx.via },
-    output: result, source: result?.source ?? "n/a", model: agent.model, created_by: ctx.userId,
+    output: persisted, source: result?.source ?? "n/a", model: agent.model, created_by: ctx.userId,
   });
 
   await supabase.from("activities").insert({
