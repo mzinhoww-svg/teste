@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { logout } from "@/app/login/actions";
 
-type Tab = "board" | "studio" | "how";
+type Tab = "board" | "contracts" | "studio" | "how";
 
 const tabs: { id: Tab; href: string; label: string }[] = [
   { id: "board", href: "/", label: "Funil" },
+  { id: "contracts", href: "/contracts", label: "Contratos" },
   { id: "studio", href: "/studio", label: "Studio de Agentes" },
   { id: "how", href: "/como-funciona", label: "Como funciona" },
 ];
@@ -19,17 +21,19 @@ export function Nav({ active }: { active: Tab }) {
             <div className="text-[11px] text-slate-400">versão privada</div>
           </div>
         </Link>
-        <nav className="flex items-center gap-1 text-sm">
-          {tabs.map((t) => (
-            <Link
-              key={t.id}
-              href={t.href}
-              className={`rounded-md px-3 py-1.5 font-medium ${active === t.id ? "bg-brand-50 text-brand-700" : "text-slate-500 hover:text-slate-800"}`}
-            >
-              {t.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="flex items-center gap-1">
+          <nav className="flex items-center gap-1 text-sm">
+            {tabs.map((t) => (
+              <Link key={t.id} href={t.href}
+                className={`rounded-md px-3 py-1.5 font-medium ${active === t.id ? "bg-brand-50 text-brand-700" : "text-slate-500 hover:text-slate-800"}`}>
+                {t.label}
+              </Link>
+            ))}
+          </nav>
+          <form action={logout}>
+            <button className="ml-2 rounded-md px-3 py-1.5 text-sm font-medium text-slate-400 hover:text-slate-700">Sair</button>
+          </form>
+        </div>
       </div>
     </header>
   );

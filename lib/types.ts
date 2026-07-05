@@ -43,6 +43,8 @@ export interface Deal {
   title: string;
   pipelineId: string;
   stageId: StageId;
+  /** chave estável do estágio (meeting/proposal/...), usada por agentes e automações */
+  stageKey: string;
   contactId: string;
   amount: number; // valor do negócio em BRL
   /** score 0-100 atribuído pelo Lead Scoring Agent */
@@ -62,6 +64,8 @@ export type AgentKind = RunnableAgentKind | string;
 
 export interface Agent {
   id: AgentKind;
+  /** id (uuid) da linha no banco, usado para updates */
+  uuid?: string;
   name: string;
   /** grupo do funil: aquisição | vendas | pós-venda */
   group: "aquisição" | "vendas" | "pós-venda";
