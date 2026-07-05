@@ -1,13 +1,41 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { getOrgId } from "@/lib/db";
+import { ACTIVE_ORG_COOKIE, getAuthContext, getOrgId } from "@/lib/db";
 
 async function orgOrThrow() {
   const orgId = await getOrgId();
   if (!orgId) throw new Error("Sem organização / não autenticado");
   return orgId;
+}
+
+// --- Tenant ativo ----------------------------------------------------------
+
+export async function switchOrg(orgId: string) {
+  const ctx = await getAuthContext();
+  if (!ctx) throw new Error("Não autenticado");
+  // Só permite trocar para org da qual o usuário é membro.
+  if (!ctx.memberships.some((m) => m.orgId === orgId)) {
+    throw new Error("Você não é membro dessa organização");
+  }
+  cookies().set(ACTIVE_ORG_COOKIE, orgId, {
+    path: "/", httpOnly: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 365,
+  });
+  revalidatePath("/", "layout");
+}
+
+export async function renameOrg(name: string) {
+  const ctx = await getAuthContext();
+  if (!ctx?.orgId) throw new Error("Sem organização");
+  if (ctx.role === "member") throw new Error("Apenas owner/admin podem renomear a organização");
+  const trimmed = name.trim();
+  if (!trimmed) throw new Error("Nome inválido");
+  const supabase = createClient();
+  const { error } = await supabase.from("orgs").update({ name: trimmed }).eq("id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/", "layout");
 }
 
 // --- Leads / Deals -------------------------------------------------------
