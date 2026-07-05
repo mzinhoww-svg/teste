@@ -18,12 +18,19 @@ export interface OrgMembership {
   role: MemberRole;
 }
 
+export interface OrgBrand {
+  primary?: string;
+  accent?: string;
+  logoUrl?: string;
+}
+
 export interface AuthContext {
   userId: string;
   email: string;
   orgId: string;
   orgName: string;
   role: MemberRole;
+  brand: OrgBrand;
   memberships: OrgMembership[];
 }
 
@@ -40,7 +47,7 @@ export async function getAuthContext(): Promise<AuthContext | null> {
 
   const { data: rows } = await supabase
     .from("memberships")
-    .select("org_id, member_role, created_at, orgs(name)")
+    .select("org_id, member_role, created_at, orgs(name, settings)")
     .eq("user_id", user.id)
     .order("created_at", { ascending: true });
 
@@ -49,11 +56,16 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     orgName: r.orgs?.name ?? "Organização",
     role: (r.member_role ?? "member") as MemberRole,
   }));
+  const brandByOrg = new Map<string, OrgBrand>((rows ?? []).map((r: any) => [r.org_id, {
+    primary: r.orgs?.settings?.brand?.primary,
+    accent: r.orgs?.settings?.brand?.accent,
+    logoUrl: r.orgs?.settings?.brand?.logoUrl,
+  }]));
   if (memberships.length === 0) {
     // Usuário logado sem organização (trigger de signup falhou ou foi removido).
     return {
       userId: user.id, email: user.email ?? "", orgId: "", orgName: "",
-      role: "member", memberships: [],
+      role: "member", brand: {}, memberships: [],
     };
   }
 
@@ -66,6 +78,7 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     orgId: active.orgId,
     orgName: active.orgName,
     role: active.role,
+    brand: brandByOrg.get(active.orgId) ?? {},
     memberships,
   };
 }

@@ -52,6 +52,76 @@ export async function renameOrg(name: string) {
   revalidatePath("/", "layout");
 }
 
+export async function updateOrgBrand(brand: { primary?: string; accent?: string; logoUrl?: string }) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { data: org } = await supabase.from("orgs").select("settings").eq("id", ctx.orgId).maybeSingle();
+  const settings = { ...(org?.settings ?? {}), brand: { ...(org?.settings?.brand ?? {}), ...brand } };
+  const { error } = await supabase.from("orgs").update({ settings }).eq("id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}
+
+// --- Membros e convites -----------------------------------------------------
+
+export async function createInvite(formData: FormData) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const role = String(formData.get("role") ?? "member");
+  if (!email.includes("@")) throw new Error("E-mail inválido");
+  if (!["admin", "member"].includes(role)) throw new Error("Papel inválido");
+
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("invites")
+    .insert({ org_id: ctx.orgId, email, member_role: role, created_by: ctx.userId })
+    .select("token")
+    .single();
+  if (error) throw error;
+
+  await supabase.from("notifications").insert({
+    org_id: ctx.orgId, type: "invite_created", title: "Convite criado",
+    body: `${email} foi convidado como ${role}.`, action_url: "/app/org",
+  });
+
+  revalidatePath("/app/org");
+  return data.token as string;
+}
+
+export async function cancelInvite(id: string) {
+  await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("invites").update({ status: "cancelled" }).eq("id", id).eq("status", "pending");
+  if (error) throw error;
+  revalidatePath("/app/org");
+}
+
+export async function setMemberRole(userId: string, role: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { data } = await supabase.rpc("change_member_role", { p_org: ctx.orgId, p_user: userId, p_role: role });
+  if (!data?.ok) throw new Error(data?.error ?? "Falha ao alterar papel");
+  revalidatePath("/app/org");
+}
+
+export async function removeMemberAction(userId: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { data } = await supabase.rpc("remove_member", { p_org: ctx.orgId, p_user: userId });
+  if (!data?.ok) throw new Error(data?.error ?? "Falha ao remover membro");
+  revalidatePath("/app/org");
+}
+
+export async function acceptInviteAction(token: string) {
+  const supabase = createClient();
+  const { data } = await supabase.rpc("accept_invite", { p_token: token });
+  if (!data?.ok) throw new Error(data?.error ?? "Falha ao aceitar convite");
+  // Ativa a org recém-aceita
+  cookies().set(ACTIVE_ORG_COOKIE, data.org_id, { path: "/", httpOnly: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 365 });
+  revalidatePath("/", "layout");
+  return { orgName: data.org_name as string };
+}
+
 // --- Leads / Deals -------------------------------------------------------
 
 export async function createLead(formData: FormData) {
