@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { updateAgent } from "@/app/actions";
 import { Badge } from "@/components/ui/badge";
@@ -62,7 +63,7 @@ export function AgentEditor({ agent, orgName }: { agent: Agent; orgName: string 
         </div>
         <div className="rounded-lg bg-emerald-50/60 p-3">
           <div className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Atividades automatizadas</div>
-          <ul className="mt-1.5 space-y-1">{agent.automatedActivities.map((a, i) => <li key={i} className="flex gap-1.5 text-xs text-slate-600"><span className="text-emerald-500">✓</span>{a}</li>)}</ul>
+          <ul className="mt-1.5 space-y-1">{agent.automatedActivities.map((a, i) => <li key={i} className="flex gap-1.5 text-xs text-slate-600"><Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500" aria-hidden />{a}</li>)}</ul>
         </div>
       </div>
 
@@ -84,7 +85,7 @@ export function AgentEditor({ agent, orgName }: { agent: Agent; orgName: string 
         <Button onClick={save} disabled={!dirty} loading={pending}>
           {pending ? "Salvando" : "Salvar"}
         </Button>
-        {saved && <span className="text-sm text-emerald-600">✓ salvo (versão anterior guardada)</span>}
+        {saved && <span className="inline-flex items-center gap-1 text-sm text-emerald-600"><Check className="h-3.5 w-3.5" aria-hidden /> salvo (versão anterior guardada)</span>}
       </div>
     </div>
   );

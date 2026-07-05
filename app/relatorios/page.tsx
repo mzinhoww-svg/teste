@@ -1,3 +1,4 @@
+import { Download } from "lucide-react";
 import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase/server";
 import { getBoard, getOrgId } from "@/lib/db";
@@ -111,7 +112,7 @@ export default async function ReportsPage() {
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-800">Últimas execuções</h2>
             <a href="/api/export" className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50">
-              ⬇ Exportar dados (LGPD)
+              <Download className="mr-1 inline h-3.5 w-3.5" aria-hidden /> Exportar dados (LGPD)
             </a>
           </div>
           {allRuns.length === 0 ? (

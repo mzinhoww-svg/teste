@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { updateContractClauses, updateContractStatus } from "@/app/actions";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -101,7 +102,7 @@ export function ContractCard({ c, orgName }: { c: ContractView; orgName: string 
             <button onClick={saveClauses} disabled={pending} className="rounded-md bg-brand-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-50">
               {pending ? "Salvando…" : "Salvar cláusulas"}
             </button>
-            {saved && <span className="text-xs text-emerald-600">✓ salvo</span>}
+            {saved && <span className="inline-flex items-center gap-1 text-xs text-emerald-600"><Check className="h-3 w-3" aria-hidden /> salvo</span>}
           </div>
 
           {c.signatories.length > 0 && (
