@@ -3,6 +3,9 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { updateAgent } from "@/app/actions";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input, Textarea } from "@/components/ui/input";
 import type { Agent } from "@/lib/types";
 
 export function AgentEditor({ agent, orgName }: { agent: Agent; orgName: string }) {
@@ -41,8 +44,8 @@ export function AgentEditor({ agent, orgName }: { agent: Agent; orgName: string 
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-base font-semibold text-slate-900">{agent.name}</h3>
-          <span className="mt-1 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{agent.role}</span>
-          {agent.runnable && <span className="ml-1 rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-medium text-brand-700">executável</span>}
+          <Badge className="mt-1">{agent.role}</Badge>
+          {agent.runnable && <Badge variant="brand" className="ml-1 text-[10px]">executável</Badge>}
         </div>
         <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-500">
           <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="h-4 w-4 accent-brand-600" />
@@ -65,26 +68,22 @@ export function AgentEditor({ agent, orgName }: { agent: Agent; orgName: string 
 
       <div className="mt-4">
         <label className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Instruções (prompt)</label>
-        <textarea value={instructions} onChange={(e) => setInstructions(e.target.value)} rows={4}
-          className="mt-1 w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-700 outline-none focus:border-brand-400" />
+        <Textarea value={instructions} onChange={(e) => setInstructions(e.target.value)} rows={4} className="mt-1" />
       </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Modelo
-          <input value={model} onChange={(e) => setModel(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs text-slate-700 outline-none focus:border-brand-400" />
+          <Input value={model} onChange={(e) => setModel(e.target.value)} className="mt-1 font-mono text-xs" />
         </label>
         <label className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Estágios (triggers, separados por vírgula)
-          <input value={triggers} onChange={(e) => setTriggers(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-700 outline-none focus:border-brand-400" />
+          <Input value={triggers} onChange={(e) => setTriggers(e.target.value)} className="mt-1 text-xs" />
         </label>
       </div>
 
       <div className="mt-3 flex items-center gap-3">
-        <button onClick={save} disabled={!dirty || pending}
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-40">
-          {pending ? "Salvando…" : "Salvar"}
-        </button>
+        <Button onClick={save} disabled={!dirty} loading={pending}>
+          {pending ? "Salvando" : "Salvar"}
+        </Button>
         {saved && <span className="text-sm text-emerald-600">✓ salvo (versão anterior guardada)</span>}
       </div>
     </div>

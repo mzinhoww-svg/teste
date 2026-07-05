@@ -1,8 +1,13 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { Plus } from "lucide-react";
+import { toast } from "sonner";
 import { createLead } from "@/app/actions";
 import { DealDrawer } from "@/components/DealDrawer";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Input, Label, Select } from "@/components/ui/input";
 import { brl } from "@/lib/format";
 import type { Agent, Contact, Deal, Pipeline } from "@/lib/types";
 
@@ -43,55 +48,66 @@ function DealCard({ deal, contact, onClick }: { deal: Deal; contact?: Contact; o
   );
 }
 
-function NewLeadModal({ onClose }: { onClose: () => void }) {
+function NewLeadModal({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const [pending, start] = useTransition();
   function submit(fd: FormData) {
     start(async () => {
-      await createLead(fd);
-      onClose();
+      try {
+        await createLead(fd);
+        onOpenChange(false);
+        toast.success("Lead criado no primeiro estágio do funil");
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Falha ao criar lead");
+      }
     });
   }
   return (
-    <div className="fixed inset-0 z-40 grid place-items-center bg-slate-900/30 px-4">
-      <form action={submit} className="w-full max-w-md space-y-3 rounded-xl bg-white p-5 shadow-xl">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-slate-900">Novo lead</h3>
-          <button type="button" onClick={onClose} className="rounded p-1 text-slate-400 hover:bg-slate-100">✕</button>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <label className="col-span-2 text-xs font-medium text-slate-500">Nome*
-            <input name="name" required className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400" />
-          </label>
-          <label className="text-xs font-medium text-slate-500">Empresa
-            <input name="company" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400" />
-          </label>
-          <label className="text-xs font-medium text-slate-500">Canal
-            <select name="channel" defaultValue="whatsapp" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400">
-              <option value="whatsapp">WhatsApp</option>
-              <option value="email">E-mail</option>
-              <option value="voice">Voz</option>
-              <option value="portal">Portal</option>
-              <option value="form">Formulário</option>
-            </select>
-          </label>
-          <label className="text-xs font-medium text-slate-500">E-mail
-            <input name="email" type="email" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400" />
-          </label>
-          <label className="text-xs font-medium text-slate-500">Telefone (WhatsApp)
-            <input name="phone" placeholder="+55 11 90000-0000" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400" />
-          </label>
-          <label className="text-xs font-medium text-slate-500">Título da oportunidade
-            <input name="title" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400" />
-          </label>
-          <label className="text-xs font-medium text-slate-500">Valor (R$)
-            <input name="amount" type="number" min="0" step="1000" defaultValue="0" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400" />
-          </label>
-        </div>
-        <button disabled={pending} className="w-full rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50">
-          {pending ? "Criando…" : "Criar lead"}
-        </button>
-      </form>
-    </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent aria-describedby={undefined}>
+        <DialogTitle>Novo lead</DialogTitle>
+        <form action={submit} className="mt-3 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <Label htmlFor="nl-name">Nome*</Label>
+              <Input id="nl-name" name="name" required autoFocus />
+            </div>
+            <div>
+              <Label htmlFor="nl-company">Empresa</Label>
+              <Input id="nl-company" name="company" />
+            </div>
+            <div>
+              <Label htmlFor="nl-channel">Canal</Label>
+              <Select id="nl-channel" name="channel" defaultValue="whatsapp">
+                <option value="whatsapp">WhatsApp</option>
+                <option value="email">E-mail</option>
+                <option value="voice">Voz</option>
+                <option value="portal">Portal</option>
+                <option value="form">Formulário</option>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="nl-email">E-mail</Label>
+              <Input id="nl-email" name="email" type="email" />
+            </div>
+            <div>
+              <Label htmlFor="nl-phone">Telefone (WhatsApp)</Label>
+              <Input id="nl-phone" name="phone" placeholder="+55 11 90000-0000" />
+            </div>
+            <div>
+              <Label htmlFor="nl-title">Título da oportunidade</Label>
+              <Input id="nl-title" name="title" />
+            </div>
+            <div>
+              <Label htmlFor="nl-amount">Valor (R$)</Label>
+              <Input id="nl-amount" name="amount" type="number" min="0" step="1000" defaultValue="0" />
+            </div>
+          </div>
+          <Button type="submit" loading={pending} className="w-full">
+            {pending ? "Criando" : "Criar lead"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -118,7 +134,7 @@ export function Board({ pipeline, deals, contacts, agents }: { pipeline: Pipelin
           <h1 className="text-xl font-semibold text-slate-900">{pipeline.name}</h1>
           <p className="text-sm text-slate-500">Do lead ao pós-venda, orquestrado por agentes de IA.</p>
         </div>
-        <button onClick={() => setNewOpen(true)} className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">+ Novo lead</button>
+        <Button onClick={() => setNewOpen(true)}><Plus className="h-4 w-4" aria-hidden /> Novo lead</Button>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -156,7 +172,7 @@ export function Board({ pipeline, deals, contacts, agents }: { pipeline: Pipelin
       {open && (
         <DealDrawer deal={open} contact={openContact ?? null} agents={agents} stages={pipeline.stages} onClose={() => setOpenId(null)} />
       )}
-      {newOpen && <NewLeadModal onClose={() => setNewOpen(false)} />}
+      <NewLeadModal open={newOpen} onOpenChange={setNewOpen} />
     </>
   );
 }
