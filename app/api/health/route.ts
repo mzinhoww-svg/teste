@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
-import { hasLiveAI } from "@/lib/ai";
+import { activeModel, activeProvider, hasLiveAI } from "@/lib/ai";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json({ ok: true, liveAI: hasLiveAI() });
+  return NextResponse.json({
+    ok: true,
+    liveAI: hasLiveAI(),
+    provider: activeProvider(),
+    model: activeModel(),
+  });
 }

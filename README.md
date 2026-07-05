@@ -23,9 +23,9 @@ automatiza atividades (detalhes no **Studio de Agentes**). Os marcados com ⚡ t
 | **Agente de Feedback de Vendas** | Vendas | Registra resultados e realimenta o modelo de scoring |
 | **Copiloto de Atendimento** | Pós-venda | Handoff, onboarding e acompanhamento de entregas |
 
-Os agentes executáveis rodam via **Claude API** quando `ANTHROPIC_API_KEY` está
-definida; caso contrário usam uma **heurística determinística**, então o app sobe e
-funciona sem nenhuma configuração.
+Os agentes executáveis rodam no **GLM 5.2 via OpenRouter** quando `OPENROUTER_API_KEY`
+está definida (ou no **Claude** via `ANTHROPIC_API_KEY`); caso contrário usam uma
+**heurística determinística**, então o app sobe e funciona sem nenhuma configuração.
 
 ## Resultados-alvo (arquitetura de referência)
 
@@ -63,7 +63,8 @@ npm run dev        # http://localhost:3000
 ## Deploy na Vercel
 
 O repositório já traz `vercel.json` (framework `nextjs`). Basta importar o repo
-na Vercel. Para IA ao vivo, adicione a variável de ambiente `ANTHROPIC_API_KEY`.
+na Vercel. Para IA ao vivo, adicione a variável de ambiente `OPENROUTER_API_KEY`
+(modelo padrão `z-ai/glm-5.2`, configurável via `OPENROUTER_MODEL`).
 
 ## Roadmap para produção
 

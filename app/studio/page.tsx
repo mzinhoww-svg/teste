@@ -96,9 +96,10 @@ export default function StudioPage() {
         })}
 
         <div className="mt-2 rounded-xl border border-dashed border-slate-300 bg-white p-5 text-sm text-slate-500">
-          <strong className="text-slate-700">IA ao vivo:</strong> defina a variável de ambiente{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs">ANTHROPIC_API_KEY</code> na Vercel para
-          que os agentes usem o Claude API. Sem a chave, tudo funciona com heurística determinística.
+          <strong className="text-slate-700">IA ao vivo:</strong> os agentes executáveis rodam no{" "}
+          <strong className="text-slate-700">GLM 5.2</strong> via OpenRouter — defina{" "}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs">OPENROUTER_API_KEY</code> na Vercel.
+          Sem a chave, tudo funciona com heurística determinística.
         </div>
       </main>
     </div>

@@ -98,7 +98,7 @@ export const agents: Agent[] = [
     instructions: "Enriqueça e normalize cada lead com dados de empresa e contato, deduplique registros e sinalize leads quentes.",
     enabled: true,
     triggers: ["meeting"],
-    model: "claude-opus-4-8",
+    model: "z-ai/glm-5.2",
   },
   {
     id: "lead-scoring",
@@ -120,7 +120,7 @@ export const agents: Agent[] = [
       "Avalie cada deal considerando: fit de perfil (porte/segmento), sinais de engajamento, valor potencial e recência do último contato. Retorne score 0-100, temperatura (hot/warm/cold) e uma justificativa curta e acionável.",
     enabled: true,
     triggers: ["meeting", "proposal"],
-    model: "claude-opus-4-8",
+    model: "z-ai/glm-5.2",
     runnable: true,
   },
   {
@@ -143,7 +143,7 @@ export const agents: Agent[] = [
       "Com base no estágio, histórico e canal preferido do contato, proponha a próxima ação ideal e escreva uma mensagem de outreach curta, personalizada e no tom certo para o canal.",
     enabled: true,
     triggers: ["proposal", "negotiation", "contract"],
-    model: "claude-opus-4-8",
+    model: "z-ai/glm-5.2",
     runnable: true,
   },
   {
@@ -166,7 +166,7 @@ export const agents: Agent[] = [
       "Monte uma proposta com itens, preços e desconto coerentes com o valor do deal e o segmento. Respeite o teto de desconto de 15%. Inclua um resumo executivo e termos comerciais.",
     enabled: true,
     triggers: ["proposal", "negotiation"],
-    model: "claude-opus-4-8",
+    model: "z-ai/glm-5.2",
     runnable: true,
   },
   {
@@ -189,7 +189,7 @@ export const agents: Agent[] = [
       "A partir da proposta aprovada do deal, redija um contrato personalizado com cláusulas de objeto, valor, vigência, SLA, proteção de dados (LGPD) e foro. Identifique os signatários de cada parte e envie para assinatura digital com validade jurídica, mantendo trilha auditável. Responda SOMENTE com JSON no formato do contrato.",
     enabled: true,
     triggers: ["contract"],
-    model: "claude-opus-4-8",
+    model: "z-ai/glm-5.2",
     runnable: true,
   },
   {
@@ -211,7 +211,7 @@ export const agents: Agent[] = [
     instructions: "Gere um plano de follow-up com tarefas, responsável e prazo, priorizando deals parados ou de maior valor. Dispare alertas para cards acima do SLA.",
     enabled: true,
     triggers: ["negotiation", "contract"],
-    model: "claude-opus-4-8",
+    model: "z-ai/glm-5.2",
   },
   {
     id: "coaching",
@@ -232,7 +232,7 @@ export const agents: Agent[] = [
     instructions: "Avalie as interações do vendedor no deal e produza recomendações de coaching específicas e acionáveis.",
     enabled: false,
     triggers: ["negotiation"],
-    model: "claude-opus-4-8",
+    model: "z-ai/glm-5.2",
   },
   {
     id: "sales-feedback",
@@ -253,7 +253,7 @@ export const agents: Agent[] = [
     instructions: "A cada deal fechado ou perdido, registre o motivo e proponha ajustes nos critérios de lead scoring.",
     enabled: true,
     triggers: ["won", "lost"],
-    model: "claude-opus-4-8",
+    model: "z-ai/glm-5.2",
   },
   {
     id: "support-copilot",
@@ -274,6 +274,6 @@ export const agents: Agent[] = [
     instructions: "Ao marcar o deal como Ganho, gere o card de onboarding com contexto completo, tarefas de implementação e alertas de SLA.",
     enabled: true,
     triggers: ["won"],
-    model: "claude-opus-4-8",
+    model: "z-ai/glm-5.2",
   },
 ];

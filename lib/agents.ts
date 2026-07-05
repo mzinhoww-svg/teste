@@ -1,29 +1,29 @@
 // Lógica de cada agente de IA. Cada função tenta o Claude API e, em qualquer
 // falha (sem chave, timeout, erro), usa uma heurística determinística.
 
-import { callClaude, extractJson, hasLiveAI } from "./ai";
+import { callLLM, extractJson, hasLiveAI } from "./ai";
 import type { Agent, Contact, Contract, Deal, Proposal } from "./types";
 
 export interface ScoreResult {
   score: number;
   temperature: "hot" | "warm" | "cold";
   reason: string;
-  source: "claude" | "heuristic";
+  source: "llm" | "heuristic";
 }
 
 export interface CopilotResult {
   nextAction: string;
   message: string;
   channel: string;
-  source: "claude" | "heuristic";
+  source: "llm" | "heuristic";
 }
 
 export interface ProposalResult extends Proposal {
-  source: "claude" | "heuristic";
+  source: "llm" | "heuristic";
 }
 
 export interface ContractResult extends Contract {
-  source: "claude" | "heuristic";
+  source: "llm" | "heuristic";
 }
 
 function tempFromScore(score: number): "hot" | "warm" | "cold" {
@@ -49,8 +49,7 @@ export async function runLeadScoring(
 ): Promise<ScoreResult> {
   if (hasLiveAI() && agent.enabled) {
     try {
-      const text = await callClaude({
-        model: agent.model,
+      const text = await callLLM({
         system: `Você é o "${agent.name}" de um CRM. ${agent.instructions} Responda SOMENTE com JSON no formato {"score": number, "temperature": "hot|warm|cold", "reason": string}.`,
         prompt: JSON.stringify({
           deal: { title: deal.title, amount: deal.amount, stage: deal.stageId, engagement: deal.engagement, diasSemContato: daysSince(deal.lastTouch), tags: deal.tags },
@@ -60,7 +59,7 @@ export async function runLeadScoring(
       });
       const parsed = extractJson<{ score: number; temperature: "hot" | "warm" | "cold"; reason: string }>(text);
       if (parsed && typeof parsed.score === "number") {
-        return { ...parsed, source: "claude" };
+        return { ...parsed, source: "llm" };
       }
     } catch {
       // cai no heurístico
@@ -94,8 +93,7 @@ export async function runCopilot(
 ): Promise<CopilotResult> {
   if (hasLiveAI() && agent.enabled) {
     try {
-      const text = await callClaude({
-        model: agent.model,
+      const text = await callLLM({
         system: `Você é o "${agent.name}". ${agent.instructions} Responda SOMENTE com JSON {"nextAction": string, "message": string, "channel": string}.`,
         prompt: JSON.stringify({
           deal: { title: deal.title, stage: deal.stageId, amount: deal.amount, lastActivities: deal.activities.slice(-2) },
@@ -104,7 +102,7 @@ export async function runCopilot(
         maxTokens: 500,
       });
       const parsed = extractJson<{ nextAction: string; message: string; channel: string }>(text);
-      if (parsed && parsed.message) return { ...parsed, source: "claude" };
+      if (parsed && parsed.message) return { ...parsed, source: "llm" };
     } catch {
       // fallback
     }
@@ -150,8 +148,7 @@ export async function runProposal(
 ): Promise<ProposalResult> {
   if (hasLiveAI() && agent.enabled) {
     try {
-      const text = await callClaude({
-        model: agent.model,
+      const text = await callLLM({
         system: `Você é o "${agent.name}". ${agent.instructions} Teto de desconto ${MAX_DISCOUNT * 100}%. Responda SOMENTE com JSON {"items":[{"name":string,"qty":number,"unitPrice":number}],"discountPct":number,"summary":string,"terms":string}.`,
         prompt: JSON.stringify({ deal: { title: deal.title, amount: deal.amount, tags: deal.tags }, contact: { company: contact.company, role: contact.role } }),
         maxTokens: 800,
@@ -161,7 +158,7 @@ export async function runProposal(
         const subtotal = parsed.items.reduce((s, i) => s + i.qty * i.unitPrice, 0);
         const discountPct = Math.min(MAX_DISCOUNT * 100, Math.max(0, parsed.discountPct));
         const total = Math.round(subtotal * (1 - discountPct / 100));
-        return { dealId: deal.id, items: parsed.items, subtotal, discountPct, total, summary: parsed.summary, terms: parsed.terms, generatedBy: agent.name, source: "claude" };
+        return { dealId: deal.id, items: parsed.items, subtotal, discountPct, total, summary: parsed.summary, terms: parsed.terms, generatedBy: agent.name, source: "llm" };
       }
     } catch {
       // fallback
@@ -209,8 +206,7 @@ export async function runContract(
 
   if (hasLiveAI() && agent.enabled) {
     try {
-      const text = await callClaude({
-        model: agent.model,
+      const text = await callLLM({
         system: `Você é o "${agent.name}". ${agent.instructions} Responda SOMENTE com JSON {"title":string,"clauses":[{"heading":string,"body":string}],"signatories":[{"name":string,"role":string,"party":"contratante|contratada","email":string}]}.`,
         prompt: JSON.stringify({
           deal: { title: deal.title, value, tags: deal.tags },
@@ -224,7 +220,7 @@ export async function runContract(
         return {
           dealId: deal.id, reference, title: parsed.title, clauses: parsed.clauses, value,
           signatories: parsed.signatories?.length ? parsed.signatories : defaultSignatories(contact),
-          signatureStatus: "enviado", signatureProvider: SIGNATURE_PROVIDER, generatedBy: agent.name, source: "claude",
+          signatureStatus: "enviado", signatureProvider: SIGNATURE_PROVIDER, generatedBy: agent.name, source: "llm",
         };
       }
     } catch {

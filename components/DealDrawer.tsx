@@ -17,14 +17,15 @@ async function post<T>(url: string, dealId: string): Promise<T> {
   return (await res.json()) as T;
 }
 
-function SourceTag({ source }: { source?: "claude" | "heuristic" }) {
+function SourceTag({ source }: { source?: "llm" | "heuristic" }) {
   if (!source) return null;
+  const live = source === "llm";
   return (
     <span
-      className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-medium ${source === "claude" ? "bg-brand-100 text-brand-700" : "bg-slate-100 text-slate-500"}`}
-      title={source === "claude" ? "Gerado pelo Claude API" : "Heurística (defina ANTHROPIC_API_KEY para IA ao vivo)"}
+      className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-medium ${live ? "bg-brand-100 text-brand-700" : "bg-slate-100 text-slate-500"}`}
+      title={live ? "Gerado por IA (GLM 5.2 via OpenRouter)" : "Heurística (configure OPENROUTER_API_KEY para IA ao vivo)"}
     >
-      {source === "claude" ? "Claude" : "heurística"}
+      {live ? "IA · GLM" : "heurística"}
     </span>
   );
 }
