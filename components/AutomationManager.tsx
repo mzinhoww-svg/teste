@@ -1,20 +1,28 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { createAutomation, deleteAutomation, toggleAutomation } from "@/app/actions";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { AutomationView } from "@/lib/db";
 import type { Agent, Stage } from "@/lib/types";
 
-export function AutomationManager({ automations, stages, agents }: {
-  automations: AutomationView[]; stages: Stage[]; agents: Agent[];
+export function AutomationManager({ automations, stages, agents, orgName }: {
+  automations: AutomationView[]; stages: Stage[]; agents: Agent[]; orgName: string;
 }) {
   const [pending, start] = useTransition();
   const [formOpen, setFormOpen] = useState(false);
+  const [toDelete, setToDelete] = useState<AutomationView | null>(null);
 
   function submit(fd: FormData) {
     start(async () => {
-      await createAutomation(fd);
-      setFormOpen(false);
+      try {
+        await createAutomation(fd);
+        setFormOpen(false);
+        toast.success("Automação criada");
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Falha ao criar automação");
+      }
     });
   }
 
@@ -83,7 +91,7 @@ export function AutomationManager({ automations, stages, agents }: {
                     </button>
                   </td>
                   <td className="px-4 py-2.5 text-right">
-                    <button onClick={() => start(() => deleteAutomation(a.id))} className="text-xs text-rose-400 hover:text-rose-600">remover</button>
+                    <button onClick={() => setToDelete(a)} className="text-xs text-rose-400 hover:text-rose-600">remover</button>
                   </td>
                 </tr>
               ))}
@@ -91,6 +99,30 @@ export function AutomationManager({ automations, stages, agents }: {
           </table>
         </div>
       )}
+      <ConfirmDialog
+        open={toDelete !== null}
+        onOpenChange={(o) => !o && setToDelete(null)}
+        title="Remover automação?"
+        itemName={toDelete ? `${toDelete.name} — entrar em ${toDelete.stageName} → ${toDelete.agentName}` : ""}
+        scopeName={orgName}
+        description="A regra deixa de disparar imediatamente. Esta ação não pode ser desfeita."
+        confirmLabel="Remover"
+        destructive
+        loading={pending}
+        onConfirm={() => {
+          if (!toDelete) return;
+          start(async () => {
+            try {
+              await deleteAutomation(toDelete.id);
+              toast.success("Automação removida");
+            } catch (e) {
+              toast.error(e instanceof Error ? e.message : "Falha ao remover");
+            } finally {
+              setToDelete(null);
+            }
+          });
+        }}
+      />
     </div>
   );
 }

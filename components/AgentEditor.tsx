@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { updateAgent } from "@/app/actions";
 import type { Agent } from "@/lib/types";
 
-export function AgentEditor({ agent }: { agent: Agent }) {
+export function AgentEditor({ agent, orgName }: { agent: Agent; orgName: string }) {
   const [instructions, setInstructions] = useState(agent.instructions);
   const [model, setModel] = useState(agent.model);
   const [enabled, setEnabled] = useState(agent.enabled);
@@ -21,12 +22,17 @@ export function AgentEditor({ agent }: { agent: Agent }) {
   function save() {
     if (!agent.uuid) return;
     start(async () => {
-      await updateAgent(agent.uuid!, {
-        instructions, model, enabled,
-        triggers: triggers.split(",").map((t) => t.trim()).filter(Boolean),
-      });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      try {
+        await updateAgent(agent.uuid!, {
+          instructions, model, enabled,
+          triggers: triggers.split(",").map((t) => t.trim()).filter(Boolean),
+        });
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+        toast.success(`${agent.name} atualizado para toda a organização ${orgName ? `"${orgName}"` : ""}`);
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Falha ao salvar agente");
+      }
     });
   }
 

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { updateContractClauses, updateContractStatus } from "@/app/actions";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { brl } from "@/lib/format";
 import type { ContractView } from "@/lib/db";
 
@@ -13,25 +15,51 @@ const statusColor: Record<string, string> = {
   cancelado: "bg-rose-100 text-rose-700",
 };
 
-export function ContractCard({ c }: { c: ContractView }) {
+const TERMINAL = new Set(["assinado", "cancelado"]);
+
+export function ContractCard({ c, orgName }: { c: ContractView; orgName: string }) {
   const [open, setOpen] = useState(false);
   const [clauses, setClauses] = useState(c.clauses);
   const [status, setStatus] = useState(c.status);
   const [pending, start] = useTransition();
   const [saved, setSaved] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+  const [clauseToRemove, setClauseToRemove] = useState<number | null>(null);
 
-  function changeStatus(s: string) {
+  function applyStatus(s: string) {
+    const prev = status;
     setStatus(s);
-    start(() => updateContractStatus(c.id, s));
+    start(async () => {
+      try {
+        await updateContractStatus(c.id, s);
+        toast.success(`Contrato ${c.reference}: status "${s}"`);
+      } catch (e) {
+        setStatus(prev);
+        toast.error(e instanceof Error ? e.message : "Falha ao alterar status");
+      }
+    });
+  }
+  function changeStatus(s: string) {
+    // Estados terminais têm efeito jurídico — exigem confirmação com escopo.
+    if (TERMINAL.has(s)) { setPendingStatus(s); return; }
+    applyStatus(s);
   }
   function saveClauses() {
-    start(async () => { await updateContractClauses(c.id, clauses); setSaved(true); setTimeout(() => setSaved(false), 2000); });
+    start(async () => {
+      try {
+        await updateContractClauses(c.id, clauses);
+        setSaved(true); setTimeout(() => setSaved(false), 2000);
+        toast.success("Cláusulas salvas");
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Falha ao salvar cláusulas");
+      }
+    });
   }
   function editClause(i: number, field: "heading" | "body", v: string) {
     setClauses((prev) => prev.map((cl, idx) => (idx === i ? { ...cl, [field]: v } : cl)));
   }
   function addClause() { setClauses((prev) => [...prev, { heading: `${prev.length + 1}. Nova cláusula`, body: "" }]); }
-  function removeClause(i: number) { setClauses((prev) => prev.filter((_, idx) => idx !== i)); }
+  function removeClause(i: number) { setClauseToRemove(i); }
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -88,6 +116,38 @@ export function ContractCard({ c }: { c: ContractView }) {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={pendingStatus !== null}
+        onOpenChange={(o) => !o && setPendingStatus(null)}
+        title={pendingStatus === "assinado" ? "Marcar contrato como assinado?" : "Cancelar contrato?"}
+        itemName={`${c.reference} — ${c.title}`}
+        scopeName={orgName}
+        description={pendingStatus === "assinado"
+          ? "O contrato passa a valer como assinado para esta organização."
+          : "O contrato será marcado como cancelado. Esta ação tem efeito jurídico."}
+        confirmLabel={pendingStatus === "assinado" ? "Confirmar assinatura" : "Cancelar contrato"}
+        destructive={pendingStatus === "cancelado"}
+        loading={pending}
+        onConfirm={() => { if (pendingStatus) { applyStatus(pendingStatus); setPendingStatus(null); } }}
+      />
+
+      <ConfirmDialog
+        open={clauseToRemove !== null}
+        onOpenChange={(o) => !o && setClauseToRemove(null)}
+        title="Remover cláusula?"
+        itemName={clauseToRemove !== null ? (clauses[clauseToRemove]?.heading ?? "Cláusula") : ""}
+        scopeName={orgName}
+        description="A remoção só é aplicada quando você salvar as cláusulas."
+        confirmLabel="Remover"
+        destructive
+        onConfirm={() => {
+          if (clauseToRemove !== null) {
+            setClauses((prev) => prev.filter((_, idx) => idx !== clauseToRemove));
+            setClauseToRemove(null);
+          }
+        }}
+      />
     </div>
   );
 }
