@@ -23,7 +23,7 @@ function KpiCard({ label, value, hint }: { label: string; value: string; hint?: 
 
 function DealCard({ deal, contact, onClick }: { deal: Deal; contact?: Contact; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="w-full rounded-lg border border-slate-200 bg-white p-3 text-left transition hover:border-brand-300 hover:shadow-sm">
+    <button onClick={onClick} className="w-full rounded-lg border border-slate-200 bg-white p-3 text-left transition-all duration-150 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-sm motion-reduce:hover:translate-y-0">
       <div className="text-sm font-medium text-slate-800">{deal.title}</div>
       <div className="mt-0.5 text-xs text-slate-400">{contact?.company || contact?.name || "—"}</div>
       <div className="mt-2 flex items-center justify-between">

@@ -310,7 +310,7 @@ function heuristicAdvisoryBase(deal: Deal, contact: Contact, agent: Agent): Omit
       return {
         headline: `Plano de follow-up (${dias} dia(s) sem contato)`,
         items: [
-          dias > 5 ? `⚠️ Deal parado há ${dias} dias — acima do SLA. Follow-up hoje.` : `Próximo follow-up sugerido em 2 dias.`,
+          dias > 5 ? `Atenção: deal parado há ${dias} dias — acima do SLA. Follow-up hoje.` : `Próximo follow-up sugerido em 2 dias.`,
           `Tarefa: registrar resumo da última interação com ${first}.`,
           `Tarefa: confirmar próximo passo e data com o cliente.`,
           deal.amount > 100000 ? "Alta prioridade (ticket alto) — acionar gerente." : "Prioridade normal.",
@@ -330,7 +330,7 @@ function heuristicAdvisoryBase(deal: Deal, contact: Contact, agent: Agent): Omit
       return {
         headline: deal.stageKey === "won" ? "Registro de ganho" : deal.stageKey === "lost" ? "Registro de perda" : "Feedback em andamento",
         items: [
-          `Resultado: ${deal.stageKey === "won" ? "GANHO ✅" : deal.stageKey === "lost" ? "PERDIDO ❌" : "em aberto"}.`,
+          `Resultado: ${deal.stageKey === "won" ? "GANHO" : deal.stageKey === "lost" ? "PERDIDO" : "em aberto"}.`,
           `Ticket: R$${(deal.amount / 1000).toFixed(0)}k · Engajamento final: ${deal.engagement}/100.`,
           deal.engagement >= 70 ? "Alto engajamento reforça peso desse critério no scoring." : "Baixo engajamento: revisar critério de qualificação para casos assim.",
           "Sugestão: ajustar ICP com base neste desfecho.",

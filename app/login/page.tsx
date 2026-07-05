@@ -17,7 +17,7 @@ export default function LoginPage({
         </div>
 
         {searchParams.error && (
-          <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{searchParams.error}</div>
+          <div className="animate-shake mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" role="alert">{searchParams.error}</div>
         )}
         {searchParams.message && (
           <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{searchParams.message}</div>

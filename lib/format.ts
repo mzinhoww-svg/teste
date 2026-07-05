@@ -10,5 +10,5 @@ export function tempColor(t?: "hot" | "warm" | "cold"): string {
 }
 
 export function tempLabel(t?: "hot" | "warm" | "cold"): string {
-  return t === "hot" ? "🔥 Quente" : t === "warm" ? "🌤️ Morno" : t === "cold" ? "❄️ Frio" : "—";
+  return t === "hot" ? "Quente" : t === "warm" ? "Morno" : t === "cold" ? "Frio" : "—";
 }
