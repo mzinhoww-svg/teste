@@ -85,7 +85,7 @@ export async function createLead(formData: FormData) {
   });
   if (dErr) throw dErr;
 
-  revalidatePath("/");
+  revalidatePath("/app");
 }
 
 export async function moveDeal(dealId: string, stageId: string) {
@@ -126,7 +126,7 @@ export async function moveDeal(dealId: string, stageId: string) {
     }
   }
 
-  revalidatePath("/");
+  revalidatePath("/app");
 }
 
 export async function updateDeal(dealId: string, fields: { title?: string; amount?: number; engagement?: number }) {
@@ -138,7 +138,7 @@ export async function updateDeal(dealId: string, fields: { title?: string; amoun
   if (fields.engagement !== undefined) patch.engagement = fields.engagement;
   const { error } = await supabase.from("deals").update(patch).eq("id", dealId);
   if (error) throw error;
-  revalidatePath("/");
+  revalidatePath("/app");
 }
 
 export async function addActivity(dealId: string, type: string, summary: string, author = "Você") {
@@ -147,7 +147,7 @@ export async function addActivity(dealId: string, type: string, summary: string,
   const { error } = await supabase.from("activities").insert({ org_id: orgId, deal_id: dealId, type, summary, author });
   if (error) throw error;
   await supabase.from("deals").update({ last_touch: new Date().toISOString().slice(0, 10) }).eq("id", dealId);
-  revalidatePath("/");
+  revalidatePath("/app");
 }
 
 // --- Agentes (Studio) ----------------------------------------------------
@@ -177,7 +177,7 @@ export async function updateAgent(uuid: string, fields: {
 
   const { error } = await supabase.from("agents").update(patch).eq("id", uuid);
   if (error) throw error;
-  revalidatePath("/studio");
+  revalidatePath("/app/studio");
 }
 
 // --- Automações ------------------------------------------------------------
@@ -195,7 +195,7 @@ export async function createAutomation(formData: FormData) {
     trigger_stage_id: stageId, agent_kind: agentKind, enabled: true,
   });
   if (error) throw error;
-  revalidatePath("/automacoes");
+  revalidatePath("/app/automacoes");
 }
 
 export async function toggleAutomation(id: string, enabled: boolean) {
@@ -203,7 +203,7 @@ export async function toggleAutomation(id: string, enabled: boolean) {
   const supabase = createClient();
   const { error } = await supabase.from("automations").update({ enabled }).eq("id", id);
   if (error) throw error;
-  revalidatePath("/automacoes");
+  revalidatePath("/app/automacoes");
 }
 
 export async function deleteAutomation(id: string) {
@@ -211,7 +211,7 @@ export async function deleteAutomation(id: string) {
   const supabase = createClient();
   const { error } = await supabase.from("automations").delete().eq("id", id);
   if (error) throw error;
-  revalidatePath("/automacoes");
+  revalidatePath("/app/automacoes");
 }
 
 // --- Contratos -----------------------------------------------------------
@@ -224,8 +224,8 @@ export async function updateContractStatus(contractId: string, status: string) {
     .update({ signature_status: status, updated_at: new Date().toISOString() })
     .eq("id", contractId);
   if (error) throw error;
-  revalidatePath("/contracts");
-  revalidatePath("/");
+  revalidatePath("/app/contracts");
+  revalidatePath("/app");
 }
 
 export async function updateContractClauses(contractId: string, clauses: { heading: string; body: string }[]) {
@@ -236,5 +236,5 @@ export async function updateContractClauses(contractId: string, clauses: { headi
     .update({ clauses, updated_at: new Date().toISOString() })
     .eq("id", contractId);
   if (error) throw error;
-  revalidatePath("/contracts");
+  revalidatePath("/app/contracts");
 }

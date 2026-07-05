@@ -6,12 +6,12 @@ import { TenantBadge, UserMenu } from "./UserMenu";
 type Tab = "board" | "contracts" | "automations" | "reports" | "studio" | "how";
 
 const tabs: { id: Tab; href: string; label: string }[] = [
-  { id: "board", href: "/", label: "Funil" },
-  { id: "contracts", href: "/contracts", label: "Contratos" },
-  { id: "automations", href: "/automacoes", label: "Automações" },
-  { id: "reports", href: "/relatorios", label: "Relatórios" },
-  { id: "studio", href: "/studio", label: "Studio" },
-  { id: "how", href: "/como-funciona", label: "Como funciona" },
+  { id: "board", href: "/app", label: "Funil" },
+  { id: "contracts", href: "/app/contracts", label: "Contratos" },
+  { id: "automations", href: "/app/automacoes", label: "Automações" },
+  { id: "reports", href: "/app/relatorios", label: "Relatórios" },
+  { id: "studio", href: "/app/studio", label: "Studio" },
+  { id: "how", href: "/app/como-funciona", label: "Como funciona" },
 ];
 
 // Header com identidade permanente do tenant: logo (escopo do produto),
@@ -28,7 +28,7 @@ export async function Nav({ active }: { active: Tab }) {
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
-          <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="Início">
+          <Link href="/app" className="flex shrink-0 items-center gap-2" aria-label="Início">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">AI</span>
             <span className="hidden text-sm font-semibold text-slate-900 lg:block">CRM AI Studio</span>
           </Link>
