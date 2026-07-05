@@ -17,7 +17,7 @@ export async function GET() {
 
   const dump: Record<string, unknown> = { exported_at: new Date().toISOString(), org_id: auth.orgId };
   for (const t of tables) {
-    const { data } = await supabase.from(t).select("*").limit(5000);
+    const { data } = await supabase.from(t).select("*").eq("org_id", auth.orgId).limit(5000);
     dump[t] = data ?? [];
   }
 

@@ -1,6 +1,6 @@
 import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase/server";
-import { getBoard } from "@/lib/db";
+import { getBoard, getOrgId } from "@/lib/db";
 import { brl } from "@/lib/format";
 
 export const metadata = { title: "Relatórios — CRM AI Studio" };
@@ -23,13 +23,14 @@ const AGENT_LABEL: Record<string, string> = {
 
 export default async function ReportsPage() {
   const supabase = createClient();
+  const orgId = await getOrgId();
   const { pipeline, deals } = await getBoard();
 
   const [{ data: runs }, { count: contractCount }, { count: proposalCount }, { count: msgCount }] = await Promise.all([
-    supabase.from("agent_runs").select("agent_kind, source, created_at, input").order("created_at", { ascending: false }).limit(200),
-    supabase.from("contracts").select("id", { count: "exact", head: true }),
-    supabase.from("proposals").select("id", { count: "exact", head: true }),
-    supabase.from("messages").select("id", { count: "exact", head: true }),
+    supabase.from("agent_runs").select("agent_kind, source, created_at, input").eq("org_id", orgId ?? "").order("created_at", { ascending: false }).limit(200),
+    supabase.from("contracts").select("id", { count: "exact", head: true }).eq("org_id", orgId ?? ""),
+    supabase.from("proposals").select("id", { count: "exact", head: true }).eq("org_id", orgId ?? ""),
+    supabase.from("messages").select("id", { count: "exact", head: true }).eq("org_id", orgId ?? ""),
   ]);
 
   const allRuns = runs ?? [];

@@ -1,28 +1,78 @@
 import "server-only";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import type { Activity, Agent, Contact, Deal, Pipeline, Stage } from "./types";
+
+export const ACTIVE_ORG_COOKIE = "active_org";
 
 // ==========================================================================
 // Camada de acesso a dados. Toda query roda sob a sessão do usuário; a RLS do
 // Postgres garante que só dados da org dele voltem.
 // ==========================================================================
 
-export async function getAuthContext(): Promise<{ userId: string; orgId: string } | null> {
+export type MemberRole = "owner" | "admin" | "member";
+
+export interface OrgMembership {
+  orgId: string;
+  orgName: string;
+  role: MemberRole;
+}
+
+export interface AuthContext {
+  userId: string;
+  email: string;
+  orgId: string;
+  orgName: string;
+  role: MemberRole;
+  memberships: OrgMembership[];
+}
+
+/**
+ * Contexto de autenticação + tenant ativo.
+ * A org ativa vem do cookie `active_org`, SEMPRE validado contra as
+ * memberships reais do usuário — cookie inválido/alheio cai no fallback
+ * (primeira org por ordem de criação). Nunca confia no cookie às cegas.
+ */
+export async function getAuthContext(): Promise<AuthContext | null> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data } = await supabase
+
+  const { data: rows } = await supabase
     .from("memberships")
-    .select("org_id")
+    .select("org_id, member_role, created_at, orgs(name)")
     .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (!data?.org_id) return null;
-  return { userId: user.id, orgId: data.org_id };
+    .order("created_at", { ascending: true });
+
+  const memberships: OrgMembership[] = (rows ?? []).map((r: any) => ({
+    orgId: r.org_id,
+    orgName: r.orgs?.name ?? "Organização",
+    role: (r.member_role ?? "member") as MemberRole,
+  }));
+  if (memberships.length === 0) {
+    // Usuário logado sem organização (trigger de signup falhou ou foi removido).
+    return {
+      userId: user.id, email: user.email ?? "", orgId: "", orgName: "",
+      role: "member", memberships: [],
+    };
+  }
+
+  const wanted = cookies().get(ACTIVE_ORG_COOKIE)?.value;
+  const active = memberships.find((m) => m.orgId === wanted) ?? memberships[0];
+
+  return {
+    userId: user.id,
+    email: user.email ?? "",
+    orgId: active.orgId,
+    orgName: active.orgName,
+    role: active.role,
+    memberships,
+  };
 }
 
 export async function getOrgId(): Promise<string | null> {
-  return (await getAuthContext())?.orgId ?? null;
+  const ctx = await getAuthContext();
+  return ctx?.orgId || null;
 }
 
 // --- Mappers (row snake_case -> domínio camelCase) -----------------------
@@ -71,7 +121,9 @@ export interface BoardData {
 
 export async function getBoard(): Promise<BoardData> {
   const supabase = createClient();
-  const { data: pipes } = await supabase.from("pipelines").select("*").order("position").limit(1);
+  const orgId = await getOrgId();
+  if (!orgId) return { pipeline: null, deals: [], contacts: [] };
+  const { data: pipes } = await supabase.from("pipelines").select("*").eq("org_id", orgId).order("position").limit(1);
   const pipe = pipes?.[0];
   if (!pipe) return { pipeline: null, deals: [], contacts: [] };
 
@@ -80,7 +132,7 @@ export async function getBoard(): Promise<BoardData> {
   const stageKeyById = new Map<string, string>((stageRows ?? []).map((s: any) => [s.id, s.key]));
 
   const { data: dealRows } = await supabase.from("deals").select("*").eq("pipeline_id", pipe.id).order("created_at", { ascending: false });
-  const { data: contactRows } = await supabase.from("contacts").select("*").order("created_at", { ascending: false });
+  const { data: contactRows } = await supabase.from("contacts").select("*").eq("org_id", orgId).order("created_at", { ascending: false });
 
   const pipeline: Pipeline = { id: pipe.id, name: pipe.name, area: pipe.area, stages };
   return {
@@ -97,7 +149,9 @@ export interface DealFull {
 
 export async function getDealFull(dealId: string): Promise<DealFull | null> {
   const supabase = createClient();
-  const { data: d } = await supabase.from("deals").select("*").eq("id", dealId).maybeSingle();
+  const orgId = await getOrgId();
+  if (!orgId) return null;
+  const { data: d } = await supabase.from("deals").select("*").eq("id", dealId).eq("org_id", orgId).maybeSingle();
   if (!d) return null;
 
   const { data: stageRows } = await supabase.from("stages").select("id,key").eq("pipeline_id", d.pipeline_id);
@@ -117,13 +171,17 @@ export async function getDealFull(dealId: string): Promise<DealFull | null> {
 
 export async function getAgents(): Promise<Agent[]> {
   const supabase = createClient();
-  const { data } = await supabase.from("agents").select("*").order("position");
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase.from("agents").select("*").eq("org_id", orgId).order("position");
   return (data ?? []).map(mapAgent);
 }
 
 export async function getAgentByKind(kind: string): Promise<Agent | null> {
   const supabase = createClient();
-  const { data } = await supabase.from("agents").select("*").eq("kind", kind).maybeSingle();
+  const orgId = await getOrgId();
+  if (!orgId) return null;
+  const { data } = await supabase.from("agents").select("*").eq("kind", kind).eq("org_id", orgId).maybeSingle();
   return data ? mapAgent(data) : null;
 }
 
@@ -139,9 +197,12 @@ export interface AutomationView {
 
 export async function getAutomations(): Promise<AutomationView[]> {
   const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
   const { data } = await supabase
     .from("automations")
     .select("*, stage:stages(name)")
+    .eq("org_id", orgId)
     .order("created_at", { ascending: false });
   const agents = await getAgents();
   const nameByKind = new Map(agents.map((a) => [a.id, a.name]));
@@ -169,9 +230,12 @@ export interface ContractView {
 
 export async function getContracts(): Promise<ContractView[]> {
   const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
   const { data } = await supabase
     .from("contracts")
     .select("*, deal:deals(title, contact:contacts(name, company))")
+    .eq("org_id", orgId)
     .order("created_at", { ascending: false });
   return (data ?? []).map((r: any) => ({
     id: r.id, reference: r.reference, title: r.title, value: Number(r.value),
