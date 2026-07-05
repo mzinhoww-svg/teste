@@ -58,17 +58,17 @@ export function AgentEditor({ agent }: { agent: Agent }) {
       </div>
 
       <div className="mt-4">
-        <label className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Instruções (prompt)</label>
+        <label className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Instruções (prompt)</label>
         <textarea value={instructions} onChange={(e) => setInstructions(e.target.value)} rows={4}
           className="mt-1 w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-700 outline-none focus:border-brand-400" />
       </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <label className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Modelo
+        <label className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Modelo
           <input value={model} onChange={(e) => setModel(e.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs text-slate-700 outline-none focus:border-brand-400" />
         </label>
-        <label className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Estágios (triggers, separados por vírgula)
+        <label className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Estágios (triggers, separados por vírgula)
           <input value={triggers} onChange={(e) => setTriggers(e.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-700 outline-none focus:border-brand-400" />
         </label>

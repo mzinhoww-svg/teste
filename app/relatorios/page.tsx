@@ -8,7 +8,7 @@ export const metadata = { title: "Relatórios — CRM AI Studio" };
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <div className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</div>
+      <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
       <div className="mt-1 text-2xl font-bold text-slate-900">{value}</div>
       {hint && <div className="text-xs text-slate-400">{hint}</div>}
     </div>

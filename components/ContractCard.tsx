@@ -78,7 +78,7 @@ export function ContractCard({ c }: { c: ContractView }) {
 
           {c.signatories.length > 0 && (
             <div className="pt-2">
-              <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Signatários · {c.provider}</div>
+              <div className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Signatários · {c.provider}</div>
               <ul className="mt-1 space-y-1">
                 {c.signatories.map((s, i) => (
                   <li key={i} className="text-xs text-slate-600">{s.name} — {s.role} <span className="text-slate-400">({s.party})</span> · {s.email}</li>

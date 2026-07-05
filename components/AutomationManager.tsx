@@ -62,7 +62,7 @@ export function AutomationManager({ automations, stages, agents }: {
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-400">
+              <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-500">
                 <th className="px-4 py-2.5">Nome</th>
                 <th className="px-4 py-2.5">Gatilho</th>
                 <th className="px-4 py-2.5">Agente</th>
