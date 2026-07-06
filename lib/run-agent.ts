@@ -109,11 +109,12 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
     }
     case "proposal": {
       result = await runProposal(deal, contact, agent);
-      await supabase.from("proposals").insert({
+      const { data: prop } = await supabase.from("proposals").insert({
         org_id: ctx.orgId, deal_id: dealId, items: result.items, subtotal: result.subtotal,
         discount_pct: result.discountPct, total: result.total, summary: result.summary,
         terms: result.terms, generated_by: result.generatedBy,
-      });
+      }).select("id, share_token").single();
+      if (prop?.share_token) extra.shareToken = prop.share_token;
       break;
     }
     case "legal-contract": {

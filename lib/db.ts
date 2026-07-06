@@ -274,6 +274,8 @@ export interface ContractView {
   certificateUrl: string | null;
   contactPhone: string | null;
   contactName: string | null;
+  signToken: string | null;
+  signedAt: string | null;
 }
 
 export async function getContracts(): Promise<ContractView[]> {
@@ -294,6 +296,7 @@ export async function getContracts(): Promise<ContractView[]> {
     dealId: r.deal_id ?? null, envelopeId: r.envelope_id ?? null, externalStatus: r.external_status ?? null,
     signingUrl: r.signing_url ?? null, certificateUrl: r.certificate_url ?? null,
     contactPhone: r.deal?.contact?.phone ?? null, contactName: r.deal?.contact?.name ?? null,
+    signToken: r.sign_token ?? null, signedAt: r.signed_at ?? null,
   }));
 }
 
