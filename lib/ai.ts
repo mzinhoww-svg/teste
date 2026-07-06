@@ -126,16 +126,34 @@ async function callAnthropic({ system, prompt, maxTokens }: Required<LLMOptions>
 }
 
 /**
- * Extrai o primeiro bloco JSON de um texto (o modelo às vezes embrulha em prosa).
+ * Extrai um objeto JSON de um texto do modelo, de forma robusta a:
+ * - blocos de raciocínio de modelos "thinking" (ex.: GLM-5.2 emite <think>…</think>
+ *   com chaves que confundem um match ganancioso);
+ * - cercas de código markdown (```json … ```);
+ * - prosa antes/depois do JSON e múltiplos objetos (usa o ÚLTIMO objeto
+ *   BALANCEADO, pois a resposta costuma vir depois do raciocínio).
  */
 export function extractJson<T>(text: string): T | null {
-  // Remove cercas de código markdown se presentes.
-  const cleaned = text.replace(/```json\s*/gi, "").replace(/```/g, "");
-  const match = cleaned.match(/\{[\s\S]*\}/);
-  if (!match) return null;
-  try {
-    return JSON.parse(match[0]) as T;
-  } catch {
-    return null;
+  const cleaned = text
+    .replace(/<think>[\s\S]*?<\/think>/gi, "")
+    .replace(/<thinking>[\s\S]*?<\/thinking>/gi, "")
+    .replace(/```json\s*/gi, "")
+    .replace(/```/g, "")
+    .trim();
+
+  // 1) Tenta o texto inteiro (caso já seja JSON puro).
+  try { return JSON.parse(cleaned) as T; } catch { /* continua */ }
+
+  // 2) Varre objetos {…} balanceados e devolve o último que parsear.
+  const candidates: string[] = [];
+  let depth = 0, start = -1;
+  for (let i = 0; i < cleaned.length; i++) {
+    const c = cleaned[i];
+    if (c === "{") { if (depth === 0) start = i; depth++; }
+    else if (c === "}") { depth--; if (depth === 0 && start >= 0) { candidates.push(cleaned.slice(start, i + 1)); start = -1; } }
   }
+  for (let i = candidates.length - 1; i >= 0; i--) {
+    try { return JSON.parse(candidates[i]) as T; } catch { /* tenta o anterior */ }
+  }
+  return null;
 }
