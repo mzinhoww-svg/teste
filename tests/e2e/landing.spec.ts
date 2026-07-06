@@ -9,9 +9,15 @@ test.describe("Landing pública (/)", () => {
 
   test("mostra os pilares de funcionalidade", async ({ page }) => {
     await page.goto("/");
-    for (const title of ["Funil inteligente", "Agentes de IA", "Contratos e assinatura", "Relatórios"]) {
+    for (const title of ["Funil inteligente", "agentes de IA", "Contratos e assinatura", "Relatórios"]) {
       await expect(page.getByText(title, { exact: false }).first()).toBeVisible();
     }
+  });
+
+  test("hero: como funciona e segurança", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: /Como funciona/i })).toBeVisible();
+    await expect(page.getByText(/Row Level Security/i)).toBeVisible();
   });
 
   test("tem CTA que leva ao app", async ({ page }) => {
