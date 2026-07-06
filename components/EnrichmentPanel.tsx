@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { enrichDeal } from "@/app/actions";
@@ -16,9 +16,11 @@ const confColor: Record<string, string> = {
 
 // Enriquecimento sob demanda: chama BrasilAPI (CNPJ) e persiste evidências em
 // lead_enrichment. Sem CNPJ, devolve buscas recomendadas.
-export function EnrichmentPanel({ dealId }: { dealId: string }) {
-  const [facts, setFacts] = useState<Fact[] | null>(null);
+export function EnrichmentPanel({ dealId, initialFacts }: { dealId: string; initialFacts?: Fact[] }) {
+  const [facts, setFacts] = useState<Fact[] | null>(initialFacts && initialFacts.length ? initialFacts : null);
   const [pending, start] = useTransition();
+  // Evidências salvas chegam via fetch async (panels) — mostra assim que carregam.
+  useEffect(() => { if (initialFacts && initialFacts.length) setFacts((cur) => cur ?? initialFacts); }, [initialFacts]);
 
   function run() {
     start(async () => {

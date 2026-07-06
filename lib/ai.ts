@@ -8,8 +8,25 @@
 // Assim o app funciona sempre; com uma chave configurada na Vercel, os agentes
 // passam a raciocinar com um LLM de verdade.
 
+import { AsyncLocalStorage } from "node:async_hooks";
+
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
+
+// Captura de uso de tokens por execução (concurrency-safe via ALS). run-agent
+// envolve a execução do agente em runWithUsage e lê os tokens reais gastos.
+const usageStore = new AsyncLocalStorage<{ tokens: number }>();
+
+export async function runWithUsage<T>(fn: () => Promise<T>): Promise<{ result: T; tokens: number }> {
+  const bucket = { tokens: 0 };
+  const result = await usageStore.run(bucket, fn);
+  return { result, tokens: bucket.tokens };
+}
+
+function addTokens(n: number) {
+  const b = usageStore.getStore();
+  if (b && Number.isFinite(n)) b.tokens += n;
+}
 
 export const DEFAULT_OPENROUTER_MODEL = "z-ai/glm-5.2";
 const DEFAULT_ANTHROPIC_MODEL = "claude-opus-4-8";
@@ -74,7 +91,8 @@ async function callOpenRouter({ system, prompt, maxTokens }: Required<LLMOptions
   });
 
   if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${await res.text()}`);
-  const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+  const data = (await res.json()) as { choices?: { message?: { content?: string } }[]; usage?: { total_tokens?: number } };
+  addTokens(data.usage?.total_tokens ?? 0);
   return (data.choices?.[0]?.message?.content ?? "").trim();
 }
 
@@ -98,7 +116,8 @@ async function callAnthropic({ system, prompt, maxTokens }: Required<LLMOptions>
   });
 
   if (!res.ok) throw new Error(`Anthropic ${res.status}: ${await res.text()}`);
-  const data = (await res.json()) as { content?: { type: string; text?: string }[] };
+  const data = (await res.json()) as { content?: { type: string; text?: string }[]; usage?: { input_tokens?: number; output_tokens?: number } };
+  addTokens((data.usage?.input_tokens ?? 0) + (data.usage?.output_tokens ?? 0));
   return (data.content ?? [])
     .filter((b) => b.type === "text")
     .map((b) => b.text ?? "")
