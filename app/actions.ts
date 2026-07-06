@@ -370,9 +370,12 @@ export async function addActivity(dealId: string, type: string, summary: string,
 export async function updateDealFull(dealId: string, fields: {
   title?: string; amount?: number; engagement?: number; origin?: string;
   nextActionAt?: string | null; temperature?: string | null; productId?: string | null;
+  productLabel?: string | null; probability?: number | null; stageId?: string;
   lostReason?: string | null; tags?: string[];
+  /** campos comerciais gravados em deals.custom (merge) */
+  custom?: Record<string, unknown>;
 }) {
-  await orgOrThrow();
+  const orgId = await orgOrThrow();
   const supabase = createClient();
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (fields.title !== undefined) patch.title = fields.title;
@@ -382,11 +385,24 @@ export async function updateDealFull(dealId: string, fields: {
   if (fields.nextActionAt !== undefined) patch.next_action_at = fields.nextActionAt || null;
   if (fields.temperature !== undefined) patch.temperature = fields.temperature || null;
   if (fields.productId !== undefined) patch.product_id = fields.productId || null;
+  if (fields.probability !== undefined) patch.probability = fields.probability == null ? null : Number(fields.probability);
   if (fields.lostReason !== undefined) patch.lost_reason = fields.lostReason || null;
   if (fields.tags !== undefined) patch.tags = fields.tags;
-  const { error } = await supabase.from("deals").update(patch).eq("id", dealId);
+  if (fields.stageId !== undefined) {
+    // Estágio deve pertencer ao mesmo funil do deal (evita mover para funil alheio).
+    const { data: cur } = await supabase.from("deals").select("pipeline_id").eq("id", dealId).eq("org_id", orgId).maybeSingle();
+    const { data: st } = await supabase.from("stages").select("id").eq("id", fields.stageId).eq("pipeline_id", cur?.pipeline_id ?? "").maybeSingle();
+    if (st) patch.stage_id = st.id;
+  }
+  if (fields.custom !== undefined || fields.productLabel !== undefined) {
+    const { data: cur } = await supabase.from("deals").select("custom").eq("id", dealId).eq("org_id", orgId).maybeSingle();
+    const merged: Record<string, unknown> = { ...(cur?.custom ?? {}) };
+    if (fields.productLabel !== undefined) merged.product_interest = fields.productLabel || undefined;
+    for (const [k, v] of Object.entries(fields.custom ?? {})) merged[k] = v === "" ? undefined : v;
+    patch.custom = merged;
+  }
+  const { error } = await supabase.from("deals").update(patch).eq("id", dealId).eq("org_id", orgId);
   if (error) throw error;
-  const orgId = await getOrgId();
   await supabase.from("activities").insert({ org_id: orgId, deal_id: dealId, type: "note", summary: "Deal editado", author: "Você" });
   revalidatePath("/app");
 }

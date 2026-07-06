@@ -64,7 +64,7 @@ export function Board({ pipeline, pipelines, deals, contacts, agents, products, 
 }) {
   const router = useRouter();
   const params = useSearchParams();
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(params.get("deal"));
   const [newOpen, setNewOpen] = useState(false);
   const [dragOver, setDragOver] = useState<string | null>(null);
   const [, startMove] = useTransition();

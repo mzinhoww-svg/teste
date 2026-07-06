@@ -114,6 +114,7 @@ function mapDeal(r: any, stageKeyById: Map<string, string>): Deal {
     lastTouch: r.last_touch ?? "", activities: [], tags: r.tags ?? [],
     origin: r.origin ?? undefined, nextActionAt: r.next_action_at ?? undefined,
     productId: r.product_id ?? undefined, lostReason: r.lost_reason ?? undefined,
+    probability: r.probability ?? undefined, custom: r.custom ?? {},
   };
 }
 
@@ -324,6 +325,7 @@ export async function getContracts(): Promise<ContractView[]> {
 export interface NotificationRow {
   id: string; type: string; title: string; body: string;
   action_url: string | null; deal_id: string | null; read_at: string | null; created_at: string;
+  metadata: any;
 }
 
 export async function getNotifications(limit = 50): Promise<NotificationRow[]> {
@@ -333,7 +335,7 @@ export async function getNotifications(limit = 50): Promise<NotificationRow[]> {
   // Notificações da org direcionadas ao usuário OU gerais (user_id null)
   const { data } = await supabase
     .from("notifications")
-    .select("id,type,title,body,action_url,deal_id,read_at,created_at,user_id")
+    .select("id,type,title,body,action_url,deal_id,read_at,created_at,user_id,metadata")
     .eq("org_id", ctx.orgId)
     .or(`user_id.is.null,user_id.eq.${ctx.userId}`)
     .order("created_at", { ascending: false })

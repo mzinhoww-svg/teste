@@ -58,6 +58,8 @@ export interface Deal {
   nextActionAt?: string;
   productId?: string;
   lostReason?: string;
+  probability?: number;
+  custom?: Record<string, any>;
   activities: Activity[];
   tags: string[];
 }
