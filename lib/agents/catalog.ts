@@ -15,7 +15,7 @@ export interface PlatformAgentDef {
   prompt: string;
 }
 
-const MODEL = "z-ai/glm-5.2";
+const MODEL = "deepseek/deepseek-v4-flash";
 
 export const PLATFORM_AGENTS: PlatformAgentDef[] = [
   {

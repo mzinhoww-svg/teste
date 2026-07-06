@@ -2,6 +2,7 @@ import { PackageCheck, ExternalLink } from "lucide-react";
 import { getPortalContext, getPortalDeliverables } from "@/lib/portal-db";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
+import { ApproveDeliverableButton } from "@/components/portal/ApproveDeliverableButton";
 
 export const dynamic = "force-dynamic";
 
@@ -30,11 +31,14 @@ export default async function PortalDocs({ params }: { params: { client: string 
                   <Badge variant={VARIANT[d.status] ?? "muted"}>{d.status}</Badge>
                 </div>
               </div>
-              {d.url && (
-                <a href={d.url} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-brand-600 hover:bg-brand-50 dark:border-slate-700 dark:text-brand-300 dark:hover:bg-brand-950/40">
-                  Abrir <ExternalLink className="h-3 w-3" aria-hidden />
-                </a>
-              )}
+              <div className="flex shrink-0 items-center gap-2">
+                {d.url && (
+                  <a href={d.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-brand-600 hover:bg-brand-50 dark:border-slate-700 dark:text-brand-300 dark:hover:bg-brand-950/40">
+                    Abrir <ExternalLink className="h-3 w-3" aria-hidden />
+                  </a>
+                )}
+                {d.status === "entregue" && <ApproveDeliverableButton id={d.id} clientSlug={params.client} />}
+              </div>
             </li>
           ))}
         </ul>

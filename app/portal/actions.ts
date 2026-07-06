@@ -36,3 +36,12 @@ export async function clientSignupAndAccept(formData: FormData) {
   revalidatePath("/", "layout");
   redirect(`/portal/${data.client_slug}`);
 }
+
+// Cliente aprova uma entrega pelo portal. A RPC (SECURITY DEFINER) valida
+// is_client_user e o estado; notifica a agência.
+export async function approveDeliverable(id: string, clientSlug: string) {
+  const supabase = createClient();
+  const { data } = await supabase.rpc("approve_deliverable", { p_id: id });
+  if (!data?.ok) throw new Error(data?.error ?? "Falha ao aprovar entrega");
+  revalidatePath(`/portal/${clientSlug}/documentos`);
+}
