@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { CheckCircle2, Copy, FileSignature, FileText, FlaskConical, MessageCircle, Pencil, Play, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
-import { deleteContact, deleteDeal, moveDeal, updateContact, updateDealFull } from "@/app/actions";
+import { createActivity, deleteContact, deleteDeal, moveDeal, updateContact, updateDealFull } from "@/app/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select, Textarea } from "@/components/ui/input";
@@ -315,6 +315,33 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
     hasBudget: Boolean(deal.custom?.budget), complete: missingOverview.length === 0,
   });
 
+  // Status operacional pela próxima ação.
+  const today = new Date().toISOString().slice(0, 10);
+  const nextAction = deal.nextActionAt ?? null;
+  const actionStatus = !nextAction
+    ? { label: "sem próxima ação", cls: "bg-amber-100 text-amber-700" }
+    : nextAction < today
+      ? { label: "atrasado", cls: "bg-rose-100 text-rose-700" }
+      : { label: "em dia", cls: "bg-emerald-100 text-emerald-700" };
+
+  const [acts, setActs] = useState(deal.activities);
+  const [actText, setActText] = useState("");
+  const [actType, setActType] = useState("note");
+  const [actNext, setActNext] = useState("");
+  const [pendingAct, startAct] = useTransition();
+  function addActivity() {
+    const summary = actText.trim();
+    if (!summary) return;
+    startAct(async () => {
+      try {
+        await createActivity(deal.id, { type: actType, summary, nextActionAt: actNext || undefined });
+        setActs((prev) => [{ id: `tmp-${Date.now()}`, summary, type: actType, at: today, author: "Você" } as any, ...prev]);
+        setActText(""); setActNext("");
+        toast.success("Atividade registrada");
+      } catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao registrar"); }
+    });
+  }
+
   return (
     <Sheet open onOpenChange={(o) => !o && onClose()}>
       <SheetContent aria-describedby={undefined}>
@@ -365,11 +392,12 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
               <Field label="Score" value={deal.score != null ? String(deal.score) : "—"} />
               <Field label="Próxima ação" value={deal.nextActionAt ?? deal.custom?.next_action ?? "—"} />
             </div>
-            {missingOverview.length > 0 && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                Falta para proposta: {missingOverview.join(", ")}.
-              </div>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${actionStatus.cls}`}>{actionStatus.label}</span>
+              {missingOverview.length > 0 && (
+                <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1 text-xs text-amber-800">Falta para proposta: {missingOverview.join(", ")}.</span>
+              )}
+            </div>
             <div className="rounded-lg border border-brand-200 bg-brand-50/60 px-3 py-2 text-xs dark:border-brand-900 dark:bg-brand-950/30">
               <span className="font-semibold text-brand-700 dark:text-brand-300">Agente recomendado:</span>{" "}
               {AGENT_LABEL_BY_KIND[overviewSuggestion.kind] ?? overviewSuggestion.kind} — {overviewSuggestion.reason}
@@ -433,9 +461,25 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
           </TabsContent>
 
           <TabsContent value="activity" className="py-4">
-            {deal.activities.length === 0 && <p className="text-sm text-slate-400">Sem atividades ainda. Ações no deal (edição, execução de agentes, mudança de estágio) aparecem aqui.</p>}
+            <div className="mb-4 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+              <div className="grid grid-cols-[1fr_auto] gap-2">
+                <Input value={actText} onChange={(e) => setActText(e.target.value)} placeholder="Registrar ligação, reunião, observação…" onKeyDown={(e) => { if (e.key === "Enter") addActivity(); }} />
+                <Button size="sm" loading={pendingAct} onClick={addActivity}>Registrar</Button>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <Select value={actType} onChange={(e) => setActType(e.target.value)} className="h-8 w-auto text-xs">
+                  <option value="note">Observação</option>
+                  <option value="call">Ligação</option>
+                  <option value="meeting">Reunião</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="task">Tarefa</option>
+                </Select>
+                <label className="text-xs text-slate-500">Próxima ação: <Input type="date" value={actNext} onChange={(e) => setActNext(e.target.value)} className="ml-1 inline-block h-8 w-auto text-xs" /></label>
+              </div>
+            </div>
+            {acts.length === 0 && <p className="text-sm text-slate-400">Sem atividades ainda. Registre a primeira acima.</p>}
             <ul className="space-y-2">
-              {deal.activities.map((a) => (
+              {acts.map((a) => (
                 <li key={a.id} className="flex gap-3 text-sm">
                   <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-400" aria-hidden />
                   <div>

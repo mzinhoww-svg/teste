@@ -2,14 +2,15 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Search } from "lucide-react";
+import { Bot, CalendarClock, Clock, Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 import { moveDeal } from "@/app/actions";
 import { DealDrawer } from "@/components/DealDrawer";
 import { CreateLeadSheet } from "@/components/leads/CreateLeadSheet";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/input";
-import { brl } from "@/lib/format";
+import { brl, tempColor, tempLabel } from "@/lib/format";
+import { AGENT_LABEL_BY_KIND, suggestAgentKind } from "@/lib/agent-suggest";
 import type { PipelineListItem, ProductListItem } from "@/lib/db";
 import type { Agent, Contact, Deal, Pipeline } from "@/lib/types";
 
@@ -23,34 +24,62 @@ function KpiCard({ label, value, hint }: { label: string; value: string; hint?: 
   );
 }
 
+function daysSince(iso?: string): number | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  return Math.max(0, Math.floor((Date.now() - t) / 86_400_000));
+}
+
 function DealCard({ deal, contact, onClick, onDragStart }: {
   deal: Deal; contact?: Contact; onClick: () => void; onDragStart: (e: React.DragEvent) => void;
 }) {
+  const product = (deal.custom?.product_interest as string) || "";
+  const stopped = daysSince(deal.lastTouch);
+  const stale = stopped != null && stopped >= 3; // regra Reiners: sem ação > 72h
+  const agent = suggestAgentKind({ stageKey: deal.stageKey, hasDecisor: deal.custom?.decisor === "sim", hasBudget: Boolean(deal.custom?.budget), complete: Boolean(product && (contact?.phone || contact?.email)) });
+  const nextAt = deal.nextActionAt;
+
   return (
     <button
       onClick={onClick}
       draggable
       onDragStart={onDragStart}
-      className="w-full cursor-grab rounded-lg border border-slate-200 bg-white p-3 text-left transition-all duration-150 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-sm active:cursor-grabbing motion-reduce:hover:translate-y-0"
+      className="w-full cursor-grab rounded-lg border border-slate-200 bg-white p-3 text-left transition-all duration-150 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-sm active:cursor-grabbing motion-reduce:hover:translate-y-0 dark:border-slate-700 dark:bg-slate-900"
     >
-      <div className="text-sm font-medium text-slate-800">{deal.title}</div>
-      <div className="mt-0.5 text-xs text-slate-400">{contact?.company || contact?.name || "—"}</div>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{deal.title}</div>
+          <div className="mt-0.5 truncate text-xs text-slate-400">{contact?.company || contact?.name || "—"}</div>
+        </div>
+        {deal.temperature && (
+          <span className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-medium ${tempColor(deal.temperature)}`}>{tempLabel(deal.temperature)}</span>
+        )}
+      </div>
+
+      {product && <div className="mt-1.5 truncate text-[11px] font-medium text-brand-700 dark:text-brand-300">{product}</div>}
+
       <div className="mt-2 flex items-center justify-between">
-        <span className="text-sm font-semibold text-emerald-700">{brl(deal.amount)}</span>
+        <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">{brl(deal.amount)}</span>
         <div className="flex items-center gap-1">
-          {deal.score != null && (
-            <span className="rounded bg-brand-50 px-1.5 py-0.5 text-[10px] font-medium text-brand-700">{deal.score}</span>
-          )}
-          <div className="h-1.5 w-12 overflow-hidden rounded-full bg-slate-100">
+          {deal.score != null && <span className="rounded bg-brand-50 px-1.5 py-0.5 text-[10px] font-medium text-brand-700 dark:bg-brand-950/40 dark:text-brand-300">{deal.score}</span>}
+          <div className="h-1.5 w-10 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
             <div className="h-full rounded-full bg-brand-400" style={{ width: `${deal.engagement}%` }} />
           </div>
         </div>
       </div>
+
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px]">
+        <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 ${stale ? "bg-rose-50 text-rose-600 dark:bg-rose-950/40" : "bg-slate-100 text-slate-500 dark:bg-slate-800"}`} title="Tempo desde o último toque">
+          <Clock className="h-2.5 w-2.5" aria-hidden /> {stopped == null ? "—" : stopped === 0 ? "hoje" : `${stopped}d`}
+        </span>
+        {nextAt && <span className="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-amber-700 dark:bg-amber-950/40"><CalendarClock className="h-2.5 w-2.5" aria-hidden /> {nextAt.slice(5)}</span>}
+        <span className="inline-flex items-center gap-1 rounded bg-brand-50 px-1.5 py-0.5 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300" title={agent.reason}><Bot className="h-2.5 w-2.5" aria-hidden /> {AGENT_LABEL_BY_KIND[agent.kind]}</span>
+      </div>
+
       {deal.tags.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          {deal.tags.map((t) => (
-            <span key={t} className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{t}</span>
-          ))}
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {deal.tags.map((t) => <span key={t} className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500 dark:bg-slate-800">{t}</span>)}
         </div>
       )}
     </button>
