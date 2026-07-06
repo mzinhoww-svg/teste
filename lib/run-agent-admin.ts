@@ -38,7 +38,16 @@ export async function runAgentForDeal(admin: SupabaseClient, kind: string, dealI
   } else if (kind === "sales-copilot") result = await runCopilot(deal, contact, agent);
   else if (kind === "proposal") result = await runProposal(deal, contact, agent);
   else if (kind === "legal-contract") result = await runContract(deal, contact, agent);
-  else result = await runAdvisory(deal, contact, agent);
+  else if (kind === "activities" || kind === "cadencia") {
+    // Cadência operacional também no caminho automático (cron/estágio): agenda o
+    // próximo follow-up no card, não só sugere.
+    result = await runAdvisory(deal, contact, agent);
+    const touchMs = deal.lastTouch ? new Date(deal.lastTouch).getTime() : NaN;
+    const stale = Number.isNaN(touchMs) ? null : Math.floor((Date.now() - touchMs) / 86_400_000);
+    const nextAt = new Date(Date.now() + (stale != null && stale > 3 ? 0 : 2) * 86_400_000).toISOString().slice(0, 10);
+    await admin.from("deals").update({ next_action_at: nextAt }).eq("id", dealId);
+    (result as any).nextActionAt = nextAt;
+  } else result = await runAdvisory(deal, contact, agent);
 
   await admin.from("agent_runs").insert({
     org_id: orgId, agent_kind: kind, deal_id: dealId,
