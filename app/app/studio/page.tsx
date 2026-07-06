@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { StudioAgentCard } from "@/components/StudioAgentCard";
+import { TenantAgentEditor } from "@/components/TenantAgentEditor";
 import { getAuthContext } from "@/lib/db";
 import { resolveAllAgents } from "@/lib/agents/resolve";
 import { PermissionDenied } from "@/components/PermissionDenied";
@@ -51,7 +52,11 @@ export default async function StudioPage() {
           return (
             <section key={g} className="mb-8">
               <h2 className={`mb-3 text-sm font-semibold uppercase tracking-wide ${groupMeta[g].color}`}>{groupMeta[g].label}</h2>
-              <div className="grid gap-4">{list.map((a) => <StudioAgentCard key={a.key} agent={a} />)}</div>
+              <div className="grid gap-4">{list.map((a) => (
+                overridesEnabled
+                  ? <TenantAgentEditor key={a.key} agent={a} orgName={ctx?.orgName ?? ""} />
+                  : <StudioAgentCard key={a.key} agent={a} />
+              ))}</div>
             </section>
           );
         })}

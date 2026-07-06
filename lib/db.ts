@@ -210,12 +210,26 @@ export async function getDealFull(dealId: string): Promise<DealFull | null> {
   return { deal, contact };
 }
 
+// Fonte ÚNICA de verdade da configuração de execução: a metadata rica (grupo,
+// dores, descrição) vem da tabela agents, mas enabled/model/instructions/triggers
+// vêm da resolução (padrão da plataforma → override do tenant). Assim, se o admin
+// desativa um agente em /admin/agents, ele fica desativado em todo lugar.
 export async function getAgents(): Promise<Agent[]> {
   const supabase = createClient();
   const orgId = await getOrgId();
   if (!orgId) return [];
-  const { data } = await supabase.from("agents").select("*").eq("org_id", orgId).order("position");
-  return (data ?? []).map(mapAgent);
+  const { resolveAllAgents } = await import("@/lib/agents/resolve");
+  const [{ data }, resolved] = await Promise.all([
+    supabase.from("agents").select("*").eq("org_id", orgId).order("position"),
+    resolveAllAgents(orgId),
+  ]);
+  const byKind = new Map(resolved.map((r) => [r.kind, r]));
+  return (data ?? []).map((row: any) => {
+    const a = mapAgent(row);
+    const r = byKind.get(a.id);
+    if (!r) return a;
+    return { ...a, enabled: r.active, model: r.model, triggers: r.triggers, instructions: r.prompt };
+  });
 }
 
 export async function getAgentByKind(kind: string): Promise<Agent | null> {
@@ -223,7 +237,12 @@ export async function getAgentByKind(kind: string): Promise<Agent | null> {
   const orgId = await getOrgId();
   if (!orgId) return null;
   const { data } = await supabase.from("agents").select("*").eq("kind", kind).eq("org_id", orgId).maybeSingle();
-  return data ? mapAgent(data) : null;
+  if (!data) return null;
+  const a = mapAgent(data);
+  const { resolveAgentByKind } = await import("@/lib/agents/resolve");
+  const r = await resolveAgentByKind(kind, orgId);
+  if (r) { a.enabled = r.active; a.model = r.model; a.triggers = r.triggers; a.instructions = r.prompt; }
+  return a;
 }
 
 export interface AutomationView {
@@ -331,29 +350,6 @@ export async function getUnreadCount(): Promise<number> {
     .is("read_at", null)
     .or(`user_id.is.null,user_id.eq.${ctx.userId}`);
   return count ?? 0;
-}
-
-// --- Versões de agentes (Studio: histórico / rollback / diff) ---------------
-
-export interface AgentVersion {
-  id: string; instructions: string; model: string; temperature: number | null; createdAt: string;
-}
-
-export async function getAgentVersions(agentId: string, limit = 10): Promise<AgentVersion[]> {
-  const supabase = createClient();
-  const ctx = await getAuthContext();
-  if (!ctx?.orgId) return [];
-  const { data } = await supabase
-    .from("agent_versions")
-    .select("id,instructions,model,temperature,created_at")
-    .eq("org_id", ctx.orgId)
-    .eq("agent_id", agentId)
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  return (data ?? []).map((v: any) => ({
-    id: v.id, instructions: v.instructions ?? "", model: v.model ?? "",
-    temperature: v.temperature, createdAt: v.created_at,
-  }));
 }
 
 // --- Onboarding guiado ------------------------------------------------------

@@ -442,64 +442,34 @@ export async function deleteStage(stageId: string, migrateToStageId?: string) {
   revalidatePath("/app");
 }
 
-// --- Agentes (Studio) ----------------------------------------------------
+// --- Agentes (Studio): override por tenant -------------------------------
+// Só tem efeito quando ALLOW_TENANT_AGENT_OVERRIDES=true. O tenant passa a NÃO
+// herdar o padrão da plataforma para aquele agente. Validado por papel e org.
 
-export async function updateAgent(uuid: string, fields: {
-  instructions?: string; model?: string; enabled?: boolean; triggers?: string[]; temperature?: number;
+export async function saveTenantAgentOverride(agentKey: string, fields: {
+  prompt: string; model: string; triggers: string[]; active: boolean;
 }) {
   const { orgId } = await requireRole(["owner", "admin"]);
-  const supabase = createClient();
-
-  // Versiona o prompt antes de sobrescrever.
-  if (fields.instructions !== undefined || fields.model !== undefined) {
-    const { data: cur } = await supabase.from("agents").select("instructions,model,temperature").eq("id", uuid).maybeSingle();
-    if (cur) {
-      await supabase.from("agent_versions").insert({
-        org_id: orgId, agent_id: uuid, instructions: cur.instructions, model: cur.model, temperature: cur.temperature,
-      });
-    }
+  if (process.env.ALLOW_TENANT_AGENT_OVERRIDES !== "true") {
+    throw new Error("Overrides por tenant estão desabilitados nesta instância");
   }
-
-  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
-  if (fields.instructions !== undefined) patch.instructions = fields.instructions;
-  if (fields.model !== undefined) patch.model = fields.model;
-  if (fields.enabled !== undefined) patch.enabled = fields.enabled;
-  if (fields.triggers !== undefined) patch.triggers = fields.triggers;
-  if (fields.temperature !== undefined) patch.temperature = fields.temperature;
-
-  const { error } = await supabase.from("agents").update(patch).eq("id", uuid);
+  const supabase = createClient();
+  const { error } = await supabase.from("org_agent_settings").upsert({
+    org_id: orgId, agent_key: agentKey, inherit_platform_default: false,
+    override_prompt: fields.prompt, override_model: fields.model,
+    override_triggers: fields.triggers, active: fields.active,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "org_id,agent_key" });
   if (error) throw error;
   revalidatePath("/app/studio");
 }
 
-/**
- * Reverte um agente para uma versão anterior do prompt/modelo/temperatura.
- * A configuração atual é versionada antes (rollback também é reversível).
- */
-export async function rollbackAgent(agentId: string, versionId: string) {
+export async function resetTenantAgentOverride(agentKey: string) {
   const { orgId } = await requireRole(["owner", "admin"]);
   const supabase = createClient();
-
-  const { data: version } = await supabase
-    .from("agent_versions")
-    .select("instructions, model, temperature")
-    .eq("id", versionId)
-    .eq("agent_id", agentId)
-    .maybeSingle();
-  if (!version) throw new Error("Versão não encontrada");
-
-  const { data: cur } = await supabase
-    .from("agents").select("instructions, model, temperature").eq("id", agentId).maybeSingle();
-  if (cur) {
-    await supabase.from("agent_versions").insert({
-      org_id: orgId, agent_id: agentId, instructions: cur.instructions, model: cur.model, temperature: cur.temperature,
-    });
-  }
-
-  const { error } = await supabase.from("agents").update({
-    instructions: version.instructions, model: version.model, temperature: version.temperature,
-    updated_at: new Date().toISOString(),
-  }).eq("id", agentId);
+  const { error } = await supabase.from("org_agent_settings")
+    .update({ inherit_platform_default: true, updated_at: new Date().toISOString() })
+    .eq("org_id", orgId).eq("agent_key", agentKey);
   if (error) throw error;
   revalidatePath("/app/studio");
 }
