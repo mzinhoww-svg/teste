@@ -154,27 +154,35 @@ export async function logWhatsappOpened(dealId: string, templateKey: string) {
 
 // --- Leads / Deals -------------------------------------------------------
 
-export async function createLead(formData: FormData) {
+export interface CreateLeadInput {
+  // Identidade
+  name: string; company?: string; jobTitle?: string; email?: string; phone?: string;
+  channel?: string; originDetail?: string; city?: string; segment?: string;
+  // Oportunidade
+  title?: string; productLabel?: string; productId?: string | null;
+  pipelineId?: string; stageId?: string; amount?: number; probability?: number;
+  temperature?: string; clientType?: string;
+  // Contexto comercial
+  pain?: string; objective?: string; objection?: string; decisor?: string; decisorName?: string;
+  budget?: string; urgency?: string; eventDate?: string; location?: string; notes?: string; tags?: string[];
+  cnpj?: string;
+  // Próxima ação
+  nextAction?: string; nextActionAt?: string; createNotification?: boolean;
+}
+
+export async function createLead(input: CreateLeadInput): Promise<{ dealId: string; contactId: string }> {
   const orgId = await orgOrThrow();
+  const ctx = await getAuthContext();
   const supabase = createClient();
+  const { normalizePhoneBR } = await import("@/lib/whatsapp");
 
-  const name = String(formData.get("name") ?? "").trim();
-  const company = String(formData.get("company") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim() || null;
-  const phone = String(formData.get("phone") ?? "").trim() || null;
-  const channel = String(formData.get("channel") ?? "form");
-  const title = String(formData.get("title") ?? "").trim() || `${company || name} — nova oportunidade`;
-  const amount = Number(formData.get("amount") ?? 0) || 0;
-  const pipelineId = String(formData.get("pipelineId") ?? "").trim() || null;
-  if (!name) throw new Error("Nome é obrigatório");
+  const name = (input.name ?? "").trim();
+  if (!name) throw new Error("Nome do contato é obrigatório");
 
-  // CRÍTICO multi-tenant: o funil DEVE pertencer à org ativa. Antes, a seleção
-  // não filtrava por org e pegava o funil de menor posição entre TODAS as orgs
-  // do usuário (RLS permite ver as orgs em que ele é membro), fazendo o lead
-  // cair no funil de outra organização — o deal sumia dos dois quadros.
+  // Funil DENTRO da org ativa; respeita o funil/estágio escolhidos.
   let pipe: { id: string } | null = null;
-  if (pipelineId) {
-    const { data } = await supabase.from("pipelines").select("id").eq("id", pipelineId).eq("org_id", orgId).maybeSingle();
+  if (input.pipelineId) {
+    const { data } = await supabase.from("pipelines").select("id").eq("id", input.pipelineId).eq("org_id", orgId).maybeSingle();
     pipe = data;
   }
   if (!pipe) {
@@ -182,23 +190,108 @@ export async function createLead(formData: FormData) {
     pipe = data;
   }
   if (!pipe) throw new Error("Nenhum funil configurado nesta organização");
-  const { data: firstStage } = await supabase.from("stages").select("id").eq("pipeline_id", pipe.id).order("position").limit(1).maybeSingle();
-  if (!firstStage) throw new Error("Nenhum estágio configurado");
+
+  let stageId = input.stageId ?? null;
+  if (stageId) {
+    const { data } = await supabase.from("stages").select("id").eq("id", stageId).eq("pipeline_id", pipe.id).maybeSingle();
+    stageId = data?.id ?? null;
+  }
+  if (!stageId) {
+    const { data } = await supabase.from("stages").select("id").eq("pipeline_id", pipe.id).order("position").limit(1).maybeSingle();
+    stageId = data?.id ?? null;
+  }
+  if (!stageId) throw new Error("Nenhum estágio configurado");
+
+  const phone = input.phone ? (normalizePhoneBR(input.phone) ?? input.phone) : null;
+  const contactCustom: Record<string, unknown> = {};
+  if (input.originDetail) contactCustom.origin_detail = input.originDetail;
+  if (input.clientType) contactCustom.client_type = input.clientType;
+  if (input.cnpj) contactCustom.cnpj = input.cnpj;
 
   const { data: contact, error: cErr } = await supabase
     .from("contacts")
-    .insert({ org_id: orgId, name, company, email, phone, channel })
-    .select("id")
-    .single();
+    .insert({
+      org_id: orgId, name, company: input.company || null, email: input.email || null, phone,
+      channel: input.channel || "form", job_title: input.jobTitle || null,
+      city: input.city || null, segment: input.segment || null, notes: input.notes || null,
+      custom: contactCustom,
+    })
+    .select("id").single();
   if (cErr) throw cErr;
 
-  const { error: dErr } = await supabase.from("deals").insert({
-    org_id: orgId, pipeline_id: pipe.id, stage_id: firstStage.id, contact_id: contact.id,
-    title, amount, engagement: 40, last_touch: new Date().toISOString().slice(0, 10),
-  });
+  const title = (input.title ?? "").trim() || `${input.company || name} — ${input.productLabel || "nova oportunidade"}`;
+  const dealCustom: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries({
+    product_interest: input.productLabel, pain: input.pain, objective: input.objective,
+    objection: input.objection, decisor: input.decisor, decisor_name: input.decisorName,
+    budget: input.budget, urgency: input.urgency, event_date: input.eventDate,
+    location: input.location, client_type: input.clientType, next_action: input.nextAction, cnpj: input.cnpj,
+  })) { if (v) dealCustom[k] = v; }
+
+  const { data: deal, error: dErr } = await supabase.from("deals").insert({
+    org_id: orgId, pipeline_id: pipe.id, stage_id: stageId, contact_id: contact.id,
+    title, amount: Number(input.amount) || 0, engagement: 40,
+    probability: input.probability != null ? Number(input.probability) : null,
+    temperature: input.temperature || null, product_id: input.productId || null,
+    origin: input.channel || null, next_action_at: input.nextActionAt || null,
+    tags: input.tags ?? [], custom: dealCustom, last_touch: new Date().toISOString().slice(0, 10),
+  }).select("id, stage_id").single();
   if (dErr) throw dErr;
 
+  // Dados que ainda faltam para uma proposta.
+  const missing: string[] = [];
+  if (!phone && !input.email) missing.push("canal de contato");
+  if (!input.productLabel) missing.push("produto de interesse");
+  if (!input.nextAction && !input.nextActionAt) missing.push("próxima ação");
+  if (input.decisor === "nao" || input.decisor === "nao_sei") missing.push("decisor");
+
+  // Timeline da criação.
+  const acts = [
+    { summary: `Lead criado${input.channel ? ` · origem: ${input.channel}` : ""}`, author: ctx?.email ?? "Você" },
+    ...(input.nextAction ? [{ summary: `Próxima ação: ${input.nextAction}${input.nextActionAt ? ` (${input.nextActionAt})` : ""}`, author: "Sistema" }] : []),
+    ...(missing.length ? [{ summary: `Dados faltantes: ${missing.join(", ")}`, author: "Sistema" }] : []),
+  ];
+  await supabase.from("activities").insert(acts.map((a) => ({ org_id: orgId, deal_id: deal.id, type: "note", ...a })));
+
+  // Sugestão de agente + notificação (se pedida ou se faltar próxima ação).
+  const { suggestAgentKind } = await import("@/lib/agent-suggest");
+  const suggestion = suggestAgentKind({
+    hasDecisor: input.decisor === "sim", hasBudget: Boolean(input.budget),
+    complete: missing.length === 0,
+  });
+  const shouldNotify = input.createNotification || !input.nextAction;
+  if (shouldNotify) {
+    await supabase.from("notifications").insert({
+      org_id: orgId, type: missing.length ? "lead_incomplete" : "agent_suggestion",
+      title: missing.length ? "Novo lead precisa de ação" : "Lead pronto para abordagem",
+      body: missing.length ? `${title}: falta ${missing.join(", ")}.` : `${title}: ${suggestion.reason}`,
+      deal_id: deal.id, contact_id: contact.id, action_url: "/app",
+      metadata: { agent_key: suggestion.kind, reason: suggestion.reason, missing },
+    });
+  }
+
   revalidatePath("/app");
+  return { dealId: deal.id, contactId: contact.id };
+}
+
+/** Detecta possíveis duplicidades por telefone, e-mail, empresa ou nome. */
+export async function findLeadDuplicates(input: { name?: string; email?: string; phone?: string; company?: string }) {
+  const orgId = await orgOrThrow();
+  const supabase = createClient();
+  const { normalizePhoneBR } = await import("@/lib/whatsapp");
+  const phone = input.phone ? normalizePhoneBR(input.phone) : null;
+
+  const ors: string[] = [];
+  if (phone) ors.push(`phone.eq.${phone}`);
+  if (input.email) ors.push(`email.eq.${input.email}`);
+  if (!ors.length && !input.company && !input.name) return [];
+
+  let q = supabase.from("contacts").select("id, name, company, email, phone").eq("org_id", orgId).limit(5);
+  if (ors.length) q = q.or(ors.join(","));
+  else if (input.company) q = q.ilike("company", input.company);
+  else if (input.name) q = q.ilike("name", `%${input.name}%`);
+  const { data } = await q;
+  return (data ?? []).map((c: any) => ({ id: c.id, name: c.name, company: c.company, email: c.email, phone: c.phone }));
 }
 
 export async function moveDeal(dealId: string, stageId: string) {
