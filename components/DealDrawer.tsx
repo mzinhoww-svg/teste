@@ -409,7 +409,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
               <span className="font-semibold text-brand-700 dark:text-brand-300">Agente recomendado:</span>{" "}
               {AGENT_LABEL_BY_KIND[overviewSuggestion.kind] ?? overviewSuggestion.kind} — {overviewSuggestion.reason}
             </div>
-            <EnrichmentPanel dealId={deal.id} />
+            <EnrichmentPanel dealId={deal.id} initialFacts={(panels as any).enrichment} />
 
             {contact && (
               <section className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">

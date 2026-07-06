@@ -99,13 +99,23 @@ export default async function ReportsPage() {
   const lossRows = [...lossMap.entries()].sort((a, b) => b[1] - a[1]);
   const maxLoss = lossRows[0]?.[1] ?? 1;
 
-  // Custo estimado de IA: não gravamos tokens por execução, então estimamos
-  // ~1,5k tokens/execução ao preço aproximado do GLM 5.2 (US$0,60/1M tokens).
+  // Custo de IA: usa tokens REAIS gravados por execução (agent_runs.input.tokens,
+  // capturados via AsyncLocalStorage em lib/ai). Execuções antigas sem tokens
+  // caem para a estimativa de ~1,5k/execução. Preço aproximado do GLM 5.2.
   const AVG_TOKENS_PER_RUN = 1500;
   const USD_PER_1M = 0.6;
   const USD_BRL = 5.4;
-  const estTokens = llmRuns * AVG_TOKENS_PER_RUN;
+  let realTokens = 0, estimatedRuns = 0;
+  for (const r of allRuns) {
+    const t = Number((r.input as any)?.tokens ?? 0);
+    if (t > 0) realTokens += t;
+    else if (r.source === "llm") estimatedRuns++;
+  }
+  const estTokens = realTokens + estimatedRuns * AVG_TOKENS_PER_RUN;
   const estCostBRL = (estTokens / 1_000_000) * USD_PER_1M * USD_BRL;
+  const tokensLabel = realTokens > 0
+    ? `${(estTokens / 1000).toFixed(0)}k tokens${estimatedRuns ? " (parte est.)" : " reais"}`
+    : `~${(estTokens / 1000).toFixed(0)}k tokens (est.)`;
 
   return (
     <div className="min-h-screen">
@@ -127,7 +137,7 @@ export default async function ReportsPage() {
           <Stat label="Win rate" value={winRate == null ? "—" : `${winRate}%`} hint={closed ? `${won.length} ganhos / ${lost.length} perdidos` : "sem fechados"} />
           <Stat label="Ciclo médio" value={avgCycle == null ? "—" : `${avgCycle}d`} hint={avgCycle == null ? "sem ganhos" : `${wonRows.length} ganhos`} />
           <Stat label="Execuções IA" value={String(allRuns.length)} hint={`${llmRuns} IA · ${autoRuns} auto`} />
-          <Stat label="Custo IA (est.)" value={brl(estCostBRL)} hint={`~${(estTokens / 1000).toFixed(0)}k tokens`} />
+          <Stat label={realTokens > 0 ? "Custo IA" : "Custo IA (est.)"} value={brl(estCostBRL)} hint={tokensLabel} />
         </section>
 
         <section className="mb-8 grid gap-4 lg:grid-cols-2">

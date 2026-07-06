@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAgentByKind, getDealFull } from "@/lib/db";
 import { resolveAgentByKind } from "@/lib/agents/resolve";
 import { getLeadCommunicationContext, buildWhatsAppPromptBlock } from "@/lib/lead-comm-context";
+import { runWithUsage } from "@/lib/ai";
 import {
   runAdvisory, runContract, runCopilot, runLeadScoring, runProposal,
 } from "@/lib/agents";
@@ -126,6 +127,7 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
   let result: any;
   const extra: Record<string, unknown> = {};
 
+  const usage = await runWithUsage(async () => {
   switch (kind) {
     case "lead-scoring": {
       result = await runLeadScoring(deal, contact, agent);
@@ -168,11 +170,13 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
     default:
       result = await runAdvisory(deal, contact, agent);
   }
+  });
+  const tokens = usage.tokens;
 
   const persisted = { ...result, ...extra };
   await supabase.from("agent_runs").insert({
     org_id: ctx.orgId, agent_kind: kind, deal_id: dealId,
-    input: { title: deal.title, stage: deal.stageKey, via: ctx.via, agentKey: resolved?.key ?? null, templateVersion: resolved?.templateVersion ?? null, whatsappUsed: Boolean((agent as any).__waUsed) },
+    input: { title: deal.title, stage: deal.stageKey, via: ctx.via, agentKey: resolved?.key ?? null, templateVersion: resolved?.templateVersion ?? null, whatsappUsed: Boolean((agent as any).__waUsed), tokens },
     output: persisted, source: result?.source ?? "n/a", model: agent.model, created_by: ctx.userId,
   });
 
