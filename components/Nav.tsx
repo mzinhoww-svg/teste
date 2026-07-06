@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { getAuthContext } from "@/lib/db";
+import { getAuthContext, getNotifications, getUnreadCount } from "@/lib/db";
 import { MobileNav } from "./MobileNav";
 import { TenantBadge, UserMenu } from "./UserMenu";
+import { NotificationBell } from "./NotificationBell";
 
 type Tab = "board" | "contracts" | "automations" | "reports" | "studio" | "how";
 
@@ -18,6 +19,9 @@ const tabs: { id: Tab; href: string; label: string }[] = [
 // TenantBadge (organização ativa — switcher com 2+ orgs) e UserMenu (escopo pessoal).
 export async function Nav({ active }: { active: Tab }) {
   const ctx = await getAuthContext();
+  const [notifs, unread] = ctx?.orgId
+    ? await Promise.all([getNotifications(8), getUnreadCount()])
+    : [[], 0];
   // Studio e Automações alteram o comportamento da org inteira — visíveis só
   // para owner/admin (a autorização real é server-side, nas actions/páginas).
   const visibleTabs = ctx?.role === "member"
@@ -51,6 +55,7 @@ export async function Nav({ active }: { active: Tab }) {
             ))}
           </nav>
           <MobileNav tabs={visibleTabs} active={active} />
+          {ctx?.orgId && <NotificationBell items={notifs} unread={unread} />}
           {ctx && <UserMenu email={ctx.email} role={ctx.role} orgName={ctx.orgName || "—"} isTenantAdmin={ctx.role !== "member"} />}
         </div>
       </div>

@@ -122,6 +122,36 @@ export async function acceptInviteAction(token: string) {
   return { orgName: data.org_name as string };
 }
 
+// --- Notificações -----------------------------------------------------------
+
+export async function markNotificationRead(id: string) {
+  await orgOrThrow();
+  const supabase = createClient();
+  await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", id);
+  revalidatePath("/app/notifications");
+  revalidatePath("/app");
+}
+
+export async function markAllNotificationsRead() {
+  const orgId = await orgOrThrow();
+  const supabase = createClient();
+  await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("org_id", orgId).is("read_at", null);
+  revalidatePath("/app/notifications");
+  revalidatePath("/app");
+}
+
+/** Registra na timeline do deal que o WhatsApp foi ABERTO (não entregue). */
+export async function logWhatsappOpened(dealId: string, templateKey: string) {
+  const orgId = await orgOrThrow();
+  const supabase = createClient();
+  await supabase.from("activities").insert({
+    org_id: orgId, deal_id: dealId, type: "whatsapp",
+    summary: `WhatsApp aberto${templateKey ? ` (template: ${templateKey})` : ""}`, author: "Você",
+  });
+  await supabase.from("deals").update({ last_touch: new Date().toISOString().slice(0, 10) }).eq("id", dealId);
+  revalidatePath("/app");
+}
+
 // --- Leads / Deals -------------------------------------------------------
 
 export async function createLead(formData: FormData) {
@@ -173,6 +203,17 @@ export async function moveDeal(dealId: string, stageId: string) {
     org_id: orgId, deal_id: dealId, type: "note",
     summary: `Movido para "${stage?.name ?? "novo estágio"}"`, author: "Você",
   });
+
+  // Notificação in-app para estágios críticos
+  const { data: st } = await supabase.from("stages").select("name,is_won,is_lost,key").eq("id", stageId).maybeSingle();
+  if (st && (st.is_won || st.is_lost || ["proposta", "negociacao", "proposal", "negotiation"].includes(st.key ?? ""))) {
+    const { data: dealRow } = await supabase.from("deals").select("title").eq("id", dealId).maybeSingle();
+    await supabase.from("notifications").insert({
+      org_id: orgId, type: st.is_won ? "deal_won" : st.is_lost ? "deal_lost" : "deal_stage",
+      title: st.is_won ? "Deal fechado (ganho)" : st.is_lost ? "Deal perdido" : `Deal em ${st.name}`,
+      body: `${dealRow?.title ?? "Deal"} entrou em "${st.name}".`, deal_id: dealId, action_url: "/app",
+    });
+  }
 
   // Automações: regras "ao entrar no estágio X, executar agente Y"
   const { data: autos } = await supabase
