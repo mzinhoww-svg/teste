@@ -19,7 +19,7 @@ funcionando via pg_cron.
 
 Configurar no `vercel.json`:
 ```json
-{ "crons": [{ "path": "/api/cron/cadences", "schedule": "0 * * * *" }] }
+{ "crons": [{ "path": "/api/cron/cadences", "schedule": "0 9 * * *" }] }
 ```
 E as env vars na Vercel: `CRON_SECRET` (string aleatória) e
 `SUPABASE_SERVICE_ROLE_KEY` (Supabase → Project Settings → API → service_role).
