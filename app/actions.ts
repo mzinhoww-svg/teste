@@ -905,9 +905,17 @@ export async function sendProposalEmail(proposalId: string): Promise<{ ok: boole
 
   const { data: proposal } = await supabase
     .from("proposals")
-    .select("id, deal_id, total, share_token, deal:deals(title, contact:contacts(id, name, email))")
+    .select("id, deal_id, total, share_token, approval_status, deal:deals(title, contact:contacts(id, name, email))")
     .eq("id", proposalId).eq("org_id", ctx.orgId).maybeSingle();
   if (!proposal) throw new Error("Proposta não encontrada");
+  // Política: desconto nunca é aprovado automaticamente — bloqueia o envio até
+  // a aprovação de um gestor.
+  if ((proposal as any).approval_status === "pendente") {
+    throw new Error("Esta proposta tem desconto pendente de aprovação. Peça a um owner/admin para aprovar antes de enviar.");
+  }
+  if ((proposal as any).approval_status === "rejeitada") {
+    throw new Error("Esta proposta foi rejeitada (desconto não aprovado). Gere uma nova proposta.");
+  }
 
   const deal: any = Array.isArray((proposal as any).deal) ? (proposal as any).deal[0] : (proposal as any).deal;
   const contact: any = Array.isArray(deal?.contact) ? deal.contact[0] : deal?.contact;
@@ -951,4 +959,39 @@ export async function sendProposalEmail(proposalId: string): Promise<{ ok: boole
   }
   revalidatePath("/app");
   return { ok: result.ok, error: result.error };
+}
+
+// --- Aprovação de desconto em proposta (nunca automático) -------------------
+export async function approveProposal(proposalId: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { data: p } = await supabase.from("proposals").select("deal_id").eq("id", proposalId).eq("org_id", ctx.orgId).maybeSingle();
+  const { error } = await supabase.from("proposals")
+    .update({ approval_status: "aprovada", approved_by: ctx.userId, approved_at: new Date().toISOString() })
+    .eq("id", proposalId).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  if (p?.deal_id) {
+    await supabase.from("activities").insert({
+      org_id: ctx.orgId, deal_id: p.deal_id, type: "note",
+      summary: "Desconto da proposta aprovado", author: ctx.email ?? "Gestor",
+    });
+  }
+  revalidatePath("/app");
+}
+
+export async function rejectProposal(proposalId: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { data: p } = await supabase.from("proposals").select("deal_id").eq("id", proposalId).eq("org_id", ctx.orgId).maybeSingle();
+  const { error } = await supabase.from("proposals")
+    .update({ approval_status: "rejeitada", approved_by: ctx.userId, approved_at: new Date().toISOString() })
+    .eq("id", proposalId).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  if (p?.deal_id) {
+    await supabase.from("activities").insert({
+      org_id: ctx.orgId, deal_id: p.deal_id, type: "note",
+      summary: "Desconto da proposta rejeitado", author: ctx.email ?? "Gestor",
+    });
+  }
+  revalidatePath("/app");
 }

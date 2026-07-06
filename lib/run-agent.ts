@@ -149,12 +149,24 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
     }
     case "proposal": {
       result = await runProposal(deal, contact, agent);
+      // Política: desconto NUNCA é aprovado automaticamente. Toda proposta com
+      // desconto nasce "pendente" e só pode ser enviada após aprovação de gestor.
+      const needsApproval = Number(result.discountPct) > 0;
       const { data: prop } = await supabase.from("proposals").insert({
         org_id: ctx.orgId, deal_id: dealId, items: result.items, subtotal: result.subtotal,
         discount_pct: result.discountPct, total: result.total, summary: result.summary,
         terms: result.terms, generated_by: result.generatedBy,
+        approval_status: needsApproval ? "pendente" : "aprovada",
       }).select("id, share_token").single();
       if (prop?.share_token) extra.shareToken = prop.share_token;
+      extra.approvalStatus = needsApproval ? "pendente" : "aprovada";
+      if (needsApproval && prop?.id) {
+        await supabase.from("notifications").insert({
+          org_id: ctx.orgId, type: "discount_approval", title: "Desconto aguarda aprovação",
+          body: `Proposta de "${deal.title}" tem ${result.discountPct}% de desconto e precisa de aprovação antes de ser enviada.`,
+          deal_id: dealId, action_url: "/app",
+        });
+      }
       break;
     }
     case "legal-contract": {
