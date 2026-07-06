@@ -7,9 +7,11 @@ import { updateAgent } from "@/app/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
+import { AgentVersionHistory } from "@/components/AgentVersionHistory";
 import type { Agent } from "@/lib/types";
+import type { AgentVersion } from "@/lib/db";
 
-export function AgentEditor({ agent, orgName }: { agent: Agent; orgName: string }) {
+export function AgentEditor({ agent, orgName, versions = [] }: { agent: Agent; orgName: string; versions?: AgentVersion[] }) {
   const [instructions, setInstructions] = useState(agent.instructions);
   const [model, setModel] = useState(agent.model);
   const [enabled, setEnabled] = useState(agent.enabled);
@@ -87,6 +89,8 @@ export function AgentEditor({ agent, orgName }: { agent: Agent; orgName: string 
         </Button>
         {saved && <span className="inline-flex items-center gap-1 text-sm text-emerald-600"><Check className="h-3.5 w-3.5" aria-hidden /> salvo (versão anterior guardada)</span>}
       </div>
+
+      {agent.uuid && <AgentVersionHistory agentId={agent.uuid} versions={versions} currentInstructions={agent.instructions} />}
     </div>
   );
 }

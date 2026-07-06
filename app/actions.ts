@@ -459,6 +459,50 @@ export async function updateAgent(uuid: string, fields: {
   revalidatePath("/app/studio");
 }
 
+/**
+ * Reverte um agente para uma versão anterior do prompt/modelo/temperatura.
+ * A configuração atual é versionada antes (rollback também é reversível).
+ */
+export async function rollbackAgent(agentId: string, versionId: string) {
+  const { orgId } = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+
+  const { data: version } = await supabase
+    .from("agent_versions")
+    .select("instructions, model, temperature")
+    .eq("id", versionId)
+    .eq("agent_id", agentId)
+    .maybeSingle();
+  if (!version) throw new Error("Versão não encontrada");
+
+  const { data: cur } = await supabase
+    .from("agents").select("instructions, model, temperature").eq("id", agentId).maybeSingle();
+  if (cur) {
+    await supabase.from("agent_versions").insert({
+      org_id: orgId, agent_id: agentId, instructions: cur.instructions, model: cur.model, temperature: cur.temperature,
+    });
+  }
+
+  const { error } = await supabase.from("agents").update({
+    instructions: version.instructions, model: version.model, temperature: version.temperature,
+    updated_at: new Date().toISOString(),
+  }).eq("id", agentId);
+  if (error) throw error;
+  revalidatePath("/app/studio");
+}
+
+// --- Onboarding ------------------------------------------------------------
+
+export async function dismissOnboarding() {
+  const { orgId } = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  await supabase.from("onboarding_progress").upsert(
+    { org_id: orgId, dismissed: true, updated_at: new Date().toISOString() },
+    { onConflict: "org_id" },
+  );
+  revalidatePath("/app");
+}
+
 // --- Assinatura digital (OpenSign) ------------------------------------------
 
 export async function sendContractForSignature(contractId: string) {

@@ -10,6 +10,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import type { OrgMembership, MemberRole } from "@/lib/db";
 
 const roleLabel: Record<MemberRole, string> = {
@@ -101,6 +102,15 @@ export function UserMenu({ email, role, orgName, isTenantAdmin }: { email: strin
             <DropdownMenuSeparator />
           </>
         )}
+        <div
+          className="flex items-center justify-between px-2 py-1.5 text-sm text-slate-600 dark:text-slate-300"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <span>Tema</span>
+          <ThemeToggle />
+        </div>
+        <DropdownMenuSeparator />
         <form action={logout}>
           <button type="submit" className="w-full">
             <DropdownMenuItem className="text-rose-600 data-[highlighted]:bg-rose-50">

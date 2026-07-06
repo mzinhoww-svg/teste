@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { CheckCircle2, FileSignature, MessageCircle, Pencil, Play, Trash2, UserRound } from "lucide-react";
+import { CheckCircle2, FileSignature, FlaskConical, MessageCircle, Pencil, Play, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { deleteContact, deleteDeal, moveDeal, updateContact, updateDealFull } from "@/app/actions";
 import { Badge } from "@/components/ui/badge";
@@ -15,11 +15,11 @@ import { brl, tempColor, tempLabel } from "@/lib/format";
 import type { Agent, Contact, Deal, Stage } from "@/lib/types";
 import type { ProductListItem } from "@/lib/db";
 
-async function runAgent(dealId: string, kind: string) {
+async function runAgent(dealId: string, kind: string, dryRun = false) {
   const res = await fetch("/api/agents/run", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ dealId, kind }),
+    body: JSON.stringify({ dealId, kind, dryRun }),
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body?.error ?? `Erro ${res.status}`);
@@ -199,11 +199,12 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
     return () => { alive = false; };
   }, [deal.id]);
 
-  async function run(kind: string) {
+  async function run(kind: string, dryRun = false) {
     setLoading(kind);
     try {
-      const r = await runAgent(deal.id, kind);
+      const r = await runAgent(deal.id, kind, dryRun);
       setResults((prev) => ({ ...prev, [kind]: r }));
+      if (dryRun) toast.info("Prévia gerada — nada foi salvo neste deal");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao executar agente");
     } finally {
@@ -254,21 +255,41 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
                   <h3 className="text-sm font-semibold text-slate-800">{agent.name}</h3>
                   <span className="text-[11px] text-slate-500">{agent.role}</span>
                 </div>
-                <Button
-                  size="xs"
-                  onClick={() => run(String(agent.id))}
-                  disabled={!agent.enabled}
-                  loading={loading === agent.id}
-                >
-                  {loading === agent.id ? "Executando" : agent.enabled ? (<><Play className="h-3 w-3" aria-hidden /> Executar</>) : "inativo"}
-                </Button>
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    onClick={() => run(String(agent.id), true)}
+                    disabled={!agent.enabled || loading === agent.id}
+                    title="Gerar prévia sem salvar"
+                  >
+                    <FlaskConical className="h-3 w-3" aria-hidden /> Testar
+                  </Button>
+                  <Button
+                    size="xs"
+                    onClick={() => run(String(agent.id))}
+                    disabled={!agent.enabled}
+                    loading={loading === agent.id}
+                  >
+                    {loading === agent.id ? "Executando" : agent.enabled ? (<><Play className="h-3 w-3" aria-hidden /> Executar</>) : "inativo"}
+                  </Button>
+                </div>
               </div>
               {loading === agent.id ? (
                 <RunningSkeleton />
               ) : hydrating ? (
                 <Skeleton className="mt-3 h-4 w-2/3" />
               ) : (
-                results[String(agent.id)] && <AgentResult kind={String(agent.id)} r={results[String(agent.id)]} />
+                results[String(agent.id)] && (
+                  <>
+                    {results[String(agent.id)]?.dryRun && (
+                      <div className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-700">
+                        <FlaskConical className="h-3 w-3" aria-hidden /> Prévia — não foi salvo neste deal
+                      </div>
+                    )}
+                    <AgentResult kind={String(agent.id)} r={results[String(agent.id)]} />
+                  </>
+                )
               )}
             </section>
           ))}

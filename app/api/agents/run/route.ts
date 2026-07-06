@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAuthContext } from "@/lib/db";
-import { RateLimitError, runAgentForDeal } from "@/lib/run-agent";
+import { RateLimitError, runAgentForDeal, dryRunAgentForDeal } from "@/lib/run-agent";
 
 export const runtime = "nodejs";
 
@@ -34,11 +34,13 @@ export async function POST(req: Request) {
   const auth = await getAuthContext();
   if (!auth) return NextResponse.json({ error: "não autenticado" }, { status: 401 });
 
-  const { dealId, kind } = (await req.json()) as { dealId?: string; kind?: string };
+  const { dealId, kind, dryRun } = (await req.json()) as { dealId?: string; kind?: string; dryRun?: boolean };
   if (!dealId || !kind) return NextResponse.json({ error: "dealId e kind obrigatórios" }, { status: 400 });
 
   try {
-    const result = await runAgentForDeal(kind, dealId, { orgId: auth.orgId, userId: auth.userId, via: "manual" });
+    const result = dryRun
+      ? await dryRunAgentForDeal(kind, dealId, { orgId: auth.orgId, userId: auth.userId, via: "manual" })
+      : await runAgentForDeal(kind, dealId, { orgId: auth.orgId, userId: auth.userId, via: "manual" });
     return NextResponse.json(result);
   } catch (e) {
     if (e instanceof RateLimitError) return NextResponse.json({ error: e.message }, { status: 429 });

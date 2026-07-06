@@ -33,3 +33,38 @@ body {
   75% { transform: translateX(4px); }
 }
 .animate-shake { animation: shake 0.25s ease-in-out 2; }
+
+/* ==========================================================================
+   Dark mode
+   O app usa a paleta neutra `slate` de forma consistente. Em vez de anotar
+   `dark:` em dezenas de arquivos, remapeamos aqui as superfícies e textos
+   neutros mais usados quando a classe `.dark` está no <html>. Cores com
+   significado (emerald/rose/amber/brand) permanecem — só o cinza vira escuro.
+   Componentes novos (Studio, onboarding) já trazem variantes `dark:` próprias.
+   ========================================================================== */
+.dark body { @apply bg-slate-950 text-slate-200; }
+
+/* superfícies */
+.dark .bg-white { background-color: #0f172a !important; }        /* slate-900 */
+.dark .bg-slate-50 { background-color: #020617 !important; }     /* slate-950 */
+.dark .bg-slate-100 { background-color: #1e293b !important; }    /* slate-800 */
+.dark .bg-slate-200 { background-color: #334155 !important; }    /* slate-700 */
+
+/* bordas */
+.dark .border-slate-100 { border-color: #1e293b !important; }
+.dark .border-slate-200 { border-color: #293548 !important; }
+.dark .border-slate-300 { border-color: #334155 !important; }
+
+/* textos neutros */
+.dark .text-slate-900 { color: #f1f5f9 !important; }
+.dark .text-slate-800 { color: #e2e8f0 !important; }
+.dark .text-slate-700 { color: #cbd5e1 !important; }
+.dark .text-slate-600 { color: #b4c0d0 !important; }
+.dark .text-slate-500 { color: #94a3b8 !important; }
+
+/* divisores e hovers */
+.dark .divide-slate-100 > * + * { border-color: #1e293b !important; }
+.dark .hover\:bg-slate-50:hover { background-color: #1e293b !important; }
+.dark .hover\:bg-slate-100:hover { background-color: #334155 !important; }
+
+.dark ::-webkit-scrollbar-thumb { @apply bg-slate-600; }
