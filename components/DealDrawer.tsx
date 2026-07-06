@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { CheckCircle2, Copy, FileSignature, FileText, FlaskConical, MessageCircle, Pencil, Play, ShieldCheck, Trash2, UserRound } from "lucide-react";
+import { CheckCircle2, Copy, FileSignature, FileText, FlaskConical, Mail, MessageCircle, Pencil, Play, ShieldCheck, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
-import { completeActivity, createActivity, deleteContact, deleteDeal, moveDeal, updateContact, updateDealFull } from "@/app/actions";
+import { completeActivity, createActivity, deleteContact, deleteDeal, moveDeal, sendProposalEmail, updateContact, updateDealFull } from "@/app/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select, Textarea } from "@/components/ui/input";
@@ -39,6 +39,26 @@ function SourceTag({ source }: { source?: string }) {
     <Badge variant={live ? "brand" : "muted"} className="ml-2 text-[10px]">
       {live ? "IA · GLM" : "heurística"}
     </Badge>
+  );
+}
+
+function ProposalEmailButton({ proposalId, hasEmail }: { proposalId: string; hasEmail: boolean }) {
+  const [pending, start] = useTransition();
+  return (
+    <button
+      disabled={pending}
+      title={hasEmail ? "Enviar a proposta por e-mail ao contato" : "Contato sem e-mail cadastrado"}
+      onClick={() => start(async () => {
+        try {
+          const r = await sendProposalEmail(proposalId);
+          if (r.ok) toast.success("Proposta enviada por e-mail");
+          else toast.error(r.error ?? "Falha ao enviar e-mail");
+        } catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao enviar e-mail"); }
+      })}
+      className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700"
+    >
+      <Mail className="h-3 w-3" aria-hidden /> {pending ? "Enviando…" : "E-mail"}
+    </button>
   );
 }
 
@@ -474,6 +494,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
                     <div className="flex shrink-0 gap-1.5">
                       {link && <a href={`${origin.replace(/\/$/, "")}/api/proposta/${p.shareToken}/pdf`} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700"><FileText className="h-3 w-3" aria-hidden /> PDF</a>}
                       {link && <button onClick={() => { navigator.clipboard.writeText(link); toast.success("Link copiado"); }} className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700"><Copy className="h-3 w-3" aria-hidden /> Link</button>}
+                      <ProposalEmailButton proposalId={p.id} hasEmail={Boolean(contact?.email)} />
                     </div>
                   </div>
                 </div>

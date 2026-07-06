@@ -185,8 +185,9 @@ export function OrgManager({ orgName, orgBrand, members, invites, meId, myRole, 
             <Button type="submit" loading={pending}><UserPlus className="h-4 w-4" aria-hidden /> Gerar convite</Button>
           </form>
           <p className="text-xs text-slate-400">
-            Sem e-mail automático: o convite gera um <strong>link copiável</strong> (expira em 7 dias) que você envia
-            por onde quiser — inclusive direto pelo WhatsApp. A pessoa precisa entrar com o mesmo e-mail do convite.
+            O convite é enviado por <strong>e-mail</strong> (quando o Brevo está configurado) e também gera um
+            <strong> link copiável</strong> (expira em 7 dias) para enviar por onde quiser — inclusive pelo WhatsApp.
+            A pessoa precisa entrar com o mesmo e-mail do convite.
           </p>
 
           {lastInviteLink && (

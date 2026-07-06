@@ -424,3 +424,135 @@ export async function getOnboarding(): Promise<OnboardingState | null> {
     steps, doneCount, total: steps.length,
   };
 }
+
+// ==========================================================================
+// Portal do Cliente + Financeiro (Fase 4/5) — leituras escopadas por org (RLS
+// + .eq('org_id') de defesa em profundidade). Ver migration 0010.
+// ==========================================================================
+
+export interface ClientAccountRow {
+  id: string; slug: string; name: string; portal_enabled: boolean;
+  cnpj: string | null; notes: string | null; brand: any; created_at: string;
+  deals: number; invoices: number; users: number;
+}
+
+export async function getClientAccounts(): Promise<ClientAccountRow[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase
+    .from("client_accounts")
+    .select("id,slug,name,portal_enabled,cnpj,notes,brand,created_at")
+    .eq("org_id", orgId)
+    .order("name");
+  const accounts = data ?? [];
+  if (accounts.length === 0) return [];
+  const ids = accounts.map((a: any) => a.id);
+  const [{ data: deals }, { data: invoices }, { data: users }] = await Promise.all([
+    supabase.from("deals").select("client_account_id").eq("org_id", orgId).in("client_account_id", ids),
+    supabase.from("invoices").select("client_account_id").eq("org_id", orgId).in("client_account_id", ids),
+    supabase.from("client_users").select("client_account_id").eq("org_id", orgId).in("client_account_id", ids),
+  ]);
+  const count = (rows: any[] | null, id: string) => (rows ?? []).filter((r) => r.client_account_id === id).length;
+  return accounts.map((a: any) => ({
+    ...a,
+    deals: count(deals, a.id), invoices: count(invoices, a.id), users: count(users, a.id),
+  })) as ClientAccountRow[];
+}
+
+export interface ClientOption { id: string; name: string; slug: string }
+export async function getClientOptions(): Promise<ClientOption[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase.from("client_accounts").select("id,name,slug").eq("org_id", orgId).order("name");
+  return (data ?? []) as ClientOption[];
+}
+
+export interface InvoiceRow {
+  id: string; number: string | null; description: string; amount: number; currency: string;
+  status: string; issue_date: string; due_date: string | null; paid_at: string | null;
+  payment_link: string | null; recurring: boolean; client_account_id: string; client_name: string;
+}
+
+export async function getInvoices(): Promise<InvoiceRow[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase
+    .from("invoices")
+    .select("id,number,description,amount,currency,status,issue_date,due_date,paid_at,payment_link,recurring,client_account_id,client_accounts(name)")
+    .eq("org_id", orgId)
+    .order("issue_date", { ascending: false });
+  return (data ?? []).map((r: any) => ({ ...r, amount: Number(r.amount), client_name: r.client_accounts?.name ?? "—" })) as InvoiceRow[];
+}
+
+export interface ProjectRow {
+  id: string; name: string; status: string; start_date: string | null; due_date: string | null;
+  description: string; client_account_id: string; client_name: string;
+}
+
+export async function getProjects(): Promise<ProjectRow[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase
+    .from("projects")
+    .select("id,name,status,start_date,due_date,description,client_account_id,client_accounts(name)")
+    .eq("org_id", orgId)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r: any) => ({ ...r, client_name: r.client_accounts?.name ?? "—" })) as ProjectRow[];
+}
+
+export interface DeliverableRow {
+  id: string; type: string; title: string; url: string | null; status: string;
+  delivered_at: string | null; description: string; client_account_id: string;
+  client_name: string; project_name: string | null;
+}
+
+export async function getDeliverables(): Promise<DeliverableRow[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase
+    .from("deliverables")
+    .select("id,type,title,url,status,delivered_at,description,client_account_id,client_accounts(name),projects(name)")
+    .eq("org_id", orgId)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r: any) => ({ ...r, client_name: r.client_accounts?.name ?? "—", project_name: r.projects?.name ?? null })) as DeliverableRow[];
+}
+
+export interface ContactListRow {
+  id: string; name: string; email: string | null; phone: string | null;
+  company: string | null; job_title: string | null; city: string | null; client_account_id: string | null;
+}
+
+export async function getContactsList(q?: string): Promise<ContactListRow[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  let query = supabase
+    .from("contacts")
+    .select("id,name,email,phone,company,job_title,city,client_account_id")
+    .eq("org_id", orgId)
+    .order("name")
+    .limit(500);
+  if (q && q.trim()) {
+    const term = `%${q.trim()}%`;
+    query = query.or(`name.ilike.${term},company.ilike.${term},email.ilike.${term}`);
+  }
+  const { data } = await query;
+  return (data ?? []) as ContactListRow[];
+}
+
+export interface ClientInviteRow { id: string; email: string; token: string; status: string; client_account_id: string; client_name: string }
+export async function getClientInvites(): Promise<ClientInviteRow[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase
+    .from("client_invites")
+    .select("id,email,token,status,client_account_id,client_accounts(name)")
+    .eq("org_id", orgId).eq("status", "pending").order("created_at", { ascending: false });
+  return (data ?? []).map((r: any) => ({ ...r, client_name: r.client_accounts?.name ?? "—" })) as ClientInviteRow[];
+}

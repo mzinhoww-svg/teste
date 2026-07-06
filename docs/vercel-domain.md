@@ -55,3 +55,38 @@ O `vercel.json` agenda `/api/cron/cadences` **diariamente** (`0 9 * * *`) — o
 plano Hobby só permite cron diário. As cadências de hora em hora rodam pelo
 `pg_cron` no Supabase (jobs `crm-cadence-sweep` e `crm-sla-sweep`). Em um plano
 pago, é possível aumentar a frequência do cron da Vercel.
+
+## Roteamento por subdomínio — CRM, Portal e Landing
+
+O app serve três experiências no mesmo deploy, roteadas por **host** no
+middleware (`lib/supabase/middleware.ts`, `subdomainFor`):
+
+| Host | Reescreve para | Conteúdo |
+| --- | --- | --- |
+| `reiners.agency` (apex) e `www.` | `/` | Landing pública |
+| `crm.reiners.agency` | `/app…` | CRM interno (área logada da agência) |
+| `app.reiners.agency` | `/portal…` | Portal do cliente (`/portal/[cliente]/…`) |
+
+Defina **`NEXT_PUBLIC_ROOT_DOMAIN=reiners.agency`** nas env vars. Em
+localhost/preview (sem esse subdomínio) o roteamento cai para **path**: `/app`,
+`/portal/[cliente]` e `/portal/convite/[token]` funcionam direto — dev e E2E não
+quebram.
+
+### DNS (CNAMEs)
+
+Na Vercel, adicione os domínios em **Settings → Domains** e aponte no seu DNS:
+
+| Registro | Tipo | Valor |
+| --- | --- | --- |
+| `reiners.agency` | A / ALIAS | conforme a Vercel indicar |
+| `www` | CNAME | `cname.vercel-dns.com` |
+| `crm` | CNAME | `cname.vercel-dns.com` |
+| `app` | CNAME | `cname.vercel-dns.com` |
+
+### Guards de acesso
+
+- Usuário-CRM (tem `membership`) que abre o portal → redirecionado ao CRM.
+- Usuário-portal (tem `client_user`, sem membership) que abre o CRM/login →
+  redirecionado ao seu portal (`/portal/<slug>`).
+- O signup do portal grava `role='portal'`; o trigger `handle_new_user` então
+  **não** cria org/agentes (o cliente nunca vira um tenant do CRM).
