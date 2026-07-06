@@ -171,11 +171,11 @@ export function ContractCard({ c, orgName }: { c: ContractView; orgName: string 
             <div key={i} className="rounded-lg bg-slate-50 p-3">
               <div className="flex items-center gap-2">
                 <input value={cl.heading} onChange={(e) => editClause(i, "heading", e.target.value)}
-                  className="flex-1 rounded border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 outline-none focus:border-brand-400" />
+                  className="flex-1 rounded border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 outline-none focus:border-brand-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
                 <button onClick={() => removeClause(i)} className="text-xs text-rose-400 hover:text-rose-600">remover</button>
               </div>
               <textarea value={cl.body} onChange={(e) => editClause(i, "body", e.target.value)} rows={2}
-                className="mt-1 w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 outline-none focus:border-brand-400" />
+                className="mt-1 w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 outline-none focus:border-brand-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
             </div>
           ))}
           <div className="flex items-center gap-3">
