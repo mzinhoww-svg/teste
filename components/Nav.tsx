@@ -28,8 +28,10 @@ export async function Nav({ active }: { active: Tab }) {
     ? tabs.filter((t) => t.id !== "studio" && t.id !== "automations")
     : tabs;
 
+  const brandBar = ctx?.brand?.accent || ctx?.brand?.primary;
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
+      {brandBar && <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${ctx?.brand?.primary ?? brandBar}, ${brandBar})` }} aria-hidden />}
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Link href="/app" className="flex shrink-0 items-center gap-2" aria-label="Início">
