@@ -286,3 +286,36 @@ export async function getContracts(): Promise<ContractView[]> {
     createdAt: (r.created_at ?? "").slice(0, 10),
   }));
 }
+
+export interface NotificationRow {
+  id: string; type: string; title: string; body: string;
+  action_url: string | null; deal_id: string | null; read_at: string | null; created_at: string;
+}
+
+export async function getNotifications(limit = 50): Promise<NotificationRow[]> {
+  const supabase = createClient();
+  const ctx = await getAuthContext();
+  if (!ctx?.orgId) return [];
+  // Notificações da org direcionadas ao usuário OU gerais (user_id null)
+  const { data } = await supabase
+    .from("notifications")
+    .select("id,type,title,body,action_url,deal_id,read_at,created_at,user_id")
+    .eq("org_id", ctx.orgId)
+    .or(`user_id.is.null,user_id.eq.${ctx.userId}`)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []) as NotificationRow[];
+}
+
+export async function getUnreadCount(): Promise<number> {
+  const supabase = createClient();
+  const ctx = await getAuthContext();
+  if (!ctx?.orgId) return 0;
+  const { count } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("org_id", ctx.orgId)
+    .is("read_at", null)
+    .or(`user_id.is.null,user_id.eq.${ctx.userId}`);
+  return count ?? 0;
+}
