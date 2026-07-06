@@ -3,6 +3,20 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 
+// GET: healthcheck do endpoint — abrir a URL no navegador confirma que a rota
+// está no ar (o teste de alcance do Brevo e a verificação manual passam). NÃO
+// processa eventos nem exige o secret; só sinaliza se as dependências estão
+// prontas. O processamento real (com validação do secret) fica no POST abaixo.
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    endpoint: "brevo-webhook",
+    note: "Endpoint ativo. Os eventos são recebidos por POST. Configure a URL com ?secret=… no painel do Brevo.",
+    secretConfigured: Boolean(process.env.BREVO_WEBHOOK_SECRET),
+    canPersist: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
+  });
+}
+
 // Webhook de eventos transacionais do Brevo — atualiza `messages.status` pelo
 // message-id (external_id). O Brevo não assina o payload; protegemos o endpoint
 // com um segredo próprio (BREVO_WEBHOOK_SECRET) via query `?secret=` ou header

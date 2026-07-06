@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { refreshContractStatus, sendContractForSignature, updateContractClauses, updateContractStatus } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { waMeLink } from "@/lib/whatsapp";
+import { publicBaseUrl } from "@/lib/urls";
 import { buildWaTemplate } from "@/lib/whatsapp";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { brl } from "@/lib/format";
@@ -34,8 +35,8 @@ export function ContractCard({ c, orgName }: { c: ContractView; orgName: string 
   // Link SEMPRE aponta para a página interna estável /sign/contracts/[token],
   // nunca para a URL do provider (que no modo mock era example.test).
   // Origin resolvido pós-mount para não gerar mismatch de hidratação.
-  const [origin, setOrigin] = useState(process.env.NEXT_PUBLIC_APP_URL || "");
-  useEffect(() => { if (!process.env.NEXT_PUBLIC_APP_URL) setOrigin(window.location.origin); }, []);
+  const [origin, setOrigin] = useState(publicBaseUrl());
+  useEffect(() => { if (!publicBaseUrl()) setOrigin(window.location.origin); }, []);
   const internalLink = c.signToken && origin ? `${origin.replace(/\/$/, "")}/sign/contracts/${c.signToken}` : null;
   const isSigned = status === "assinado" || ["assinado", "completed", "signed"].includes(c.externalStatus ?? "");
   const waLink = (c.contactPhone && internalLink && !isSigned)

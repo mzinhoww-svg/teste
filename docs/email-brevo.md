@@ -51,16 +51,29 @@ testar em previews) → **Redeploy**:
 | `BREVO_WEBHOOK_SECRET` | segredo próprio p/ validar o webhook. |
 | `NEXT_PUBLIC_APP_URL` | URL pública canônica (links dos e-mails). |
 
-## 3. Webhook de eventos
-Em **Brevo → Transactional → Settings → Webhook**, aponte para:
+## 3. Webhook de eventos (opcional)
+O webhook **não é necessário para enviar** — ele só atualiza o status de entrega/
+abertura em `messages`. Pode ser configurado depois.
 
-```
-https://SEU-APP/api/webhooks/brevo?secret=SEU_BREVO_WEBHOOK_SECRET
-```
+**Passo a passo no painel do Brevo:**
+1. **Transactional → Settings → aba "Webhook" → "Add a new webhook"** (ou "Adicionar").
+2. Na aba **Destino / URL**, cole (com o mesmo secret das env vars):
+   ```
+   https://SEU-APP/api/webhooks/brevo?secret=SEU_BREVO_WEBHOOK_SECRET
+   ```
+   **Método de autenticação: "Sem autenticação"** — o segredo já viaja na URL.
+3. Na aba **"Eventos para sincronizar"**, marque: `Entregue`, `Aberto`, `Clique`,
+   `Devolvido (hard/soft bounce)`, `Spam`. **Sem eventos marcados, nada é disparado.**
+4. Salvar. O `?secret=` da URL precisa ser **idêntico** ao `BREVO_WEBHOOK_SECRET` da
+   Vercel (senão o endpoint responde 401).
 
-Marque os eventos desejados (delivered, opened, click, hard/soft bounce, spam).
-O webhook exige `SUPABASE_SERVICE_ROLE_KEY` para persistir status (escreve sem
-sessão de usuário).
+**Verificar se o endpoint está no ar:** abra no navegador
+`https://SEU-APP/api/webhooks/brevo` (sem `?secret`) — deve responder um JSON
+`{ "ok": true, ... }` com `secretConfigured` e `canPersist`. Se der 404/erro, o
+deploy/rota não está publicado; se `canPersist:false`, falta `SUPABASE_SERVICE_ROLE_KEY`.
+
+O webhook exige `SUPABASE_SERVICE_ROLE_KEY` para **persistir** status (escreve sem
+sessão de usuário) — sem ela, os eventos chegam mas o status não é gravado.
 
 ## 4. E-mails de autenticação via Brevo (SMTP no Supabase)
 Para que confirmação de conta, reset de senha e magic links saiam pelo Brevo com a

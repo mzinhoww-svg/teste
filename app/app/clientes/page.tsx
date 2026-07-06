@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Input, Label, Select } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { clientInviteUrl } from "@/lib/urls";
 
 export const metadata = { title: "Clientes — CRM AI Studio" };
 export const dynamic = "force-dynamic";
@@ -78,7 +79,7 @@ export default async function ClientesPage() {
             {invites.map((i) => (
               <li key={i.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-50 py-1.5 last:border-0 dark:border-slate-800">
                 <span className="text-slate-600 dark:text-slate-300">{i.email} · <span className="text-slate-400">{i.client_name}</span></span>
-                <code className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">/portal/convite/{i.token}</code>
+                <code className="max-w-full truncate rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">{clientInviteUrl(i.token)}</code>
               </li>
             ))}
           </ul>

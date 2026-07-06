@@ -3,6 +3,7 @@ import { OrgManager } from "@/components/OrgManager";
 import { PermissionDenied } from "@/components/PermissionDenied";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthContext } from "@/lib/db";
+import { crmBaseUrl } from "@/lib/urls";
 
 export const metadata = { title: "Organização — CRM AI Studio" };
 
@@ -24,7 +25,7 @@ export default async function OrgPage() {
     supabase.from("invites").select("id,email,member_role,token,status,expires_at").eq("org_id", ctx.orgId).order("created_at", { ascending: false }).limit(30),
   ]);
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://teste-phi-gray.vercel.app";
+  const baseUrl = crmBaseUrl();
 
   return (
     <div className="min-h-screen">
