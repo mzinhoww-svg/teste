@@ -165,10 +165,23 @@ export async function createLead(formData: FormData) {
   const channel = String(formData.get("channel") ?? "form");
   const title = String(formData.get("title") ?? "").trim() || `${company || name} — nova oportunidade`;
   const amount = Number(formData.get("amount") ?? 0) || 0;
+  const pipelineId = String(formData.get("pipelineId") ?? "").trim() || null;
   if (!name) throw new Error("Nome é obrigatório");
 
-  const { data: pipe } = await supabase.from("pipelines").select("id").order("position").limit(1).maybeSingle();
-  if (!pipe) throw new Error("Nenhum funil configurado");
+  // CRÍTICO multi-tenant: o funil DEVE pertencer à org ativa. Antes, a seleção
+  // não filtrava por org e pegava o funil de menor posição entre TODAS as orgs
+  // do usuário (RLS permite ver as orgs em que ele é membro), fazendo o lead
+  // cair no funil de outra organização — o deal sumia dos dois quadros.
+  let pipe: { id: string } | null = null;
+  if (pipelineId) {
+    const { data } = await supabase.from("pipelines").select("id").eq("id", pipelineId).eq("org_id", orgId).maybeSingle();
+    pipe = data;
+  }
+  if (!pipe) {
+    const { data } = await supabase.from("pipelines").select("id").eq("org_id", orgId).eq("archived", false).order("position").limit(1).maybeSingle();
+    pipe = data;
+  }
+  if (!pipe) throw new Error("Nenhum funil configurado nesta organização");
   const { data: firstStage } = await supabase.from("stages").select("id").eq("pipeline_id", pipe.id).order("position").limit(1).maybeSingle();
   if (!firstStage) throw new Error("Nenhum estágio configurado");
 
