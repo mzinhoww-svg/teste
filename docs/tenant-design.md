@@ -32,15 +32,26 @@ Em `orgs.settings` (JSON):
 ## Como o app aplica (replicável, sem tocar em componentes)
 
 1. `getAuthContext` carrega `brand` do tenant ativo.
-2. `components/TenantThemeVars` (no `Nav`) injeta `--tenant-primary` /
-   `--tenant-accent` no `<html>` e marca `data-tenant-themed` — pós-mount, sem
-   mismatch de hidratação.
-3. `app/globals.css`, sob `[data-tenant-themed]`, remapeia as classes brand-*
-   de ação (`bg-brand-600`, `hover:bg-brand-700`, `text-brand-600/700`,
-   `border-brand-600`, `ring-brand-400`, `accent-brand-600`) para as variáveis.
+2. `components/TenantThemeVars` (no `Nav`) deriva a **escala de marca inteira**
+   (`--brand-50` … `--brand-950`, em canais `R G B`) a partir de `brand.primary`
+   via `lib/brand-ramp.ts` — rampa determinística em HSL, preservando a matiz e
+   garantindo tints coloridos (não cinzas) e passos escuros distintos (hover
+   visível). Injeta também `--accent`/`--accent-foreground` (realce + texto
+   legível calculado por contraste). Pós-mount, sem mismatch de hidratação.
+3. `tailwind.config.ts` define `brand-*` como `rgb(var(--brand-N) / <alpha-value>)`
+   com **fallback índigo** — então cada classe `brand-*` (bg, text, border, ring,
+   e os modificadores de opacidade como `bg-brand-950/40`) re-tinta sozinha, em
+   claro **e** escuro.
 
 Resultado: **qualquer tenant com `brand.primary` re-tematiza o app inteiro**,
-sem alterar componentes. Sem `brand`, mantém o índigo padrão.
+sem alterar componentes. Sem `brand`, mantém o índigo padrão (os fallbacks).
+
+### Accent (realce) — regra de contraste
+
+`brand.accent` (ex.: dourado da Reiners) é **realce**, nunca fundo de texto
+branco. O app publica `--accent-foreground` calculado por contraste (slate-800
+sobre dourado claro, branco sobre cor escura). Botões/hover usam o navy da rampa
+(`brand-600/700`), não o accent — por isso não há mais o "hover dourado ilegível".
 
 ## Adicionar um novo tenant com identidade
 

@@ -52,7 +52,7 @@ export async function Nav({ active }: { active: Tab }) {
                 key={t.id}
                 href={t.href}
                 aria-current={active === t.id ? "page" : undefined}
-                className={`rounded-md px-3 py-1.5 font-medium transition-colors ${active === t.id ? "bg-brand-50 text-brand-700" : "text-slate-500 hover:text-slate-800"}`}
+                className={`rounded-md px-3 py-1.5 font-medium transition-colors ${active === t.id ? "bg-brand-50 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
               >
                 {t.label}
               </Link>

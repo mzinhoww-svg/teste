@@ -24,12 +24,12 @@ export function NotificationBell({ items, unread }: { items: NotificationRow[]; 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="relative grid h-8 w-8 place-items-center rounded-full text-slate-500 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+        className="relative grid h-8 w-8 place-items-center rounded-full text-slate-500 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 dark:hover:bg-slate-800"
         aria-label={`Notificações${unread ? `, ${unread} não lidas` : ""}`}
       >
         <Bell className="h-4 w-4" aria-hidden />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">
+          <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 origin-center animate-badge-pop place-items-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white motion-reduce:animate-none">
             {unread > 9 ? "9+" : unread}
           </span>
         )}

@@ -49,5 +49,6 @@ export function TabsTrigger({ value, children }: { value: string; children: Reac
 export function TabsContent({ value, className, children }: { value: string; className?: string; children: React.ReactNode }) {
   const ctx = React.useContext(Ctx)!;
   if (ctx.value !== value) return null;
-  return <div role="tabpanel" className={className}>{children}</div>;
+  // Reveal ao trocar de aba (transitions-dev 18) — respeita reduced-motion.
+  return <div role="tabpanel" className={cn("animate-reveal motion-reduce:animate-none", className)}>{children}</div>;
 }

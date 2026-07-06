@@ -35,6 +35,28 @@ body {
 .animate-shake { animation: shake 0.25s ease-in-out 2; }
 
 /* ==========================================================================
+   Microinterações (transitions-dev) — R5
+   Durações 150–300ms, easing suave (sem bounce agressivo). Respeitam
+   prefers-reduced-motion pelo bloco global no topo deste arquivo.
+   ========================================================================== */
+
+/* Texts/panel reveal (ref. 18/07): conteúdo entra com leve subida + fade.
+   Aplicado ao trocar de aba no drawer e ao revelar painéis. */
+@keyframes t-reveal-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-reveal { animation: t-reveal-rise 220ms cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Notification badge (ref. 03): o contador surge com um pop contido. */
+@keyframes t-badge-pop {
+  0%   { transform: scale(0); }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.animate-badge-pop { animation: t-badge-pop 320ms cubic-bezier(0.34, 1.36, 0.64, 1); }
+
+/* ==========================================================================
    Dark mode
    O app usa a paleta neutra `slate` de forma consistente. Em vez de anotar
    `dark:` em dezenas de arquivos, remapeamos aqui as superfícies e textos
