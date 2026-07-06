@@ -28,7 +28,10 @@ function addTokens(n: number) {
   if (b && Number.isFinite(n)) b.tokens += n;
 }
 
-export const DEFAULT_OPENROUTER_MODEL = "z-ai/glm-5.2";
+// DeepSeek V4 Flash: rápido, barato e NÃO é modelo de raciocínio — devolve o
+// JSON direto no content (sem o problema de content vazio do GLM-5.2). Pode ser
+// sobrescrito por OPENROUTER_MODEL.
+export const DEFAULT_OPENROUTER_MODEL = "deepseek/deepseek-v4-flash";
 const DEFAULT_ANTHROPIC_MODEL = "claude-opus-4-8";
 
 export type Provider = "openrouter" | "anthropic" | "none";
