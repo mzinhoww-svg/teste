@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { brl, tempColor, tempLabel } from "@/lib/format";
 import { waMeLink, buildWaTemplate } from "@/lib/whatsapp";
+import { EnrichmentPanel } from "@/components/EnrichmentPanel";
 import type { Agent, Contact, Deal, Stage } from "@/lib/types";
 import type { ProductListItem } from "@/lib/db";
 
@@ -322,6 +323,8 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
               )}
             </section>
           ))}
+
+          <EnrichmentPanel dealId={deal.id} />
 
           {contact && (
             <section className="rounded-xl border border-slate-200 p-4">

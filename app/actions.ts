@@ -474,6 +474,47 @@ export async function resetTenantAgentOverride(agentKey: string) {
   revalidatePath("/app/studio");
 }
 
+// --- Enriquecimento de leads ------------------------------------------------
+
+export async function enrichDeal(dealId: string) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { fetchCNPJ, recommendedSearches } = await import("@/lib/enrichment");
+
+  const { data: deal } = await supabase
+    .from("deals").select("id, custom, contact:contacts(id, name, company, custom)")
+    .eq("id", dealId).eq("org_id", ctx.orgId).maybeSingle();
+  if (!deal) throw new Error("Deal não encontrado");
+
+  const contact: any = Array.isArray(deal.contact) ? deal.contact[0] : deal.contact;
+  const custom: any = deal.custom ?? {};
+  const cnpj = String(custom.cnpj ?? contact?.custom?.cnpj ?? "").trim();
+  const company = contact?.company ?? null;
+  const name = contact?.name ?? null;
+
+  const facts = [
+    ...(cnpj ? await fetchCNPJ(cnpj) : []),
+    ...recommendedSearches(company, name),
+  ];
+
+  if (facts.length) {
+    await supabase.from("lead_enrichment").insert(
+      facts.map((f) => ({
+        org_id: ctx.orgId, deal_id: dealId, contact_id: contact?.id ?? null, company_name: company,
+        source_type: f.source_type, source_label: f.source_label, source_url: f.source_url,
+        extracted_fact: f.extracted_fact, confidence: f.confidence, relevance: f.relevance,
+        used_by_agent: null, created_by_user_id: ctx.userId,
+      })),
+    );
+  }
+  revalidatePath("/app");
+  return {
+    count: facts.length,
+    hadCnpj: Boolean(cnpj),
+    facts: facts.map((f) => ({ label: f.source_label, fact: f.extracted_fact, confidence: f.confidence, url: f.source_url })),
+  };
+}
+
 // --- Onboarding ------------------------------------------------------------
 
 export async function dismissOnboarding() {

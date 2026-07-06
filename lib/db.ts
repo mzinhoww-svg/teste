@@ -352,6 +352,29 @@ export async function getUnreadCount(): Promise<number> {
   return count ?? 0;
 }
 
+// --- Enriquecimento de leads ------------------------------------------------
+
+export interface EnrichmentRow {
+  id: string; sourceLabel: string; sourceUrl: string | null; fact: string;
+  confidence: string; relevance: string; createdAt: string;
+}
+
+export async function getLeadEnrichment(dealId: string): Promise<EnrichmentRow[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase
+    .from("lead_enrichment")
+    .select("id, source_label, source_url, extracted_fact, confidence, relevance, created_at")
+    .eq("org_id", orgId).eq("deal_id", dealId)
+    .order("created_at", { ascending: false })
+    .limit(40);
+  return (data ?? []).map((r: any) => ({
+    id: r.id, sourceLabel: r.source_label, sourceUrl: r.source_url, fact: r.extracted_fact,
+    confidence: r.confidence, relevance: r.relevance, createdAt: r.created_at,
+  }));
+}
+
 // --- Onboarding guiado ------------------------------------------------------
 
 export interface OnboardingState {
