@@ -1,7 +1,25 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Renova a sessão do Supabase a cada request e protege rotas privadas.
+// Deriva o subdomínio do host contra a raiz (NEXT_PUBLIC_ROOT_DOMAIN).
+// Retorna null em localhost / preview Vercel / apex — nesses casos o roteamento
+// é por PATH (dev e E2E não quebram). Pura e determinística (testável).
+export function subdomainFor(host: string | null | undefined, root: string | null | undefined): string | null {
+  if (!host || !root) return null;
+  const hostname = host.split(":")[0].toLowerCase();
+  const r = root.toLowerCase();
+  if (hostname === r || hostname === `www.${r}`) return null;
+  if (!hostname.endsWith(`.${r}`)) return null; // localhost, *.vercel.app, etc.
+  const sub = hostname.slice(0, -(r.length + 1));
+  return sub || null;
+}
+
+function copyCookies(target: NextResponse, from: NextResponse): NextResponse {
+  from.cookies.getAll().forEach((c) => target.cookies.set(c));
+  return target;
+}
+
+// Renova a sessão do Supabase, reescreve por subdomínio e protege as áreas.
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -24,15 +42,34 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
+  // ---- Roteamento por host (produção). Em dev/preview segue por path. --------
+  const sub = subdomainFor(request.headers.get("host"), process.env.NEXT_PUBLIC_ROOT_DOMAIN);
+  const url = request.nextUrl.clone();
+  const rawPath = url.pathname;
+  let rewrote = false;
+
+  const isAsset = rawPath.startsWith("/api") || rawPath.startsWith("/_next") || rawPath.startsWith("/icon") || rawPath.startsWith("/favicon");
+  if (!isAsset) {
+    if (sub === "crm" && !rawPath.startsWith("/app")) {
+      url.pathname = rawPath === "/" ? "/app" : `/app${rawPath}`;
+      rewrote = true;
+    } else if (sub === "app" && !rawPath.startsWith("/portal")) {
+      url.pathname = rawPath === "/" ? "/portal" : `/portal${rawPath}`;
+      rewrote = true;
+    }
+    // apex/www (sub === null) → landing: nada a reescrever.
+  }
+
+  // Caminho "lógico" (pós-rewrite) usado pelos guards.
+  const path = url.pathname;
+
   const isPublic =
     path === "/" ||
     path === "/login" ||
     path.startsWith("/convite") ||
+    path.startsWith("/portal/convite") ||
     path.startsWith("/sign") ||
     path.startsWith("/proposta") ||
     path.startsWith("/api/proposta") ||
@@ -43,19 +80,45 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/favicon") ||
     path.startsWith("/icon");
 
-  // Não logado tentando acessar área privada → login
-  if (!user && !isPublic) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+  const redirectTo = (pathname: string) => {
+    const u = request.nextUrl.clone();
+    u.pathname = pathname;
+    u.search = "";
+    return copyCookies(NextResponse.redirect(u), response);
+  };
+
+  // Não logado em área privada → login.
+  if (!user && !isPublic) return redirectTo("/login");
+
+  // Guards de área: distinguem usuário-CRM (tem membership) de usuário-portal
+  // (tem client_user). Só consultam o banco quando logado e na área relevante.
+  if (user && (path.startsWith("/app") || (path.startsWith("/portal") && !path.startsWith("/portal/convite")) || path === "/login")) {
+    const isPortalArea = path.startsWith("/portal") && !path.startsWith("/portal/convite");
+    const isCrmArea = path.startsWith("/app");
+
+    const { data: mem } = await supabase.from("memberships").select("org_id").eq("user_id", user.id).limit(1);
+    const isCrmUser = (mem?.length ?? 0) > 0;
+
+    // Usuário-CRM tentando o portal → volta pro CRM.
+    if (isPortalArea && isCrmUser) return redirectTo("/app");
+
+    // Usuário-portal (sem membership) tentando o CRM ou /login → seu portal.
+    if ((isCrmArea || path === "/login") && !isCrmUser) {
+      const { data: cu } = await supabase
+        .from("client_users")
+        .select("client_accounts(slug)")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle();
+      const slug = (cu?.client_accounts as { slug?: string } | null)?.slug;
+      if (slug) return redirectTo(`/portal/${slug}`);
+    }
+
+    // Logado em /login sendo usuário-CRM → CRM.
+    if (path === "/login" && isCrmUser) return redirectTo("/app");
   }
 
-  // Logado indo para /login → manda pro CRM
-  if (user && path === "/login") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/app";
-    return NextResponse.redirect(url);
-  }
-
+  if (rewrote) return copyCookies(NextResponse.rewrite(url), response);
   return response;
 }
