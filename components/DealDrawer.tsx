@@ -236,7 +236,10 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
   deal: Deal; contact: Contact | null; agents: Agent[]; stages: Stage[];
   products?: ProductListItem[]; myRole?: string; orgName?: string; onClose: () => void;
 }) {
-  const [loading, setLoading] = useState<string | null>(null);
+  // Agentes rodando AGORA (por id) — permite disparar vários em paralelo sem que
+  // um bloqueie ou apague o indicador do outro.
+  const [running, setRunning] = useState<Record<string, boolean>>({});
+  const isRunning = (kind: string) => Boolean(running[kind]);
   const [results, setResults] = useState<Record<string, any>>({});
   const [hydrating, setHydrating] = useState(true);
   const [panels, setPanels] = useState<{ proposals: any[]; contracts: any[] }>({ proposals: [], contracts: [] });
@@ -313,7 +316,8 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
   }, [deal.id]);
 
   async function run(kind: string, dryRun = false) {
-    setLoading(kind);
+    if (isRunning(kind)) return; // evita duplo clique no MESMO agente
+    setRunning((prev) => ({ ...prev, [kind]: true }));
     try {
       const r = await runAgent(deal.id, kind, dryRun);
       setResults((prev) => ({ ...prev, [kind]: r }));
@@ -321,7 +325,8 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao executar agente");
     } finally {
-      setLoading(null);
+      // Limpa só o próprio agente — não interfere nos outros que ainda rodam.
+      setRunning((prev) => { const next = { ...prev }; delete next[kind]; return next; });
     }
   }
 
@@ -460,15 +465,15 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
                     <span className="text-[11px] text-slate-500">{agent.role}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Button variant="outline" size="xs" onClick={() => run(String(agent.id), true)} disabled={!agent.enabled || loading === agent.id} title="Gerar prévia sem salvar">
+                    <Button variant="outline" size="xs" onClick={() => run(String(agent.id), true)} disabled={!agent.enabled || isRunning(String(agent.id))} title="Gerar prévia sem salvar">
                       <FlaskConical className="h-3 w-3" aria-hidden /> Testar
                     </Button>
-                    <Button size="xs" onClick={() => run(String(agent.id))} disabled={!agent.enabled} loading={loading === agent.id}>
-                      {loading === agent.id ? "Executando" : agent.enabled ? (<><Play className="h-3 w-3" aria-hidden /> Executar</>) : "inativo"}
+                    <Button size="xs" onClick={() => run(String(agent.id))} disabled={!agent.enabled || isRunning(String(agent.id))} loading={isRunning(String(agent.id))}>
+                      {isRunning(String(agent.id)) ? "Executando" : agent.enabled ? (<><Play className="h-3 w-3" aria-hidden /> Executar</>) : "inativo"}
                     </Button>
                   </div>
                 </div>
-                {loading === agent.id ? <RunningSkeleton /> : hydrating ? <Skeleton className="mt-3 h-4 w-2/3" /> : (
+                {isRunning(String(agent.id)) ? <RunningSkeleton /> : hydrating ? <Skeleton className="mt-3 h-4 w-2/3" /> : (
                   results[String(agent.id)] && (
                     <>
                       {results[String(agent.id)]?.dryRun && (
