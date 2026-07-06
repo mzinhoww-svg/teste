@@ -167,6 +167,24 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
       });
       break;
     }
+    case "cadencia": {
+      // Cadência OPERACIONAL: além do plano, agenda o próximo follow-up no card
+      // (data + notificação acionável). Sem isso o agente só "sugeria".
+      result = await runAdvisory(deal, contact, agent);
+      const touchMs = deal.lastTouch ? new Date(deal.lastTouch).getTime() : NaN;
+      const stale = Number.isNaN(touchMs) ? null : Math.floor((Date.now() - touchMs) / 86_400_000);
+      const days = stale != null && stale > 3 ? 0 : 2; // parado > SLA → hoje
+      const nextAt = new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+      await supabase.from("deals").update({ next_action_at: nextAt }).eq("id", dealId);
+      await supabase.from("notifications").insert({
+        org_id: ctx.orgId, deal_id: dealId, contact_id: contact.id || null,
+        type: "cadence", title: "Follow-up agendado", action_url: "/app",
+        body: `${deal.title}: próximo toque em ${nextAt} por ${contact.channel === "whatsapp" ? "WhatsApp" : "canal preferido"}.`,
+        metadata: { agent_key: "cadencia", next_action_at: nextAt },
+      });
+      extra.nextActionAt = nextAt;
+      break;
+    }
     default:
       result = await runAdvisory(deal, contact, agent);
   }
@@ -176,7 +194,7 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
   const persisted = { ...result, ...extra };
   await supabase.from("agent_runs").insert({
     org_id: ctx.orgId, agent_kind: kind, deal_id: dealId,
-    input: { title: deal.title, stage: deal.stageKey, via: ctx.via, agentKey: resolved?.key ?? null, templateVersion: resolved?.templateVersion ?? null, whatsappUsed: Boolean((agent as any).__waUsed), tokens },
+    input: { title: deal.title, stage: deal.stageKey, via: ctx.via, agentKey: resolved?.key ?? null, templateVersion: resolved?.templateVersion ?? null, whatsappUsed: Boolean((agent as any).__waUsed), tokens, llmError: result?.llmError ?? null },
     output: persisted, source: result?.source ?? "n/a", model: agent.model, created_by: ctx.userId,
   });
 

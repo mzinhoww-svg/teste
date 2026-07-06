@@ -33,13 +33,27 @@ async function runAgent(dealId: string, kind: string, dryRun = false) {
   return body;
 }
 
-function SourceTag({ source }: { source?: string }) {
+function SourceTag({ source, llmError }: { source?: string; llmError?: string }) {
   if (!source || source === "n/a") return null;
   const live = source === "llm";
   return (
-    <Badge variant={live ? "brand" : "muted"} className="ml-2 text-[10px]">
-      {live ? "IA · GLM" : "heurística"}
+    <Badge
+      variant={live ? "brand" : "muted"}
+      className="ml-2 text-[10px]"
+      title={!live && llmError ? `IA indisponível: ${llmError}` : undefined}
+    >
+      {live ? "IA · GLM" : llmError ? "heurística (IA falhou)" : "heurística"}
     </Badge>
+  );
+}
+
+// Aviso âmbar quando a IA ao vivo estava ligada mas falhou (mostra o motivo).
+function LlmErrorNote({ llmError }: { llmError?: string }) {
+  if (!llmError) return null;
+  return (
+    <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+      IA indisponível — usando heurística. Motivo: {llmError}. Verifique em <code>/api/health?probe=1</code>.
+    </p>
   );
 }
 
@@ -93,92 +107,96 @@ function ProposalShare({ token, phone, name }: { token: string; phone?: string |
 }
 
 function AgentResult({ kind, r, contactPhone, contactName }: { kind: string; r: any; contactPhone?: string | null; contactName?: string | null }) {
-  if (kind === "lead-scoring") {
+  const body = (() => {
+    if (kind === "lead-scoring") {
+      return (
+        <div className="mt-3">
+          <div className="flex items-center gap-3">
+            <div className="text-3xl font-bold text-slate-900">{r.score}</div>
+            <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${tempColor(r.temperature)}`}>{tempLabel(r.temperature)}</span>
+            <SourceTag source={r.source} llmError={r.llmError} />
+          </div>
+          <p className="mt-2 text-sm text-slate-600">{r.reason}</p>
+        </div>
+      );
+    }
+    if (kind === "sales-copilot") {
+      return (
+        <div className="mt-3 space-y-2">
+          <p className="text-sm font-medium text-slate-800">→ {r.nextAction}<SourceTag source={r.source} llmError={r.llmError} /></p>
+          <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+            <div className="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">Mensagem · {r.channel}</div>
+            {r.message}
+          </div>
+          {r.waLink && (
+            <a href={r.waLink} target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+              <MessageCircle className="h-3.5 w-3.5" aria-hidden /> Abrir no WhatsApp
+            </a>
+          )}
+        </div>
+      );
+    }
+    if (kind === "proposal") {
+      return (
+        <div className="mt-3 space-y-3">
+          <p className="text-sm text-slate-600">{r.summary}<SourceTag source={r.source} llmError={r.llmError} /></p>
+          <table className="w-full text-sm">
+            <tbody>
+              {r.items.map((it: any, i: number) => (
+                <tr key={i} className="border-b border-slate-100">
+                  <td className="py-1.5 pr-2 text-slate-600">{it.name}</td>
+                  <td className="py-1.5 text-right tabular-nums text-slate-800">{brl(it.qty * it.unitPrice)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">Desconto {r.discountPct}%</span>
+            <span className="text-lg font-bold text-emerald-700">{brl(r.total)}</span>
+          </div>
+          <p className="text-xs text-slate-400">{r.terms}</p>
+          {r.shareToken && <ProposalShare token={r.shareToken} phone={contactPhone} name={contactName} />}
+          {r.dryRun && !r.shareToken && <p className="text-xs text-amber-600">Prévia — execute (sem dry-run) para gerar o link compartilhável da proposta.</p>}
+        </div>
+      );
+    }
+    if (kind === "legal-contract") {
+      return (
+        <div className="mt-3 space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-slate-800">{r.title}</span><SourceTag source={r.source} llmError={r.llmError} />
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs">
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 font-mono text-slate-600">{r.reference}</span>
+            <Badge variant="success">{brl(r.value)}</Badge>
+            <Badge variant="warning"><FileSignature className="h-3 w-3" aria-hidden /> {r.signatureStatus}</Badge>
+          </div>
+          <div className="space-y-2">
+            {r.clauses.map((c: any, i: number) => (
+              <div key={i} className="rounded-lg bg-slate-50 p-2.5">
+                <div className="text-xs font-semibold text-slate-700">{c.heading}</div>
+                <div className="text-xs text-slate-500">{c.body}</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-slate-400">Gerir em <a href="/app/contracts" className="text-brand-600 underline">Contratos</a> · {r.signatureProvider}</p>
+        </div>
+      );
+    }
     return (
       <div className="mt-3">
-        <div className="flex items-center gap-3">
-          <div className="text-3xl font-bold text-slate-900">{r.score}</div>
-          <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${tempColor(r.temperature)}`}>{tempLabel(r.temperature)}</span>
-          <SourceTag source={r.source} />
-        </div>
-        <p className="mt-2 text-sm text-slate-600">{r.reason}</p>
-      </div>
-    );
-  }
-  if (kind === "sales-copilot") {
-    return (
-      <div className="mt-3 space-y-2">
-        <p className="text-sm font-medium text-slate-800">→ {r.nextAction}<SourceTag source={r.source} /></p>
-        <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">Mensagem · {r.channel}</div>
-          {r.message}
-        </div>
-        {r.waLink && (
-          <a href={r.waLink} target="_blank" rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
-            <MessageCircle className="h-3.5 w-3.5" aria-hidden /> Abrir no WhatsApp
-          </a>
-        )}
-      </div>
-    );
-  }
-  if (kind === "proposal") {
-    return (
-      <div className="mt-3 space-y-3">
-        <p className="text-sm text-slate-600">{r.summary}<SourceTag source={r.source} /></p>
-        <table className="w-full text-sm">
-          <tbody>
-            {r.items.map((it: any, i: number) => (
-              <tr key={i} className="border-b border-slate-100">
-                <td className="py-1.5 pr-2 text-slate-600">{it.name}</td>
-                <td className="py-1.5 text-right tabular-nums text-slate-800">{brl(it.qty * it.unitPrice)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-slate-500">Desconto {r.discountPct}%</span>
-          <span className="text-lg font-bold text-emerald-700">{brl(r.total)}</span>
-        </div>
-        <p className="text-xs text-slate-400">{r.terms}</p>
-        {r.shareToken && <ProposalShare token={r.shareToken} phone={contactPhone} name={contactName} />}
-        {r.dryRun && !r.shareToken && <p className="text-xs text-amber-600">Prévia — execute (sem dry-run) para gerar o link compartilhável da proposta.</p>}
-      </div>
-    );
-  }
-  if (kind === "legal-contract") {
-    return (
-      <div className="mt-3 space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-slate-800">{r.title}</span><SourceTag source={r.source} />
-        </div>
-        <div className="flex flex-wrap gap-2 text-xs">
-          <span className="rounded-full bg-slate-100 px-2.5 py-1 font-mono text-slate-600">{r.reference}</span>
-          <Badge variant="success">{brl(r.value)}</Badge>
-          <Badge variant="warning"><FileSignature className="h-3 w-3" aria-hidden /> {r.signatureStatus}</Badge>
-        </div>
-        <div className="space-y-2">
-          {r.clauses.map((c: any, i: number) => (
-            <div key={i} className="rounded-lg bg-slate-50 p-2.5">
-              <div className="text-xs font-semibold text-slate-700">{c.heading}</div>
-              <div className="text-xs text-slate-500">{c.body}</div>
-            </div>
+        <p className="text-sm font-medium text-slate-800">{r.headline}<SourceTag source={r.source} llmError={r.llmError} /></p>
+        <ul className="mt-2 space-y-1">
+          {(r.items ?? []).map((it: string, i: number) => (
+            <li key={i} className="flex gap-1.5 text-sm text-slate-600"><span className="text-brand-400">•</span>{it}</li>
           ))}
-        </div>
-        <p className="text-xs text-slate-400">Gerir em <a href="/app/contracts" className="text-brand-600 underline">Contratos</a> · {r.signatureProvider}</p>
+        </ul>
       </div>
     );
-  }
-  return (
-    <div className="mt-3">
-      <p className="text-sm font-medium text-slate-800">{r.headline}<SourceTag source={r.source} /></p>
-      <ul className="mt-2 space-y-1">
-        {(r.items ?? []).map((it: string, i: number) => (
-          <li key={i} className="flex gap-1.5 text-sm text-slate-600"><span className="text-brand-400">•</span>{it}</li>
-        ))}
-      </ul>
-    </div>
-  );
+  })();
+
+  return <>{body}<LlmErrorNote llmError={r.llmError} /></>;
 }
 
 function RunningSkeleton() {
@@ -236,7 +254,10 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
   deal: Deal; contact: Contact | null; agents: Agent[]; stages: Stage[];
   products?: ProductListItem[]; myRole?: string; orgName?: string; onClose: () => void;
 }) {
-  const [loading, setLoading] = useState<string | null>(null);
+  // Agentes rodando AGORA (por id) — permite disparar vários em paralelo sem que
+  // um bloqueie ou apague o indicador do outro.
+  const [running, setRunning] = useState<Record<string, boolean>>({});
+  const isRunning = (kind: string) => Boolean(running[kind]);
   const [results, setResults] = useState<Record<string, any>>({});
   const [hydrating, setHydrating] = useState(true);
   const [panels, setPanels] = useState<{ proposals: any[]; contracts: any[] }>({ proposals: [], contracts: [] });
@@ -313,7 +334,8 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
   }, [deal.id]);
 
   async function run(kind: string, dryRun = false) {
-    setLoading(kind);
+    if (isRunning(kind)) return; // evita duplo clique no MESMO agente
+    setRunning((prev) => ({ ...prev, [kind]: true }));
     try {
       const r = await runAgent(deal.id, kind, dryRun);
       setResults((prev) => ({ ...prev, [kind]: r }));
@@ -321,7 +343,8 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao executar agente");
     } finally {
-      setLoading(null);
+      // Limpa só o próprio agente — não interfere nos outros que ainda rodam.
+      setRunning((prev) => { const next = { ...prev }; delete next[kind]; return next; });
     }
   }
 
@@ -460,15 +483,15 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
                     <span className="text-[11px] text-slate-500">{agent.role}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Button variant="outline" size="xs" onClick={() => run(String(agent.id), true)} disabled={!agent.enabled || loading === agent.id} title="Gerar prévia sem salvar">
+                    <Button variant="outline" size="xs" onClick={() => run(String(agent.id), true)} disabled={!agent.enabled || isRunning(String(agent.id))} title="Gerar prévia sem salvar">
                       <FlaskConical className="h-3 w-3" aria-hidden /> Testar
                     </Button>
-                    <Button size="xs" onClick={() => run(String(agent.id))} disabled={!agent.enabled} loading={loading === agent.id}>
-                      {loading === agent.id ? "Executando" : agent.enabled ? (<><Play className="h-3 w-3" aria-hidden /> Executar</>) : "inativo"}
+                    <Button size="xs" onClick={() => run(String(agent.id))} disabled={!agent.enabled || isRunning(String(agent.id))} loading={isRunning(String(agent.id))}>
+                      {isRunning(String(agent.id)) ? "Executando" : agent.enabled ? (<><Play className="h-3 w-3" aria-hidden /> Executar</>) : "inativo"}
                     </Button>
                   </div>
                 </div>
-                {loading === agent.id ? <RunningSkeleton /> : hydrating ? <Skeleton className="mt-3 h-4 w-2/3" /> : (
+                {isRunning(String(agent.id)) ? <RunningSkeleton /> : hydrating ? <Skeleton className="mt-3 h-4 w-2/3" /> : (
                   results[String(agent.id)] && (
                     <>
                       {results[String(agent.id)]?.dryRun && (

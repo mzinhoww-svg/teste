@@ -4,11 +4,20 @@
 import { callLLM, extractJson, hasLiveAI } from "./ai";
 import type { Agent, Contact, Contract, Deal, Proposal } from "./types";
 
+// Motivo do fallback para heurística quando a IA ao vivo estava ligada mas a
+// chamada falhou (chave inválida, sem crédito, modelo errado, timeout). Fica
+// visível no resultado do agente e persistido em agent_runs para diagnóstico.
+function llmErrorMessage(e: unknown): string {
+  const raw = e instanceof Error ? e.message : String(e);
+  return raw.replace(/\s+/g, " ").trim().slice(0, 300);
+}
+
 export interface ScoreResult {
   score: number;
   temperature: "hot" | "warm" | "cold";
   reason: string;
   source: "llm" | "heuristic";
+  llmError?: string;
 }
 
 export interface CopilotResult {
@@ -16,14 +25,17 @@ export interface CopilotResult {
   message: string;
   channel: string;
   source: "llm" | "heuristic";
+  llmError?: string;
 }
 
 export interface ProposalResult extends Proposal {
   source: "llm" | "heuristic";
+  llmError?: string;
 }
 
 export interface ContractResult extends Contract {
   source: "llm" | "heuristic";
+  llmError?: string;
 }
 
 function tempFromScore(score: number): "hot" | "warm" | "cold" {
@@ -49,6 +61,7 @@ export async function runLeadScoring(
   contact: Contact,
   agent: Agent,
 ): Promise<ScoreResult> {
+  let llmError: string | undefined;
   if (hasLiveAI() && agent.enabled) {
     try {
       const text = await callLLM({
@@ -63,8 +76,9 @@ export async function runLeadScoring(
       if (parsed && typeof parsed.score === "number") {
         return { ...parsed, source: "llm" };
       }
-    } catch {
-      // cai no heurístico
+      llmError = "IA respondeu em formato inválido (JSON não reconhecido).";
+    } catch (e) {
+      llmError = llmErrorMessage(e);
     }
   }
 
@@ -77,7 +91,7 @@ export async function runLeadScoring(
     `Engajamento ${deal.engagement}/100, ticket R$${(deal.amount / 1000).toFixed(0)}k, ` +
     `${daysSince(deal.lastTouch)} dia(s) sem contato. ` +
     (temperature === "hot" ? "Priorizar agora." : temperature === "warm" ? "Nutrir e agendar próximo passo." : "Reativar com cadência automatizada.");
-  return { score, temperature, reason, source: "heuristic" };
+  return { score, temperature, reason, source: "heuristic", llmError };
 }
 
 // ---------------------------------------------------------------------------
@@ -93,6 +107,7 @@ export async function runCopilot(
   contact: Contact,
   agent: Agent,
 ): Promise<CopilotResult> {
+  let llmError: string | undefined;
   if (hasLiveAI() && agent.enabled) {
     try {
       const text = await callLLM({
@@ -105,8 +120,9 @@ export async function runCopilot(
       });
       const parsed = extractJson<{ nextAction: string; message: string; channel: string }>(text);
       if (parsed && parsed.message) return { ...parsed, source: "llm" };
-    } catch {
-      // fallback
+      llmError = "IA respondeu em formato inválido (JSON não reconhecido).";
+    } catch (e) {
+      llmError = llmErrorMessage(e);
     }
   }
 
@@ -134,7 +150,7 @@ export async function runCopilot(
     },
   };
   const rec = byStage[deal.stageKey] ?? byStage.proposal;
-  return { nextAction: rec.action, message: rec.msg, channel: channelLabel[contact.channel], source: "heuristic" };
+  return { nextAction: rec.action, message: rec.msg, channel: channelLabel[contact.channel], source: "heuristic", llmError };
 }
 
 // ---------------------------------------------------------------------------
@@ -148,6 +164,7 @@ export async function runProposal(
   contact: Contact,
   agent: Agent,
 ): Promise<ProposalResult> {
+  let llmError: string | undefined;
   if (hasLiveAI() && agent.enabled) {
     try {
       const text = await callLLM({
@@ -162,8 +179,9 @@ export async function runProposal(
         const total = Math.round(subtotal * (1 - discountPct / 100));
         return { dealId: deal.id, items: parsed.items, subtotal, discountPct, total, summary: parsed.summary, terms: parsed.terms, generatedBy: agent.name, source: "llm" };
       }
-    } catch {
-      // fallback
+      llmError = "IA respondeu em formato inválido (JSON não reconhecido).";
+    } catch (e) {
+      llmError = llmErrorMessage(e);
     }
   }
 
@@ -180,7 +198,7 @@ export async function runProposal(
   const discountPct = deal.amount > 150000 ? 12 : deal.amount > 80000 ? 8 : 5;
   const total = Math.round(subtotal * (1 - discountPct / 100));
   return {
-    dealId: deal.id, items, subtotal, discountPct, total, generatedBy: agent.name, source: "heuristic",
+    dealId: deal.id, items, subtotal, discountPct, total, generatedBy: agent.name, source: "heuristic", llmError,
     summary: `Proposta para ${contact.company}: plataforma, implantação e suporte com desconto de ${discountPct}% por volume. Retorno esperado em até 20 dias de uso.`,
     terms: "Validade: 15 dias. Pagamento: 12x sem juros ou anual à vista. Inclui SLA de suporte e onboarding assistido.",
   };
@@ -205,6 +223,7 @@ export async function runContract(
 ): Promise<ContractResult> {
   const value = contractValue(deal);
   const reference = `CT-${deal.id.toUpperCase()}-2026`;
+  let llmError: string | undefined;
 
   if (hasLiveAI() && agent.enabled) {
     try {
@@ -225,8 +244,9 @@ export async function runContract(
           signatureStatus: "enviado", signatureProvider: SIGNATURE_PROVIDER, generatedBy: agent.name, source: "llm",
         };
       }
-    } catch {
-      // fallback
+      llmError = "IA respondeu em formato inválido (JSON não reconhecido).";
+    } catch (e) {
+      llmError = llmErrorMessage(e);
     }
   }
 
@@ -244,7 +264,7 @@ export async function runContract(
   return {
     dealId: deal.id, reference, title: `Contrato de Prestação de Serviços — ${contact.company}`,
     clauses, value, signatories: defaultSignatories(contact),
-    signatureStatus: "enviado", signatureProvider: SIGNATURE_PROVIDER, generatedBy: agent.name, source: "heuristic",
+    signatureStatus: "enviado", signatureProvider: SIGNATURE_PROVIDER, generatedBy: agent.name, source: "heuristic", llmError,
   };
 }
 
@@ -264,9 +284,11 @@ export interface AdvisoryResult {
   headline: string;
   items: string[];
   source: "llm" | "heuristic";
+  llmError?: string;
 }
 
 export async function runAdvisory(deal: Deal, contact: Contact, agent: Agent): Promise<AdvisoryResult> {
+  let llmError: string | undefined;
   if (hasLiveAI() && agent.enabled) {
     try {
       const text = await callLLM({
@@ -281,11 +303,12 @@ export async function runAdvisory(deal: Deal, contact: Contact, agent: Agent): P
       if (parsed && Array.isArray(parsed.items) && parsed.items.length) {
         return { headline: parsed.headline, items: parsed.items.slice(0, 6), source: "llm" };
       }
-    } catch {
-      // fallback
+      llmError = "IA respondeu em formato inválido (JSON não reconhecido).";
+    } catch (e) {
+      llmError = llmErrorMessage(e);
     }
   }
-  return heuristicAdvisory(deal, contact, agent);
+  return { ...heuristicAdvisory(deal, contact, agent), llmError };
 }
 
 function heuristicAdvisory(deal: Deal, contact: Contact, agent: Agent): AdvisoryResult {
@@ -337,13 +360,54 @@ function heuristicAdvisoryBase(deal: Deal, contact: Contact, agent: Agent): Omit
         ],
       };
     case "support-copilot":
+    case "posvenda":
       return {
-        headline: `Handoff e onboarding de ${contact.company || contact.name}`,
+        headline: `Pós-venda e upsell — ${contact.company || contact.name}`,
         items: [
-          `Criar card de onboarding com contexto completo do deal ${deal.title}.`,
-          `Apresentar ${first} ao CS responsável em até 24h.`,
-          "Definir plano de implementação com marcos e SLAs.",
-          "Agendar kickoff e configurar dashboard de acompanhamento.",
+          `Criar plano de onboarding com contexto completo do deal ${deal.title}.`,
+          `Apresentar ${first} ao CS responsável em até 24h e agendar kickoff.`,
+          deal.amount > 100000 ? "Conta estratégica — mapear expansão (novos formatos/estúdio permanente)." : "Mapear oportunidade de upsell no 2º mês (posicionamento contínuo).",
+          "Definir marcos de entrega e SLA de acompanhamento no portal do cliente.",
+        ],
+      };
+    case "diagnostico":
+      return {
+        headline: `Diagnóstico de presença — ${contact.company || contact.name}`,
+        items: [
+          `Avaliar a presença institucional atual de ${contact.company || contact.name} (canais, consistência, autoridade percebida).`,
+          `Identificar a lacuna entre o posicionamento atual e o desejado — base para a proposta.`,
+          `Sinalizar o formato Reiners mais aderente (podcast in loco, estúdio permanente, domo em evento).`,
+          dias != null && dias > 3 ? `Lead parado há ${dias} dias — retomar com o diagnóstico como gancho.` : "Usar o diagnóstico como gancho para a próxima conversa.",
+        ],
+      };
+    case "recomendador":
+      return {
+        headline: `Produto recomendado — ${deal.title}`,
+        items: [
+          deal.amount >= 100000 ? "Estúdio Corporativo Permanente — presença institucional contínua (ticket alto)." : deal.amount >= 10000 ? "Podcast In Loco — posicionamento recorrente com produção no local." : "Domo em Evento — presença pontual de alto impacto para capturar autoridade.",
+          `Justificativa: engajamento ${deal.engagement}/100, estágio ${deal.stageKey}, ticket estimado R$${(deal.amount / 1000).toFixed(0)}k.`,
+          "Ancorar o valor em posicionamento/autoridade contínua — não em número de posts ou vídeos.",
+          "Oferecer 1 alternativa de entrada para reduzir fricção de decisão.",
+        ],
+      };
+    case "objecoes":
+      return {
+        headline: `Tratamento de objeções — ${first}`,
+        items: [
+          `Preço: ancorar em ROI de posicionamento (retorno em ~20 dias) e comparar com custo de invisibilidade institucional.`,
+          `Timing: reforçar janela de oportunidade e o custo de adiar a presença contínua.`,
+          `Autoridade/decisor: ${deal.custom?.decisor === "sim" ? "decisor mapeado — pedir avanço." : "confirmar o decisor antes de propor."}`,
+          "Fechar cada resposta reconfirmando o próximo passo por escrito.",
+        ],
+      };
+    case "cadencia":
+      return {
+        headline: `Cadência de follow-up — ${deal.title}`,
+        items: [
+          dias != null && dias > 3 ? `Lead parado há ${dias} dias (acima do SLA) — 1º toque HOJE por ${contact.channel === "whatsapp" ? "WhatsApp" : "o canal preferido"}.` : `1º toque em até 2 dias por ${contact.channel === "whatsapp" ? "WhatsApp" : "o canal preferido"}.`,
+          "2º toque em 4 dias: enviar a proposta/diagnóstico e confirmar recebimento.",
+          "3º toque em 7 dias: ligação de fechamento ou break-up educado.",
+          "Registrar próxima ação e data no card — nenhum lead sem próximo passo.",
         ],
       };
     default:

@@ -57,3 +57,22 @@ O `run-agent` usa o prompt/modelo resolvido; `agent_runs` registra `agentKey`,
 
 Ver também: `docs/platform-admin-agents.md` (edição do padrão) e
 `docs/agent-enrichment.md` (camada de enriquecimento).
+
+## Diagnóstico — "por que está usando heurística?"
+
+Quando o agente cai na heurística mesmo com uma chave de IA configurada, a chamada
+ao LLM falhou e o motivo agora fica visível:
+
+- **`GET /api/health`** → mostra se há chave detectada (`liveAI`, `provider`, `model`).
+- **`GET /api/health?probe=1`** → faz uma chamada **real** ao LLM e retorna o erro
+  exato em `probe.error`. Use isto para diagnosticar:
+  - `401` → `OPENROUTER_API_KEY` inválida/ausente.
+  - `402` → conta OpenRouter sem crédito.
+  - `400 ... model` → o slug em `OPENROUTER_MODEL` (padrão `z-ai/glm-5.2`) não existe;
+    troque por um modelo válido de [openrouter.ai/models](https://openrouter.ai/models).
+- No drawer do lead, o resultado do agente mostra o badge **"heurística (IA falhou)"**
+  com o motivo, e um aviso âmbar com o erro.
+
+Depois de corrigir a env na Vercel e **refazer o deploy**, reexecute o agente — o
+badge antigo fica gravado em `agent_runs`, então é preciso rodar de novo para ver
+"IA · GLM".

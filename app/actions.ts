@@ -217,7 +217,14 @@ export async function createLead(input: CreateLeadInput): Promise<{ dealId: stri
   if (!stageId) throw new Error("Nenhum estágio configurado");
 
   const phone = input.phone ? (normalizePhoneBR(input.phone) ?? input.phone) : null;
+  // `contacts.channel` é o MEIO de contato (enum restrito no banco). O campo
+  // "Canal de origem" do formulário traz a ORIGEM (indicação/evento/…), texto
+  // livre que vai para `deal.origin`. Sanitiza o meio para o enum permitido —
+  // senão o INSERT viola contacts_channel_check e a action quebra.
+  const CONTACT_CHANNELS = new Set(["whatsapp", "email", "voice", "portal", "form"]);
+  const contactChannel = CONTACT_CHANNELS.has(input.channel ?? "") ? (input.channel as string) : "form";
   const contactCustom: Record<string, unknown> = {};
+  if (input.channel && !CONTACT_CHANNELS.has(input.channel)) contactCustom.origin = input.channel;
   if (input.originDetail) contactCustom.origin_detail = input.originDetail;
   if (input.clientType) contactCustom.client_type = input.clientType;
   if (input.cnpj) contactCustom.cnpj = input.cnpj;
@@ -226,7 +233,7 @@ export async function createLead(input: CreateLeadInput): Promise<{ dealId: stri
     .from("contacts")
     .insert({
       org_id: orgId, name, company: input.company || null, email: input.email || null, phone,
-      channel: input.channel || "form", job_title: input.jobTitle || null,
+      channel: contactChannel, job_title: input.jobTitle || null,
       city: input.city || null, segment: input.segment || null, notes: input.notes || null,
       custom: contactCustom,
     })

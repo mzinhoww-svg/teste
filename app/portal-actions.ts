@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getAuthContext } from "@/lib/db";
+import { getAuthContext, type OrgBrand } from "@/lib/db";
+import { clientInviteUrl, portalBaseUrl } from "@/lib/urls";
 
 // Ações do lado AGÊNCIA (CRM) para Clientes, Financeiro, Projetos e Entregas.
 // Todas exigem papel owner/admin/member e escopam por org (RLS + org_id).
@@ -15,6 +16,37 @@ async function requireOrg(allowed: Array<"owner" | "admin" | "member"> = ["owner
 
 function slugify(s: string) {
   return s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+// Resolve destinatários e identidade do cliente para os e-mails (fatura/entrega).
+// Prioriza os usuários ativos do portal; se não houver, usa o contato principal.
+async function resolveClientCtx(supabase: ReturnType<typeof createClient>, clientAccountId: string) {
+  const { data: ca } = await supabase
+    .from("client_accounts")
+    .select("name, slug, brand, primary_contact_id")
+    .eq("id", clientAccountId)
+    .maybeSingle();
+  const { data: users } = await supabase
+    .from("client_users")
+    .select("email, name")
+    .eq("client_account_id", clientAccountId)
+    .eq("status", "active");
+  const recipients: { email: string; name?: string }[] = (users ?? [])
+    .filter((u: any) => u.email)
+    .map((u: any) => ({ email: u.email as string, name: (u.name ?? undefined) as string | undefined }));
+  if (!recipients.length && ca?.primary_contact_id) {
+    const { data: contact } = await supabase.from("contacts").select("email, name").eq("id", ca.primary_contact_id).maybeSingle();
+    if (contact?.email) recipients.push({ email: contact.email, name: contact.name ?? undefined });
+  }
+  const brandObj: any = ca?.brand ?? {};
+  const brand: OrgBrand | undefined = brandObj?.primary ? brandObj : undefined;
+  return { name: (ca?.name ?? "Cliente") as string, slug: (ca?.slug ?? "") as string, brand, recipients };
+}
+
+/** Link para uma seção do portal do cliente (absoluto). "" se não houver base. */
+function portalSectionUrl(slug: string, section: string): string | undefined {
+  const base = portalBaseUrl();
+  return base ? `${base}/portal/${slug}/${section}` : undefined;
 }
 
 // ---- Clientes -------------------------------------------------------------
@@ -68,6 +100,21 @@ export async function createClientInvite(formData: FormData) {
     .select("token")
     .single();
   if (error) throw error;
+
+  // E-mail do convite do portal (Brevo). Best-effort; o link copiável é o fallback.
+  if (portalBaseUrl()) {
+    try {
+      const cc = await resolveClientCtx(supabase, clientAccountId);
+      const { sendAndLogEmail } = await import("@/lib/email/send");
+      const { portalInviteEmail } = await import("@/lib/email/templates");
+      const content = portalInviteEmail({
+        brand: cc.brand ?? ctx.brand, orgName: ctx.orgName, clientName: cc.name,
+        portalUrl: clientInviteUrl(data.token),
+      });
+      await sendAndLogEmail({ db: supabase, orgId: ctx.orgId, to: { email }, content, tags: ["portal-convite"] });
+    } catch { /* não bloqueia a criação do convite */ }
+  }
+
   revalidatePath("/app/clientes");
   return data.token as string;
 }
@@ -78,28 +125,67 @@ export async function createInvoice(formData: FormData) {
   const clientAccountId = String(formData.get("clientAccountId") ?? "");
   if (!clientAccountId) throw new Error("Cliente obrigatório");
   const supabase = createClient();
+  const number = String(formData.get("number") ?? "") || null;
+  const amount = Number(formData.get("amount") ?? 0);
+  const dueDate = String(formData.get("due_date") ?? "") || null;
+  const paymentLink = String(formData.get("payment_link") ?? "") || null;
+  const status = String(formData.get("status") ?? "rascunho");
   const { error } = await supabase.from("invoices").insert({
     org_id: ctx.orgId, client_account_id: clientAccountId,
-    number: String(formData.get("number") ?? "") || null,
-    description: String(formData.get("description") ?? ""),
-    amount: Number(formData.get("amount") ?? 0),
-    due_date: String(formData.get("due_date") ?? "") || null,
-    payment_link: String(formData.get("payment_link") ?? "") || null,
-    recurring: formData.get("recurring") === "on",
-    status: String(formData.get("status") ?? "rascunho"),
+    number, description: String(formData.get("description") ?? ""),
+    amount, due_date: dueDate, payment_link: paymentLink,
+    recurring: formData.get("recurring") === "on", status,
   });
   if (error) throw error;
+  // Só envia por e-mail quando a fatura é criada já como "enviada" (não em rascunho).
+  if (status === "enviada") {
+    await emailInvoice(supabase, ctx.orgId, ctx.orgName, ctx.brand, clientAccountId, { number, amount, dueDate, paymentLink });
+  }
   revalidatePath("/app/financeiro");
 }
 
 export async function setInvoiceStatus(id: string, status: string) {
-  await requireOrg(["owner", "admin", "member"]);
+  const ctx = await requireOrg(["owner", "admin", "member"]);
   const supabase = createClient();
   const patch: Record<string, unknown> = { status };
   if (status === "paga") patch.paid_at = new Date().toISOString();
   const { error } = await supabase.from("invoices").update(patch).eq("id", id);
   if (error) throw error;
+  // Ao marcar como "enviada", dispara a fatura por e-mail ao cliente.
+  if (status === "enviada") {
+    const { data: inv } = await supabase
+      .from("invoices")
+      .select("client_account_id, number, amount, due_date, payment_link")
+      .eq("id", id).maybeSingle();
+    if (inv) {
+      await emailInvoice(supabase, ctx.orgId, ctx.orgName, ctx.brand, inv.client_account_id, {
+        number: inv.number, amount: Number(inv.amount), dueDate: inv.due_date, paymentLink: inv.payment_link,
+      });
+    }
+  }
   revalidatePath("/app/financeiro");
+}
+
+// Envia uma fatura por e-mail aos destinatários do cliente. Best-effort.
+async function emailInvoice(
+  supabase: ReturnType<typeof createClient>, orgId: string, orgName: string, orgBrand: OrgBrand,
+  clientAccountId: string,
+  inv: { number: string | null; amount: number; dueDate: string | null; paymentLink: string | null },
+) {
+  try {
+    const cc = await resolveClientCtx(supabase, clientAccountId);
+    if (!cc.recipients.length) return;
+    const { sendAndLogEmail } = await import("@/lib/email/send");
+    const { invoiceEmail } = await import("@/lib/email/templates");
+    const content = invoiceEmail({
+      brand: cc.brand ?? orgBrand, orgName,
+      clientName: cc.name, number: inv.number ?? "—", amount: inv.amount,
+      dueDate: inv.dueDate ?? undefined,
+      paymentUrl: inv.paymentLink ?? undefined,
+      invoiceUrl: portalSectionUrl(cc.slug, "financeiro"),
+    });
+    await sendAndLogEmail({ db: supabase, orgId, to: cc.recipients, content, tags: ["fatura"] });
+  } catch { /* não bloqueia a operação financeira */ }
 }
 
 // ---- Projetos -------------------------------------------------------------
@@ -134,13 +220,29 @@ export async function createDeliverable(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   if (!clientAccountId || !title) throw new Error("Cliente e título obrigatórios");
   const supabase = createClient();
+  const deliverableUrl = String(formData.get("url") ?? "") || null;
   const { error } = await supabase.from("deliverables").insert({
     org_id: ctx.orgId, client_account_id: clientAccountId, title,
     type: String(formData.get("type") ?? "file"),
-    url: String(formData.get("url") ?? "") || null,
+    url: deliverableUrl,
     description: String(formData.get("description") ?? ""),
   });
   if (error) throw error;
+
+  // Notifica o cliente por e-mail sobre a nova entrega/documento/link. Best-effort.
+  try {
+    const cc = await resolveClientCtx(supabase, clientAccountId);
+    if (cc.recipients.length) {
+      const { sendAndLogEmail } = await import("@/lib/email/send");
+      const { deliverableEmail } = await import("@/lib/email/templates");
+      const content = deliverableEmail({
+        brand: cc.brand ?? ctx.brand, orgName: ctx.orgName, clientName: cc.name, title,
+        url: deliverableUrl ?? portalSectionUrl(cc.slug, "documentos"),
+      });
+      await sendAndLogEmail({ db: supabase, orgId: ctx.orgId, to: cc.recipients, content, tags: ["entrega"] });
+    }
+  } catch { /* não bloqueia a criação da entrega */ }
+
   revalidatePath("/app/entregas");
 }
 
