@@ -407,6 +407,25 @@ export async function updateDealFull(dealId: string, fields: {
   revalidatePath("/app");
 }
 
+// Registra uma atividade/nota/tarefa na timeline do deal e, opcionalmente,
+// atualiza a próxima ação. Papel operacional (member pode registrar).
+export async function createActivity(dealId: string, input: { type?: string; summary: string; nextActionAt?: string | null }) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const summary = (input.summary ?? "").trim();
+  if (!summary) throw new Error("Descrição obrigatória");
+  const { error } = await supabase.from("activities").insert({
+    org_id: ctx.orgId, deal_id: dealId, type: input.type || "note", summary, author: ctx.email ?? "Você",
+  });
+  if (error) throw error;
+  if (input.nextActionAt !== undefined) {
+    await supabase.from("deals").update({ next_action_at: input.nextActionAt || null, last_touch: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString() }).eq("id", dealId).eq("org_id", ctx.orgId);
+  } else {
+    await supabase.from("deals").update({ last_touch: new Date().toISOString().slice(0, 10) }).eq("id", dealId).eq("org_id", ctx.orgId);
+  }
+  revalidatePath("/app");
+}
+
 export async function deleteDeal(dealId: string) {
   await requireRole(["owner", "admin"]);
   const supabase = createClient();
