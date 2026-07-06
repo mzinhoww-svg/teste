@@ -360,13 +360,54 @@ function heuristicAdvisoryBase(deal: Deal, contact: Contact, agent: Agent): Omit
         ],
       };
     case "support-copilot":
+    case "posvenda":
       return {
-        headline: `Handoff e onboarding de ${contact.company || contact.name}`,
+        headline: `Pós-venda e upsell — ${contact.company || contact.name}`,
         items: [
-          `Criar card de onboarding com contexto completo do deal ${deal.title}.`,
-          `Apresentar ${first} ao CS responsável em até 24h.`,
-          "Definir plano de implementação com marcos e SLAs.",
-          "Agendar kickoff e configurar dashboard de acompanhamento.",
+          `Criar plano de onboarding com contexto completo do deal ${deal.title}.`,
+          `Apresentar ${first} ao CS responsável em até 24h e agendar kickoff.`,
+          deal.amount > 100000 ? "Conta estratégica — mapear expansão (novos formatos/estúdio permanente)." : "Mapear oportunidade de upsell no 2º mês (posicionamento contínuo).",
+          "Definir marcos de entrega e SLA de acompanhamento no portal do cliente.",
+        ],
+      };
+    case "diagnostico":
+      return {
+        headline: `Diagnóstico de presença — ${contact.company || contact.name}`,
+        items: [
+          `Avaliar a presença institucional atual de ${contact.company || contact.name} (canais, consistência, autoridade percebida).`,
+          `Identificar a lacuna entre o posicionamento atual e o desejado — base para a proposta.`,
+          `Sinalizar o formato Reiners mais aderente (podcast in loco, estúdio permanente, domo em evento).`,
+          dias != null && dias > 3 ? `Lead parado há ${dias} dias — retomar com o diagnóstico como gancho.` : "Usar o diagnóstico como gancho para a próxima conversa.",
+        ],
+      };
+    case "recomendador":
+      return {
+        headline: `Produto recomendado — ${deal.title}`,
+        items: [
+          deal.amount >= 100000 ? "Estúdio Corporativo Permanente — presença institucional contínua (ticket alto)." : deal.amount >= 10000 ? "Podcast In Loco — posicionamento recorrente com produção no local." : "Domo em Evento — presença pontual de alto impacto para capturar autoridade.",
+          `Justificativa: engajamento ${deal.engagement}/100, estágio ${deal.stageKey}, ticket estimado R$${(deal.amount / 1000).toFixed(0)}k.`,
+          "Ancorar o valor em posicionamento/autoridade contínua — não em número de posts ou vídeos.",
+          "Oferecer 1 alternativa de entrada para reduzir fricção de decisão.",
+        ],
+      };
+    case "objecoes":
+      return {
+        headline: `Tratamento de objeções — ${first}`,
+        items: [
+          `Preço: ancorar em ROI de posicionamento (retorno em ~20 dias) e comparar com custo de invisibilidade institucional.`,
+          `Timing: reforçar janela de oportunidade e o custo de adiar a presença contínua.`,
+          `Autoridade/decisor: ${deal.custom?.decisor === "sim" ? "decisor mapeado — pedir avanço." : "confirmar o decisor antes de propor."}`,
+          "Fechar cada resposta reconfirmando o próximo passo por escrito.",
+        ],
+      };
+    case "cadencia":
+      return {
+        headline: `Cadência de follow-up — ${deal.title}`,
+        items: [
+          dias != null && dias > 3 ? `Lead parado há ${dias} dias (acima do SLA) — 1º toque HOJE por ${contact.channel === "whatsapp" ? "WhatsApp" : "o canal preferido"}.` : `1º toque em até 2 dias por ${contact.channel === "whatsapp" ? "WhatsApp" : "o canal preferido"}.`,
+          "2º toque em 4 dias: enviar a proposta/diagnóstico e confirmar recebimento.",
+          "3º toque em 7 dias: ligação de fechamento ou break-up educado.",
+          "Registrar próxima ação e data no card — nenhum lead sem próximo passo.",
         ],
       };
     default:
