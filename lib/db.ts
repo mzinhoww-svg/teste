@@ -210,12 +210,26 @@ export async function getDealFull(dealId: string): Promise<DealFull | null> {
   return { deal, contact };
 }
 
+// Fonte ÚNICA de verdade da configuração de execução: a metadata rica (grupo,
+// dores, descrição) vem da tabela agents, mas enabled/model/instructions/triggers
+// vêm da resolução (padrão da plataforma → override do tenant). Assim, se o admin
+// desativa um agente em /admin/agents, ele fica desativado em todo lugar.
 export async function getAgents(): Promise<Agent[]> {
   const supabase = createClient();
   const orgId = await getOrgId();
   if (!orgId) return [];
-  const { data } = await supabase.from("agents").select("*").eq("org_id", orgId).order("position");
-  return (data ?? []).map(mapAgent);
+  const { resolveAllAgents } = await import("@/lib/agents/resolve");
+  const [{ data }, resolved] = await Promise.all([
+    supabase.from("agents").select("*").eq("org_id", orgId).order("position"),
+    resolveAllAgents(orgId),
+  ]);
+  const byKind = new Map(resolved.map((r) => [r.kind, r]));
+  return (data ?? []).map((row: any) => {
+    const a = mapAgent(row);
+    const r = byKind.get(a.id);
+    if (!r) return a;
+    return { ...a, enabled: r.active, model: r.model, triggers: r.triggers, instructions: r.prompt };
+  });
 }
 
 export async function getAgentByKind(kind: string): Promise<Agent | null> {
@@ -223,7 +237,12 @@ export async function getAgentByKind(kind: string): Promise<Agent | null> {
   const orgId = await getOrgId();
   if (!orgId) return null;
   const { data } = await supabase.from("agents").select("*").eq("kind", kind).eq("org_id", orgId).maybeSingle();
-  return data ? mapAgent(data) : null;
+  if (!data) return null;
+  const a = mapAgent(data);
+  const { resolveAgentByKind } = await import("@/lib/agents/resolve");
+  const r = await resolveAgentByKind(kind, orgId);
+  if (r) { a.enabled = r.active; a.model = r.model; a.triggers = r.triggers; a.instructions = r.prompt; }
+  return a;
 }
 
 export interface AutomationView {
@@ -276,6 +295,7 @@ export interface ContractView {
   contactName: string | null;
   signToken: string | null;
   signedAt: string | null;
+  signers: { name: string; email: string | null; status: string }[];
 }
 
 export async function getContracts(): Promise<ContractView[]> {
@@ -284,7 +304,7 @@ export async function getContracts(): Promise<ContractView[]> {
   if (!orgId) return [];
   const { data } = await supabase
     .from("contracts")
-    .select("*, deal:deals(title, contact:contacts(name, company, phone))")
+    .select("*, deal:deals(title, contact:contacts(name, company, phone)), signers:contract_signers(name, email, status)")
     .eq("org_id", orgId)
     .order("created_at", { ascending: false });
   return (data ?? []).map((r: any) => ({
@@ -297,6 +317,7 @@ export async function getContracts(): Promise<ContractView[]> {
     signingUrl: r.signing_url ?? null, certificateUrl: r.certificate_url ?? null,
     contactPhone: r.deal?.contact?.phone ?? null, contactName: r.deal?.contact?.name ?? null,
     signToken: r.sign_token ?? null, signedAt: r.signed_at ?? null,
+    signers: (r.signers ?? []).map((s: any) => ({ name: s.name, email: s.email ?? null, status: s.status })),
   }));
 }
 
@@ -333,26 +354,26 @@ export async function getUnreadCount(): Promise<number> {
   return count ?? 0;
 }
 
-// --- Versões de agentes (Studio: histórico / rollback / diff) ---------------
+// --- Enriquecimento de leads ------------------------------------------------
 
-export interface AgentVersion {
-  id: string; instructions: string; model: string; temperature: number | null; createdAt: string;
+export interface EnrichmentRow {
+  id: string; sourceLabel: string; sourceUrl: string | null; fact: string;
+  confidence: string; relevance: string; createdAt: string;
 }
 
-export async function getAgentVersions(agentId: string, limit = 10): Promise<AgentVersion[]> {
+export async function getLeadEnrichment(dealId: string): Promise<EnrichmentRow[]> {
   const supabase = createClient();
-  const ctx = await getAuthContext();
-  if (!ctx?.orgId) return [];
+  const orgId = await getOrgId();
+  if (!orgId) return [];
   const { data } = await supabase
-    .from("agent_versions")
-    .select("id,instructions,model,temperature,created_at")
-    .eq("org_id", ctx.orgId)
-    .eq("agent_id", agentId)
+    .from("lead_enrichment")
+    .select("id, source_label, source_url, extracted_fact, confidence, relevance, created_at")
+    .eq("org_id", orgId).eq("deal_id", dealId)
     .order("created_at", { ascending: false })
-    .limit(limit);
-  return (data ?? []).map((v: any) => ({
-    id: v.id, instructions: v.instructions ?? "", model: v.model ?? "",
-    temperature: v.temperature, createdAt: v.created_at,
+    .limit(40);
+  return (data ?? []).map((r: any) => ({
+    id: r.id, sourceLabel: r.source_label, sourceUrl: r.source_url, fact: r.extracted_fact,
+    confidence: r.confidence, relevance: r.relevance, createdAt: r.created_at,
   }));
 }
 

@@ -35,6 +35,7 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/convite") ||
     path.startsWith("/sign") ||
     path.startsWith("/proposta") ||
+    path.startsWith("/api/proposta") ||
     path.startsWith("/api/health") ||
     path.startsWith("/api/webhooks") ||
     path.startsWith("/api/whatsapp/webhook") ||

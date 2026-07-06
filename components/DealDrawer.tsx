@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { brl, tempColor, tempLabel } from "@/lib/format";
 import { waMeLink, buildWaTemplate } from "@/lib/whatsapp";
+import { EnrichmentPanel } from "@/components/EnrichmentPanel";
 import type { Agent, Contact, Deal, Stage } from "@/lib/types";
 import type { ProductListItem } from "@/lib/db";
 
@@ -48,7 +49,10 @@ function ProposalShare({ token, phone, name }: { token: string; phone?: string |
   return (
     <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-2">
       <a href={link} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50">
-        <FileText className="h-3 w-3" aria-hidden /> Abrir / PDF
+        <FileText className="h-3 w-3" aria-hidden /> Abrir
+      </a>
+      <a href={`${origin.replace(/\/$/, "")}/api/proposta/${token}/pdf`} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50">
+        <FileText className="h-3 w-3" aria-hidden /> PDF
       </a>
       <button onClick={() => { navigator.clipboard.writeText(link); toast.success("Link da proposta copiado"); }}
         className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50">
@@ -322,6 +326,8 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
               )}
             </section>
           ))}
+
+          <EnrichmentPanel dealId={deal.id} />
 
           {contact && (
             <section className="rounded-xl border border-slate-200 p-4">

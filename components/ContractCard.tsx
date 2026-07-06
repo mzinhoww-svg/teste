@@ -154,6 +154,17 @@ export function ContractCard({ c, orgName }: { c: ContractView; orgName: string 
         )}
       </div>
 
+      {c.signers.length > 0 && (
+        <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-500">
+          {c.signers.map((s, i) => (
+            <li key={i} className="inline-flex items-center gap-1">
+              <span className={`h-1.5 w-1.5 rounded-full ${s.status === "signed" ? "bg-emerald-500" : "bg-slate-300"}`} />
+              {s.name} <span className="text-slate-400">· {s.status === "signed" ? "assinou" : "pendente"}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
       {open && (
         <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
           {clauses.map((cl, i) => (

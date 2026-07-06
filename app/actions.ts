@@ -442,66 +442,77 @@ export async function deleteStage(stageId: string, migrateToStageId?: string) {
   revalidatePath("/app");
 }
 
-// --- Agentes (Studio) ----------------------------------------------------
+// --- Agentes (Studio): override por tenant -------------------------------
+// Só tem efeito quando ALLOW_TENANT_AGENT_OVERRIDES=true. O tenant passa a NÃO
+// herdar o padrão da plataforma para aquele agente. Validado por papel e org.
 
-export async function updateAgent(uuid: string, fields: {
-  instructions?: string; model?: string; enabled?: boolean; triggers?: string[]; temperature?: number;
+export async function saveTenantAgentOverride(agentKey: string, fields: {
+  prompt: string; model: string; triggers: string[]; active: boolean;
 }) {
   const { orgId } = await requireRole(["owner", "admin"]);
-  const supabase = createClient();
-
-  // Versiona o prompt antes de sobrescrever.
-  if (fields.instructions !== undefined || fields.model !== undefined) {
-    const { data: cur } = await supabase.from("agents").select("instructions,model,temperature").eq("id", uuid).maybeSingle();
-    if (cur) {
-      await supabase.from("agent_versions").insert({
-        org_id: orgId, agent_id: uuid, instructions: cur.instructions, model: cur.model, temperature: cur.temperature,
-      });
-    }
+  if (process.env.ALLOW_TENANT_AGENT_OVERRIDES !== "true") {
+    throw new Error("Overrides por tenant estão desabilitados nesta instância");
   }
-
-  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
-  if (fields.instructions !== undefined) patch.instructions = fields.instructions;
-  if (fields.model !== undefined) patch.model = fields.model;
-  if (fields.enabled !== undefined) patch.enabled = fields.enabled;
-  if (fields.triggers !== undefined) patch.triggers = fields.triggers;
-  if (fields.temperature !== undefined) patch.temperature = fields.temperature;
-
-  const { error } = await supabase.from("agents").update(patch).eq("id", uuid);
+  const supabase = createClient();
+  const { error } = await supabase.from("org_agent_settings").upsert({
+    org_id: orgId, agent_key: agentKey, inherit_platform_default: false,
+    override_prompt: fields.prompt, override_model: fields.model,
+    override_triggers: fields.triggers, active: fields.active,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "org_id,agent_key" });
   if (error) throw error;
   revalidatePath("/app/studio");
 }
 
-/**
- * Reverte um agente para uma versão anterior do prompt/modelo/temperatura.
- * A configuração atual é versionada antes (rollback também é reversível).
- */
-export async function rollbackAgent(agentId: string, versionId: string) {
+export async function resetTenantAgentOverride(agentKey: string) {
   const { orgId } = await requireRole(["owner", "admin"]);
   const supabase = createClient();
-
-  const { data: version } = await supabase
-    .from("agent_versions")
-    .select("instructions, model, temperature")
-    .eq("id", versionId)
-    .eq("agent_id", agentId)
-    .maybeSingle();
-  if (!version) throw new Error("Versão não encontrada");
-
-  const { data: cur } = await supabase
-    .from("agents").select("instructions, model, temperature").eq("id", agentId).maybeSingle();
-  if (cur) {
-    await supabase.from("agent_versions").insert({
-      org_id: orgId, agent_id: agentId, instructions: cur.instructions, model: cur.model, temperature: cur.temperature,
-    });
-  }
-
-  const { error } = await supabase.from("agents").update({
-    instructions: version.instructions, model: version.model, temperature: version.temperature,
-    updated_at: new Date().toISOString(),
-  }).eq("id", agentId);
+  const { error } = await supabase.from("org_agent_settings")
+    .update({ inherit_platform_default: true, updated_at: new Date().toISOString() })
+    .eq("org_id", orgId).eq("agent_key", agentKey);
   if (error) throw error;
   revalidatePath("/app/studio");
+}
+
+// --- Enriquecimento de leads ------------------------------------------------
+
+export async function enrichDeal(dealId: string) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { fetchCNPJ, recommendedSearches } = await import("@/lib/enrichment");
+
+  const { data: deal } = await supabase
+    .from("deals").select("id, custom, contact:contacts(id, name, company, custom)")
+    .eq("id", dealId).eq("org_id", ctx.orgId).maybeSingle();
+  if (!deal) throw new Error("Deal não encontrado");
+
+  const contact: any = Array.isArray(deal.contact) ? deal.contact[0] : deal.contact;
+  const custom: any = deal.custom ?? {};
+  const cnpj = String(custom.cnpj ?? contact?.custom?.cnpj ?? "").trim();
+  const company = contact?.company ?? null;
+  const name = contact?.name ?? null;
+
+  const facts = [
+    ...(cnpj ? await fetchCNPJ(cnpj) : []),
+    ...recommendedSearches(company, name),
+  ];
+
+  if (facts.length) {
+    await supabase.from("lead_enrichment").insert(
+      facts.map((f) => ({
+        org_id: ctx.orgId, deal_id: dealId, contact_id: contact?.id ?? null, company_name: company,
+        source_type: f.source_type, source_label: f.source_label, source_url: f.source_url,
+        extracted_fact: f.extracted_fact, confidence: f.confidence, relevance: f.relevance,
+        used_by_agent: null, created_by_user_id: ctx.userId,
+      })),
+    );
+  }
+  revalidatePath("/app");
+  return {
+    count: facts.length,
+    hadCnpj: Boolean(cnpj),
+    facts: facts.map((f) => ({ label: f.source_label, fact: f.extracted_fact, confidence: f.confidence, url: f.source_url })),
+  };
 }
 
 // --- Onboarding ------------------------------------------------------------
@@ -542,6 +553,27 @@ export async function sendContractForSignature(contractId: string) {
     updated_at: new Date().toISOString(),
   }).eq("id", contractId);
 
+  // Modelo por-signatário: envelope + um signatário por parte, cada um com token
+  // interno HASHEADO (o token em claro nunca é persistido). Idempotente: remove
+  // signatários/envelope antigos deste contrato antes de recriar.
+  const { createHash, randomBytes } = await import("crypto");
+  await supabase.from("contract_signers").delete().eq("contract_id", contractId);
+  await supabase.from("contract_signature_envelopes").delete().eq("contract_id", contractId);
+  const { data: envelope } = await supabase.from("contract_signature_envelopes").insert({
+    org_id: ctx.orgId, contract_id: contractId, provider: env.provider,
+    provider_document_id: env.envelopeId, status: "sent", signing_url: env.signingUrl ?? null,
+    sent_at: new Date().toISOString(),
+  }).select("id").single();
+  const signerRows = (Array.isArray(c.signatories) ? c.signatories : [])
+    .filter((s: any) => s.email)
+    .map((s: any, i: number) => ({
+      org_id: ctx.orgId, contract_id: contractId, envelope_id: envelope?.id ?? null,
+      name: s.name, email: s.email, phone: s.phone ?? null, role: "signer", signing_order: i + 1,
+      internal_signing_token_hash: createHash("sha256").update(randomBytes(24)).digest("hex"),
+      status: "sent",
+    }));
+  if (signerRows.length) await supabase.from("contract_signers").insert(signerRows);
+
   await supabase.from("notifications").insert({
     org_id: ctx.orgId, type: "contract", title: "Contrato enviado para assinatura",
     body: `${c.reference} — ${c.title} enviado via ${env.provider}.`, contract_id: contractId, deal_id: c.deal_id, action_url: "/app/contracts",
@@ -567,12 +599,21 @@ export async function refreshContractStatus(contractId: string) {
   const provider = getSignatureProvider();
   const st = await provider.getStatus(c.envelope_id);
   const localMap: Record<string, string> = { enviado: "enviado", visualizado: "enviado", assinado: "assinado", recusado: "cancelado", expirado: "cancelado", erro: "enviado" };
+  const now = new Date().toISOString();
   await supabase.from("contracts").update({
     external_status: st.status, signature_status: localMap[st.status] ?? "enviado",
     certificate_url: st.certificateUrl ?? null,
-    signed_at: st.status === "assinado" ? new Date().toISOString() : null,
-    updated_at: new Date().toISOString(),
+    signed_at: st.status === "assinado" ? now : null,
+    updated_at: now,
   }).eq("id", contractId);
+  const envStatus = st.status === "assinado" ? "completed" : st.status === "recusado" ? "declined" : st.status === "expirado" ? "expired" : "sent";
+  await supabase.from("contract_signature_envelopes").update({
+    status: envStatus, certificate_url: st.certificateUrl ?? null,
+    completed_at: st.status === "assinado" ? now : null, updated_at: now,
+  }).eq("contract_id", contractId);
+  if (st.status === "assinado") {
+    await supabase.from("contract_signers").update({ status: "signed", signed_at: now, updated_at: now }).eq("contract_id", contractId);
+  }
   revalidatePath("/app/contracts");
   return { status: st.status };
 }
