@@ -85,10 +85,15 @@ npm run test:e2e   # testes E2E (Playwright) — ver docs/testing.md
 
 | Tema | Arquivo |
 | --- | --- |
+| Agentes de IA (9 agentes, resolução global) | [`docs/agents.md`](docs/agents.md) |
+| Camada de enriquecimento dos agentes | [`docs/agent-enrichment.md`](docs/agent-enrichment.md) |
+| Admin da plataforma — agentes padrão | [`docs/platform-admin-agents.md`](docs/platform-admin-agents.md) |
+| WhatsApp Bridge (leitura de conversas) | [`docs/whatsapp-bridge.md`](docs/whatsapp-bridge.md) |
+| Contratos e assinatura | [`docs/contracts-signature.md`](docs/contracts-signature.md) |
 | Assinatura digital (OpenSign) | [`docs/opensign.md`](docs/opensign.md) |
 | Notificações in-app + WhatsApp | [`docs/notifications.md`](docs/notifications.md) |
 | Cadências e SLA | [`docs/cadences.md`](docs/cadences.md) |
-| Testes E2E e CI | [`docs/testing.md`](docs/testing.md) |
+| Testes (unit + E2E) e CI | [`docs/testing.md`](docs/testing.md) |
 | Deploy na Vercel e domínio próprio | [`docs/vercel-domain.md`](docs/vercel-domain.md) |
 | Admin da plataforma | [`docs/admin.md`](docs/admin.md) |
 | Seed do primeiro tenant (Reiners Media) | [`docs/reiners-media-seed.md`](docs/reiners-media-seed.md) |

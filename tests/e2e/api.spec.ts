@@ -18,6 +18,13 @@ test.describe("APIs públicas e webhooks", () => {
     expect(res.status()).toBe(401);
   });
 
+  test("webhook WhatsApp recusa payload sem segredo", async ({ request }) => {
+    const res = await request.post("/api/whatsapp/webhook", {
+      data: { from: "5565999999999", body: "oi" },
+    });
+    expect(res.status()).toBe(401);
+  });
+
   // O middleware redireciona rotas privadas para /login antes de chegar ao
   // handler, então sem seguir o redirect esperamos 3xx (ou 401 do próprio
   // handler). O que importa: acesso deslogado nunca é 200 com dados.
