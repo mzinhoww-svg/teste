@@ -72,7 +72,21 @@ async function callOpenRouter({ system, prompt, maxTokens }: Required<LLMOptions
   const apiKey = process.env.OPENROUTER_API_KEY!;
   const model = process.env.OPENROUTER_MODEL || DEFAULT_OPENROUTER_MODEL;
 
-  const res = await fetch(OPENROUTER_URL, {
+  // GLM-5.2 é um modelo de raciocínio: sem folga de tokens gasta tudo "pensando"
+  // e devolve content VAZIO. Damos teto alto, reduzimos o esforço de raciocínio e
+  // forçamos JSON. Esses parâmetros são opcionais — se o modelo não suportar
+  // (400), refazemos a chamada sem eles (degradação graciosa).
+  const base = {
+    model,
+    max_tokens: Math.max(maxTokens, 2048),
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: prompt },
+    ],
+  };
+  const enhanced = { ...base, reasoning: { effort: "low" }, response_format: { type: "json_object" } };
+
+  const post = (body: object) => fetch(OPENROUTER_URL, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -80,20 +94,18 @@ async function callOpenRouter({ system, prompt, maxTokens }: Required<LLMOptions
       "HTTP-Referer": "https://crm-ai-studio.vercel.app",
       "X-Title": "CRM AI Studio",
     },
-    body: JSON.stringify({
-      model,
-      max_tokens: maxTokens,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: prompt },
-      ],
-    }),
+    body: JSON.stringify(body),
   });
 
+  let res = await post(enhanced);
+  if (res.status === 400 || res.status === 422) res = await post(base); // params não suportados → tenta simples
   if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${await res.text()}`);
-  const data = (await res.json()) as { choices?: { message?: { content?: string } }[]; usage?: { total_tokens?: number } };
+
+  const data = (await res.json()) as { choices?: { message?: { content?: string; reasoning?: string } }[]; usage?: { total_tokens?: number } };
   addTokens(data.usage?.total_tokens ?? 0);
-  return (data.choices?.[0]?.message?.content ?? "").trim();
+  const msg = data.choices?.[0]?.message;
+  // Se o content vier vazio (raciocínio consumiu tudo), tenta o campo de reasoning.
+  return ((msg?.content || msg?.reasoning) ?? "").trim();
 }
 
 async function callAnthropic({ system, prompt, maxTokens }: Required<LLMOptions>): Promise<string> {
