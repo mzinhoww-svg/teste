@@ -3,6 +3,7 @@ import { getAuthContext, getNotifications, getUnreadCount } from "@/lib/db";
 import { MobileNav } from "./MobileNav";
 import { TenantBadge, UserMenu } from "./UserMenu";
 import { NotificationBell } from "./NotificationBell";
+import { TenantThemeVars } from "./TenantThemeVars";
 
 type Tab = "board" | "contracts" | "automations" | "reports" | "studio" | "how";
 
@@ -31,6 +32,7 @@ export async function Nav({ active }: { active: Tab }) {
   const brandBar = ctx?.brand?.accent || ctx?.brand?.primary;
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
+      <TenantThemeVars primary={ctx?.brand?.primary} accent={ctx?.brand?.accent} />
       {brandBar && <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${ctx?.brand?.primary ?? brandBar}, ${brandBar})` }} aria-hidden />}
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">

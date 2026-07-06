@@ -68,3 +68,20 @@ body {
 .dark .hover\:bg-slate-100:hover { background-color: #334155 !important; }
 
 .dark ::-webkit-scrollbar-thumb { @apply bg-slate-600; }
+
+/* ==========================================================================
+   Tema por tenant (Fase M)
+   Quando o tenant ativo tem cores de marca, TenantThemeVars marca o documento
+   com [data-tenant-themed] e define --tenant-primary/--tenant-accent. Aqui
+   remapeamos as classes brand-* de AÇÃO (as mais visíveis) para essas
+   variáveis — cada tenant re-tematiza o app sem tocar em componentes.
+   Padronizado e replicável: qualquer tenant com brand.primary é tematizado.
+   Ver docs/tenant-design.md.
+   ========================================================================== */
+[data-tenant-themed] .bg-brand-600 { background-color: var(--tenant-primary) !important; }
+[data-tenant-themed] .hover\:bg-brand-700:hover { background-color: var(--tenant-accent) !important; }
+[data-tenant-themed] .text-brand-600,
+[data-tenant-themed] .text-brand-700 { color: var(--tenant-primary) !important; }
+[data-tenant-themed] .border-brand-600 { border-color: var(--tenant-primary) !important; }
+[data-tenant-themed] .ring-brand-400 { --tw-ring-color: var(--tenant-accent) !important; }
+[data-tenant-themed] .accent-brand-600 { accent-color: var(--tenant-primary) !important; }
