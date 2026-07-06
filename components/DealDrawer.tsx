@@ -15,6 +15,9 @@ import { brl, tempColor, tempLabel } from "@/lib/format";
 import { waMeLink, buildWaTemplate } from "@/lib/whatsapp";
 import { EnrichmentPanel } from "@/components/EnrichmentPanel";
 import { REINERS_PRODUCTS } from "@/components/leads/CreateLeadSheet";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { AGENT_LABEL_BY_KIND, suggestAgentKind } from "@/lib/agent-suggest";
+import { WA_TEMPLATES } from "@/lib/whatsapp";
 import type { Agent, Contact, Deal, Stage } from "@/lib/types";
 import type { ProductListItem } from "@/lib/db";
 
@@ -169,6 +172,45 @@ function RunningSkeleton() {
 
 const groupOrder: Record<string, number> = { "aquisição": 0, vendas: 1, "pós-venda": 2 };
 
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700">
+      <div className="text-[10px] font-medium uppercase tracking-wide text-slate-400">{label}</div>
+      <div className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{value}</div>
+    </div>
+  );
+}
+
+// Aba WhatsApp: templates por contexto + envio manual via wa.me (registra timeline
+// no servidor via logWhatsappOpened não é chamado aqui para não bloquear o link;
+// o wa.me apenas abre a conversa — nada automático).
+const WA_TAB_KEYS = ["primeiro_contato", "confirmacao_reuniao", "envio_proposta", "followup_48h", "ligacao_5d", "ultimo_contato_10d", "posvenda", "upsell"] as const;
+
+function WhatsAppTab({ phone, name, company }: { phone?: string | null; name?: string | null; company?: string | null }) {
+  if (!phone) {
+    return <p className="text-sm text-slate-400">Sem telefone no contato. Adicione um número (aba Visão geral → Contato) para enviar pelo WhatsApp.</p>;
+  }
+  const ctx = { nome: (name ?? "").split(" ")[0], empresa: company ?? undefined };
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-slate-500">Envio manual via wa.me — a mensagem abre pré-preenchida no seu WhatsApp. Nada é enviado automaticamente.</p>
+      {WA_TAB_KEYS.map((k) => {
+        const tpl = WA_TEMPLATES[k];
+        if (!tpl) return null;
+        const msg = buildWaTemplate(k, ctx);
+        const link = waMeLink(phone, msg);
+        return (
+          <a key={k} href={link ?? "#"} target="_blank" rel="noreferrer"
+            className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2 text-sm hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-slate-700">
+            <span className="min-w-0"><span className="font-medium text-slate-700 dark:text-slate-200">{tpl.label}</span><span className="ml-2 truncate text-xs text-slate-400">{msg.slice(0, 48)}…</span></span>
+            <MessageCircle className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
 export function DealDrawer({ deal, contact, agents, stages, products = [], myRole = "member", orgName = "", onClose }: {
   deal: Deal; contact: Contact | null; agents: Agent[]; stages: Stage[];
   products?: ProductListItem[]; myRole?: string; orgName?: string; onClose: () => void;
@@ -259,6 +301,20 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
 
   const runnable = agents.filter((a) => a.runnable).sort((a, b) => (groupOrder[a.group] ?? 9) - (groupOrder[b.group] ?? 9));
 
+  // Resumo operacional da aba "Visão geral".
+  const missingOverview = (() => {
+    const m: string[] = [];
+    if (!contact?.phone && !contact?.email) m.push("canal de contato");
+    if (!deal.custom?.product_interest && !deal.productId) m.push("produto");
+    if (!deal.nextActionAt && !deal.custom?.next_action) m.push("próxima ação");
+    if (deal.custom?.decisor === "nao" || deal.custom?.decisor === "nao_sei") m.push("decisor");
+    return m;
+  })();
+  const overviewSuggestion = suggestAgentKind({
+    stageKey: deal.stageKey, hasDecisor: deal.custom?.decisor === "sim",
+    hasBudget: Boolean(deal.custom?.budget), complete: missingOverview.length === 0,
+  });
+
   return (
     <Sheet open onOpenChange={(o) => !o && onClose()}>
       <SheetContent aria-describedby={undefined}>
@@ -292,97 +348,105 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
           </div>
         </div>
 
-        <div className="space-y-4 px-6 py-5">
-          {runnable.map((agent) => (
-            <section key={String(agent.id)} className="rounded-xl border border-slate-200 p-4">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-800">{agent.name}</h3>
-                  <span className="text-[11px] text-slate-500">{agent.role}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    onClick={() => run(String(agent.id), true)}
-                    disabled={!agent.enabled || loading === agent.id}
-                    title="Gerar prévia sem salvar"
-                  >
-                    <FlaskConical className="h-3 w-3" aria-hidden /> Testar
-                  </Button>
-                  <Button
-                    size="xs"
-                    onClick={() => run(String(agent.id))}
-                    disabled={!agent.enabled}
-                    loading={loading === agent.id}
-                  >
-                    {loading === agent.id ? "Executando" : agent.enabled ? (<><Play className="h-3 w-3" aria-hidden /> Executar</>) : "inativo"}
-                  </Button>
-                </div>
+        <Tabs defaultValue="overview" className="px-6 py-3">
+          <TabsList>
+            <TabsTrigger value="overview">Visão geral</TabsTrigger>
+            <TabsTrigger value="agents">Agentes</TabsTrigger>
+            <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
+            <TabsTrigger value="activity">Atividades</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+              <Field label="Valor" value={brl(deal.amount)} />
+              <Field label="Temperatura" value={deal.temperature ? tempLabel(deal.temperature) : "—"} />
+              <Field label="Probabilidade" value={deal.probability != null ? `${deal.probability}%` : "—"} />
+              <Field label="Produto" value={deal.custom?.product_interest ?? "—"} />
+              <Field label="Score" value={deal.score != null ? String(deal.score) : "—"} />
+              <Field label="Próxima ação" value={deal.nextActionAt ?? deal.custom?.next_action ?? "—"} />
+            </div>
+            {missingOverview.length > 0 && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                Falta para proposta: {missingOverview.join(", ")}.
               </div>
-              {loading === agent.id ? (
-                <RunningSkeleton />
-              ) : hydrating ? (
-                <Skeleton className="mt-3 h-4 w-2/3" />
-              ) : (
-                results[String(agent.id)] && (
-                  <>
-                    {results[String(agent.id)]?.dryRun && (
-                      <div className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-700">
-                        <FlaskConical className="h-3 w-3" aria-hidden /> Prévia — não foi salvo neste deal
-                      </div>
-                    )}
-                    <AgentResult kind={String(agent.id)} r={results[String(agent.id)]} contactPhone={contact?.phone} contactName={contact?.name} />
-                  </>
-                )
-              )}
-            </section>
-          ))}
+            )}
+            <div className="rounded-lg border border-brand-200 bg-brand-50/60 px-3 py-2 text-xs dark:border-brand-900 dark:bg-brand-950/30">
+              <span className="font-semibold text-brand-700 dark:text-brand-300">Agente recomendado:</span>{" "}
+              {AGENT_LABEL_BY_KIND[overviewSuggestion.kind] ?? overviewSuggestion.kind} — {overviewSuggestion.reason}
+            </div>
+            <EnrichmentPanel dealId={deal.id} />
 
-          <EnrichmentPanel dealId={deal.id} />
-
-          {contact && (
-            <section className="rounded-xl border border-slate-200 p-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex min-w-0 items-center gap-2">
-                  <UserRound className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold text-slate-800">{contact.name}</div>
-                    <div className="truncate text-xs text-slate-400">
-                      {[contact.company, contact.email, contact.phone].filter(Boolean).join(" · ") || "sem dados de contato"}
+            {contact && (
+              <section className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <UserRound className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">{contact.name}</div>
+                      <div className="truncate text-xs text-slate-400">{[contact.company, contact.email, contact.phone].filter(Boolean).join(" · ") || "sem dados de contato"}</div>
                     </div>
                   </div>
+                  <div className="flex shrink-0 gap-1.5">
+                    <Button variant="outline" size="xs" onClick={() => setContactOpen(true)}><Pencil className="h-3 w-3" aria-hidden /> Contato</Button>
+                    <Button variant="outline" size="xs" onClick={() => setEditOpen(true)}><Pencil className="h-3 w-3" aria-hidden /> Oportunidade</Button>
+                  </div>
                 </div>
-                <div className="flex shrink-0 gap-1.5">
-                  <Button variant="outline" size="xs" onClick={() => setContactOpen(true)}>
-                    <Pencil className="h-3 w-3" aria-hidden /> Editar
-                  </Button>
-                  {isAdmin && (
-                    <Button variant="destructive-ghost" size="xs" onClick={() => setConfirmDeleteContact(true)}>
-                      <Trash2 className="h-3 w-3" aria-hidden />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
+              </section>
+            )}
+          </TabsContent>
 
-          <section>
-            <h3 className="mb-2 text-sm font-semibold text-slate-800">Atividades</h3>
-            {deal.activities.length === 0 && <p className="text-sm text-slate-400">Sem atividades ainda.</p>}
+          <TabsContent value="agents" className="space-y-4 py-4">
+            {runnable.map((agent) => (
+              <section key={String(agent.id)} className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">{agent.name}</h3>
+                    <span className="text-[11px] text-slate-500">{agent.role}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Button variant="outline" size="xs" onClick={() => run(String(agent.id), true)} disabled={!agent.enabled || loading === agent.id} title="Gerar prévia sem salvar">
+                      <FlaskConical className="h-3 w-3" aria-hidden /> Testar
+                    </Button>
+                    <Button size="xs" onClick={() => run(String(agent.id))} disabled={!agent.enabled} loading={loading === agent.id}>
+                      {loading === agent.id ? "Executando" : agent.enabled ? (<><Play className="h-3 w-3" aria-hidden /> Executar</>) : "inativo"}
+                    </Button>
+                  </div>
+                </div>
+                {loading === agent.id ? <RunningSkeleton /> : hydrating ? <Skeleton className="mt-3 h-4 w-2/3" /> : (
+                  results[String(agent.id)] && (
+                    <>
+                      {results[String(agent.id)]?.dryRun && (
+                        <div className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-700">
+                          <FlaskConical className="h-3 w-3" aria-hidden /> Prévia — não foi salvo neste deal
+                        </div>
+                      )}
+                      <AgentResult kind={String(agent.id)} r={results[String(agent.id)]} contactPhone={contact?.phone} contactName={contact?.name} />
+                    </>
+                  )
+                )}
+              </section>
+            ))}
+          </TabsContent>
+
+          <TabsContent value="whatsapp" className="py-4">
+            <WhatsAppTab phone={contact?.phone} name={contact?.name} company={contact?.company} />
+          </TabsContent>
+
+          <TabsContent value="activity" className="py-4">
+            {deal.activities.length === 0 && <p className="text-sm text-slate-400">Sem atividades ainda. Ações no deal (edição, execução de agentes, mudança de estágio) aparecem aqui.</p>}
             <ul className="space-y-2">
               {deal.activities.map((a) => (
                 <li key={a.id} className="flex gap-3 text-sm">
                   <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-400" aria-hidden />
                   <div>
-                    <span className="text-slate-700">{a.summary}</span>
+                    <span className="text-slate-700 dark:text-slate-300">{a.summary}</span>
                     <div className="text-xs text-slate-400">{a.at} · {a.type} · {a.author}</div>
                   </div>
                 </li>
               ))}
             </ul>
-          </section>
-        </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Editar deal */}
         <Dialog open={editOpen} onOpenChange={setEditOpen}>
