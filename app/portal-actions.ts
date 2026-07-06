@@ -247,11 +247,31 @@ export async function createDeliverable(formData: FormData) {
 }
 
 export async function setDeliverableStatus(id: string, status: string) {
-  await requireOrg(["owner", "admin", "member"]);
+  const ctx = await requireOrg(["owner", "admin", "member"]);
   const supabase = createClient();
   const patch: Record<string, unknown> = { status };
   if (status === "entregue" || status === "aprovado") patch.delivered_at = new Date().toISOString();
   const { error } = await supabase.from("deliverables").update(patch).eq("id", id);
   if (error) throw error;
+
+  // Agente de Pós-entrega/NPS: ao marcar como entregue, cria tarefa de pesquisa
+  // de satisfação + gancho de upsell. Best-effort.
+  if (status === "entregue") {
+    try {
+      const { data: d } = await supabase.from("deliverables").select("title, client_account_id").eq("id", id).maybeSingle();
+      const due = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
+      await supabase.from("activities").insert({
+        org_id: ctx.orgId, type: "note",
+        summary: `Pós-entrega: enviar pesquisa de satisfação (NPS) sobre "${d?.title ?? "entrega"}" e avaliar upsell`,
+        author: "Agente de Pós-venda", due_at: due,
+      });
+      await supabase.from("notifications").insert({
+        org_id: ctx.orgId, type: "nps", title: "Entrega concluída — coletar NPS",
+        body: `"${d?.title ?? "Entrega"}" foi entregue. Envie o NPS e avalie oportunidade de upsell.`,
+        action_url: "/app/tarefas",
+      });
+    } catch { /* não bloqueia */ }
+  }
+
   revalidatePath("/app/entregas");
 }
