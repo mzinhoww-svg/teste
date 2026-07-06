@@ -42,15 +42,15 @@ export function AutomationManager({ automations, stages, agents, orgName }: {
       {formOpen && (
         <form action={submit} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-4">
           <label className="text-xs font-medium text-slate-500">Nome
-            <input name="name" placeholder="ex.: Proposta automática" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400" />
+            <input name="name" placeholder="ex.: Proposta automática" className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400" />
           </label>
           <label className="text-xs font-medium text-slate-500">Quando entrar em…
-            <select name="stageId" required className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400">
+            <select name="stageId" required className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
               {stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </label>
           <label className="text-xs font-medium text-slate-500">Executar o agente…
-            <select name="agentKind" required className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400">
+            <select name="agentKind" required className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-brand-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100">
               {agents.filter((a) => a.enabled).map((a) => <option key={a.id} value={String(a.id)}>{a.name}</option>)}
             </select>
           </label>

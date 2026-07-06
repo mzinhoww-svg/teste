@@ -1,4 +1,5 @@
 import { login, signup } from "./actions";
+import { Input } from "@/components/ui/input";
 
 export const metadata = { title: "Entrar — CRM AI Studio" };
 
@@ -17,28 +18,26 @@ export default function LoginPage({
         </div>
 
         {searchParams.error && (
-          <div className="animate-shake mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700" role="alert">{searchParams.error}</div>
+          <div className="animate-shake mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300" role="alert">{searchParams.error}</div>
         )}
         {searchParams.message && (
-          <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{searchParams.message}</div>
+          <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">{searchParams.message}</div>
         )}
 
-        <form className="space-y-3 rounded-xl border border-slate-200 bg-white p-5">
+        <form className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800">
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-500">E-mail</label>
-            <input name="email" type="email" required autoComplete="email"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-400" placeholder="voce@empresa.com" />
+            <Input name="email" type="email" required autoComplete="email" placeholder="voce@empresa.com" />
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-500">Senha</label>
-            <input name="password" type="password" required minLength={6} autoComplete="current-password"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-400" placeholder="mínimo 6 caracteres" />
+            <Input name="password" type="password" required minLength={6} autoComplete="current-password" placeholder="mínimo 6 caracteres" />
           </div>
           <div className="flex gap-2 pt-1">
             <button formAction={login}
               className="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700">Entrar</button>
             <button formAction={signup}
-              className="flex-1 rounded-lg border border-brand-300 px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50">Criar conta</button>
+              className="flex-1 rounded-lg border border-brand-300 px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50 dark:border-brand-800 dark:text-brand-300 dark:hover:bg-brand-950/40">Criar conta</button>
           </div>
         </form>
 

@@ -109,7 +109,7 @@ export default function LandingPage() {
             <div className="absolute -bottom-4 -left-4 hidden rounded-xl border border-slate-200 bg-white p-3 shadow-lg sm:block dark:border-slate-700 dark:bg-slate-900">
               <div className="flex items-center gap-2 text-xs">
                 <span className="grid h-7 w-7 place-items-center rounded-full bg-emerald-100 text-emerald-600"><MessageCircle className="h-3.5 w-3.5" /></span>
-                <div><div className="font-medium">WhatsApp em 1 clique</div><div className="text-slate-400">template por contexto</div></div>
+                <div><div className="font-medium">WhatsApp em 1 clique</div><div className="text-slate-500 dark:text-slate-400">template por contexto</div></div>
               </div>
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="border-t border-slate-100 dark:border-slate-800">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-slate-400 sm:flex-row">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-slate-500 dark:text-slate-400 sm:flex-row">
           <div className="flex items-center gap-2">
             <span className="grid h-6 w-6 place-items-center rounded-md bg-brand-600 text-[10px] font-bold text-white">AI</span>
             CRM AI Studio
