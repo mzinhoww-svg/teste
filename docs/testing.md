@@ -43,7 +43,27 @@ Em ambientes que já trazem o Chromium pré-instalado, aponte para ele:
 PLAYWRIGHT_CHROMIUM_PATH=/caminho/para/chrome npm run test:e2e
 ```
 
-## Testando fluxos autenticados
+## Matriz de fluxos autenticados (20 cenários)
+
+`tests/e2e/authenticated/flows.spec.ts` cobre os fluxos logados do escopo:
+login → /app, tenant no header, abrir/criar lead (rápido e completo), abas do
+drawer, editar oportunidade, registrar atividade, executar agente, notificações,
+WhatsApp, mover estágio, contratos, relatórios, studio, admin de agentes e
+navegação mobile.
+
+Eles **se auto-pulam** sem credenciais. Para rodar contra um preview real:
+
+```bash
+export E2E_BASE_URL=https://seu-preview.vercel.app
+export E2E_EMAIL=usuario-de-teste@exemplo.com
+export E2E_PASSWORD=senha-de-teste
+npm run test:e2e
+```
+
+Sem essas variáveis, `npm run test:e2e` roda a superfície pública (18 testes) e
+pula a matriz autenticada (16) — por isso o CI permanece verde sem segredos.
+
+## Testando fluxos autenticados (setup)
 
 Os cenários com login real (board, studio, contratos) não rodam no CI porque
 exigem um Supabase provisionado. Para exercitá-los localmente ou contra um
