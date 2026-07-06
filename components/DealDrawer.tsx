@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { CheckCircle2, Copy, FileSignature, FileText, FlaskConical, MessageCircle, Pencil, Play, Trash2, UserRound } from "lucide-react";
+import { CheckCircle2, Copy, FileSignature, FileText, FlaskConical, MessageCircle, Pencil, Play, ShieldCheck, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
-import { createActivity, deleteContact, deleteDeal, moveDeal, updateContact, updateDealFull } from "@/app/actions";
+import { completeActivity, createActivity, deleteContact, deleteDeal, moveDeal, updateContact, updateDealFull } from "@/app/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select, Textarea } from "@/components/ui/input";
@@ -218,6 +218,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
   const [loading, setLoading] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, any>>({});
   const [hydrating, setHydrating] = useState(true);
+  const [panels, setPanels] = useState<{ proposals: any[]; contracts: any[] }>({ proposals: [], contracts: [] });
   const [editOpen, setEditOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -283,6 +284,10 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
       .then((b) => { if (alive) setResults(b.latest ?? {}); })
       .catch(() => {})
       .finally(() => { if (alive) setHydrating(false); });
+    fetch(`/api/deals/${deal.id}/panels`)
+      .then((r) => (r.ok ? r.json() : { proposals: [], contracts: [] }))
+      .then((b) => { if (alive) setPanels(b); })
+      .catch(() => {});
     return () => { alive = false; };
   }, [deal.id]);
 
@@ -379,6 +384,8 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
           <TabsList>
             <TabsTrigger value="overview">Visão geral</TabsTrigger>
             <TabsTrigger value="agents">Agentes</TabsTrigger>
+            <TabsTrigger value="proposal">Proposta{panels.proposals.length ? ` (${panels.proposals.length})` : ""}</TabsTrigger>
+            <TabsTrigger value="contracts">Contratos{panels.contracts.length ? ` (${panels.contracts.length})` : ""}</TabsTrigger>
             <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
             <TabsTrigger value="activity">Atividades</TabsTrigger>
           </TabsList>
@@ -456,6 +463,50 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
             ))}
           </TabsContent>
 
+          <TabsContent value="proposal" className="space-y-2 py-4">
+            {panels.proposals.length === 0 && <p className="text-sm text-slate-400">Nenhuma proposta gerada. Rode o agente de Propostas na aba Agentes.</p>}
+            {panels.proposals.map((p) => {
+              const link = origin ? `${origin.replace(/\/$/, "")}/proposta/${p.shareToken}` : "";
+              return (
+                <div key={p.id} className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0"><div className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{p.summary || "Proposta"}</div><div className="text-xs text-slate-400">{brl(p.total)} · {String(p.createdAt).slice(0, 10)}</div></div>
+                    <div className="flex shrink-0 gap-1.5">
+                      {link && <a href={`${origin.replace(/\/$/, "")}/api/proposta/${p.shareToken}/pdf`} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700"><FileText className="h-3 w-3" aria-hidden /> PDF</a>}
+                      {link && <button onClick={() => { navigator.clipboard.writeText(link); toast.success("Link copiado"); }} className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700"><Copy className="h-3 w-3" aria-hidden /> Link</button>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </TabsContent>
+
+          <TabsContent value="contracts" className="space-y-2 py-4">
+            {panels.contracts.length === 0 && <p className="text-sm text-slate-400">Nenhum contrato. Rode o agente de Contratos ou gere na aba Contratos do menu.</p>}
+            {panels.contracts.map((c) => {
+              const link = origin && c.signToken ? `${origin.replace(/\/$/, "")}/sign/contracts/${c.signToken}` : "";
+              return (
+                <div key={c.id} className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{c.title}</div>
+                      <div className="text-xs text-slate-400">{c.reference} · {brl(c.value)}</div>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${c.signed ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{c.signed ? "assinado" : (c.externalStatus ?? c.status ?? "rascunho")}</span>
+                  </div>
+                  {c.signers.length > 0 && <div className="mt-1.5 flex flex-wrap gap-2 text-[10px] text-slate-500">{c.signers.map((s: any, i: number) => <span key={i} className="inline-flex items-center gap-1"><span className={`h-1.5 w-1.5 rounded-full ${s.status === "signed" ? "bg-emerald-500" : "bg-slate-300"}`} />{s.name}</span>)}</div>}
+                  {!c.signed && link && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      <button onClick={() => { navigator.clipboard.writeText(link); toast.success("Link de assinatura copiado"); }} className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700"><Copy className="h-3 w-3" aria-hidden /> Copiar link</button>
+                      {contact?.phone && <a href={waMeLink(contact.phone, buildWaTemplate("link_opensign", { nome: (contact.name ?? "").split(" ")[0], link })) ?? "#"} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg bg-emerald-600 px-2.5 text-xs font-medium text-white hover:bg-emerald-700"><MessageCircle className="h-3 w-3" aria-hidden /> WhatsApp</a>}
+                    </div>
+                  )}
+                  {c.signed && c.certificateUrl && <a href={c.certificateUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700"><ShieldCheck className="h-3 w-3" aria-hidden /> Documento assinado</a>}
+                </div>
+              );
+            })}
+          </TabsContent>
+
           <TabsContent value="whatsapp" className="py-4">
             <WhatsAppTab phone={contact?.phone} name={contact?.name} company={contact?.company} />
           </TabsContent>
@@ -479,15 +530,36 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
             </div>
             {acts.length === 0 && <p className="text-sm text-slate-400">Sem atividades ainda. Registre a primeira acima.</p>}
             <ul className="space-y-2">
-              {acts.map((a) => (
-                <li key={a.id} className="flex gap-3 text-sm">
-                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-400" aria-hidden />
-                  <div>
-                    <span className="text-slate-700 dark:text-slate-300">{a.summary}</span>
-                    <div className="text-xs text-slate-400">{a.at} · {a.type} · {a.author}</div>
-                  </div>
-                </li>
-              ))}
+              {acts.map((a) => {
+                const isTask = a.type === "task" || Boolean(a.dueAt);
+                const overdue = isTask && !a.doneAt && a.dueAt && a.dueAt < today;
+                return (
+                  <li key={a.id} className="flex gap-2.5 text-sm">
+                    {isTask ? (
+                      <button
+                        onClick={() => {
+                          const done = !a.doneAt;
+                          setActs((prev) => prev.map((x) => x.id === a.id ? { ...x, doneAt: done ? new Date().toISOString() : null } : x));
+                          startAct(async () => { try { await completeActivity(a.id, done); } catch { setActs((prev) => prev.map((x) => x.id === a.id ? { ...x, doneAt: done ? null : new Date().toISOString() } : x)); toast.error("Falha ao atualizar tarefa"); } });
+                        }}
+                        className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded border ${a.doneAt ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-300 dark:border-slate-600"}`}
+                        aria-label={a.doneAt ? "Reabrir tarefa" : "Concluir tarefa"}
+                      >
+                        {a.doneAt && <CheckCircle2 className="h-3 w-3" aria-hidden />}
+                      </button>
+                    ) : (
+                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-400" aria-hidden />
+                    )}
+                    <div>
+                      <span className={a.doneAt ? "text-slate-400 line-through" : "text-slate-700 dark:text-slate-300"}>{a.summary}</span>
+                      <div className="text-xs text-slate-400">
+                        {a.at} · {a.type} · {a.author}
+                        {a.dueAt && <span className={`ml-1 ${overdue ? "text-rose-500" : "text-amber-600"}`}>· vence {a.dueAt}</span>}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </TabsContent>
         </Tabs>

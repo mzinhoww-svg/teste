@@ -33,9 +33,11 @@ export interface Contact {
 export interface Activity {
   id: string;
   at: string; // ISO date
-  type: "note" | "email" | "call" | "meeting" | "whatsapp" | "form" | "agent";
+  type: "note" | "email" | "call" | "meeting" | "whatsapp" | "form" | "agent" | "task";
   summary: string;
   author: string; // pessoa ou nome do agente
+  dueAt?: string | null;
+  doneAt?: string | null;
 }
 
 export interface Deal {

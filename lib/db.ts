@@ -102,7 +102,7 @@ function mapContact(r: any): Contact {
 }
 
 function mapActivity(r: any): Activity {
-  return { id: r.id, at: (r.created_at ?? "").slice(0, 10), type: r.type, summary: r.summary, author: r.author ?? "" };
+  return { id: r.id, at: (r.created_at ?? "").slice(0, 10), type: r.type, summary: r.summary, author: r.author ?? "", dueAt: r.due_at ?? null, doneAt: r.done_at ?? null };
 }
 
 function mapDeal(r: any, stageKeyById: Map<string, string>): Deal {
