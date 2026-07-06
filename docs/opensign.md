@@ -8,6 +8,41 @@ Toda a integração passa por um adapter (`lib/signature/provider.ts`), então a
 e as rotas dependem apenas de uma interface. Trocar de provider, se um dia for
 preciso, não exige mudar o resto do app.
 
+## Colocar em produção (passo a passo)
+
+O código já está pronto — falta apenas provisionar o OpenSign e preencher as
+variáveis. **Sem as `OPENSIGN_*`, o app opera em modo demonstração** (assinatura
+simulada na página interna).
+
+1. **Crie a conta / instância OpenSign** (uma destas):
+   - **Cloud gerenciado**: crie uma conta em https://www.opensignlabs.com e gere
+     um **API token** no painel (Settings → API). É a via mais rápida.
+     _(Este passo exige verificação de e-mail e por isso é feito por você.)_
+   - **Self-host (grátis)**: siga o
+     [guia de self-hosting](https://github.com/OpenSignLabs/OpenSign) (Docker) e
+     gere um token de API na instância.
+2. **Preencha as variáveis na Vercel** (Project → Settings → Environment Variables):
+   - `SIGNATURE_PROVIDER=opensign`
+   - `OPENSIGN_BASE_URL` = URL da instância/cloud
+   - `OPENSIGN_API_KEY` = token gerado
+   - `OPENSIGN_WEBHOOK_SECRET` = um segredo forte à sua escolha
+   - (opcional) `OPENSIGN_DEFAULT_TEMPLATE_ID`, `OPENSIGN_FOLDER_ID`, `OPENSIGN_API_VERSION`
+   - `SUPABASE_SERVICE_ROLE_KEY` (para o webhook escrever)
+3. **Configure o webhook** no painel do OpenSign apontando para
+   `https://SEU-APP/api/webhooks/opensign`, com o header `x-opensign-secret`
+   igual ao `OPENSIGN_WEBHOOK_SECRET`.
+4. **Redeploy**. A partir daí, "Preparar assinatura" cria um envelope real e a
+   página `/sign/contracts/[token]` encaminha o signatário ao OpenSign.
+
+## Modelo por-signatário
+
+Ao preparar a assinatura, além de gravar no contrato, o app cria um
+**envelope** (`contract_signature_envelopes`) e um **signatário por parte**
+(`contract_signers`), cada um com token interno **hasheado** (nunca em texto
+puro). O webhook e o "Atualizar status" refletem a assinatura no envelope e em
+cada signatário; o card do contrato mostra quem já assinou e quem falta. A
+assinatura duplicada é bloqueada no servidor e na UI.
+
 ## Como funciona
 
 1. **Envio** — na aba **Contratos**, o botão _Enviar para assinatura_ chama a

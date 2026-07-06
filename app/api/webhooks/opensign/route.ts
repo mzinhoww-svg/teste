@@ -31,10 +31,21 @@ export async function POST(req: Request) {
   const { data: contract } = await admin.from("contracts").select("id, org_id, reference, deal_id").eq("envelope_id", v.envelopeId).maybeSingle();
   if (!contract) return NextResponse.json({ ok: true, note: "envelope sem contrato correspondente" });
 
+  const nowIso = new Date().toISOString();
   await admin.from("contracts").update({
     external_status: v.status, signature_status: local, certificate_url: v.certificateUrl ?? null,
-    signed_at: v.status === "assinado" ? new Date().toISOString() : null, updated_at: new Date().toISOString(),
+    signed_at: v.status === "assinado" ? nowIso : null, updated_at: nowIso,
   }).eq("id", contract.id);
+
+  // Reflete no modelo por-signatário (envelope + signatários).
+  const envStatus = v.status === "assinado" ? "completed" : v.status === "recusado" ? "declined" : v.status === "expirado" ? "expired" : "sent";
+  await admin.from("contract_signature_envelopes").update({
+    status: envStatus, certificate_url: v.certificateUrl ?? null,
+    completed_at: v.status === "assinado" ? nowIso : null, updated_at: nowIso,
+  }).eq("contract_id", contract.id);
+  if (v.status === "assinado") {
+    await admin.from("contract_signers").update({ status: "signed", signed_at: nowIso, updated_at: nowIso }).eq("contract_id", contract.id);
+  }
 
   const titleByStatus: Record<string, string> = {
     assinado: "Contrato assinado", recusado: "Contrato recusado", expirado: "Contrato expirado", visualizado: "Contrato visualizado",

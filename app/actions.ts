@@ -553,6 +553,27 @@ export async function sendContractForSignature(contractId: string) {
     updated_at: new Date().toISOString(),
   }).eq("id", contractId);
 
+  // Modelo por-signatário: envelope + um signatário por parte, cada um com token
+  // interno HASHEADO (o token em claro nunca é persistido). Idempotente: remove
+  // signatários/envelope antigos deste contrato antes de recriar.
+  const { createHash, randomBytes } = await import("crypto");
+  await supabase.from("contract_signers").delete().eq("contract_id", contractId);
+  await supabase.from("contract_signature_envelopes").delete().eq("contract_id", contractId);
+  const { data: envelope } = await supabase.from("contract_signature_envelopes").insert({
+    org_id: ctx.orgId, contract_id: contractId, provider: env.provider,
+    provider_document_id: env.envelopeId, status: "sent", signing_url: env.signingUrl ?? null,
+    sent_at: new Date().toISOString(),
+  }).select("id").single();
+  const signerRows = (Array.isArray(c.signatories) ? c.signatories : [])
+    .filter((s: any) => s.email)
+    .map((s: any, i: number) => ({
+      org_id: ctx.orgId, contract_id: contractId, envelope_id: envelope?.id ?? null,
+      name: s.name, email: s.email, phone: s.phone ?? null, role: "signer", signing_order: i + 1,
+      internal_signing_token_hash: createHash("sha256").update(randomBytes(24)).digest("hex"),
+      status: "sent",
+    }));
+  if (signerRows.length) await supabase.from("contract_signers").insert(signerRows);
+
   await supabase.from("notifications").insert({
     org_id: ctx.orgId, type: "contract", title: "Contrato enviado para assinatura",
     body: `${c.reference} — ${c.title} enviado via ${env.provider}.`, contract_id: contractId, deal_id: c.deal_id, action_url: "/app/contracts",
@@ -578,12 +599,21 @@ export async function refreshContractStatus(contractId: string) {
   const provider = getSignatureProvider();
   const st = await provider.getStatus(c.envelope_id);
   const localMap: Record<string, string> = { enviado: "enviado", visualizado: "enviado", assinado: "assinado", recusado: "cancelado", expirado: "cancelado", erro: "enviado" };
+  const now = new Date().toISOString();
   await supabase.from("contracts").update({
     external_status: st.status, signature_status: localMap[st.status] ?? "enviado",
     certificate_url: st.certificateUrl ?? null,
-    signed_at: st.status === "assinado" ? new Date().toISOString() : null,
-    updated_at: new Date().toISOString(),
+    signed_at: st.status === "assinado" ? now : null,
+    updated_at: now,
   }).eq("id", contractId);
+  const envStatus = st.status === "assinado" ? "completed" : st.status === "recusado" ? "declined" : st.status === "expirado" ? "expired" : "sent";
+  await supabase.from("contract_signature_envelopes").update({
+    status: envStatus, certificate_url: st.certificateUrl ?? null,
+    completed_at: st.status === "assinado" ? now : null, updated_at: now,
+  }).eq("contract_id", contractId);
+  if (st.status === "assinado") {
+    await supabase.from("contract_signers").update({ status: "signed", signed_at: now, updated_at: now }).eq("contract_id", contractId);
+  }
   revalidatePath("/app/contracts");
   return { status: st.status };
 }
