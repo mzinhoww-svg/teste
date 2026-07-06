@@ -199,8 +199,21 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
       extra.nextActionAt = nextAt;
       break;
     }
-    default:
+    default: {
+      // Agentes advisory (Nutrição, Coaching, Feedback, Atendimento): além do
+      // texto, viram "atores" — o 1º item acionável vira uma tarefa com prazo.
       result = await runAdvisory(deal, contact, agent);
+      const items: string[] = Array.isArray(result?.items) ? result.items : [];
+      if (items.length) {
+        const due = new Date(Date.now() + 2 * 86_400_000).toISOString().slice(0, 10);
+        await supabase.from("activities").insert({
+          org_id: ctx.orgId, deal_id: dealId, type: "note",
+          summary: `${agent.name}: ${items[0]}`.slice(0, 280),
+          author: agent.name, due_at: due,
+        });
+        extra.taskCreated = true;
+      }
+    }
   }
   });
   const tokens = usage.tokens;
