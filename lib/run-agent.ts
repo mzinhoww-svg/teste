@@ -1,6 +1,8 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getAgentByKind, getDealFull } from "@/lib/db";
+import { resolveAgentByKind } from "@/lib/agents/resolve";
+import { getLeadCommunicationContext, buildWhatsAppPromptBlock } from "@/lib/lead-comm-context";
 import {
   runAdvisory, runContract, runCopilot, runLeadScoring, runProposal,
 } from "@/lib/agents";
@@ -48,8 +50,26 @@ export async function dryRunAgentForDeal(kind: string, dealId: string, ctx: RunC
   if (!full || !agent) throw new Error("Deal ou agente não encontrado");
   if (!agent.enabled) throw new Error("Agente inativo");
 
+  // Prompt efetivo vem do padrão global da plataforma (+ override do tenant se
+  // habilitado). O modelo e as instruções refinadas substituem os da linha do
+  // agente por org, mantendo a metadata rica (grupo, dores) para a UI.
+  const resolved = await resolveAgentByKind(kind, ctx.orgId);
+  if (resolved) {
+    if (!resolved.active) throw new Error("Agente inativo (padrão da plataforma)");
+    agent.instructions = resolved.composedPrompt;
+    agent.model = resolved.model;
+  }
+
   const { deal } = full;
   const contact = full.contact ?? STUB_CONTACT;
+
+  // Injeta a conversa de WhatsApp do lead (quando o bridge estiver ativo e
+  // houver thread) no prompt — escopado por org. Registra se foi usada.
+  const comm = await getLeadCommunicationContext(ctx.orgId, dealId, contact.id || null);
+  if (comm.whatsapp_available) {
+    agent.instructions = `${agent.instructions}\n\n${buildWhatsAppPromptBlock(comm)}`;
+    (agent as any).__waUsed = true;
+  }
 
   let result: any;
   const extra: Record<string, unknown> = {};
@@ -82,8 +102,26 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
   if (!full || !agent) throw new Error("Deal ou agente não encontrado");
   if (!agent.enabled) throw new Error("Agente inativo");
 
+  // Prompt efetivo vem do padrão global da plataforma (+ override do tenant se
+  // habilitado). O modelo e as instruções refinadas substituem os da linha do
+  // agente por org, mantendo a metadata rica (grupo, dores) para a UI.
+  const resolved = await resolveAgentByKind(kind, ctx.orgId);
+  if (resolved) {
+    if (!resolved.active) throw new Error("Agente inativo (padrão da plataforma)");
+    agent.instructions = resolved.composedPrompt;
+    agent.model = resolved.model;
+  }
+
   const { deal } = full;
   const contact = full.contact ?? STUB_CONTACT;
+
+  // Injeta a conversa de WhatsApp do lead (quando o bridge estiver ativo e
+  // houver thread) no prompt — escopado por org. Registra se foi usada.
+  const comm = await getLeadCommunicationContext(ctx.orgId, dealId, contact.id || null);
+  if (comm.whatsapp_available) {
+    agent.instructions = `${agent.instructions}\n\n${buildWhatsAppPromptBlock(comm)}`;
+    (agent as any).__waUsed = true;
+  }
 
   let result: any;
   const extra: Record<string, unknown> = {};
@@ -134,7 +172,7 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
   const persisted = { ...result, ...extra };
   await supabase.from("agent_runs").insert({
     org_id: ctx.orgId, agent_kind: kind, deal_id: dealId,
-    input: { title: deal.title, stage: deal.stageKey, via: ctx.via },
+    input: { title: deal.title, stage: deal.stageKey, via: ctx.via, agentKey: resolved?.key ?? null, templateVersion: resolved?.templateVersion ?? null, whatsappUsed: Boolean((agent as any).__waUsed) },
     output: persisted, source: result?.source ?? "n/a", model: agent.model, created_by: ctx.userId,
   });
 

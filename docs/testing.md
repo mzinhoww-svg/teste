@@ -13,10 +13,17 @@ por isso é estável no CI.
 | `auth.spec.ts` | `/app` e `/app/studio` redirecionam para `/login` quando deslogado; formulário de login; validação de senha. |
 | `api.spec.ts` | `/api/health` responde ok; webhook OpenSign recusa payload sem segredo (401); rotas privadas exigem autenticação. |
 
+## Camadas de teste
+
+- **Unit (Vitest)** — funções puras (`tests/unit/`): normalização de telefone,
+  `wa.me`, templates, composição de prompt e catálogo dos 9 agentes.
+- **E2E (Playwright)** — superfície pública e guardas (`tests/e2e/`).
+
 ## Rodando localmente
 
 ```bash
 npm install
+npm run test:unit         # Vitest (rápido, sem browser)
 npm run build
 npm run test:e2e          # headless
 npm run test:e2e:ui       # modo interativo (Playwright UI)

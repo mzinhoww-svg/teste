@@ -37,6 +37,7 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/proposta") ||
     path.startsWith("/api/health") ||
     path.startsWith("/api/webhooks") ||
+    path.startsWith("/api/whatsapp/webhook") ||
     path.startsWith("/_next") ||
     path.startsWith("/favicon") ||
     path.startsWith("/icon");
