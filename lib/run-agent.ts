@@ -176,7 +176,7 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
   const persisted = { ...result, ...extra };
   await supabase.from("agent_runs").insert({
     org_id: ctx.orgId, agent_kind: kind, deal_id: dealId,
-    input: { title: deal.title, stage: deal.stageKey, via: ctx.via, agentKey: resolved?.key ?? null, templateVersion: resolved?.templateVersion ?? null, whatsappUsed: Boolean((agent as any).__waUsed), tokens },
+    input: { title: deal.title, stage: deal.stageKey, via: ctx.via, agentKey: resolved?.key ?? null, templateVersion: resolved?.templateVersion ?? null, whatsappUsed: Boolean((agent as any).__waUsed), tokens, llmError: result?.llmError ?? null },
     output: persisted, source: result?.source ?? "n/a", model: agent.model, created_by: ctx.userId,
   });
 

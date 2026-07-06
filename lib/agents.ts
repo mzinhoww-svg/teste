@@ -4,11 +4,20 @@
 import { callLLM, extractJson, hasLiveAI } from "./ai";
 import type { Agent, Contact, Contract, Deal, Proposal } from "./types";
 
+// Motivo do fallback para heurística quando a IA ao vivo estava ligada mas a
+// chamada falhou (chave inválida, sem crédito, modelo errado, timeout). Fica
+// visível no resultado do agente e persistido em agent_runs para diagnóstico.
+function llmErrorMessage(e: unknown): string {
+  const raw = e instanceof Error ? e.message : String(e);
+  return raw.replace(/\s+/g, " ").trim().slice(0, 300);
+}
+
 export interface ScoreResult {
   score: number;
   temperature: "hot" | "warm" | "cold";
   reason: string;
   source: "llm" | "heuristic";
+  llmError?: string;
 }
 
 export interface CopilotResult {
@@ -16,14 +25,17 @@ export interface CopilotResult {
   message: string;
   channel: string;
   source: "llm" | "heuristic";
+  llmError?: string;
 }
 
 export interface ProposalResult extends Proposal {
   source: "llm" | "heuristic";
+  llmError?: string;
 }
 
 export interface ContractResult extends Contract {
   source: "llm" | "heuristic";
+  llmError?: string;
 }
 
 function tempFromScore(score: number): "hot" | "warm" | "cold" {
@@ -49,6 +61,7 @@ export async function runLeadScoring(
   contact: Contact,
   agent: Agent,
 ): Promise<ScoreResult> {
+  let llmError: string | undefined;
   if (hasLiveAI() && agent.enabled) {
     try {
       const text = await callLLM({
@@ -63,8 +76,9 @@ export async function runLeadScoring(
       if (parsed && typeof parsed.score === "number") {
         return { ...parsed, source: "llm" };
       }
-    } catch {
-      // cai no heurístico
+      llmError = "IA respondeu em formato inválido (JSON não reconhecido).";
+    } catch (e) {
+      llmError = llmErrorMessage(e);
     }
   }
 
@@ -77,7 +91,7 @@ export async function runLeadScoring(
     `Engajamento ${deal.engagement}/100, ticket R$${(deal.amount / 1000).toFixed(0)}k, ` +
     `${daysSince(deal.lastTouch)} dia(s) sem contato. ` +
     (temperature === "hot" ? "Priorizar agora." : temperature === "warm" ? "Nutrir e agendar próximo passo." : "Reativar com cadência automatizada.");
-  return { score, temperature, reason, source: "heuristic" };
+  return { score, temperature, reason, source: "heuristic", llmError };
 }
 
 // ---------------------------------------------------------------------------
@@ -93,6 +107,7 @@ export async function runCopilot(
   contact: Contact,
   agent: Agent,
 ): Promise<CopilotResult> {
+  let llmError: string | undefined;
   if (hasLiveAI() && agent.enabled) {
     try {
       const text = await callLLM({
@@ -105,8 +120,9 @@ export async function runCopilot(
       });
       const parsed = extractJson<{ nextAction: string; message: string; channel: string }>(text);
       if (parsed && parsed.message) return { ...parsed, source: "llm" };
-    } catch {
-      // fallback
+      llmError = "IA respondeu em formato inválido (JSON não reconhecido).";
+    } catch (e) {
+      llmError = llmErrorMessage(e);
     }
   }
 
@@ -134,7 +150,7 @@ export async function runCopilot(
     },
   };
   const rec = byStage[deal.stageKey] ?? byStage.proposal;
-  return { nextAction: rec.action, message: rec.msg, channel: channelLabel[contact.channel], source: "heuristic" };
+  return { nextAction: rec.action, message: rec.msg, channel: channelLabel[contact.channel], source: "heuristic", llmError };
 }
 
 // ---------------------------------------------------------------------------
@@ -148,6 +164,7 @@ export async function runProposal(
   contact: Contact,
   agent: Agent,
 ): Promise<ProposalResult> {
+  let llmError: string | undefined;
   if (hasLiveAI() && agent.enabled) {
     try {
       const text = await callLLM({
@@ -162,8 +179,9 @@ export async function runProposal(
         const total = Math.round(subtotal * (1 - discountPct / 100));
         return { dealId: deal.id, items: parsed.items, subtotal, discountPct, total, summary: parsed.summary, terms: parsed.terms, generatedBy: agent.name, source: "llm" };
       }
-    } catch {
-      // fallback
+      llmError = "IA respondeu em formato inválido (JSON não reconhecido).";
+    } catch (e) {
+      llmError = llmErrorMessage(e);
     }
   }
 
@@ -180,7 +198,7 @@ export async function runProposal(
   const discountPct = deal.amount > 150000 ? 12 : deal.amount > 80000 ? 8 : 5;
   const total = Math.round(subtotal * (1 - discountPct / 100));
   return {
-    dealId: deal.id, items, subtotal, discountPct, total, generatedBy: agent.name, source: "heuristic",
+    dealId: deal.id, items, subtotal, discountPct, total, generatedBy: agent.name, source: "heuristic", llmError,
     summary: `Proposta para ${contact.company}: plataforma, implantação e suporte com desconto de ${discountPct}% por volume. Retorno esperado em até 20 dias de uso.`,
     terms: "Validade: 15 dias. Pagamento: 12x sem juros ou anual à vista. Inclui SLA de suporte e onboarding assistido.",
   };
@@ -205,6 +223,7 @@ export async function runContract(
 ): Promise<ContractResult> {
   const value = contractValue(deal);
   const reference = `CT-${deal.id.toUpperCase()}-2026`;
+  let llmError: string | undefined;
 
   if (hasLiveAI() && agent.enabled) {
     try {
@@ -225,8 +244,9 @@ export async function runContract(
           signatureStatus: "enviado", signatureProvider: SIGNATURE_PROVIDER, generatedBy: agent.name, source: "llm",
         };
       }
-    } catch {
-      // fallback
+      llmError = "IA respondeu em formato inválido (JSON não reconhecido).";
+    } catch (e) {
+      llmError = llmErrorMessage(e);
     }
   }
 
@@ -244,7 +264,7 @@ export async function runContract(
   return {
     dealId: deal.id, reference, title: `Contrato de Prestação de Serviços — ${contact.company}`,
     clauses, value, signatories: defaultSignatories(contact),
-    signatureStatus: "enviado", signatureProvider: SIGNATURE_PROVIDER, generatedBy: agent.name, source: "heuristic",
+    signatureStatus: "enviado", signatureProvider: SIGNATURE_PROVIDER, generatedBy: agent.name, source: "heuristic", llmError,
   };
 }
 
@@ -264,9 +284,11 @@ export interface AdvisoryResult {
   headline: string;
   items: string[];
   source: "llm" | "heuristic";
+  llmError?: string;
 }
 
 export async function runAdvisory(deal: Deal, contact: Contact, agent: Agent): Promise<AdvisoryResult> {
+  let llmError: string | undefined;
   if (hasLiveAI() && agent.enabled) {
     try {
       const text = await callLLM({
@@ -281,11 +303,12 @@ export async function runAdvisory(deal: Deal, contact: Contact, agent: Agent): P
       if (parsed && Array.isArray(parsed.items) && parsed.items.length) {
         return { headline: parsed.headline, items: parsed.items.slice(0, 6), source: "llm" };
       }
-    } catch {
-      // fallback
+      llmError = "IA respondeu em formato inválido (JSON não reconhecido).";
+    } catch (e) {
+      llmError = llmErrorMessage(e);
     }
   }
-  return heuristicAdvisory(deal, contact, agent);
+  return { ...heuristicAdvisory(deal, contact, agent), llmError };
 }
 
 function heuristicAdvisory(deal: Deal, contact: Contact, agent: Agent): AdvisoryResult {
