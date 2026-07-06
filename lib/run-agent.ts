@@ -28,6 +28,44 @@ export interface RunContext {
   via: "manual" | "automation";
 }
 
+/**
+ * Dry-run: executa a lógica do agente e devolve o resultado SEM persistir nada
+ * (não grava em deals/proposals/contracts/agent_runs/activities). Serve para
+ * pré-visualizar a saída antes de aplicar de verdade. Respeita o rate limit.
+ */
+export async function dryRunAgentForDeal(kind: string, dealId: string, ctx: RunContext) {
+  const supabase = createClient();
+
+  const since = new Date(Date.now() - 60_000).toISOString();
+  const { count } = await supabase
+    .from("agent_runs")
+    .select("id", { count: "exact", head: true })
+    .eq("org_id", ctx.orgId)
+    .gte("created_at", since);
+  if ((count ?? 0) >= MAX_RUNS_PER_MINUTE) throw new RateLimitError();
+
+  const [full, agent] = await Promise.all([getDealFull(dealId), getAgentByKind(kind)]);
+  if (!full || !agent) throw new Error("Deal ou agente não encontrado");
+  if (!agent.enabled) throw new Error("Agente inativo");
+
+  const { deal } = full;
+  const contact = full.contact ?? STUB_CONTACT;
+
+  let result: any;
+  const extra: Record<string, unknown> = {};
+  switch (kind) {
+    case "lead-scoring": result = await runLeadScoring(deal, contact, agent); break;
+    case "sales-copilot":
+      result = await runCopilot(deal, contact, agent);
+      extra.waLink = waMeLink(contact.phone, result.message);
+      break;
+    case "proposal": result = await runProposal(deal, contact, agent); break;
+    case "legal-contract": result = await runContract(deal, contact, agent); break;
+    default: result = await runAdvisory(deal, contact, agent);
+  }
+  return { ...result, ...extra, dryRun: true };
+}
+
 export async function runAgentForDeal(kind: string, dealId: string, ctx: RunContext) {
   const supabase = createClient();
 

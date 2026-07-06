@@ -13,9 +13,16 @@ export const viewport: Viewport = {
   themeColor: "#4f46e5",
 };
 
+// Evita "flash" do tema errado: aplica a classe `dark` antes da hidratação,
+// lendo a preferência salva ou a do sistema.
+const themeInit = `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={GeistSans.variable}>
+    <html lang="pt-BR" className={GeistSans.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+      </head>
       <body>
         {children}
         <Toaster />

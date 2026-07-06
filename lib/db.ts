@@ -329,3 +329,72 @@ export async function getUnreadCount(): Promise<number> {
     .or(`user_id.is.null,user_id.eq.${ctx.userId}`);
   return count ?? 0;
 }
+
+// --- Versões de agentes (Studio: histórico / rollback / diff) ---------------
+
+export interface AgentVersion {
+  id: string; instructions: string; model: string; temperature: number | null; createdAt: string;
+}
+
+export async function getAgentVersions(agentId: string, limit = 10): Promise<AgentVersion[]> {
+  const supabase = createClient();
+  const ctx = await getAuthContext();
+  if (!ctx?.orgId) return [];
+  const { data } = await supabase
+    .from("agent_versions")
+    .select("id,instructions,model,temperature,created_at")
+    .eq("org_id", ctx.orgId)
+    .eq("agent_id", agentId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []).map((v: any) => ({
+    id: v.id, instructions: v.instructions ?? "", model: v.model ?? "",
+    temperature: v.temperature, createdAt: v.created_at,
+  }));
+}
+
+// --- Onboarding guiado ------------------------------------------------------
+
+export interface OnboardingState {
+  dismissed: boolean;
+  steps: {
+    key: string; label: string; done: boolean; href: string;
+  }[];
+  doneCount: number;
+  total: number;
+}
+
+/**
+ * Calcula o progresso de onboarding derivando o estado real do banco
+ * (pipeline, deal, execução de agente, contrato, membro convidado, agente
+ * editado). O estado é computado, não confiado só em flags.
+ */
+export async function getOnboarding(): Promise<OnboardingState | null> {
+  const supabase = createClient();
+  const ctx = await getAuthContext();
+  if (!ctx?.orgId) return null;
+  const org = ctx.orgId;
+
+  const [prog, deals, runs, contracts, invites, versions] = await Promise.all([
+    supabase.from("onboarding_progress").select("dismissed").eq("org_id", org).maybeSingle(),
+    supabase.from("deals").select("id", { count: "exact", head: true }).eq("org_id", org),
+    supabase.from("agent_runs").select("id", { count: "exact", head: true }).eq("org_id", org),
+    supabase.from("contracts").select("id", { count: "exact", head: true }).eq("org_id", org),
+    supabase.from("memberships").select("id", { count: "exact", head: true }).eq("org_id", org),
+    supabase.from("agent_versions").select("id", { count: "exact", head: true }).eq("org_id", org),
+  ]);
+
+  const steps = [
+    { key: "brand", label: "Personalizar marca e organização", done: Boolean(ctx.orgName), href: "/app/org" },
+    { key: "deal", label: "Criar seu primeiro negócio no funil", done: (deals.count ?? 0) > 0, href: "/app" },
+    { key: "agent", label: "Executar um agente de IA em um negócio", done: (runs.count ?? 0) > 0, href: "/app" },
+    { key: "studio", label: "Ajustar um agente no Studio", done: (versions.count ?? 0) > 0, href: "/app/studio" },
+    { key: "contract", label: "Gerar um contrato", done: (contracts.count ?? 0) > 0, href: "/app/contracts" },
+    { key: "team", label: "Convidar um membro para o time", done: (invites.count ?? 0) > 1, href: "/app/org" },
+  ];
+  const doneCount = steps.filter((s) => s.done).length;
+  return {
+    dismissed: Boolean(prog.data?.dismissed),
+    steps, doneCount, total: steps.length,
+  };
+}

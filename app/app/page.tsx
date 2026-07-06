@@ -1,7 +1,8 @@
 import { Building2 } from "lucide-react";
 import { Nav } from "@/components/Nav";
 import { Board } from "@/components/Board";
-import { getAgents, getAuthContext, getBoard, getProducts } from "@/lib/db";
+import { OnboardingChecklist } from "@/components/OnboardingChecklist";
+import { getAgents, getAuthContext, getBoard, getOnboarding, getProducts } from "@/lib/db";
 import { logout } from "@/app/login/actions";
 
 export default async function BoardPage({ searchParams }: { searchParams: { pipeline?: string } }) {
@@ -32,12 +33,14 @@ export default async function BoardPage({ searchParams }: { searchParams: { pipe
     );
   }
 
-  const [{ pipeline, pipelines, deals, contacts }, agents, products] = await Promise.all([getBoard(searchParams.pipeline), getAgents(), getProducts()]);
+  const [{ pipeline, pipelines, deals, contacts }, agents, products, onboarding] = await Promise.all([getBoard(searchParams.pipeline), getAgents(), getProducts(), getOnboarding()]);
+  const canManage = ctx?.role === "owner" || ctx?.role === "admin";
 
   return (
     <div className="min-h-screen">
       <Nav active="board" />
       <main className="mx-auto max-w-7xl px-6 py-6">
+        {onboarding && canManage && <OnboardingChecklist state={onboarding} canDismiss={canManage} />}
         {!pipeline ? (
           <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
             Nenhum funil encontrado nesta organização. Recarregue a página — o funil padrão é criado automaticamente

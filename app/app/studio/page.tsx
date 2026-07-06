@@ -1,6 +1,7 @@
 import { Nav } from "@/components/Nav";
 import { AgentEditor } from "@/components/AgentEditor";
-import { getAgents, getAuthContext } from "@/lib/db";
+import { getAgents, getAgentVersions, getAuthContext } from "@/lib/db";
+import type { AgentVersion } from "@/lib/db";
 import { PermissionDenied } from "@/components/PermissionDenied";
 import type { Agent } from "@/lib/types";
 
@@ -24,6 +25,11 @@ export default async function StudioPage() {
     );
   }
   const agents = await getAgents();
+  const versionLists = await Promise.all(
+    agents.map((a) => (a.uuid ? getAgentVersions(a.uuid) : Promise.resolve([] as AgentVersion[]))),
+  );
+  const versionsById = new Map<string, AgentVersion[]>();
+  agents.forEach((a, i) => { if (a.uuid) versionsById.set(a.uuid, versionLists[i]); });
 
   return (
     <div className="min-h-screen">
@@ -47,7 +53,7 @@ export default async function StudioPage() {
           return (
             <section key={g} className="mb-8">
               <h2 className={`mb-3 text-sm font-semibold uppercase tracking-wide ${groupMeta[g].color}`}>{groupMeta[g].label}</h2>
-              <div className="grid gap-4">{list.map((a) => <AgentEditor key={a.id} agent={a} orgName={ctx?.orgName ?? ""} />)}</div>
+              <div className="grid gap-4">{list.map((a) => <AgentEditor key={a.id} agent={a} orgName={ctx?.orgName ?? ""} versions={a.uuid ? versionsById.get(a.uuid) ?? [] : []} />)}</div>
             </section>
           );
         })}
