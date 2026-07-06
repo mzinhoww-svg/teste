@@ -172,7 +172,15 @@ export async function getBoard(pipelineId?: string): Promise<BoardData> {
   const stages = (stageRows ?? []).map(mapStage);
   const stageKeyById = new Map<string, string>((stageRows ?? []).map((s: any) => [s.id, s.key]));
 
-  const { data: dealRows } = await supabase.from("deals").select("*").eq("pipeline_id", pipe.id).eq("org_id", orgId).order("created_at", { ascending: false });
+  // Restrição opcional por vendedor (opt-in por org): membros só veem os deals
+  // dos quais são donos. Owner/admin sempre veem tudo. Desligado por padrão.
+  const ctx = await getAuthContext();
+  let dealsQuery = supabase.from("deals").select("*").eq("pipeline_id", pipe.id).eq("org_id", orgId);
+  if (ctx?.role === "member") {
+    const { data: org } = await supabase.from("orgs").select("settings").eq("id", orgId).maybeSingle();
+    if ((org?.settings as any)?.restrict_sellers) dealsQuery = dealsQuery.eq("owner_user_id", ctx.userId);
+  }
+  const { data: dealRows } = await dealsQuery.order("created_at", { ascending: false });
   const { data: contactRows } = await supabase.from("contacts").select("*").eq("org_id", orgId).order("created_at", { ascending: false });
 
   const pipeline: Pipeline = { id: pipe.id, name: pipe.name, area: pipe.area, stages };
