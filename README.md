@@ -78,7 +78,20 @@ lib/
 ```bash
 npm install
 npm run dev        # http://localhost:3000
+npm run test:e2e   # testes E2E (Playwright) — ver docs/testing.md
 ```
+
+## Documentação
+
+| Tema | Arquivo |
+| --- | --- |
+| Assinatura digital (OpenSign) | [`docs/opensign.md`](docs/opensign.md) |
+| Notificações in-app + WhatsApp | [`docs/notifications.md`](docs/notifications.md) |
+| Cadências e SLA | [`docs/cadences.md`](docs/cadences.md) |
+| Testes E2E e CI | [`docs/testing.md`](docs/testing.md) |
+| Deploy na Vercel e domínio próprio | [`docs/vercel-domain.md`](docs/vercel-domain.md) |
+| Admin da plataforma | [`docs/admin.md`](docs/admin.md) |
+| Seed do primeiro tenant (Reiners Media) | [`docs/reiners-media-seed.md`](docs/reiners-media-seed.md) |
 
 ## Deploy na Vercel
 
@@ -86,10 +99,12 @@ O repositório já traz `vercel.json` (framework `nextjs`). Basta importar o rep
 na Vercel. Para IA ao vivo, adicione a variável de ambiente `OPENROUTER_API_KEY`
 (modelo padrão `z-ai/glm-5.2`, configurável via `OPENROUTER_MODEL`).
 
-## Roadmap para produção
+## Entregue
 
-- Persistência real (Postgres/Supabase) no lugar de `lib/seed.ts`
-- Autenticação e multi-tenant
-- Integrações omnichannel (WhatsApp, e-mail, voz) para disparo real das mensagens
-- E-signature e workflow de aprovação nas propostas
-- Versionamento e A/B dos prompts de agentes no Studio
+- Persistência real no Supabase (Postgres + Auth + RLS) e multi-tenant por `org_id`
+- Autenticação, papéis (owner/admin/member) e admin da plataforma (`/admin`)
+- Assinatura digital via OpenSign (open source) com webhook de status
+- Notificações in-app (central + sino) e envio manual por `wa.me` com templates
+- Studio com versionamento, diff e rollback de prompts; dry-run de agentes
+- Relatórios avançados (conversão, ciclo, forecast, motivos de perda, custo de IA) + export CSV
+- Dark mode, onboarding guiado, testes E2E (Playwright) e CI no GitHub
