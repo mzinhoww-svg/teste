@@ -3,6 +3,7 @@ import { ShieldAlert, Building2, Users, Activity, HeartPulse, Check, X } from "l
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { activeModel, activeProvider, hasLiveAI } from "@/lib/ai";
+import { Table, THead, TR, TH, TD } from "@/components/ui/table";
 
 export const metadata = { title: "Admin da plataforma — CRM AI Studio" };
 export const dynamic = "force-dynamic";
@@ -95,34 +96,26 @@ export default async function AdminPage() {
           </div>
         </section>
 
-        <section className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-500">
-                <th className="px-4 py-2.5">Tenant</th>
-                <th className="px-4 py-2.5">Slug</th>
-                <th className="px-4 py-2.5">Membros</th>
-                <th className="px-4 py-2.5">Deals</th>
-                <th className="px-4 py-2.5">Contratos</th>
-                <th className="px-4 py-2.5">Execuções 7d</th>
-                <th className="px-4 py-2.5">Criado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tenants.map((t) => (
-                <tr key={t.id} className="border-b border-slate-50">
-                  <td className="px-4 py-2.5 font-medium text-slate-800">{t.name}</td>
-                  <td className="px-4 py-2.5">{t.slug ? <Badge variant="outline">{t.slug}</Badge> : <span className="text-slate-300">—</span>}</td>
-                  <td className="px-4 py-2.5 tabular-nums text-slate-600">{t.members}</td>
-                  <td className="px-4 py-2.5 tabular-nums text-slate-600">{t.deals}</td>
-                  <td className="px-4 py-2.5 tabular-nums text-slate-600">{t.contracts}</td>
-                  <td className="px-4 py-2.5 tabular-nums text-slate-600">{t.runs_7d}</td>
-                  <td className="px-4 py-2.5 text-xs text-slate-400">{String(t.created_at).slice(0, 10)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
+        <Table>
+          <THead>
+            <TR>
+              <TH>Tenant</TH><TH>Slug</TH><TH>Membros</TH><TH>Deals</TH><TH>Contratos</TH><TH>Execuções 7d</TH><TH>Criado</TH>
+            </TR>
+          </THead>
+          <tbody>
+            {tenants.map((t) => (
+              <TR key={t.id}>
+                <TD className="font-medium text-slate-800 dark:text-slate-200">{t.name}</TD>
+                <TD>{t.slug ? <Badge variant="outline">{t.slug}</Badge> : <span className="text-slate-300">—</span>}</TD>
+                <TD className="tabular-nums">{t.members}</TD>
+                <TD className="tabular-nums">{t.deals}</TD>
+                <TD className="tabular-nums">{t.contracts}</TD>
+                <TD className="tabular-nums">{t.runs_7d}</TD>
+                <TD className="text-xs text-slate-400">{String(t.created_at).slice(0, 10)}</TD>
+              </TR>
+            ))}
+          </tbody>
+        </Table>
 
         <section className="rounded-xl border border-slate-200 bg-white p-5">
           <h2 className="mb-3 text-sm font-semibold text-slate-800">Últimas execuções de agentes (todas as orgs)</h2>
