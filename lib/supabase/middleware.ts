@@ -33,6 +33,8 @@ export async function updateSession(request: NextRequest) {
     path === "/" ||
     path === "/login" ||
     path.startsWith("/convite") ||
+    path.startsWith("/sign") ||
+    path.startsWith("/proposta") ||
     path.startsWith("/api/health") ||
     path.startsWith("/api/webhooks") ||
     path.startsWith("/_next") ||

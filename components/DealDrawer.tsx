@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { CheckCircle2, FileSignature, FlaskConical, MessageCircle, Pencil, Play, Trash2, UserRound } from "lucide-react";
+import { CheckCircle2, Copy, FileSignature, FileText, FlaskConical, MessageCircle, Pencil, Play, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { deleteContact, deleteDeal, moveDeal, updateContact, updateDealFull } from "@/app/actions";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { brl, tempColor, tempLabel } from "@/lib/format";
+import { waMeLink, buildWaTemplate } from "@/lib/whatsapp";
 import type { Agent, Contact, Deal, Stage } from "@/lib/types";
 import type { ProductListItem } from "@/lib/db";
 
@@ -36,7 +37,33 @@ function SourceTag({ source }: { source?: string }) {
   );
 }
 
-function AgentResult({ kind, r }: { kind: string; r: any }) {
+function ProposalShare({ token, phone, name }: { token: string; phone?: string | null; name?: string | null }) {
+  const [origin, setOrigin] = useState(process.env.NEXT_PUBLIC_APP_URL || "");
+  useEffect(() => { if (!process.env.NEXT_PUBLIC_APP_URL) setOrigin(window.location.origin); }, []);
+  if (!origin) return null;
+  const link = `${origin.replace(/\/$/, "")}/proposta/${token}`;
+  const wa = phone
+    ? waMeLink(phone, buildWaTemplate("envio_proposta", { nome: (name ?? "").split(" ")[0], link }))
+    : null;
+  return (
+    <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-2">
+      <a href={link} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50">
+        <FileText className="h-3 w-3" aria-hidden /> Abrir / PDF
+      </a>
+      <button onClick={() => { navigator.clipboard.writeText(link); toast.success("Link da proposta copiado"); }}
+        className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50">
+        <Copy className="h-3 w-3" aria-hidden /> Copiar link
+      </button>
+      {wa ? (
+        <a href={wa} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg bg-emerald-600 px-2.5 text-xs font-medium text-white hover:bg-emerald-700">
+          <MessageCircle className="h-3 w-3" aria-hidden /> Enviar por WhatsApp
+        </a>
+      ) : <span className="text-[10px] text-slate-400">sem telefone do contato</span>}
+    </div>
+  );
+}
+
+function AgentResult({ kind, r, contactPhone, contactName }: { kind: string; r: any; contactPhone?: string | null; contactName?: string | null }) {
   if (kind === "lead-scoring") {
     return (
       <div className="mt-3">
@@ -85,6 +112,8 @@ function AgentResult({ kind, r }: { kind: string; r: any }) {
           <span className="text-lg font-bold text-emerald-700">{brl(r.total)}</span>
         </div>
         <p className="text-xs text-slate-400">{r.terms}</p>
+        {r.shareToken && <ProposalShare token={r.shareToken} phone={contactPhone} name={contactName} />}
+        {r.dryRun && !r.shareToken && <p className="text-xs text-amber-600">Prévia — execute (sem dry-run) para gerar o link compartilhável da proposta.</p>}
       </div>
     );
   }
@@ -287,7 +316,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
                         <FlaskConical className="h-3 w-3" aria-hidden /> Prévia — não foi salvo neste deal
                       </div>
                     )}
-                    <AgentResult kind={String(agent.id)} r={results[String(agent.id)]} />
+                    <AgentResult kind={String(agent.id)} r={results[String(agent.id)]} contactPhone={contact?.phone} contactName={contact?.name} />
                   </>
                 )
               )}

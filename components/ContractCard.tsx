@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Check, Copy, FileSignature, MessageCircle, RefreshCw, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { refreshContractStatus, sendContractForSignature, updateContractClauses, updateContractStatus } from "@/app/actions";
@@ -29,10 +29,17 @@ export function ContractCard({ c, orgName }: { c: ContractView; orgName: string 
   const [saved, setSaved] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const [clauseToRemove, setClauseToRemove] = useState<number | null>(null);
-  const [link, setLink] = useState<string | null>(c.signingUrl);
   const sending = pending; const refreshing = pending;
-  const waLink = (c.contactPhone && (link || c.signingUrl))
-    ? waMeLink(c.contactPhone, buildWaTemplate("link_opensign", { nome: (c.contactName ?? "").split(" ")[0], empresa: c.company, link: (link || c.signingUrl) ?? undefined }))
+
+  // Link SEMPRE aponta para a página interna estável /sign/contracts/[token],
+  // nunca para a URL do provider (que no modo mock era example.test).
+  // Origin resolvido pós-mount para não gerar mismatch de hidratação.
+  const [origin, setOrigin] = useState(process.env.NEXT_PUBLIC_APP_URL || "");
+  useEffect(() => { if (!process.env.NEXT_PUBLIC_APP_URL) setOrigin(window.location.origin); }, []);
+  const internalLink = c.signToken && origin ? `${origin.replace(/\/$/, "")}/sign/contracts/${c.signToken}` : null;
+  const isSigned = status === "assinado" || ["assinado", "completed", "signed"].includes(c.externalStatus ?? "");
+  const waLink = (c.contactPhone && internalLink && !isSigned)
+    ? waMeLink(c.contactPhone, buildWaTemplate("link_opensign", { nome: (c.contactName ?? "").split(" ")[0], empresa: c.company, link: internalLink }))
     : null;
 
   function applyStatus(s: string) {
@@ -92,42 +99,56 @@ export function ContractCard({ c, orgName }: { c: ContractView; orgName: string 
         </div>
       </div>
 
-      {/* Assinatura digital (OpenSign) */}
+      {/* Assinatura digital — link interno estável + envio manual por WhatsApp */}
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-        {!c.envelopeId ? (
-          <Button size="xs" loading={sending} onClick={() => start(async () => {
-            try { const r = await sendContractForSignature(c.id); toast.success("Enviado para assinatura"); if (r.signingUrl) setLink(r.signingUrl); }
-            catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao enviar"); }
-          })}>
-            <FileSignature className="h-3 w-3" aria-hidden /> Enviar para assinatura
-          </Button>
+        {isSigned ? (
+          <>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
+              <ShieldCheck className="h-3 w-3" aria-hidden /> Assinado{c.signedAt ? ` · ${c.signedAt.slice(0, 10)}` : ""}
+            </span>
+            {c.certificateUrl && (
+              <a href={c.certificateUrl} target="_blank" rel="noreferrer"
+                className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50">
+                <ShieldCheck className="h-3 w-3" aria-hidden /> Ver documento assinado
+              </a>
+            )}
+          </>
         ) : (
           <>
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">{c.provider ?? "opensign"} · {c.externalStatus ?? "enviado"}</span>
-            {(c.signingUrl || link) && (
+            {c.envelopeId ? (
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">{c.provider ?? "opensign"} · {c.externalStatus ?? "enviado"}</span>
+            ) : (
+              <Button size="xs" loading={sending} onClick={() => start(async () => {
+                try { await sendContractForSignature(c.id); toast.success("Contrato preparado para assinatura"); }
+                catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao preparar"); }
+              })}>
+                <FileSignature className="h-3 w-3" aria-hidden /> Preparar assinatura
+              </Button>
+            )}
+
+            {internalLink && (
               <>
-                <Button variant="outline" size="xs" onClick={() => { navigator.clipboard.writeText((link || c.signingUrl)!); toast.success("Link copiado"); }}>
+                <Button variant="outline" size="xs" onClick={() => { navigator.clipboard.writeText(internalLink); toast.success("Link de assinatura copiado"); }}>
                   <Copy className="h-3 w-3" aria-hidden /> Copiar link
                 </Button>
-                {waLink && (
+                {waLink ? (
                   <a href={waLink} target="_blank" rel="noreferrer"
                     className="inline-flex h-7 items-center gap-1 rounded-lg bg-emerald-600 px-2.5 text-xs font-medium text-white hover:bg-emerald-700">
                     <MessageCircle className="h-3 w-3" aria-hidden /> WhatsApp
                   </a>
+                ) : !c.contactPhone && (
+                  <span className="text-[10px] text-slate-400">sem telefone do contato</span>
                 )}
               </>
             )}
-            <Button variant="outline" size="xs" loading={refreshing} onClick={() => start(async () => {
-              try { const r = await refreshContractStatus(c.id); toast.success(`Status: ${r.status}`); }
-              catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao atualizar"); }
-            })}>
-              <RefreshCw className="h-3 w-3" aria-hidden /> Atualizar status
-            </Button>
-            {c.certificateUrl && (
-              <a href={c.certificateUrl} target="_blank" rel="noreferrer"
-                className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50">
-                <ShieldCheck className="h-3 w-3" aria-hidden /> Ver auditoria
-              </a>
+
+            {c.envelopeId && (
+              <Button variant="outline" size="xs" loading={refreshing} onClick={() => start(async () => {
+                try { const r = await refreshContractStatus(c.id); toast.success(`Status: ${r.status}`); }
+                catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao atualizar"); }
+              })}>
+                <RefreshCw className="h-3 w-3" aria-hidden /> Atualizar status
+              </Button>
             )}
           </>
         )}
