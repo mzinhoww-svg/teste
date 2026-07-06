@@ -61,7 +61,10 @@ export default async function AdminPage() {
               <div className="text-[11px] text-slate-400">{email}</div>
             </div>
           </div>
-          <Link href="/app" className="text-sm font-medium text-slate-500 hover:text-slate-800">Ir para o CRM →</Link>
+          <div className="flex items-center gap-3">
+            <Link href="/admin/agents" className="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700">Agentes da plataforma</Link>
+            <Link href="/app" className="text-sm font-medium text-slate-500 hover:text-slate-800">Ir para o CRM →</Link>
+          </div>
         </div>
       </header>
 
