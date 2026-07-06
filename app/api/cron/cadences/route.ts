@@ -70,5 +70,58 @@ export async function GET(req: Request) {
       try { await runAgentForDeal(admin, r.agent_kind, d.id, r.org_id); processed++; } catch { /* segue */ }
     }
   }
-  return NextResponse.json({ ok: true, processed, emailed });
+
+  // ---- Cobrança (dunning): faturas "enviada" vencidas → "vencida" + e-mail. ----
+  const overdue = await processOverdueInvoices(admin);
+
+  return NextResponse.json({ ok: true, processed, emailed, overdue });
+}
+
+// Resolve destinatários do cliente (usuários ativos do portal ou o contato principal).
+async function clientRecipients(admin: any, clientAccountId: string): Promise<{ email: string; name?: string }[]> {
+  const { data: users } = await admin.from("client_users").select("email, name").eq("client_account_id", clientAccountId).eq("status", "active");
+  const rec = (users ?? []).filter((u: any) => u.email).map((u: any) => ({ email: u.email, name: u.name ?? undefined }));
+  if (rec.length) return rec;
+  const { data: ca } = await admin.from("client_accounts").select("primary_contact_id").eq("id", clientAccountId).maybeSingle();
+  if (ca?.primary_contact_id) {
+    const { data: c } = await admin.from("contacts").select("email, name").eq("id", ca.primary_contact_id).maybeSingle();
+    if (c?.email) return [{ email: c.email, name: c.name ?? undefined }];
+  }
+  return [];
+}
+
+async function processOverdueInvoices(admin: any): Promise<number> {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: invoices } = await admin
+    .from("invoices")
+    .select("id, org_id, client_account_id, number, amount, due_date, payment_link")
+    .eq("status", "enviada")
+    .lt("due_date", today)
+    .limit(100);
+  if (!invoices?.length) return 0;
+
+  const { sendAndLogEmail } = await import("@/lib/email/send");
+  const { invoiceEmail } = await import("@/lib/email/templates");
+  let count = 0;
+  for (const inv of invoices) {
+    // Marca vencida antes (evita reprocessar no próximo cron).
+    await admin.from("invoices").update({ status: "vencida" }).eq("id", inv.id);
+    const recipients = await clientRecipients(admin, inv.client_account_id);
+    if (recipients.length) {
+      const { data: org } = await admin.from("orgs").select("name, settings").eq("id", inv.org_id).maybeSingle();
+      const content = invoiceEmail({
+        brand: (org?.settings as any)?.brand ?? {}, orgName: org?.name ?? "CRM",
+        number: inv.number ?? "—", amount: Number(inv.amount), dueDate: inv.due_date ?? undefined,
+        paymentUrl: inv.payment_link ?? undefined, overdue: true,
+      });
+      await sendAndLogEmail({ db: admin, orgId: inv.org_id, to: recipients, content, tags: ["cobranca"] });
+    }
+    await admin.from("notifications").insert({
+      org_id: inv.org_id, type: "invoice_overdue", title: "Fatura vencida",
+      body: `${inv.number ?? "Fatura"} venceu e foi marcada como vencida${recipients.length ? " (cobrança enviada)" : ""}.`,
+      action_url: "/app/financeiro",
+    });
+    count++;
+  }
+  return count;
 }
