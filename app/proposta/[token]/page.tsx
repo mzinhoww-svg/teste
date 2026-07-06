@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FileText, ShieldAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { brl } from "@/lib/format";
-import { PrintButton } from "./PrintButton";
+import { Download } from "lucide-react";
 
 export const metadata = { title: "Proposta comercial — CRM AI Studio" };
 export const dynamic = "force-dynamic";
@@ -50,7 +50,14 @@ export default async function ProposalPage({ params }: { params: { token: string
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-sm font-bold text-white">AI</span>
             <span className="text-sm font-semibold text-slate-900">{p.org_name}</span>
           </div>
-          <PrintButton />
+          <a
+            href={`/api/proposta/${params.token}/pdf`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+          >
+            <Download className="h-3.5 w-3.5" aria-hidden /> Baixar PDF
+          </a>
         </div>
 
         <article className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm print:border-0 print:shadow-none">
