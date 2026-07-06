@@ -92,6 +92,7 @@ npm run test:e2e   # testes E2E (Playwright) — ver docs/testing.md
 | Contratos e assinatura | [`docs/contracts-signature.md`](docs/contracts-signature.md) |
 | Assinatura digital (OpenSign) | [`docs/opensign.md`](docs/opensign.md) |
 | Notificações in-app + WhatsApp | [`docs/notifications.md`](docs/notifications.md) |
+| E-mail transacional (Brevo) | [`docs/email-brevo.md`](docs/email-brevo.md) |
 | Cadências e SLA | [`docs/cadences.md`](docs/cadences.md) |
 | Testes (unit + E2E) e CI | [`docs/testing.md`](docs/testing.md) |
 | Deploy na Vercel e domínio próprio | [`docs/vercel-domain.md`](docs/vercel-domain.md) |

@@ -99,7 +99,7 @@ export default function LandingPage() {
               </Link>
             </div>
             <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-500">
-              {["Sem e-mail transacional", "Assinatura open source", "Dados isolados por tenant"].map((t) => (
+              {["E-mail transacional (Brevo)", "Assinatura open source", "Dados isolados por tenant"].map((t) => (
                 <li key={t} className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-emerald-500" aria-hidden /> {t}</li>
               ))}
             </ul>
@@ -159,7 +159,7 @@ export default function LandingPage() {
             </span>
             <h2 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">Multi-tenant de verdade, não por convenção.</h2>
             <p className="mt-3 max-w-lg text-slate-300">
-              Isolamento por Row Level Security no Postgres, autorização validada no servidor por papel — nunca só por cookie. Convites por link, sem e-mail transacional. LGPD por padrão.
+              Isolamento por Row Level Security no Postgres, autorização validada no servidor por papel — nunca só por cookie. Convites por link e por e-mail (Brevo). LGPD por padrão.
             </p>
             <Link href="/app" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100">
               Começar agora <ArrowRight className="h-4 w-4" aria-hidden />

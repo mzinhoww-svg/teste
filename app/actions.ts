@@ -84,6 +84,19 @@ export async function createInvite(formData: FormData) {
     body: `${email} foi convidado como ${role}.`, action_url: "/app/org",
   });
 
+  // E-mail do convite (Brevo). Best-effort: sem BREVO_API_KEY cai no mock e o
+  // link copiável continua sendo o fallback. Nunca derruba a criação do convite.
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  if (appUrl) {
+    const { sendAndLogEmail } = await import("@/lib/email/send");
+    const { inviteEmail } = await import("@/lib/email/templates");
+    const content = inviteEmail({
+      brand: ctx.brand, orgName: ctx.orgName,
+      inviteUrl: `${appUrl}/convite/${data.token}`, role, inviterName: ctx.email,
+    });
+    await sendAndLogEmail({ db: supabase, orgId: ctx.orgId, to: { email }, content, tags: ["convite"] });
+  }
+
   revalidatePath("/app/org");
   return data.token as string;
 }
@@ -732,6 +745,23 @@ export async function sendContractForSignature(contractId: string) {
       summary: `Contrato ${c.reference} enviado para assinatura (${env.provider})`, author: "Agente Jurídico",
     });
   }
+
+  // E-mail para cada signatário com o link de assinatura interno (/sign/contracts/[token]).
+  // Complementa o OpenSign; no modo demonstração é o próprio canal de entrega.
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  if (appUrl && c.sign_token) {
+    const { sendAndLogEmail } = await import("@/lib/email/send");
+    const { contractSignEmail } = await import("@/lib/email/templates");
+    const signUrl = `${appUrl}/sign/contracts/${c.sign_token}`;
+    for (const s of signers) {
+      const content = contractSignEmail({
+        brand: ctx.brand, orgName: ctx.orgName, signerName: s.name,
+        title: c.title, reference: c.reference, value: Number(c.value) || undefined, signUrl,
+      });
+      await sendAndLogEmail({ db: supabase, orgId: ctx.orgId, to: { email: s.email, name: s.name }, content, dealId: c.deal_id, tags: ["contrato"] });
+    }
+  }
+
   revalidatePath("/app/contracts");
   return { signingUrl: env.signingUrl as string | undefined };
 }
@@ -823,4 +853,61 @@ export async function updateContractClauses(contractId: string, clauses: { headi
     .eq("id", contractId);
   if (error) throw error;
   revalidatePath("/app/contracts");
+}
+
+// --- E-mail: enviar proposta -----------------------------------------------
+// Envia a proposta por e-mail ao contato do deal, com link público
+// (/proposta/[token]) e o PDF anexo (best-effort). Requer NEXT_PUBLIC_APP_URL.
+export async function sendProposalEmail(proposalId: string): Promise<{ ok: boolean; error?: string }> {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+
+  const { data: proposal } = await supabase
+    .from("proposals")
+    .select("id, deal_id, total, share_token, deal:deals(title, contact:contacts(id, name, email))")
+    .eq("id", proposalId).eq("org_id", ctx.orgId).maybeSingle();
+  if (!proposal) throw new Error("Proposta não encontrada");
+
+  const deal: any = Array.isArray((proposal as any).deal) ? (proposal as any).deal[0] : (proposal as any).deal;
+  const contact: any = Array.isArray(deal?.contact) ? deal.contact[0] : deal?.contact;
+  const toEmail = contact?.email as string | undefined;
+  if (!toEmail) throw new Error("O contato deste deal não tem e-mail cadastrado");
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  if (!appUrl) throw new Error("NEXT_PUBLIC_APP_URL não configurado — necessário para os links do e-mail");
+  const token = (proposal as any).share_token as string;
+  const proposalUrl = `${appUrl}/proposta/${token}`;
+
+  // PDF anexo (best-effort): busca a rota de PDF já existente e converte p/ base64.
+  let attachments: { name: string; content: string }[] | undefined;
+  try {
+    const res = await fetch(`${appUrl}/api/proposta/${token}/pdf`);
+    if (res.ok) {
+      const buf = Buffer.from(await res.arrayBuffer());
+      attachments = [{ name: "proposta.pdf", content: buf.toString("base64") }];
+    }
+  } catch {
+    // segue sem anexo — o link no corpo continua funcionando
+  }
+
+  const { sendAndLogEmail } = await import("@/lib/email/send");
+  const { proposalEmail } = await import("@/lib/email/templates");
+  const content = proposalEmail({
+    brand: ctx.brand, orgName: ctx.orgName, contactName: contact?.name,
+    dealTitle: deal?.title ?? "Proposta", total: Number((proposal as any).total) || undefined, proposalUrl,
+  });
+
+  const result = await sendAndLogEmail({
+    db: supabase, orgId: ctx.orgId, to: { email: toEmail, name: contact?.name },
+    content, attachments, dealId: (proposal as any).deal_id, contactId: contact?.id ?? null, tags: ["proposta"],
+  });
+
+  if (result.ok && (proposal as any).deal_id) {
+    await supabase.from("activities").insert({
+      org_id: ctx.orgId, deal_id: (proposal as any).deal_id, type: "email",
+      summary: `Proposta enviada por e-mail para ${toEmail}`, author: ctx.email ?? "Você",
+    });
+  }
+  revalidatePath("/app");
+  return { ok: result.ok, error: result.error };
 }

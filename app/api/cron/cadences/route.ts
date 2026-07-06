@@ -29,20 +29,46 @@ export async function GET(req: Request) {
 
   const { data: rules } = await admin
     .from("cadence_rules")
-    .select("id, org_id, stage_key, days, agent_kind")
+    .select("id, org_id, stage_key, days, agent_kind, action, config")
     .eq("enabled", true)
-    .eq("action", "run_agent");
+    .in("action", ["run_agent", "send_email"]);
 
   let processed = 0;
+  let emailed = 0;
   for (const r of rules ?? []) {
-    if (!r.agent_kind) continue;
     const { data: stage } = await admin.from("stages").select("id").eq("org_id", r.org_id).eq("key", r.stage_key).maybeSingle();
     if (!stage) continue;
     const cutoff = new Date(Date.now() - r.days * 86_400_000).toISOString();
+
+    if (r.action === "send_email") {
+      // Follow-up por e-mail aos contatos de deals parados no estágio.
+      const { data: deals } = await admin
+        .from("deals")
+        .select("id, title, contact:contacts(id, name, email)")
+        .eq("org_id", r.org_id).eq("stage_id", stage.id).lt("updated_at", cutoff).limit(20);
+      if (!deals?.length) continue;
+      const { data: org } = await admin.from("orgs").select("name, settings").eq("id", r.org_id).maybeSingle();
+      const brand = (org?.settings as any)?.brand ?? {};
+      const message = (r.config as any)?.message
+        ?? "Passando para retomar nossa conversa. Podemos seguir com os próximos passos?";
+      const { sendAndLogEmail } = await import("@/lib/email/send");
+      const { cadenceFollowupEmail } = await import("@/lib/email/templates");
+      for (const d of deals) {
+        const contact: any = Array.isArray((d as any).contact) ? (d as any).contact[0] : (d as any).contact;
+        if (!contact?.email) continue;
+        const content = cadenceFollowupEmail({ brand, orgName: org?.name ?? "CRM", contactName: contact.name, message });
+        await sendAndLogEmail({ db: admin, orgId: r.org_id, to: { email: contact.email, name: contact.name }, content, dealId: d.id, contactId: contact.id, tags: ["cadencia"] });
+        emailed++;
+      }
+      continue;
+    }
+
+    // action === "run_agent"
+    if (!r.agent_kind) continue;
     const { data: deals } = await admin.from("deals").select("id").eq("org_id", r.org_id).eq("stage_id", stage.id).lt("updated_at", cutoff).limit(20);
     for (const d of deals ?? []) {
       try { await runAgentForDeal(admin, r.agent_kind, d.id, r.org_id); processed++; } catch { /* segue */ }
     }
   }
-  return NextResponse.json({ ok: true, processed });
+  return NextResponse.json({ ok: true, processed, emailed });
 }
