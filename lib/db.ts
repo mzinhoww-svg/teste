@@ -460,6 +460,51 @@ export async function getClientAccounts(): Promise<ClientAccountRow[]> {
   })) as ClientAccountRow[];
 }
 
+export interface ClientAccount360 {
+  account: { id: string; name: string; slug: string; cnpj: string | null; notes: string | null; portal_enabled: boolean };
+  deals: { id: string; title: string; amount: number; stage: string }[];
+  contacts: { id: string; name: string; email: string | null; phone: string | null; job_title: string | null }[];
+  invoices: { id: string; number: string | null; amount: number; status: string; due_date: string | null }[];
+  projects: { id: string; name: string; status: string; due_date: string | null }[];
+  deliverables: { id: string; title: string; type: string; status: string; url: string | null }[];
+  totals: { pipeline: number; recebido: number; aReceber: number };
+}
+
+/** Visão 360° de uma conta de cliente (Empresa): deals, contatos, financeiro, entregas. */
+export async function getClientAccount360(id: string): Promise<ClientAccount360 | null> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return null;
+  const { data: account } = await supabase
+    .from("client_accounts")
+    .select("id,name,slug,cnpj,notes,portal_enabled")
+    .eq("org_id", orgId).eq("id", id).maybeSingle();
+  if (!account) return null;
+
+  const [{ data: deals }, { data: contacts }, { data: invoices }, { data: projects }, { data: deliverables }] = await Promise.all([
+    supabase.from("deals").select("id,title,amount,stages(name)").eq("org_id", orgId).eq("client_account_id", id).order("created_at", { ascending: false }),
+    supabase.from("contacts").select("id,name,email,phone,job_title").eq("org_id", orgId).eq("client_account_id", id).order("name"),
+    supabase.from("invoices").select("id,number,amount,status,due_date").eq("org_id", orgId).eq("client_account_id", id).order("issue_date", { ascending: false }),
+    supabase.from("projects").select("id,name,status,due_date").eq("org_id", orgId).eq("client_account_id", id).order("created_at", { ascending: false }),
+    supabase.from("deliverables").select("id,title,type,status,url").eq("org_id", orgId).eq("client_account_id", id).order("created_at", { ascending: false }),
+  ]);
+
+  const invs = (invoices ?? []).map((i: any) => ({ ...i, amount: Number(i.amount) }));
+  return {
+    account: account as any,
+    deals: (deals ?? []).map((d: any) => ({ id: d.id, title: d.title, amount: Number(d.amount), stage: d.stages?.name ?? "—" })),
+    contacts: (contacts ?? []) as any,
+    invoices: invs as any,
+    projects: (projects ?? []) as any,
+    deliverables: (deliverables ?? []) as any,
+    totals: {
+      pipeline: (deals ?? []).reduce((s: number, d: any) => s + Number(d.amount), 0),
+      recebido: invs.filter((i) => i.status === "paga").reduce((s, i) => s + i.amount, 0),
+      aReceber: invs.filter((i) => i.status === "enviada" || i.status === "vencida").reduce((s, i) => s + i.amount, 0),
+    },
+  };
+}
+
 export interface ClientOption { id: string; name: string; slug: string }
 export async function getClientOptions(): Promise<ClientOption[]> {
   const supabase = createClient();

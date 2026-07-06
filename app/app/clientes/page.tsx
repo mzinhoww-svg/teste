@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Building2, Link2 } from "lucide-react";
 import { getAuthContext, getClientAccounts, getClientInvites } from "@/lib/db";
 import { createClientAccount, createClientInvite, toggleClientPortal } from "@/app/portal-actions";
@@ -41,7 +42,7 @@ export default async function ClientesPage() {
           <tbody>
             {clients.map((c) => (
               <TR key={c.id}>
-                <TD className="font-medium text-slate-800 dark:text-slate-200">{c.name}</TD>
+                <TD className="font-medium"><Link href={`/app/clientes/${c.id}`} className="text-brand-700 hover:underline dark:text-brand-300">{c.name}</Link></TD>
                 <TD><Badge variant="outline">{c.slug}</Badge></TD>
                 <TD className="tabular-nums">{c.deals}</TD>
                 <TD className="tabular-nums">{c.invoices}</TD>
@@ -83,7 +84,7 @@ export default async function ClientesPage() {
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-slate-400">Envie o link ao cliente (sem e-mail transacional). Ele cria a senha e acessa o portal.</p>
+          <p className="mt-2 text-xs text-slate-400">O convite é enviado por e-mail (Brevo); este link é o fallback. O cliente cria a senha e acessa o portal.</p>
         </section>
       )}
     </main>

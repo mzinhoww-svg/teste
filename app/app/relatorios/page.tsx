@@ -1,16 +1,16 @@
 import { Download } from "lucide-react";
-import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase/server";
 import { getBoard, getOrgId } from "@/lib/db";
 import { brl } from "@/lib/format";
 
 export const metadata = { title: "Relatórios — CRM AI Studio" };
+export const dynamic = "force-dynamic";
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
       <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="mt-1 text-2xl font-bold text-slate-900">{value}</div>
+      <div className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">{value}</div>
       {hint && <div className="text-xs text-slate-400">{hint}</div>}
     </div>
   );
@@ -27,12 +27,13 @@ export default async function ReportsPage() {
   const orgId = await getOrgId();
   const { pipeline, deals } = await getBoard();
 
-  const [{ data: runs }, { count: contractCount }, { count: proposalCount }, { count: msgCount }, { data: dealRows }] = await Promise.all([
+  const [{ data: runs }, { count: contractCount }, { count: proposalCount }, { count: msgCount }, { data: dealRows }, { data: invoiceRows }] = await Promise.all([
     supabase.from("agent_runs").select("agent_kind, source, created_at, input").eq("org_id", orgId ?? "").order("created_at", { ascending: false }).limit(200),
     supabase.from("contracts").select("id", { count: "exact", head: true }).eq("org_id", orgId ?? ""),
     supabase.from("proposals").select("id", { count: "exact", head: true }).eq("org_id", orgId ?? ""),
     supabase.from("messages").select("id", { count: "exact", head: true }).eq("org_id", orgId ?? ""),
-    supabase.from("deals").select("stage_id, amount, probability, lost_reason, created_at, updated_at").eq("org_id", orgId ?? ""),
+    supabase.from("deals").select("stage_id, amount, probability, lost_reason, origin, created_at, updated_at").eq("org_id", orgId ?? ""),
+    supabase.from("invoices").select("amount, status, due_date, recurring").eq("org_id", orgId ?? ""),
   ]);
 
   const allRuns = runs ?? [];
@@ -117,27 +118,74 @@ export default async function ReportsPage() {
     ? `${(estTokens / 1000).toFixed(0)}k tokens${estimatedRuns ? " (parte est.)" : " reais"}`
     : `~${(estTokens / 1000).toFixed(0)}k tokens (est.)`;
 
+  // ---- Financeiro (invoices) ----
+  const invs = invoiceRows ?? [];
+  const mrr = invs.filter((i) => i.recurring && i.status !== "cancelada").reduce((s, i) => s + Number(i.amount), 0);
+  const recebido = invs.filter((i) => i.status === "paga").reduce((s, i) => s + Number(i.amount), 0);
+  const open = invs.filter((i) => i.status === "enviada" || i.status === "vencida");
+  const arTotal = open.reduce((s, i) => s + Number(i.amount), 0);
+  // Aging de contas a receber por dias vencidos.
+  const today = new Date();
+  const daysOverdue = (due: string | null) => (due ? Math.floor((today.getTime() - new Date(due).getTime()) / 86_400_000) : 0);
+  const aging = { aVencer: 0, d0_30: 0, d31_60: 0, d60p: 0 };
+  for (const i of open) {
+    const d = daysOverdue(i.due_date);
+    const v = Number(i.amount);
+    if (d <= 0) aging.aVencer += v;
+    else if (d <= 30) aging.d0_30 += v;
+    else if (d <= 60) aging.d31_60 += v;
+    else aging.d60p += v;
+  }
+
+  // ---- Win-rate por origem ----
+  const originStats = new Map<string, { won: number; lost: number }>();
+  for (const d of dRows) {
+    const isWon = d.stage_id === wonStage?.id;
+    const isLost = d.stage_id === lostStage?.id;
+    if (!isWon && !isLost) continue;
+    const key = (d.origin ?? "").trim() || "sem origem";
+    const cur = originStats.get(key) ?? { won: 0, lost: 0 };
+    if (isWon) cur.won++; else cur.lost++;
+    originStats.set(key, cur);
+  }
+  const originRows = [...originStats.entries()]
+    .map(([origin, s]) => ({ origin, won: s.won, lost: s.lost, rate: s.won + s.lost ? Math.round((s.won / (s.won + s.lost)) * 100) : 0 }))
+    .sort((a, b) => (b.won + b.lost) - (a.won + a.lost));
+
+  // ---- Sales velocity: (deals abertos × win% × ticket médio) / ciclo (dias) → R$/dia ----
+  const avgDeal = openRows.length ? openRows.reduce((s, d) => s + Number(d.amount ?? 0), 0) / openRows.length : 0;
+  const velocity = winRate != null && avgCycle && avgCycle > 0
+    ? (openRows.length * (winRate / 100) * avgDeal) / avgCycle
+    : null;
+
   return (
-    <div className="min-h-screen">
-      <Nav active="reports" />
-      <main className="mx-auto max-w-5xl px-6 py-6">
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
         <div className="mb-6 flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-xl font-semibold text-slate-900">Relatórios</h1>
-            <p className="text-sm text-slate-500">Visão executiva do funil e de tudo que os agentes executaram.</p>
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Relatórios</h1>
+            <p className="text-sm text-slate-500">Visão executiva do funil, financeiro e dos agentes.</p>
           </div>
-          <a href="/api/export/reports" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50">
+          <a href="/api/export/reports" className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900">
             <Download className="mr-1 inline h-3.5 w-3.5" aria-hidden /> Exportar CSV
           </a>
         </div>
 
-        <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <section className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <Stat label="Pipeline" value={brl(totalValue)} hint={`${deals.length} deals`} />
           <Stat label="Forecast ponderado" value={brl(forecast)} hint={`${openRows.length} deals abertos`} />
           <Stat label="Win rate" value={winRate == null ? "—" : `${winRate}%`} hint={closed ? `${won.length} ganhos / ${lost.length} perdidos` : "sem fechados"} />
           <Stat label="Ciclo médio" value={avgCycle == null ? "—" : `${avgCycle}d`} hint={avgCycle == null ? "sem ganhos" : `${wonRows.length} ganhos`} />
-          <Stat label="Execuções IA" value={String(allRuns.length)} hint={`${llmRuns} IA · ${autoRuns} auto`} />
-          <Stat label={realTokens > 0 ? "Custo IA" : "Custo IA (est.)"} value={brl(estCostBRL)} hint={tokensLabel} />
+          <Stat label="Sales velocity" value={velocity == null ? "—" : `${brl(velocity)}/d`} hint="receita/dia projetada" />
+          <Stat label="MRR" value={brl(mrr)} hint="faturas recorrentes" />
+        </section>
+
+        <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <Stat label="Recebido" value={brl(recebido)} hint="faturas pagas" />
+          <Stat label="A receber" value={brl(arTotal)} hint={`${open.length} faturas abertas`} />
+          <Stat label="A vencer" value={brl(aging.aVencer)} />
+          <Stat label="Vencido 1–30d" value={brl(aging.d0_30)} />
+          <Stat label="Vencido 31–60d" value={brl(aging.d31_60)} />
+          <Stat label="Vencido 60d+" value={brl(aging.d60p)} />
         </section>
 
         <section className="mb-8 grid gap-4 lg:grid-cols-2">
@@ -219,9 +267,29 @@ export default async function ReportsPage() {
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <section className="mb-8 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="mb-1 text-sm font-semibold text-slate-800 dark:text-slate-200">Win-rate por origem</h2>
+          <p className="mb-3 text-xs text-slate-400">Taxa de ganho dos deals fechados, por canal de origem.</p>
+          {originRows.length === 0 ? (
+            <p className="text-sm text-slate-400">Nenhum deal fechado ainda.</p>
+          ) : (
+            <div className="space-y-2">
+              {originRows.map((o) => (
+                <div key={o.origin} className="flex items-center gap-2 text-sm">
+                  <span className="w-28 shrink-0 truncate text-xs text-slate-500" title={o.origin}>{o.origin}</span>
+                  <div className="h-4 flex-1 overflow-hidden rounded bg-slate-100 dark:bg-slate-800">
+                    <div className="h-full rounded bg-emerald-500" style={{ width: `${o.rate}%` }} />
+                  </div>
+                  <span className="w-24 text-right text-xs tabular-nums text-slate-500">{o.rate}% · {o.won}/{o.won + o.lost}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-800">Últimas execuções</h2>
+            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Últimas execuções</h2>
             <a href="/api/export" className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50">
               <Download className="mr-1 inline h-3.5 w-3.5" aria-hidden /> Exportar dados (LGPD)
             </a>
@@ -249,6 +317,5 @@ export default async function ReportsPage() {
           )}
         </section>
       </main>
-    </div>
   );
 }
