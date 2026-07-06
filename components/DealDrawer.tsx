@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/
 import { brl, tempColor, tempLabel } from "@/lib/format";
 import { waMeLink, buildWaTemplate } from "@/lib/whatsapp";
 import { EnrichmentPanel } from "@/components/EnrichmentPanel";
+import { REINERS_PRODUCTS } from "@/components/leads/CreateLeadSheet";
 import type { Agent, Contact, Deal, Stage } from "@/lib/types";
 import type { ProductListItem } from "@/lib/db";
 
@@ -186,6 +187,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
   function submitEdit(fd: FormData) {
     startEdit(async () => {
       try {
+        const probRaw = String(fd.get("probability") ?? "");
         await updateDealFull(deal.id, {
           title: String(fd.get("title") ?? deal.title),
           amount: Number(fd.get("amount") ?? deal.amount) || 0,
@@ -194,7 +196,17 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
           nextActionAt: String(fd.get("nextActionAt") ?? "") || null,
           temperature: String(fd.get("temperature") ?? "") || null,
           productId: String(fd.get("productId") ?? "") || null,
+          productLabel: String(fd.get("productLabel") ?? "") || null,
+          probability: probRaw === "" ? null : Math.max(0, Math.min(100, Number(probRaw) || 0)),
+          stageId: String(fd.get("stageId") ?? "") || undefined,
+          lostReason: String(fd.get("lostReason") ?? "") || null,
           tags: String(fd.get("tags") ?? "").split(",").map((t) => t.trim()).filter(Boolean),
+          custom: {
+            pain: String(fd.get("pain") ?? ""), objective: String(fd.get("objective") ?? ""),
+            objection: String(fd.get("objection") ?? ""), decisor: String(fd.get("decisor") ?? ""),
+            budget: String(fd.get("budget") ?? ""), urgency: String(fd.get("urgency") ?? ""),
+            event_date: String(fd.get("eventDate") ?? ""), location: String(fd.get("location") ?? ""),
+          },
         });
         setEditOpen(false);
         toast.success("Deal atualizado");
@@ -408,16 +420,52 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
                   <Input id="ed-origin" name="origin" defaultValue={deal.origin ?? ""} placeholder="indicação, evento, rede…" />
                 </div>
                 <div>
-                  <Label htmlFor="ed-product">Produto</Label>
+                  <Label htmlFor="ed-stage">Estágio</Label>
+                  <Select id="ed-stage" name="stageId" defaultValue={deal.stageId}>
+                    {stages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="ed-prob">Probabilidade (%)</Label>
+                  <Input id="ed-prob" name="probability" type="number" min="0" max="100" defaultValue={deal.probability ?? ""} />
+                </div>
+                <div>
+                  <Label htmlFor="ed-product">Produto (catálogo)</Label>
                   <Select id="ed-product" name="productId" defaultValue={deal.productId ?? ""}>
                     <option value="">—</option>
                     {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </Select>
                 </div>
                 <div className="col-span-2">
+                  <Label htmlFor="ed-productLabel">Produto de interesse</Label>
+                  <Select id="ed-productLabel" name="productLabel" defaultValue={deal.custom?.product_interest ?? ""}>
+                    <option value="">—</option>
+                    {REINERS_PRODUCTS.map((p) => <option key={p} value={p}>{p}</option>)}
+                  </Select>
+                </div>
+                <div className="col-span-2">
                   <Label htmlFor="ed-tags">Tags (separadas por vírgula)</Label>
                   <Input id="ed-tags" name="tags" defaultValue={deal.tags.join(", ")} />
                 </div>
+
+                <details className="col-span-2 rounded-lg border border-slate-200 p-2 dark:border-slate-700">
+                  <summary className="cursor-pointer text-xs font-medium text-slate-500">Contexto comercial</summary>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    <div className="col-span-2"><Label htmlFor="ed-pain">Dor</Label><Input id="ed-pain" name="pain" defaultValue={deal.custom?.pain ?? ""} /></div>
+                    <div><Label htmlFor="ed-obj">Objetivo</Label><Input id="ed-obj" name="objective" defaultValue={deal.custom?.objective ?? ""} /></div>
+                    <div><Label htmlFor="ed-objection">Objeção</Label><Input id="ed-objection" name="objection" defaultValue={deal.custom?.objection ?? ""} /></div>
+                    <div><Label htmlFor="ed-decisor">Decisor</Label>
+                      <Select id="ed-decisor" name="decisor" defaultValue={deal.custom?.decisor ?? ""}>
+                        <option value="">—</option><option value="sim">Sim</option><option value="nao">Não</option><option value="nao_sei">Não sei</option>
+                      </Select>
+                    </div>
+                    <div><Label htmlFor="ed-budget">Orçamento</Label><Input id="ed-budget" name="budget" defaultValue={deal.custom?.budget ?? ""} /></div>
+                    <div><Label htmlFor="ed-urg">Urgência</Label><Input id="ed-urg" name="urgency" defaultValue={deal.custom?.urgency ?? ""} /></div>
+                    <div><Label htmlFor="ed-evt">Data evento/gravação</Label><Input id="ed-evt" name="eventDate" type="date" defaultValue={deal.custom?.event_date ?? ""} /></div>
+                    <div className="col-span-2"><Label htmlFor="ed-loc">Local</Label><Input id="ed-loc" name="location" defaultValue={deal.custom?.location ?? ""} /></div>
+                    <div className="col-span-2"><Label htmlFor="ed-lost">Motivo de perda</Label><Input id="ed-lost" name="lostReason" defaultValue={deal.lostReason ?? ""} /></div>
+                  </div>
+                </details>
               </div>
               <Button type="submit" loading={pendingEdit} className="w-full">Salvar alterações</Button>
             </form>

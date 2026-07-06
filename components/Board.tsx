@@ -4,10 +4,10 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
-import { createLead, moveDeal } from "@/app/actions";
+import { moveDeal } from "@/app/actions";
 import { DealDrawer } from "@/components/DealDrawer";
+import { CreateLeadSheet } from "@/components/leads/CreateLeadSheet";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input, Label, Select } from "@/components/ui/input";
 import { brl } from "@/lib/format";
 import type { PipelineListItem, ProductListItem } from "@/lib/db";
@@ -57,69 +57,6 @@ function DealCard({ deal, contact, onClick, onDragStart }: {
   );
 }
 
-function NewLeadModal({ open, onOpenChange, pipelineId }: { open: boolean; onOpenChange: (o: boolean) => void; pipelineId: string }) {
-  const [pending, start] = useTransition();
-  function submit(fd: FormData) {
-    start(async () => {
-      try {
-        await createLead(fd);
-        onOpenChange(false);
-        toast.success("Lead criado no primeiro estágio do funil");
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Falha ao criar lead");
-      }
-    });
-  }
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent aria-describedby={undefined}>
-        <DialogTitle>Novo lead</DialogTitle>
-        <form action={submit} className="mt-3 space-y-3">
-          <input type="hidden" name="pipelineId" value={pipelineId} />
-          <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2">
-              <Label htmlFor="nl-name">Nome*</Label>
-              <Input id="nl-name" name="name" required autoFocus />
-            </div>
-            <div>
-              <Label htmlFor="nl-company">Empresa</Label>
-              <Input id="nl-company" name="company" />
-            </div>
-            <div>
-              <Label htmlFor="nl-channel">Canal</Label>
-              <Select id="nl-channel" name="channel" defaultValue="whatsapp">
-                <option value="whatsapp">WhatsApp</option>
-                <option value="email">E-mail</option>
-                <option value="voice">Voz</option>
-                <option value="portal">Portal</option>
-                <option value="form">Formulário</option>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="nl-email">E-mail</Label>
-              <Input id="nl-email" name="email" type="email" />
-            </div>
-            <div>
-              <Label htmlFor="nl-phone">Telefone (WhatsApp)</Label>
-              <Input id="nl-phone" name="phone" placeholder="+55 65 99999-0000" />
-            </div>
-            <div>
-              <Label htmlFor="nl-title">Título da oportunidade</Label>
-              <Input id="nl-title" name="title" />
-            </div>
-            <div>
-              <Label htmlFor="nl-amount">Valor (R$)</Label>
-              <Input id="nl-amount" name="amount" type="number" min="0" step="100" defaultValue="0" />
-            </div>
-          </div>
-          <Button type="submit" loading={pending} className="w-full">
-            {pending ? "Criando" : "Criar lead"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 export function Board({ pipeline, pipelines, deals, contacts, agents, products, myRole, orgName }: {
   pipeline: Pipeline; pipelines: PipelineListItem[]; deals: Deal[]; contacts: Contact[];
@@ -127,7 +64,7 @@ export function Board({ pipeline, pipelines, deals, contacts, agents, products, 
 }) {
   const router = useRouter();
   const params = useSearchParams();
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(params.get("deal"));
   const [newOpen, setNewOpen] = useState(false);
   const [dragOver, setDragOver] = useState<string | null>(null);
   const [, startMove] = useTransition();
@@ -298,7 +235,7 @@ export function Board({ pipeline, pipelines, deals, contacts, agents, products, 
           onClose={() => setOpenId(null)}
         />
       )}
-      <NewLeadModal open={newOpen} onOpenChange={setNewOpen} pipelineId={pipeline.id} />
+      <CreateLeadSheet open={newOpen} onOpenChange={setNewOpen} pipelineId={pipeline.id} stages={pipeline.stages.map((s) => ({ id: s.id, name: s.name, key: (s as any).key }))} onCreated={(id) => { setNewOpen(false); setOpenId(id); router.refresh(); }} />
     </>
   );
 }
