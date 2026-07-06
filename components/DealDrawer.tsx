@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { CheckCircle2, Copy, FileSignature, FileText, FlaskConical, Mail, MessageCircle, Pencil, Play, ShieldCheck, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
-import { completeActivity, createActivity, deleteContact, deleteDeal, moveDeal, sendProposalEmail, updateContact, updateDealFull } from "@/app/actions";
+import { approveProposal, completeActivity, createActivity, deleteContact, deleteDeal, moveDeal, rejectProposal, sendProposalEmail, updateContact, updateDealFull } from "@/app/actions";
 import { publicBaseUrl } from "@/lib/urls";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,6 +74,27 @@ function ProposalEmailButton({ proposalId, hasEmail }: { proposalId: string; has
     >
       <Mail className="h-3 w-3" aria-hidden /> {pending ? "Enviando…" : "E-mail"}
     </button>
+  );
+}
+
+function ProposalApproval({ proposalId, status, discountPct, isAdmin }: { proposalId: string; status?: string; discountPct?: number; isAdmin: boolean }) {
+  const [pending, start] = useTransition();
+  const [local, setLocal] = useState(status);
+  if (!local || local === "aprovada") return null;
+  if (local === "rejeitada") return <div className="mt-2 rounded-lg bg-rose-50 px-2.5 py-1.5 text-[11px] text-rose-700 dark:bg-rose-950/30 dark:text-rose-300">Desconto rejeitado — gere nova proposta.</div>;
+  // pendente
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+      <span>Desconto de {discountPct ?? 0}% aguarda aprovação — envio bloqueado.</span>
+      {isAdmin && (
+        <span className="flex gap-1.5">
+          <button disabled={pending} onClick={() => start(async () => { try { await approveProposal(proposalId); setLocal("aprovada"); toast.success("Desconto aprovado"); } catch (e) { toast.error(e instanceof Error ? e.message : "Falha"); } })}
+            className="rounded bg-emerald-600 px-2 py-0.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50">Aprovar</button>
+          <button disabled={pending} onClick={() => start(async () => { try { await rejectProposal(proposalId); setLocal("rejeitada"); toast.success("Desconto rejeitado"); } catch (e) { toast.error(e instanceof Error ? e.message : "Falha"); } })}
+            className="rounded border border-rose-300 px-2 py-0.5 font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-800 dark:text-rose-300">Rejeitar</button>
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -518,9 +539,10 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
                     <div className="flex shrink-0 gap-1.5">
                       {link && <a href={`${origin.replace(/\/$/, "")}/api/proposta/${p.shareToken}/pdf`} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700"><FileText className="h-3 w-3" aria-hidden /> PDF</a>}
                       {link && <button onClick={() => { navigator.clipboard.writeText(link); toast.success("Link copiado"); }} className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700"><Copy className="h-3 w-3" aria-hidden /> Link</button>}
-                      <ProposalEmailButton proposalId={p.id} hasEmail={Boolean(contact?.email)} />
+                      {(p as any).approvalStatus !== "pendente" && (p as any).approvalStatus !== "rejeitada" && <ProposalEmailButton proposalId={p.id} hasEmail={Boolean(contact?.email)} />}
                     </div>
                   </div>
+                  <ProposalApproval proposalId={p.id} status={(p as any).approvalStatus} discountPct={(p as any).discountPct} isAdmin={isAdmin} />
                 </div>
               );
             })}
