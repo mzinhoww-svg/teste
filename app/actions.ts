@@ -409,13 +409,14 @@ export async function updateDealFull(dealId: string, fields: {
 
 // Registra uma atividade/nota/tarefa na timeline do deal e, opcionalmente,
 // atualiza a próxima ação. Papel operacional (member pode registrar).
-export async function createActivity(dealId: string, input: { type?: string; summary: string; nextActionAt?: string | null }) {
+export async function createActivity(dealId: string, input: { type?: string; summary: string; nextActionAt?: string | null; dueAt?: string | null }) {
   const ctx = await requireRole(["owner", "admin", "member"]);
   const supabase = createClient();
   const summary = (input.summary ?? "").trim();
   if (!summary) throw new Error("Descrição obrigatória");
   const { error } = await supabase.from("activities").insert({
     org_id: ctx.orgId, deal_id: dealId, type: input.type || "note", summary, author: ctx.email ?? "Você",
+    due_at: input.dueAt || input.nextActionAt || null,
   });
   if (error) throw error;
   if (input.nextActionAt !== undefined) {
@@ -423,6 +424,25 @@ export async function createActivity(dealId: string, input: { type?: string; sum
   } else {
     await supabase.from("deals").update({ last_touch: new Date().toISOString().slice(0, 10) }).eq("id", dealId).eq("org_id", ctx.orgId);
   }
+  revalidatePath("/app");
+}
+
+export async function completeActivity(activityId: string, done: boolean) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("activities")
+    .update({ done_at: done ? new Date().toISOString() : null })
+    .eq("id", activityId).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/app");
+}
+
+export async function rescheduleActivity(activityId: string, dueAt: string) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("activities")
+    .update({ due_at: dueAt || null }).eq("id", activityId).eq("org_id", ctx.orgId);
+  if (error) throw error;
   revalidatePath("/app");
 }
 
