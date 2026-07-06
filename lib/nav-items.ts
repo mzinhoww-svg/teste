@@ -10,6 +10,7 @@ export const NAV_GROUPS: NavGroup[] = [
     title: "Vendas",
     items: [
       { href: "/app", label: "Funil", icon: "Filter", exact: true },
+      { href: "/app/tarefas", label: "Meu dia", icon: "CheckSquare" },
       { href: "/app/contatos", label: "Contatos", icon: "Users" },
       { href: "/app/clientes", label: "Clientes", icon: "Building2" },
       { href: "/app/contracts", label: "Contratos", icon: "FileSignature" },

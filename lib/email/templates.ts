@@ -170,21 +170,24 @@ export function contractSignEmail(o: {
 }
 
 export function invoiceEmail(o: {
-  brand?: EmailBrand; orgName: string; clientName?: string; number: string; amount: number; dueDate?: string; paymentUrl?: string; invoiceUrl?: string;
+  brand?: EmailBrand; orgName: string; clientName?: string; number: string; amount: number; dueDate?: string; paymentUrl?: string; invoiceUrl?: string; overdue?: boolean;
 }): EmailContent {
   const url = o.paymentUrl || o.invoiceUrl;
-  const venc = o.dueDate ? p(`Vencimento: <strong>${esc(o.dueDate)}</strong>.`) : "";
+  const venc = o.dueDate ? p(`Vencimento: <strong>${esc(o.dueDate)}</strong>${o.overdue ? " (em atraso)" : ""}.`) : "";
+  const abertura = o.overdue
+    ? p(`${o.clientName ? "Olá " + esc(o.clientName) + ". Identificamos" : "Identificamos"} que a fatura <strong>${esc(o.number)}</strong> de <strong>${brl(o.amount)}</strong> está <strong>em atraso</strong>.`)
+    : p(`${o.clientName ? "Olá " + esc(o.clientName) + ", segue" : "Segue"} sua fatura no valor de <strong>${brl(o.amount)}</strong>.`);
   return {
-    subject: `Fatura ${o.number} — ${o.orgName}`,
+    subject: o.overdue ? `Fatura ${o.number} em atraso — ${o.orgName}` : `Fatura ${o.number} — ${o.orgName}`,
     html: emailLayout({
       brand: o.brand, orgName: o.orgName,
-      preheader: `Fatura ${o.number} no valor de ${brl(o.amount)}.`,
-      heading: `Fatura ${esc(o.number)}`,
+      preheader: o.overdue ? `Fatura ${o.number} em atraso (${brl(o.amount)}).` : `Fatura ${o.number} no valor de ${brl(o.amount)}.`,
+      heading: o.overdue ? `Fatura ${esc(o.number)} em atraso` : `Fatura ${esc(o.number)}`,
       bodyHtml:
-        p(`${o.clientName ? "Olá " + esc(o.clientName) + ", segue" : "Segue"} sua fatura no valor de <strong>${brl(o.amount)}</strong>.`) +
+        abertura +
         venc +
-        (url ? p("Use o botão abaixo para efetuar o pagamento.") : p("Em breve enviaremos o link de pagamento.")),
-      cta: url ? { label: "Pagar fatura", url } : undefined,
+        (url ? p("Use o botão abaixo para regularizar o pagamento.") : p("Em breve enviaremos o link de pagamento.")),
+      cta: url ? { label: o.overdue ? "Regularizar pagamento" : "Pagar fatura", url } : undefined,
     }),
   };
 }

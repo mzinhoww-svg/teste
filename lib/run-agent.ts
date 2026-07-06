@@ -167,9 +167,11 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
       });
       break;
     }
+    case "activities":
     case "cadencia": {
       // Cadência OPERACIONAL: além do plano, agenda o próximo follow-up no card
       // (data + notificação acionável). Sem isso o agente só "sugeria".
+      // `activities` = agente canônico de Cadência/SLA; `cadencia` = alias legado.
       result = await runAdvisory(deal, contact, agent);
       const touchMs = deal.lastTouch ? new Date(deal.lastTouch).getTime() : NaN;
       const stale = Number.isNaN(touchMs) ? null : Math.floor((Date.now() - touchMs) / 86_400_000);

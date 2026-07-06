@@ -545,6 +545,30 @@ export async function getContactsList(q?: string): Promise<ContactListRow[]> {
   return (data ?? []) as ContactListRow[];
 }
 
+export interface TaskRow {
+  id: string; summary: string; type: string; due_at: string | null; author: string | null;
+  deal_id: string | null; deal_title: string | null;
+}
+
+/** Tarefas abertas (activities com prazo e sem conclusão) — a fila "Meu dia". */
+export async function getOpenTasks(): Promise<TaskRow[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase
+    .from("activities")
+    .select("id,summary,type,due_at,author,deal_id,deals(title)")
+    .eq("org_id", orgId)
+    .not("due_at", "is", null)
+    .is("done_at", null)
+    .order("due_at", { ascending: true })
+    .limit(200);
+  return (data ?? []).map((r: any) => ({
+    id: r.id, summary: r.summary, type: r.type, due_at: r.due_at, author: r.author,
+    deal_id: r.deal_id, deal_title: r.deals?.title ?? null,
+  })) as TaskRow[];
+}
+
 export interface ClientInviteRow { id: string; email: string; token: string; status: string; client_account_id: string; client_name: string }
 export async function getClientInvites(): Promise<ClientInviteRow[]> {
   const supabase = createClient();

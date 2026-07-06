@@ -86,7 +86,7 @@ export async function POST(req: Request) {
 
     const { data: msg } = await admin
       .from("messages")
-      .select("id, status, org_id, contact_id, deal_id, to_email")
+      .select("id, status, org_id, contact_id, deal_id, to_email, subject, meta")
       .eq("external_id", messageId)
       .maybeSingle();
     if (!msg) continue;
@@ -94,6 +94,7 @@ export async function POST(req: Request) {
     // Não regride: só atualiza se o novo status tiver rank >= o atual.
     if ((RANK[next] ?? 0) < (RANK[msg.status ?? ""] ?? 0)) continue;
 
+    const prevStatus = msg.status ?? "";
     await admin.from("messages").update({ status: next }).eq("id", msg.id);
     updated++;
 
@@ -107,6 +108,22 @@ export async function POST(req: Request) {
         deal_id: msg.deal_id ?? null,
         contact_id: msg.contact_id ?? null,
         action_url: "/app",
+      });
+    }
+
+    // Sinal de compra: primeiro "aberto"/"clicado" de um e-mail ligado a um deal
+    // vira atividade na timeline + notificação (o vendedor age no momento certo).
+    if ((next === "aberto" || next === "clicado") && msg.deal_id && prevStatus !== "aberto" && prevStatus !== "clicado") {
+      const tag = (Array.isArray((msg.meta as any)?.tags) ? (msg.meta as any).tags[0] : null) ?? "e-mail";
+      const verbo = next === "clicado" ? "clicou no" : "abriu o";
+      await admin.from("activities").insert({
+        org_id: msg.org_id, deal_id: msg.deal_id, contact_id: msg.contact_id ?? null, type: "email",
+        summary: `Cliente ${verbo} e-mail de ${tag}${msg.subject ? ` — "${msg.subject}"` : ""}`, author: "Rastreamento",
+      });
+      await admin.from("notifications").insert({
+        org_id: msg.org_id, type: "buying_signal",
+        title: "Sinal de compra", body: `O contato ${verbo} e-mail de ${tag}. Bom momento para o follow-up.`,
+        deal_id: msg.deal_id, contact_id: msg.contact_id ?? null, action_url: "/app",
       });
     }
   }

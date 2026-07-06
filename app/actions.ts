@@ -364,6 +364,18 @@ export async function moveDeal(dealId: string, stageId: string) {
     }
   }
 
+  // Esteira Ganhou→Entrega: ao entrar num estágio de ganho, monta o pós-venda
+  // (conta do cliente + projeto + fatura rascunho + tarefa de onboarding).
+  // Best-effort e idempotente — não bloqueia o movimento do card.
+  if (st?.is_won) {
+    try {
+      const { runWonEsteira } = await import("@/lib/esteira");
+      await runWonEsteira(supabase, orgId, dealId);
+      revalidatePath("/app/projetos");
+      revalidatePath("/app/financeiro");
+    } catch { /* não propaga */ }
+  }
+
   revalidatePath("/app");
 }
 

@@ -36,13 +36,17 @@ Aplicado como migration `seed_reiners_media` no projeto Supabase
 Os 4 `kind`s executáveis do app são reutilizados para manter a persistência
 especial sem mudança de código:
 
-| Kind | Agente Reiners | Persistência |
+Os agentes seguem a **taxonomia canônica da plataforma** (`lib/agents/catalog.ts`),
+igual em todos os tenants — assim Studio, funil e execução mostram o MESMO conjunto.
+
+| Kind | Agente | Persistência |
 |---|---|---|
-| `lead-scoring` | Qualificador Comercial | score/temperatura no deal |
-| `sales-copilot` | Copy WhatsApp | mensagem em `messages` + link wa.me |
-| `proposal` | Gerador de Proposta | linha em `proposals` |
-| `legal-contract` | Contratos e Escopo | linha em `contracts` |
-| `diagnostico`, `recomendador`, `objecoes`, `cadencia`, `posvenda` | demais | advisory (`agent_runs`) |
+| `lead-scoring` | Priorização Comercial (Scoring) | score/temperatura no deal |
+| `sales-copilot` | Copiloto Comercial | mensagem em `messages` + link wa.me |
+| `proposal` | Propostas e Escopo | linha em `proposals` |
+| `legal-contract` | Contratos e Assinatura | linha em `contracts` |
+| `activities` | Cadência e SLA | agenda `next_action_at` + notificação (operacional) |
+| `lead-nurturing`, `coaching`, `sales-feedback`, `support-copilot` | demais | advisory (`agent_runs`) |
 
 ## Reexecutar o seed
 
