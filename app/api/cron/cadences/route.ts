@@ -73,8 +73,86 @@ export async function GET(req: Request) {
 
   // ---- Cobrança (dunning): faturas "enviada" vencidas → "vencida" + e-mail. ----
   const overdue = await processOverdueInvoices(admin);
+  // ---- Agente de Reativação: deals perdidos há 30+ dias → tarefa de retorno. ----
+  const reactivated = await processReactivation(admin);
+  // ---- Saúde do pipeline: digest diário por org para o gestor. ----
+  const digests = await processPipelineDigest(admin);
 
-  return NextResponse.json({ ok: true, processed, emailed, overdue });
+  return NextResponse.json({ ok: true, processed, emailed, overdue, reactivated, digests });
+}
+
+// Agente de Reativação (determinista): deals em estágio de perda parados há 30+
+// dias ganham uma tarefa de retorno + notificação. Dedupe: pula se já houver uma
+// atividade de reativação recente para o deal.
+async function processReactivation(admin: any): Promise<number> {
+  const { data: lostStages } = await admin.from("stages").select("id").eq("is_lost", true);
+  const ids = (lostStages ?? []).map((s: any) => s.id);
+  if (!ids.length) return 0;
+  const cutoff = new Date(Date.now() - 30 * 86_400_000).toISOString();
+  const { data: deals } = await admin
+    .from("deals")
+    .select("id, org_id, title")
+    .in("stage_id", ids)
+    .lt("updated_at", cutoff)
+    .limit(50);
+  if (!deals?.length) return 0;
+
+  let count = 0;
+  for (const d of deals) {
+    const { data: existing } = await admin
+      .from("activities")
+      .select("id")
+      .eq("deal_id", d.id)
+      .ilike("summary", "Reativação:%")
+      .is("done_at", null)
+      .limit(1)
+      .maybeSingle();
+    if (existing) continue;
+    const due = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    await admin.from("activities").insert({
+      org_id: d.org_id, deal_id: d.id, type: "note",
+      summary: `Reativação: retomar contato com "${d.title}" (perdido há 30+ dias) com nova abordagem`,
+      author: "Agente de Reativação", due_at: due,
+    });
+    await admin.from("notifications").insert({
+      org_id: d.org_id, type: "reactivation", title: "Lead para reativar",
+      body: `${d.title} está parado como perdido há mais de 30 dias. Que tal um retorno?`,
+      deal_id: d.id, action_url: "/app/tarefas",
+    });
+    count++;
+  }
+  return count;
+}
+
+// Saúde do pipeline (gestor): 1x/dia por org, resume deals abertos e parados.
+// Dedupe: pula se já houver um digest hoje.
+async function processPipelineDigest(admin: any): Promise<number> {
+  const { data: orgs } = await admin.from("orgs").select("id");
+  if (!orgs?.length) return 0;
+  const todayStart = new Date().toISOString().slice(0, 10) + "T00:00:00.000Z";
+  const staleCut = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  let count = 0;
+  for (const o of orgs) {
+    const { data: already } = await admin
+      .from("notifications").select("id").eq("org_id", o.id).eq("type", "pipeline_digest").gte("created_at", todayStart).limit(1).maybeSingle();
+    if (already) continue;
+    const { data: wonLost } = await admin.from("stages").select("id, is_won, is_lost").eq("org_id", o.id);
+    const closedIds = (wonLost ?? []).filter((s: any) => s.is_won || s.is_lost).map((s: any) => s.id);
+    let openQ = admin.from("deals").select("id, amount, updated_at").eq("org_id", o.id);
+    if (closedIds.length) openQ = openQ.not("stage_id", "in", `(${closedIds.join(",")})`);
+    const { data: open } = await openQ;
+    const rows = open ?? [];
+    if (!rows.length) continue;
+    const stalled = rows.filter((d: any) => d.updated_at < staleCut).length;
+    const pipelineValue = rows.reduce((s: number, d: any) => s + Number(d.amount ?? 0), 0);
+    await admin.from("notifications").insert({
+      org_id: o.id, type: "pipeline_digest", title: "Resumo do pipeline",
+      body: `${rows.length} deals abertos (${Math.round(pipelineValue).toLocaleString("pt-BR")} em pipeline). ${stalled} parado(s) há 7+ dias — priorize hoje.`,
+      action_url: "/app",
+    });
+    count++;
+  }
+  return count;
 }
 
 // Resolve destinatários do cliente (usuários ativos do portal ou o contato principal).
