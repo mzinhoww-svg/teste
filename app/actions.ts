@@ -459,6 +459,67 @@ export async function updateAgent(uuid: string, fields: {
   revalidatePath("/app/studio");
 }
 
+// --- Assinatura digital (OpenSign) ------------------------------------------
+
+export async function sendContractForSignature(contractId: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { getSignatureProvider } = await import("@/lib/signature/provider");
+
+  const { data: c } = await supabase.from("contracts").select("*").eq("id", contractId).eq("org_id", ctx.orgId).maybeSingle();
+  if (!c) throw new Error("Contrato não encontrado");
+
+  const signers = (Array.isArray(c.signatories) ? c.signatories : []).map((s: any) => ({
+    name: s.name, email: s.email, phone: s.phone,
+  })).filter((s: any) => s.email);
+  const body = (Array.isArray(c.clauses) ? c.clauses : [])
+    .map((cl: any) => `${cl.heading}\n${cl.body}`).join("\n\n");
+
+  const provider = getSignatureProvider();
+  const env = await provider.createEnvelope({ title: c.title, body, signers, reference: c.reference });
+  if (env.status === "erro") throw new Error(env.error ?? "Falha ao criar envelope de assinatura");
+
+  await supabase.from("contracts").update({
+    envelope_provider: env.provider, envelope_id: env.envelopeId, signing_url: env.signingUrl ?? null,
+    external_status: "enviado", signature_status: "enviado", sent_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }).eq("id", contractId);
+
+  await supabase.from("notifications").insert({
+    org_id: ctx.orgId, type: "contract", title: "Contrato enviado para assinatura",
+    body: `${c.reference} — ${c.title} enviado via ${env.provider}.`, contract_id: contractId, deal_id: c.deal_id, action_url: "/app/contracts",
+  });
+  if (c.deal_id) {
+    await supabase.from("activities").insert({
+      org_id: ctx.orgId, deal_id: c.deal_id, type: "note",
+      summary: `Contrato ${c.reference} enviado para assinatura (${env.provider})`, author: "Agente Jurídico",
+    });
+  }
+  revalidatePath("/app/contracts");
+  return { signingUrl: env.signingUrl as string | undefined };
+}
+
+export async function refreshContractStatus(contractId: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { getSignatureProvider } = await import("@/lib/signature/provider");
+
+  const { data: c } = await supabase.from("contracts").select("envelope_id").eq("id", contractId).eq("org_id", ctx.orgId).maybeSingle();
+  if (!c?.envelope_id) throw new Error("Contrato ainda não foi enviado para assinatura");
+
+  const provider = getSignatureProvider();
+  const st = await provider.getStatus(c.envelope_id);
+  const localMap: Record<string, string> = { enviado: "enviado", visualizado: "enviado", assinado: "assinado", recusado: "cancelado", expirado: "cancelado", erro: "enviado" };
+  await supabase.from("contracts").update({
+    external_status: st.status, signature_status: localMap[st.status] ?? "enviado",
+    certificate_url: st.certificateUrl ?? null,
+    signed_at: st.status === "assinado" ? new Date().toISOString() : null,
+    updated_at: new Date().toISOString(),
+  }).eq("id", contractId);
+  revalidatePath("/app/contracts");
+  return { status: st.status };
+}
+
 // --- Automações ------------------------------------------------------------
 
 export async function createAutomation(formData: FormData) {

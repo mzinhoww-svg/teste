@@ -267,6 +267,13 @@ export interface ContractView {
   dealTitle: string;
   company: string;
   createdAt: string;
+  dealId: string | null;
+  envelopeId: string | null;
+  externalStatus: string | null;
+  signingUrl: string | null;
+  certificateUrl: string | null;
+  contactPhone: string | null;
+  contactName: string | null;
 }
 
 export async function getContracts(): Promise<ContractView[]> {
@@ -275,7 +282,7 @@ export async function getContracts(): Promise<ContractView[]> {
   if (!orgId) return [];
   const { data } = await supabase
     .from("contracts")
-    .select("*, deal:deals(title, contact:contacts(name, company))")
+    .select("*, deal:deals(title, contact:contacts(name, company, phone))")
     .eq("org_id", orgId)
     .order("created_at", { ascending: false });
   return (data ?? []).map((r: any) => ({
@@ -284,6 +291,9 @@ export async function getContracts(): Promise<ContractView[]> {
     clauses: r.clauses ?? [], signatories: r.signatories ?? [],
     dealTitle: r.deal?.title ?? "—", company: r.deal?.contact?.company ?? r.deal?.contact?.name ?? "—",
     createdAt: (r.created_at ?? "").slice(0, 10),
+    dealId: r.deal_id ?? null, envelopeId: r.envelope_id ?? null, externalStatus: r.external_status ?? null,
+    signingUrl: r.signing_url ?? null, certificateUrl: r.certificate_url ?? null,
+    contactPhone: r.deal?.contact?.phone ?? null, contactName: r.deal?.contact?.name ?? null,
   }));
 }
 

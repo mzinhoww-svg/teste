@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check } from "lucide-react";
+import { Check, Copy, FileSignature, MessageCircle, RefreshCw, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { updateContractClauses, updateContractStatus } from "@/app/actions";
+import { refreshContractStatus, sendContractForSignature, updateContractClauses, updateContractStatus } from "@/app/actions";
+import { Button } from "@/components/ui/button";
+import { waMeLink } from "@/lib/whatsapp";
+import { buildWaTemplate } from "@/lib/whatsapp";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { brl } from "@/lib/format";
 import type { ContractView } from "@/lib/db";
@@ -26,6 +29,11 @@ export function ContractCard({ c, orgName }: { c: ContractView; orgName: string 
   const [saved, setSaved] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const [clauseToRemove, setClauseToRemove] = useState<number | null>(null);
+  const [link, setLink] = useState<string | null>(c.signingUrl);
+  const sending = pending; const refreshing = pending;
+  const waLink = (c.contactPhone && (link || c.signingUrl))
+    ? waMeLink(c.contactPhone, buildWaTemplate("link_opensign", { nome: (c.contactName ?? "").split(" ")[0], empresa: c.company, link: (link || c.signingUrl) ?? undefined }))
+    : null;
 
   function applyStatus(s: string) {
     const prev = status;
@@ -82,6 +90,47 @@ export function ContractCard({ c, orgName }: { c: ContractView; orgName: string 
             {open ? "Fechar" : "Editar cláusulas"}
           </button>
         </div>
+      </div>
+
+      {/* Assinatura digital (OpenSign) */}
+      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+        {!c.envelopeId ? (
+          <Button size="xs" loading={sending} onClick={() => start(async () => {
+            try { const r = await sendContractForSignature(c.id); toast.success("Enviado para assinatura"); if (r.signingUrl) setLink(r.signingUrl); }
+            catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao enviar"); }
+          })}>
+            <FileSignature className="h-3 w-3" aria-hidden /> Enviar para assinatura
+          </Button>
+        ) : (
+          <>
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-600">{c.provider ?? "opensign"} · {c.externalStatus ?? "enviado"}</span>
+            {(c.signingUrl || link) && (
+              <>
+                <Button variant="outline" size="xs" onClick={() => { navigator.clipboard.writeText((link || c.signingUrl)!); toast.success("Link copiado"); }}>
+                  <Copy className="h-3 w-3" aria-hidden /> Copiar link
+                </Button>
+                {waLink && (
+                  <a href={waLink} target="_blank" rel="noreferrer"
+                    className="inline-flex h-7 items-center gap-1 rounded-lg bg-emerald-600 px-2.5 text-xs font-medium text-white hover:bg-emerald-700">
+                    <MessageCircle className="h-3 w-3" aria-hidden /> WhatsApp
+                  </a>
+                )}
+              </>
+            )}
+            <Button variant="outline" size="xs" loading={refreshing} onClick={() => start(async () => {
+              try { const r = await refreshContractStatus(c.id); toast.success(`Status: ${r.status}`); }
+              catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao atualizar"); }
+            })}>
+              <RefreshCw className="h-3 w-3" aria-hidden /> Atualizar status
+            </Button>
+            {c.certificateUrl && (
+              <a href={c.certificateUrl} target="_blank" rel="noreferrer"
+                className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50">
+                <ShieldCheck className="h-3 w-3" aria-hidden /> Ver auditoria
+              </a>
+            )}
+          </>
+        )}
       </div>
 
       {open && (
