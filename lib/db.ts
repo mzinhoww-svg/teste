@@ -112,6 +112,8 @@ function mapDeal(r: any, stageKeyById: Map<string, string>): Deal {
     amount: Number(r.amount), score: r.score ?? undefined, scoreReason: r.score_reason ?? undefined,
     temperature: r.temperature ?? undefined, engagement: r.engagement ?? 0,
     lastTouch: r.last_touch ?? "", activities: [], tags: r.tags ?? [],
+    origin: r.origin ?? undefined, nextActionAt: r.next_action_at ?? undefined,
+    productId: r.product_id ?? undefined, lostReason: r.lost_reason ?? undefined,
   };
 }
 
@@ -126,19 +128,44 @@ export function mapAgent(r: any): Agent {
 
 // --- Leituras ------------------------------------------------------------
 
+export interface PipelineListItem { id: string; name: string; archived: boolean }
+
+export async function getPipelines(includeArchived = false): Promise<PipelineListItem[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  let q = supabase.from("pipelines").select("id,name,archived").eq("org_id", orgId).order("position");
+  if (!includeArchived) q = q.eq("archived", false);
+  const { data } = await q;
+  return (data ?? []) as PipelineListItem[];
+}
+
+export interface ProductListItem { id: string; name: string; price: number | null }
+
+export async function getProducts(): Promise<ProductListItem[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase.from("products").select("id,name,price").eq("org_id", orgId).eq("active", true).order("position");
+  return (data ?? []) as ProductListItem[];
+}
+
 export interface BoardData {
   pipeline: Pipeline | null;
+  pipelines: PipelineListItem[];
   deals: Deal[];
   contacts: Contact[];
 }
 
-export async function getBoard(): Promise<BoardData> {
+export async function getBoard(pipelineId?: string): Promise<BoardData> {
   const supabase = createClient();
   const orgId = await getOrgId();
-  if (!orgId) return { pipeline: null, deals: [], contacts: [] };
-  const { data: pipes } = await supabase.from("pipelines").select("*").eq("org_id", orgId).order("position").limit(1);
-  const pipe = pipes?.[0];
-  if (!pipe) return { pipeline: null, deals: [], contacts: [] };
+  if (!orgId) return { pipeline: null, pipelines: [], deals: [], contacts: [] };
+  const pipelines = await getPipelines();
+  const pipe = (pipelineId && pipelines.find((p) => p.id === pipelineId))
+    ? (await supabase.from("pipelines").select("*").eq("id", pipelineId).eq("org_id", orgId).maybeSingle()).data
+    : (await supabase.from("pipelines").select("*").eq("org_id", orgId).eq("archived", false).order("position").limit(1)).data?.[0];
+  if (!pipe) return { pipeline: null, pipelines, deals: [], contacts: [] };
 
   const { data: stageRows } = await supabase.from("stages").select("*").eq("pipeline_id", pipe.id).order("position");
   const stages = (stageRows ?? []).map(mapStage);
@@ -150,6 +177,7 @@ export async function getBoard(): Promise<BoardData> {
   const pipeline: Pipeline = { id: pipe.id, name: pipe.name, area: pipe.area, stages };
   return {
     pipeline,
+    pipelines,
     deals: (dealRows ?? []).map((d: any) => mapDeal(d, stageKeyById)),
     contacts: (contactRows ?? []).map(mapContact),
   };

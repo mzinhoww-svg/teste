@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { CheckCircle2, FileSignature, MessageCircle, Play } from "lucide-react";
+import { CheckCircle2, FileSignature, MessageCircle, Pencil, Play, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
-import { moveDeal } from "@/app/actions";
+import { deleteContact, deleteDeal, moveDeal, updateContact, updateDealFull } from "@/app/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/input";
+import { Input, Label, Select, Textarea } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { brl, tempColor, tempLabel } from "@/lib/format";
 import type { Agent, Contact, Deal, Stage } from "@/lib/types";
+import type { ProductListItem } from "@/lib/db";
 
 async function runAgent(dealId: string, kind: string) {
   const res = await fetch("/api/agents/run", {
@@ -132,13 +135,58 @@ function RunningSkeleton() {
 
 const groupOrder: Record<string, number> = { "aquisição": 0, vendas: 1, "pós-venda": 2 };
 
-export function DealDrawer({ deal, contact, agents, stages, onClose }: {
-  deal: Deal; contact: Contact | null; agents: Agent[]; stages: Stage[]; onClose: () => void;
+export function DealDrawer({ deal, contact, agents, stages, products = [], myRole = "member", orgName = "", onClose }: {
+  deal: Deal; contact: Contact | null; agents: Agent[]; stages: Stage[];
+  products?: ProductListItem[]; myRole?: string; orgName?: string; onClose: () => void;
 }) {
   const [loading, setLoading] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, any>>({});
   const [hydrating, setHydrating] = useState(true);
+  const [editOpen, setEditOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmDeleteContact, setConfirmDeleteContact] = useState(false);
+  const [pendingEdit, startEdit] = useTransition();
   const [, startMove] = useTransition();
+  const isAdmin = myRole === "owner" || myRole === "admin";
+
+  function submitEdit(fd: FormData) {
+    startEdit(async () => {
+      try {
+        await updateDealFull(deal.id, {
+          title: String(fd.get("title") ?? deal.title),
+          amount: Number(fd.get("amount") ?? deal.amount) || 0,
+          engagement: Math.max(0, Math.min(100, Number(fd.get("engagement") ?? deal.engagement) || 0)),
+          origin: String(fd.get("origin") ?? ""),
+          nextActionAt: String(fd.get("nextActionAt") ?? "") || null,
+          temperature: String(fd.get("temperature") ?? "") || null,
+          productId: String(fd.get("productId") ?? "") || null,
+          tags: String(fd.get("tags") ?? "").split(",").map((t) => t.trim()).filter(Boolean),
+        });
+        setEditOpen(false);
+        toast.success("Deal atualizado");
+      } catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao salvar"); }
+    });
+  }
+
+  function submitContact(fd: FormData) {
+    if (!contact) return;
+    startEdit(async () => {
+      try {
+        await updateContact(contact.id, {
+          name: String(fd.get("name") ?? contact.name),
+          company: String(fd.get("company") ?? ""),
+          email: String(fd.get("email") ?? ""),
+          phone: String(fd.get("phone") ?? ""),
+          jobTitle: String(fd.get("jobTitle") ?? ""),
+          city: String(fd.get("city") ?? ""),
+          notes: String(fd.get("notes") ?? ""),
+        });
+        setContactOpen(false);
+        toast.success("Contato atualizado");
+      } catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao salvar contato"); }
+    });
+  }
 
   // Reidrata a última execução de cada agente (persistida em agent_runs).
   useEffect(() => {
@@ -176,6 +224,14 @@ export function DealDrawer({ deal, contact, agents, stages, onClose }: {
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             <Badge variant="success">{brl(deal.amount)}</Badge>
             <Badge variant="muted">Engaj. {deal.engagement}</Badge>
+            <Button variant="outline" size="xs" onClick={() => setEditOpen(true)}>
+              <Pencil className="h-3 w-3" aria-hidden /> Editar
+            </Button>
+            {isAdmin && (
+              <Button variant="destructive-ghost" size="xs" onClick={() => setConfirmDelete(true)}>
+                <Trash2 className="h-3 w-3" aria-hidden /> Excluir
+              </Button>
+            )}
             <label className="ml-auto flex items-center gap-1.5 text-slate-500">
               Estágio:
               <Select
@@ -217,6 +273,32 @@ export function DealDrawer({ deal, contact, agents, stages, onClose }: {
             </section>
           ))}
 
+          {contact && (
+            <section className="rounded-xl border border-slate-200 p-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <UserRound className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold text-slate-800">{contact.name}</div>
+                    <div className="truncate text-xs text-slate-400">
+                      {[contact.company, contact.email, contact.phone].filter(Boolean).join(" · ") || "sem dados de contato"}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex shrink-0 gap-1.5">
+                  <Button variant="outline" size="xs" onClick={() => setContactOpen(true)}>
+                    <Pencil className="h-3 w-3" aria-hidden /> Editar
+                  </Button>
+                  {isAdmin && (
+                    <Button variant="destructive-ghost" size="xs" onClick={() => setConfirmDeleteContact(true)}>
+                      <Trash2 className="h-3 w-3" aria-hidden />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
           <section>
             <h3 className="mb-2 text-sm font-semibold text-slate-800">Atividades</h3>
             {deal.activities.length === 0 && <p className="text-sm text-slate-400">Sem atividades ainda.</p>}
@@ -233,6 +315,136 @@ export function DealDrawer({ deal, contact, agents, stages, onClose }: {
             </ul>
           </section>
         </div>
+
+        {/* Editar deal */}
+        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+          <DialogContent aria-describedby={undefined}>
+            <DialogTitle>Editar deal</DialogTitle>
+            <form action={submitEdit} className="mt-3 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <Label htmlFor="ed-title">Título</Label>
+                  <Input id="ed-title" name="title" defaultValue={deal.title} required />
+                </div>
+                <div>
+                  <Label htmlFor="ed-amount">Valor (R$)</Label>
+                  <Input id="ed-amount" name="amount" type="number" min="0" step="100" defaultValue={deal.amount} />
+                </div>
+                <div>
+                  <Label htmlFor="ed-eng">Engajamento (0-100)</Label>
+                  <Input id="ed-eng" name="engagement" type="number" min="0" max="100" defaultValue={deal.engagement} />
+                </div>
+                <div>
+                  <Label htmlFor="ed-temp">Temperatura</Label>
+                  <Select id="ed-temp" name="temperature" defaultValue={deal.temperature ?? ""}>
+                    <option value="">—</option>
+                    <option value="hot">Quente</option>
+                    <option value="warm">Morno</option>
+                    <option value="cold">Frio</option>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="ed-next">Próxima ação (data)</Label>
+                  <Input id="ed-next" name="nextActionAt" type="date" defaultValue={deal.nextActionAt ?? ""} />
+                </div>
+                <div>
+                  <Label htmlFor="ed-origin">Origem</Label>
+                  <Input id="ed-origin" name="origin" defaultValue={deal.origin ?? ""} placeholder="indicação, evento, rede…" />
+                </div>
+                <div>
+                  <Label htmlFor="ed-product">Produto</Label>
+                  <Select id="ed-product" name="productId" defaultValue={deal.productId ?? ""}>
+                    <option value="">—</option>
+                    {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </Select>
+                </div>
+                <div className="col-span-2">
+                  <Label htmlFor="ed-tags">Tags (separadas por vírgula)</Label>
+                  <Input id="ed-tags" name="tags" defaultValue={deal.tags.join(", ")} />
+                </div>
+              </div>
+              <Button type="submit" loading={pendingEdit} className="w-full">Salvar alterações</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Editar contato */}
+        {contact && (
+          <Dialog open={contactOpen} onOpenChange={setContactOpen}>
+            <DialogContent aria-describedby={undefined}>
+              <DialogTitle>Editar contato</DialogTitle>
+              <form action={submitContact} className="mt-3 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <Label htmlFor="ct-name">Nome*</Label>
+                    <Input id="ct-name" name="name" defaultValue={contact.name} required />
+                  </div>
+                  <div>
+                    <Label htmlFor="ct-company">Empresa</Label>
+                    <Input id="ct-company" name="company" defaultValue={contact.company} />
+                  </div>
+                  <div>
+                    <Label htmlFor="ct-job">Cargo</Label>
+                    <Input id="ct-job" name="jobTitle" defaultValue={contact.role ?? ""} />
+                  </div>
+                  <div>
+                    <Label htmlFor="ct-email">E-mail</Label>
+                    <Input id="ct-email" name="email" type="email" defaultValue={contact.email} />
+                  </div>
+                  <div>
+                    <Label htmlFor="ct-phone">Telefone (WhatsApp)</Label>
+                    <Input id="ct-phone" name="phone" defaultValue={contact.phone ?? ""} placeholder="+55 65 99999-0000" />
+                  </div>
+                  <div>
+                    <Label htmlFor="ct-city">Cidade</Label>
+                    <Input id="ct-city" name="city" defaultValue={""} />
+                  </div>
+                  <div className="col-span-2">
+                    <Label htmlFor="ct-notes">Observações</Label>
+                    <Textarea id="ct-notes" name="notes" rows={2} defaultValue={""} />
+                  </div>
+                </div>
+                <Button type="submit" loading={pendingEdit} className="w-full">Salvar contato</Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        <ConfirmDialog
+          open={confirmDelete}
+          onOpenChange={setConfirmDelete}
+          title="Excluir deal?"
+          itemName={deal.title}
+          scopeName={orgName}
+          description="Atividades, propostas e contratos vinculados também serão removidos. Esta ação não pode ser desfeita."
+          confirmLabel="Excluir deal"
+          destructive
+          loading={pendingEdit}
+          onConfirm={() => startEdit(async () => {
+            try { await deleteDeal(deal.id); toast.success("Deal excluído"); onClose(); }
+            catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao excluir"); }
+            finally { setConfirmDelete(false); }
+          })}
+        />
+
+        {contact && (
+          <ConfirmDialog
+            open={confirmDeleteContact}
+            onOpenChange={setConfirmDeleteContact}
+            title="Excluir contato?"
+            itemName={`${contact.name}${contact.company ? " — " + contact.company : ""}`}
+            scopeName={orgName}
+            description="Os deals permanecem, mas ficam sem contato vinculado."
+            confirmLabel="Excluir contato"
+            destructive
+            loading={pendingEdit}
+            onConfirm={() => startEdit(async () => {
+              try { await deleteContact(contact.id); toast.success("Contato excluído"); }
+              catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao excluir contato"); }
+              finally { setConfirmDeleteContact(false); }
+            })}
+          />
+        )}
       </SheetContent>
     </Sheet>
   );
