@@ -63,6 +63,17 @@ export async function updateOrgBrand(brand: { primary?: string; accent?: string;
   revalidatePath("/", "layout");
 }
 
+/** Liga/desliga a restrição "vendedores só veem seus próprios deals" (opt-in). */
+export async function setRestrictSellers(enabled: boolean) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { data: org } = await supabase.from("orgs").select("settings").eq("id", ctx.orgId).maybeSingle();
+  const settings = { ...(org?.settings ?? {}), restrict_sellers: enabled };
+  const { error } = await supabase.from("orgs").update({ settings }).eq("id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/app", "layout");
+}
+
 // --- Membros e convites -----------------------------------------------------
 
 export async function createInvite(formData: FormData) {
@@ -251,6 +262,7 @@ export async function createLead(input: CreateLeadInput): Promise<{ dealId: stri
 
   const { data: deal, error: dErr } = await supabase.from("deals").insert({
     org_id: orgId, pipeline_id: pipe.id, stage_id: stageId, contact_id: contact.id,
+    owner_user_id: ctx?.userId ?? null,
     title, amount: Number(input.amount) || 0, engagement: 40,
     probability: input.probability != null ? Number(input.probability) : null,
     temperature: input.temperature || null, product_id: input.productId || null,
@@ -318,6 +330,17 @@ export async function findLeadDuplicates(input: { name?: string; email?: string;
 export async function moveDeal(dealId: string, stageId: string) {
   const orgId = await orgOrThrow();
   const supabase = createClient();
+
+  // Gating por estágio: valida ANTES de mover. Ganho exige valor; perda exige motivo.
+  const { data: st } = await supabase.from("stages").select("name,is_won,is_lost,key").eq("id", stageId).maybeSingle();
+  const { data: dealNow } = await supabase.from("deals").select("amount, lost_reason").eq("id", dealId).eq("org_id", orgId).maybeSingle();
+  if (st?.is_won && !(Number(dealNow?.amount) > 0)) {
+    throw new Error("Defina o valor do deal antes de fechar como ganho.");
+  }
+  if (st?.is_lost && !((dealNow?.lost_reason ?? "").trim())) {
+    throw new Error("Informe o motivo da perda no card antes de mover para Perdido.");
+  }
+
   const { error } = await supabase
     .from("deals")
     .update({ stage_id: stageId, updated_at: new Date().toISOString() })
@@ -325,14 +348,12 @@ export async function moveDeal(dealId: string, stageId: string) {
   if (error) throw error;
 
   // Registra a mudança de estágio na timeline
-  const { data: stage } = await supabase.from("stages").select("name").eq("id", stageId).maybeSingle();
   await supabase.from("activities").insert({
     org_id: orgId, deal_id: dealId, type: "note",
-    summary: `Movido para "${stage?.name ?? "novo estágio"}"`, author: "Você",
+    summary: `Movido para "${st?.name ?? "novo estágio"}"`, author: "Você",
   });
 
   // Notificação in-app para estágios críticos
-  const { data: st } = await supabase.from("stages").select("name,is_won,is_lost,key").eq("id", stageId).maybeSingle();
   if (st && (st.is_won || st.is_lost || ["proposta", "negociacao", "proposal", "negotiation"].includes(st.key ?? ""))) {
     const { data: dealRow } = await supabase.from("deals").select("title").eq("id", dealId).maybeSingle();
     await supabase.from("notifications").insert({
