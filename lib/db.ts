@@ -171,7 +171,7 @@ export async function getBoard(pipelineId?: string): Promise<BoardData> {
   const stages = (stageRows ?? []).map(mapStage);
   const stageKeyById = new Map<string, string>((stageRows ?? []).map((s: any) => [s.id, s.key]));
 
-  const { data: dealRows } = await supabase.from("deals").select("*").eq("pipeline_id", pipe.id).order("created_at", { ascending: false });
+  const { data: dealRows } = await supabase.from("deals").select("*").eq("pipeline_id", pipe.id).eq("org_id", orgId).order("created_at", { ascending: false });
   const { data: contactRows } = await supabase.from("contacts").select("*").eq("org_id", orgId).order("created_at", { ascending: false });
 
   const pipeline: Pipeline = { id: pipe.id, name: pipe.name, area: pipe.area, stages };

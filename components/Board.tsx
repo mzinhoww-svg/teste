@@ -57,7 +57,7 @@ function DealCard({ deal, contact, onClick, onDragStart }: {
   );
 }
 
-function NewLeadModal({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+function NewLeadModal({ open, onOpenChange, pipelineId }: { open: boolean; onOpenChange: (o: boolean) => void; pipelineId: string }) {
   const [pending, start] = useTransition();
   function submit(fd: FormData) {
     start(async () => {
@@ -75,6 +75,7 @@ function NewLeadModal({ open, onOpenChange }: { open: boolean; onOpenChange: (o:
       <DialogContent aria-describedby={undefined}>
         <DialogTitle>Novo lead</DialogTitle>
         <form action={submit} className="mt-3 space-y-3">
+          <input type="hidden" name="pipelineId" value={pipelineId} />
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
               <Label htmlFor="nl-name">Nome*</Label>
@@ -297,7 +298,7 @@ export function Board({ pipeline, pipelines, deals, contacts, agents, products, 
           onClose={() => setOpenId(null)}
         />
       )}
-      <NewLeadModal open={newOpen} onOpenChange={setNewOpen} />
+      <NewLeadModal open={newOpen} onOpenChange={setNewOpen} pipelineId={pipeline.id} />
     </>
   );
 }
