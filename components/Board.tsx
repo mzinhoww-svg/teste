@@ -16,10 +16,10 @@ import type { Agent, Contact, Deal, Pipeline } from "@/lib/types";
 
 function KpiCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800">
       <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
       <div className="mt-1 text-2xl font-bold text-slate-900">{value}</div>
-      {hint && <div className="text-xs text-slate-400">{hint}</div>}
+      {hint && <div className="text-xs text-slate-400 dark:text-slate-500">{hint}</div>}
     </div>
   );
 }
@@ -50,7 +50,7 @@ function DealCard({ deal, contact, onClick, onDragStart }: {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{deal.title}</div>
-          <div className="mt-0.5 truncate text-xs text-slate-400">{contact?.company || contact?.name || "—"}</div>
+          <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{contact?.company || contact?.name || "—"}</div>
         </div>
         {deal.temperature && (
           <span className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-medium ${tempColor(deal.temperature)}`}>{tempLabel(deal.temperature)}</span>
@@ -235,8 +235,8 @@ export function Board({ pipeline, pipelines, deals, contacts, agents, products, 
                 </div>
                 <span className="text-[11px] text-slate-400">{brl(stageValue)}</span>
               </div>
-              <div className={`space-y-2 rounded-xl p-2 transition-colors ${dragOver === stage.id ? "bg-brand-50 ring-2 ring-brand-200" : "bg-slate-100/60"}`}>
-                {stageDeals.length === 0 && <div className="py-6 text-center text-xs text-slate-400">solte um card aqui</div>}
+              <div className={`space-y-2 rounded-xl p-2 transition-colors ${dragOver === stage.id ? "bg-brand-100 ring-2 ring-brand-300 dark:bg-brand-950/50" : "bg-slate-100/70 dark:bg-slate-900/50"}`}>
+                {stageDeals.length === 0 && <div className="py-6 text-center text-xs text-slate-400 dark:text-slate-500">solte um card aqui</div>}
                 {stageDeals.map((d) => (
                   <DealCard
                     key={d.id}
