@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { CheckCircle2, Copy, FileSignature, FileText, FlaskConical, Mail, MessageCircle, Pencil, Play, ShieldCheck, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { completeActivity, createActivity, deleteContact, deleteDeal, moveDeal, sendProposalEmail, updateContact, updateDealFull } from "@/app/actions";
+import { publicBaseUrl } from "@/lib/urls";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select, Textarea } from "@/components/ui/input";
@@ -63,8 +64,8 @@ function ProposalEmailButton({ proposalId, hasEmail }: { proposalId: string; has
 }
 
 function ProposalShare({ token, phone, name }: { token: string; phone?: string | null; name?: string | null }) {
-  const [origin, setOrigin] = useState(process.env.NEXT_PUBLIC_APP_URL || "");
-  useEffect(() => { if (!process.env.NEXT_PUBLIC_APP_URL) setOrigin(window.location.origin); }, []);
+  const [origin, setOrigin] = useState(publicBaseUrl());
+  useEffect(() => { if (!publicBaseUrl()) setOrigin(window.location.origin); }, []);
   if (!origin) return null;
   const link = `${origin.replace(/\/$/, "")}/proposta/${token}`;
   const wa = phone

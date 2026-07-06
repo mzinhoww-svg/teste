@@ -51,7 +51,16 @@ export async function updateSession(request: NextRequest) {
   let rewrote = false;
 
   const isAsset = rawPath.startsWith("/api") || rawPath.startsWith("/_next") || rawPath.startsWith("/icon") || rawPath.startsWith("/favicon");
-  if (!isAsset) {
+  // Rotas públicas de topo (login/convite/proposta/assinatura) são servidas como
+  // estão em QUALQUER host — não podem ser reescritas para /app ou /portal, senão
+  // os links profissionais (crm.<root>/convite, <root>/proposta) quebrariam.
+  const isPublicTop =
+    rawPath === "/login" ||
+    rawPath.startsWith("/convite") ||
+    rawPath.startsWith("/proposta") ||
+    rawPath.startsWith("/sign") ||
+    rawPath.startsWith("/portal/convite");
+  if (!isAsset && !isPublicTop) {
     if (sub === "crm" && !rawPath.startsWith("/app")) {
       url.pathname = rawPath === "/" ? "/app" : `/app${rawPath}`;
       rewrote = true;

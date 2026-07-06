@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIVE_ORG_COOKIE, getAuthContext, getOrgId } from "@/lib/db";
+import { memberInviteUrl, contractSignUrl, proposalUrl as proposalPublicUrl } from "@/lib/urls";
 
 async function orgOrThrow() {
   const orgId = await getOrgId();
@@ -92,7 +93,7 @@ export async function createInvite(formData: FormData) {
     const { inviteEmail } = await import("@/lib/email/templates");
     const content = inviteEmail({
       brand: ctx.brand, orgName: ctx.orgName,
-      inviteUrl: `${appUrl}/convite/${data.token}`, role, inviterName: ctx.email,
+      inviteUrl: memberInviteUrl(data.token), role, inviterName: ctx.email,
     });
     await sendAndLogEmail({ db: supabase, orgId: ctx.orgId, to: { email }, content, tags: ["convite"] });
   }
@@ -752,7 +753,7 @@ export async function sendContractForSignature(contractId: string) {
   if (appUrl && c.sign_token) {
     const { sendAndLogEmail } = await import("@/lib/email/send");
     const { contractSignEmail } = await import("@/lib/email/templates");
-    const signUrl = `${appUrl}/sign/contracts/${c.sign_token}`;
+    const signUrl = contractSignUrl(c.sign_token);
     for (const s of signers) {
       const content = contractSignEmail({
         brand: ctx.brand, orgName: ctx.orgName, signerName: s.name,
@@ -876,7 +877,7 @@ export async function sendProposalEmail(proposalId: string): Promise<{ ok: boole
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
   if (!appUrl) throw new Error("NEXT_PUBLIC_APP_URL não configurado — necessário para os links do e-mail");
   const token = (proposal as any).share_token as string;
-  const proposalUrl = `${appUrl}/proposta/${token}`;
+  const proposalUrl = proposalPublicUrl(token);
 
   // PDF anexo (best-effort): busca a rota de PDF já existente e converte p/ base64.
   let attachments: { name: string; content: string }[] | undefined;
