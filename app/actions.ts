@@ -220,6 +220,174 @@ export async function addActivity(dealId: string, type: string, summary: string,
   revalidatePath("/app");
 }
 
+export async function updateDealFull(dealId: string, fields: {
+  title?: string; amount?: number; engagement?: number; origin?: string;
+  nextActionAt?: string | null; temperature?: string | null; productId?: string | null;
+  lostReason?: string | null; tags?: string[];
+}) {
+  await orgOrThrow();
+  const supabase = createClient();
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (fields.title !== undefined) patch.title = fields.title;
+  if (fields.amount !== undefined) patch.amount = fields.amount;
+  if (fields.engagement !== undefined) patch.engagement = fields.engagement;
+  if (fields.origin !== undefined) patch.origin = fields.origin || null;
+  if (fields.nextActionAt !== undefined) patch.next_action_at = fields.nextActionAt || null;
+  if (fields.temperature !== undefined) patch.temperature = fields.temperature || null;
+  if (fields.productId !== undefined) patch.product_id = fields.productId || null;
+  if (fields.lostReason !== undefined) patch.lost_reason = fields.lostReason || null;
+  if (fields.tags !== undefined) patch.tags = fields.tags;
+  const { error } = await supabase.from("deals").update(patch).eq("id", dealId);
+  if (error) throw error;
+  const orgId = await getOrgId();
+  await supabase.from("activities").insert({ org_id: orgId, deal_id: dealId, type: "note", summary: "Deal editado", author: "Você" });
+  revalidatePath("/app");
+}
+
+export async function deleteDeal(dealId: string) {
+  await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("deals").delete().eq("id", dealId);
+  if (error) throw error;
+  revalidatePath("/app");
+}
+
+// --- Contatos ---------------------------------------------------------------
+
+export async function updateContact(contactId: string, fields: {
+  name?: string; company?: string; email?: string; phone?: string;
+  jobTitle?: string; city?: string; segment?: string; notes?: string; channel?: string;
+}) {
+  await orgOrThrow();
+  // Telefone precisa funcionar no wa.me: normaliza e valida dígitos
+  let phone: string | null | undefined = fields.phone;
+  if (phone !== undefined) {
+    const digits = phone.replace(/\D/g, "");
+    if (phone && (digits.length < 10 || digits.length > 14)) {
+      throw new Error("Telefone inválido para WhatsApp — use DDI+DDD+número (ex.: +55 65 99999-0000)");
+    }
+    phone = phone || null;
+  }
+  const supabase = createClient();
+  const patch: Record<string, unknown> = {};
+  if (fields.name !== undefined) patch.name = fields.name;
+  if (fields.company !== undefined) patch.company = fields.company || null;
+  if (fields.email !== undefined) patch.email = fields.email || null;
+  if (phone !== undefined) patch.phone = phone;
+  if (fields.jobTitle !== undefined) patch.job_title = fields.jobTitle || null;
+  if (fields.city !== undefined) patch.city = fields.city || null;
+  if (fields.segment !== undefined) patch.segment = fields.segment || null;
+  if (fields.notes !== undefined) patch.notes = fields.notes || null;
+  if (fields.channel !== undefined) patch.channel = fields.channel;
+  const { error } = await supabase.from("contacts").update(patch).eq("id", contactId);
+  if (error) throw error;
+  revalidatePath("/app");
+}
+
+export async function deleteContact(contactId: string) {
+  await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("contacts").delete().eq("id", contactId);
+  if (error) throw error;
+  revalidatePath("/app");
+}
+
+// --- Pipelines e estágios -----------------------------------------------------
+
+export async function createPipeline(name: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { data: max } = await supabase.from("pipelines").select("position").eq("org_id", ctx.orgId).order("position", { ascending: false }).limit(1).maybeSingle();
+  const { data: pipe, error } = await supabase.from("pipelines")
+    .insert({ org_id: ctx.orgId, name: name.trim() || "Novo funil", position: (max?.position ?? 0) + 1 })
+    .select("id").single();
+  if (error) throw error;
+  // Estágios mínimos para o funil nascer utilizável
+  await supabase.from("stages").insert([
+    { org_id: ctx.orgId, pipeline_id: pipe.id, name: "Entrada", position: 0, accent: "#6366f1", key: "entrada", sla_days: 3 },
+    { org_id: ctx.orgId, pipeline_id: pipe.id, name: "Em andamento", position: 1, accent: "#f59e0b", key: "andamento", sla_days: 5 },
+    { org_id: ctx.orgId, pipeline_id: pipe.id, name: "Concluído", position: 2, accent: "#10b981", key: "won", is_won: true },
+  ]);
+  revalidatePath("/app/pipelines");
+  revalidatePath("/app");
+}
+
+export async function renamePipeline(id: string, name: string) {
+  await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("pipelines").update({ name: name.trim() }).eq("id", id);
+  if (error) throw error;
+  revalidatePath("/app/pipelines");
+  revalidatePath("/app");
+}
+
+export async function archivePipeline(id: string, archived: boolean) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  if (archived) {
+    const { count } = await supabase.from("pipelines").select("id", { count: "exact", head: true }).eq("org_id", ctx.orgId).eq("archived", false);
+    if ((count ?? 0) <= 1) throw new Error("A organização precisa de pelo menos um funil ativo");
+  }
+  const { error } = await supabase.from("pipelines").update({ archived }).eq("id", id);
+  if (error) throw error;
+  revalidatePath("/app/pipelines");
+  revalidatePath("/app");
+}
+
+export async function saveStage(stageId: string | null, pipelineId: string, fields: {
+  name: string; accent: string; slaDays: number | null; probability: number | null;
+  isWon: boolean; isLost: boolean; position?: number;
+}) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const row = {
+    name: fields.name.trim(), accent: fields.accent, sla_days: fields.slaDays,
+    probability: fields.probability, is_won: fields.isWon, is_lost: fields.isLost,
+  };
+  if (stageId) {
+    const { error } = await supabase.from("stages").update(row).eq("id", stageId);
+    if (error) throw error;
+  } else {
+    const { data: max } = await supabase.from("stages").select("position").eq("pipeline_id", pipelineId).order("position", { ascending: false }).limit(1).maybeSingle();
+    const key = fields.name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").slice(0, 24) || "estagio";
+    const { error } = await supabase.from("stages").insert({
+      ...row, org_id: ctx.orgId, pipeline_id: pipelineId, position: (max?.position ?? 0) + 1, key,
+    });
+    if (error) throw error;
+  }
+  revalidatePath("/app/pipelines");
+  revalidatePath("/app");
+}
+
+export async function moveStagePosition(stageId: string, direction: "up" | "down") {
+  await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { data: st } = await supabase.from("stages").select("id, position, pipeline_id").eq("id", stageId).maybeSingle();
+  if (!st) throw new Error("Estágio não encontrado");
+  const targetPos = direction === "up" ? st.position - 1 : st.position + 1;
+  const { data: other } = await supabase.from("stages").select("id, position").eq("pipeline_id", st.pipeline_id).eq("position", targetPos).maybeSingle();
+  if (!other) return;
+  await supabase.from("stages").update({ position: other.position }).eq("id", st.id);
+  await supabase.from("stages").update({ position: st.position }).eq("id", other.id);
+  revalidatePath("/app/pipelines");
+  revalidatePath("/app");
+}
+
+export async function deleteStage(stageId: string, migrateToStageId?: string) {
+  await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { count } = await supabase.from("deals").select("id", { count: "exact", head: true }).eq("stage_id", stageId);
+  if ((count ?? 0) > 0) {
+    if (!migrateToStageId) throw new Error(`Há ${count} deal(s) neste estágio — escolha para onde movê-los antes de remover`);
+    const { error: mErr } = await supabase.from("deals").update({ stage_id: migrateToStageId }).eq("stage_id", stageId);
+    if (mErr) throw mErr;
+  }
+  const { error } = await supabase.from("stages").delete().eq("id", stageId);
+  if (error) throw error;
+  revalidatePath("/app/pipelines");
+  revalidatePath("/app");
+}
+
 // --- Agentes (Studio) ----------------------------------------------------
 
 export async function updateAgent(uuid: string, fields: {

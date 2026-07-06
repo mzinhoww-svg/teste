@@ -1,10 +1,10 @@
 import { Building2 } from "lucide-react";
 import { Nav } from "@/components/Nav";
 import { Board } from "@/components/Board";
-import { getAgents, getAuthContext, getBoard } from "@/lib/db";
+import { getAgents, getAuthContext, getBoard, getProducts } from "@/lib/db";
 import { logout } from "@/app/login/actions";
 
-export default async function BoardPage() {
+export default async function BoardPage({ searchParams }: { searchParams: { pipeline?: string } }) {
   const ctx = await getAuthContext();
 
   // Estado: logado, mas sem organização (bootstrap de signup falhou).
@@ -32,7 +32,7 @@ export default async function BoardPage() {
     );
   }
 
-  const [{ pipeline, deals, contacts }, agents] = await Promise.all([getBoard(), getAgents()]);
+  const [{ pipeline, pipelines, deals, contacts }, agents, products] = await Promise.all([getBoard(searchParams.pipeline), getAgents(), getProducts()]);
 
   return (
     <div className="min-h-screen">
@@ -44,7 +44,7 @@ export default async function BoardPage() {
             no cadastro.
           </div>
         ) : (
-          <Board pipeline={pipeline} deals={deals} contacts={contacts} agents={agents} />
+          <Board pipeline={pipeline} pipelines={pipelines} deals={deals} contacts={contacts} agents={agents} products={products} myRole={ctx?.role ?? "member"} orgName={ctx?.orgName ?? ""} />
         )}
       </main>
     </div>

@@ -54,6 +54,10 @@ export interface Deal {
   temperature?: "hot" | "warm" | "cold";
   engagement: number; // 0-100 sinal de engajamento
   lastTouch: string; // ISO date
+  origin?: string;
+  nextActionAt?: string;
+  productId?: string;
+  lostReason?: string;
   activities: Activity[];
   tags: string[];
 }
