@@ -37,13 +37,25 @@ equivalentes aplicados manualmente e o que foi feito para cada um.
 - [x] `prefers-reduced-motion` respeitado em `globals.css`.
 - [x] Foco visível, Escape em modais e focus trap (Radix Dialog/Sheet).
 
-## Pendências reais (follow-up honesto)
-Estas ficam registradas como fases seguintes, não concluídas nesta rodada:
-- Drawer do lead em **abas** dedicadas (Visão geral / Contato / Oportunidade /
-  Atividades / WhatsApp / Agentes / Proposta / Contratos / Histórico) — hoje a
-  edição é completa via Dialog, mas não tabbed.
-- **Landing e /admin** com refinamento premium adicional.
-- **Branding condicional da Reiners** (navy/gold/off-white) aplicado por tenant no
-  app shell.
-- Matriz **E2E completa** (20 cenários do escopo) — hoje há 17 E2E + 18 unit.
-- Tab de **WhatsApp** com timeline de "WhatsApp aberto" e conversa quando o bridge existir.
+## Fases seguintes — status
+
+- [x] **Fase A** — Drawer do lead em **abas** (Visão geral / Agentes / WhatsApp /
+  Atividades) com edição de Oportunidade/Contato e primitive `Tabs`.
+- [x] **Fase B** — Cards do funil enriquecidos (produto, valor, temperatura,
+  tempo parado com alerta >72h, próxima ação, agente sugerido) + acento de marca
+  por tenant no shell.
+- [x] **Fase C** — Atividades operacionais (`createActivity`) + status
+  "em dia / atrasado / sem próxima ação".
+- [x] **Fase D (admin)** — card "Saúde & configuração" (IA, service role,
+  OpenSign, WhatsApp) no `/admin`.
+- [x] **Fase E** — testes unitários adicionais (agent-suggest, enriquecimento);
+  20 unit + 17 E2E.
+- [x] **Fase F** — primitives `tabs`, `empty-state`, `section` criados;
+  empty-state aplicado nas notificações.
+
+### Ainda em aberto (honesto)
+- **Landing premium** — refinamento visual adicional do hero/seções.
+- **Matriz E2E completa** (os 20 cenários do escopo) — hoje 17 E2E + 20 unit.
+- **Tabs dedicadas de Proposta/Contratos/Histórico** no drawer (hoje há atalhos e
+  a aba Contratos vive na página de Contratos).
+- **Conversa de WhatsApp** na aba (depende do bridge externo ativo).

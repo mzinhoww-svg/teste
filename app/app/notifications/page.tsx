@@ -4,6 +4,7 @@ import { Nav } from "@/components/Nav";
 import { getNotifications } from "@/lib/db";
 import { markAllNotificationsRead } from "@/app/actions";
 import { NotificationItem } from "@/components/notifications/NotificationItem";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const metadata = { title: "Notificações — CRM AI Studio" };
 
@@ -53,14 +54,11 @@ export default async function NotificationsPage({ searchParams }: { searchParams
         </div>
 
         {items.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
-            <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-400">
-              <Bell className="h-5 w-5" aria-hidden />
-            </span>
-            <p className="mt-3 text-sm text-slate-500">
-              {filter === "unread" ? "Nenhuma notificação não lida." : "Nenhuma notificação ainda. Movimentações no funil, cadências e contratos aparecem aqui."}
-            </p>
-          </div>
+          <EmptyState
+            icon={Bell}
+            title={filter === "unread" ? "Nada não lido" : "Sem notificações"}
+            description={filter === "unread" ? "Você está em dia." : "Movimentações no funil, cadências, contratos e sugestões de agente aparecem aqui."}
+          />
         ) : (
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
             {items.map((n) => <NotificationItem key={n.id} n={n} />)}

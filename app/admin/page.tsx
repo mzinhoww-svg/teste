@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ShieldAlert, Building2, Users, Activity } from "lucide-react";
+import { ShieldAlert, Building2, Users, Activity, HeartPulse, Check, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
+import { activeModel, activeProvider, hasLiveAI } from "@/lib/ai";
 
 export const metadata = { title: "Admin da plataforma — CRM AI Studio" };
 export const dynamic = "force-dynamic";
@@ -84,6 +85,16 @@ export default async function AdminPage() {
           </div>
         </section>
 
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500"><HeartPulse className="h-3.5 w-3.5" aria-hidden /> Saúde &amp; configuração</div>
+          <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+            <HealthItem ok={hasLiveAI()} label="IA ao vivo" hint={hasLiveAI() ? `${activeProvider()} · ${activeModel()}` : "heurística (sem chave)"} />
+            <HealthItem ok={Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)} label="Service role" hint="webhooks/PDF" />
+            <HealthItem ok={process.env.SIGNATURE_PROVIDER === "opensign" && Boolean(process.env.OPENSIGN_BASE_URL)} label="OpenSign" hint={process.env.OPENSIGN_BASE_URL ? "configurado" : "modo demonstração"} />
+            <HealthItem ok={process.env.WHATSAPP_PROVIDER === "bridge"} label="WhatsApp bridge" hint={process.env.WHATSAPP_PROVIDER === "bridge" ? "conectado" : "wa.me manual"} warnOnly />
+          </div>
+        </section>
+
         <section className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
@@ -139,6 +150,19 @@ export default async function AdminPage() {
           <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs">PLATFORM_ADMIN_EMAILS</code>.
         </section>
       </main>
+    </div>
+  );
+}
+
+function HealthItem({ ok, label, hint, warnOnly }: { ok: boolean; label: string; hint: string; warnOnly?: boolean }) {
+  const good = ok;
+  const color = good ? "text-emerald-600" : warnOnly ? "text-slate-400" : "text-amber-600";
+  return (
+    <div className="rounded-lg border border-slate-200 p-2.5">
+      <div className={`flex items-center gap-1.5 text-xs font-medium ${color}`}>
+        {good ? <Check className="h-3.5 w-3.5" aria-hidden /> : <X className="h-3.5 w-3.5" aria-hidden />} {label}
+      </div>
+      <div className="mt-0.5 text-[11px] text-slate-400">{hint}</div>
     </div>
   );
 }
