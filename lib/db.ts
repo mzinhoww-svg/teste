@@ -513,6 +513,26 @@ export async function getClientAccount360(id: string): Promise<ClientAccount360 
   };
 }
 
+/** Overrides de template de WhatsApp editados pela org (key → corpo). */
+export async function getWaOverrides(): Promise<Record<string, string>> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return {};
+  const { data } = await supabase.from("message_templates").select("key, body").eq("org_id", orgId).eq("channel", "whatsapp");
+  const out: Record<string, string> = {};
+  for (const r of data ?? []) if (r.body?.trim()) out[r.key] = r.body;
+  return out;
+}
+
+/** Assinatura de e-mail editada pela org (texto simples). "" se não houver. */
+export async function getEmailSignature(): Promise<string> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return "";
+  const { data } = await supabase.from("message_templates").select("body").eq("org_id", orgId).eq("channel", "email").eq("key", "signature").maybeSingle();
+  return (data?.body ?? "").trim();
+}
+
 export interface ClientOption { id: string; name: string; slug: string }
 export async function getClientOptions(): Promise<ClientOption[]> {
   const supabase = createClient();
