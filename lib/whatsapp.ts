@@ -93,7 +93,21 @@ export const WA_TEMPLATES: Record<WaTemplateKey, { label: string; build: (c: WaC
   },
 };
 
-export function buildWaTemplate(key: WaTemplateKey, ctx: WaContext): string {
+// Substitui os placeholders {nome} {empresa} {deal} {link} num corpo editado.
+export function renderWaBody(body: string, ctx: WaContext): string {
+  return body
+    .replace(/\{nome\}/g, ctx.nome ?? "")
+    .replace(/\{empresa\}/g, ctx.empresa ?? "sua organização")
+    .replace(/\{deal\}/g, ctx.deal ?? "")
+    .replace(/\{link\}/g, ctx.link ?? "")
+    .trim();
+}
+
+// Overrides = textos editados pela org (message_templates, channel 'whatsapp').
+// Quando existe override para a chave, usa-o; senão, o texto padrão do catálogo.
+export function buildWaTemplate(key: WaTemplateKey, ctx: WaContext, overrides?: Record<string, string> | null): string {
+  const override = overrides?.[key];
+  if (override && override.trim()) return renderWaBody(override, ctx);
   const t = WA_TEMPLATES[key];
   return t ? t.build(ctx) : "";
 }

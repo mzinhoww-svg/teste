@@ -63,6 +63,41 @@ export async function updateOrgBrand(brand: { primary?: string; accent?: string;
   revalidatePath("/", "layout");
 }
 
+/** Salva/limpa um template de WhatsApp editado pela org (owner/admin). */
+export async function saveWaTemplate(key: string, body: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const trimmed = (body ?? "").trim();
+  if (!trimmed) {
+    await supabase.from("message_templates").delete().eq("org_id", ctx.orgId).eq("channel", "whatsapp").eq("key", key);
+  } else {
+    const { error } = await supabase.from("message_templates").upsert(
+      { org_id: ctx.orgId, channel: "whatsapp", key, body: trimmed, updated_at: new Date().toISOString() },
+      { onConflict: "org_id,channel,key" },
+    );
+    if (error) throw error;
+  }
+  revalidatePath("/app/templates");
+  revalidatePath("/app");
+}
+
+/** Salva/limpa a assinatura de e-mail da org (owner/admin). */
+export async function saveEmailSignature(body: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const trimmed = (body ?? "").trim();
+  if (!trimmed) {
+    await supabase.from("message_templates").delete().eq("org_id", ctx.orgId).eq("channel", "email").eq("key", "signature");
+  } else {
+    const { error } = await supabase.from("message_templates").upsert(
+      { org_id: ctx.orgId, channel: "email", key: "signature", body: trimmed, updated_at: new Date().toISOString() },
+      { onConflict: "org_id,channel,key" },
+    );
+    if (error) throw error;
+  }
+  revalidatePath("/app/templates");
+}
+
 /** Liga/desliga a restrição "vendedores só veem seus próprios deals" (opt-in). */
 export async function setRestrictSellers(enabled: boolean) {
   const ctx = await requireRole(["owner", "admin"]);
@@ -837,10 +872,10 @@ export async function resetTenantAgentOverride(agentKey: string) {
 export async function enrichDeal(dealId: string) {
   const ctx = await requireRole(["owner", "admin", "member"]);
   const supabase = createClient();
-  const { fetchCNPJ, recommendedSearches } = await import("@/lib/enrichment");
+  const { fetchCNPJ, llmEnrich, recommendedSearches } = await import("@/lib/enrichment");
 
   const { data: deal } = await supabase
-    .from("deals").select("id, custom, contact:contacts(id, name, company, custom)")
+    .from("deals").select("id, title, custom, contact:contacts(id, name, company, custom)")
     .eq("id", dealId).eq("org_id", ctx.orgId).maybeSingle();
   if (!deal) throw new Error("Deal não encontrado");
 
@@ -850,11 +885,18 @@ export async function enrichDeal(dealId: string) {
   const company = contact?.company ?? null;
   const name = contact?.name ?? null;
 
-  const facts = [
-    ...(cnpj ? await fetchCNPJ(cnpj) : []),
-    ...recommendedSearches(company, name),
-  ];
+  // Executa de fato: CNPJ (registro público) + perfil por IA. Só cai nas buscas
+  // recomendadas se NADA real foi obtido — não polui mais o painel.
+  const [cnpjFacts, aiFacts] = await Promise.all([
+    cnpj ? fetchCNPJ(cnpj) : Promise.resolve([]),
+    llmEnrich(company, name, (deal as any).title ?? undefined),
+  ]);
+  const real = [...cnpjFacts, ...aiFacts];
+  const facts = real.length ? real : recommendedSearches(company, name);
 
+  // Idempotente: substitui o enriquecimento anterior deste deal em vez de
+  // acumular (antes cada clique duplicava a lista).
+  await supabase.from("lead_enrichment").delete().eq("org_id", ctx.orgId).eq("deal_id", dealId);
   if (facts.length) {
     await supabase.from("lead_enrichment").insert(
       facts.map((f) => ({
@@ -869,6 +911,7 @@ export async function enrichDeal(dealId: string) {
   return {
     count: facts.length,
     hadCnpj: Boolean(cnpj),
+    enriched: real.length, // fatos REAIS (CNPJ + IA), fora as buscas sugeridas
     facts: facts.map((f) => ({ label: f.source_label, fact: f.extracted_fact, confidence: f.confidence, url: f.source_url })),
   };
 }
