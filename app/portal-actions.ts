@@ -275,3 +275,26 @@ export async function setDeliverableStatus(id: string, status: string) {
 
   revalidatePath("/app/entregas");
 }
+
+// NPS/CSAT: o cliente do portal registra a nota (0-10) da sua conta.
+// A RLS (is_client_user) garante que só insira para a própria conta.
+export async function submitNps(slug: string, score: number, comment?: string) {
+  const { getPortalContext } = await import("@/lib/portal-db");
+  const ctx = await getPortalContext(slug);
+  if (!ctx) throw new Error("Sessão do portal inválida");
+  const s = Math.max(0, Math.min(10, Math.round(Number(score))));
+  const supabase = createClient();
+  const { error } = await supabase.from("nps_responses").insert({
+    org_id: ctx.orgId, client_account_id: ctx.clientAccountId,
+    score: s, comment: (comment ?? "").trim() || null, respondent_user_id: ctx.userId,
+  });
+  if (error) throw error;
+  await supabase.from("notifications").insert({
+    org_id: ctx.orgId, type: "nps_received", priority: s <= 6 ? "alta" : "normal",
+    title: `NPS recebido: ${s}/10`,
+    body: `${ctx.name} respondeu o NPS com nota ${s}${s <= 6 ? " (detrator — acompanhar)" : ""}.`,
+    action_url: "/app/clientes",
+  });
+  revalidatePath(`/portal/${slug}`);
+  return { ok: true };
+}

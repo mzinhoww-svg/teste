@@ -259,6 +259,7 @@ export function Board({ pipeline, pipelines, deals, contacts, agents, products, 
           agents={agents}
           stages={pipeline.stages}
           products={products}
+          allContacts={contacts}
           myRole={myRole}
           orgName={orgName}
           onClose={() => setOpenId(null)}

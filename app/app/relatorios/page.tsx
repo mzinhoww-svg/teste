@@ -27,14 +27,18 @@ export default async function ReportsPage() {
   const orgId = await getOrgId();
   const { pipeline, deals } = await getBoard();
 
-  const [{ data: runs }, { count: contractCount }, { count: proposalCount }, { count: msgCount }, { data: dealRows }, { data: invoiceRows }] = await Promise.all([
+  const [{ data: runs }, { count: contractCount }, { count: proposalCount }, { count: msgCount }, { data: dealRows }, { data: invoiceRows }, { data: orgRow }, { data: npsRows }] = await Promise.all([
     supabase.from("agent_runs").select("agent_kind, source, created_at, input").eq("org_id", orgId ?? "").order("created_at", { ascending: false }).limit(200),
     supabase.from("contracts").select("id", { count: "exact", head: true }).eq("org_id", orgId ?? ""),
     supabase.from("proposals").select("id", { count: "exact", head: true }).eq("org_id", orgId ?? ""),
     supabase.from("messages").select("id", { count: "exact", head: true }).eq("org_id", orgId ?? ""),
     supabase.from("deals").select("stage_id, amount, probability, lost_reason, origin, created_at, updated_at").eq("org_id", orgId ?? ""),
-    supabase.from("invoices").select("amount, status, due_date, recurring").eq("org_id", orgId ?? ""),
+    supabase.from("invoices").select("amount, status, due_date, recurring, billing_cycle").eq("org_id", orgId ?? ""),
+    supabase.from("orgs").select("settings").eq("id", orgId ?? "").maybeSingle(),
+    supabase.from("nps_responses").select("score").eq("org_id", orgId ?? "").order("created_at", { ascending: false }).limit(500),
   ]);
+
+  const aiPricing = ((orgRow as any)?.settings ?? {}).ai_pricing ?? {};
 
   const allRuns = runs ?? [];
   const llmRuns = allRuns.filter((r) => r.source === "llm").length;
@@ -104,8 +108,10 @@ export default async function ReportsPage() {
   // capturados via AsyncLocalStorage em lib/ai). Execuções antigas sem tokens
   // caem para a estimativa de ~1,5k/execução. Preço aproximado do GLM 5.2.
   const AVG_TOKENS_PER_RUN = 1500;
-  const USD_PER_1M = 0.6;
-  const USD_BRL = 5.4;
+  // Preço/câmbio configuráveis por org (org.settings.ai_pricing); fallback padrão.
+  const USD_PER_1M = Number(aiPricing.usdPer1M ?? 0.6);
+  const USD_BRL = Number(aiPricing.usdBrl ?? 5.4);
+  const AI_BUDGET_BRL = Number(aiPricing.monthlyBudgetBRL ?? 0);
   let realTokens = 0, estimatedRuns = 0;
   for (const r of allRuns) {
     const t = Number((r.input as any)?.tokens ?? 0);
@@ -120,7 +126,20 @@ export default async function ReportsPage() {
 
   // ---- Financeiro (invoices) ----
   const invs = invoiceRows ?? [];
-  const mrr = invs.filter((i) => i.recurring && i.status !== "cancelada").reduce((s, i) => s + Number(i.amount), 0);
+  // MRR normalizado pelo ciclo (mensal=1, trimestral=1/3, anual=1/12; 'unico'=0).
+  const monthlyFactor = (i: any): number => {
+    const c = i.billing_cycle ?? (i.recurring ? "mensal" : "unico");
+    if (c === "mensal") return 1;
+    if (c === "trimestral") return 1 / 3;
+    if (c === "anual") return 1 / 12;
+    return 0;
+  };
+  const mrr = invs.filter((i) => i.status !== "cancelada").reduce((s, i) => s + Number(i.amount) * monthlyFactor(i), 0);
+  // NPS: % promotores (9-10) − % detratores (0-6).
+  const npsAll = (npsRows ?? []).map((r: any) => Number(r.score));
+  const npsScore = npsAll.length
+    ? Math.round(((npsAll.filter((s) => s >= 9).length - npsAll.filter((s) => s <= 6).length) / npsAll.length) * 100)
+    : null;
   const recebido = invs.filter((i) => i.status === "paga").reduce((s, i) => s + Number(i.amount), 0);
   const open = invs.filter((i) => i.status === "enviada" || i.status === "vencida");
   const arTotal = open.reduce((s, i) => s + Number(i.amount), 0);
@@ -176,12 +195,19 @@ export default async function ReportsPage() {
           <Stat label="Win rate" value={winRate == null ? "—" : `${winRate}%`} hint={closed ? `${won.length} ganhos / ${lost.length} perdidos` : "sem fechados"} />
           <Stat label="Ciclo médio" value={avgCycle == null ? "—" : `${avgCycle}d`} hint={avgCycle == null ? "sem ganhos" : `${wonRows.length} ganhos`} />
           <Stat label="Sales velocity" value={velocity == null ? "—" : `${brl(velocity)}/d`} hint="receita/dia projetada" />
-          <Stat label="MRR" value={brl(mrr)} hint="faturas recorrentes" />
+          <Stat label="MRR" value={brl(mrr)} hint="normalizado por ciclo" />
         </section>
 
         <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <Stat label="Recebido" value={brl(recebido)} hint="faturas pagas" />
           <Stat label="A receber" value={brl(arTotal)} hint={`${open.length} faturas abertas`} />
+          <Stat label="NPS" value={npsScore == null ? "—" : String(npsScore)} hint={npsAll.length ? `${npsAll.length} respostas` : "sem respostas"} />
+          <Stat label="Custo IA (est.)" value={brl(estCostBRL)} hint={tokensLabel} />
+          <Stat label="Orçamento IA" value={AI_BUDGET_BRL > 0 ? brl(AI_BUDGET_BRL) : "—"} hint={AI_BUDGET_BRL > 0 ? (estCostBRL > AI_BUDGET_BRL ? "⚠ estourado" : `${Math.round((estCostBRL / AI_BUDGET_BRL) * 100)}% usado`) : "defina em Organização"} />
+          <Stat label="Vencido 60d+" value={brl(aging.d60p)} />
+        </section>
+
+        <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Stat label="A vencer" value={brl(aging.aVencer)} />
           <Stat label="Vencido 1–30d" value={brl(aging.d0_30)} />
           <Stat label="Vencido 31–60d" value={brl(aging.d31_60)} />

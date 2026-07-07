@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileText, Receipt, FolderKanban, PackageCheck } from "lucide-react";
 import { getPortalContext, getPortalProposals, getPortalInvoices, getPortalProjects, getPortalDeliverables } from "@/lib/portal-db";
+import { NpsWidget } from "@/components/portal/NpsWidget";
 import { brl } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -48,6 +49,8 @@ export default async function PortalHome({ params }: { params: { client: string 
           </ul>
         )}
       </section>
+
+      <NpsWidget slug={ctx.slug} />
     </div>
   );
 }

@@ -1,15 +1,18 @@
 import { Users } from "lucide-react";
-import { getContactsList } from "@/lib/db";
+import { getAuthContext, getContactsList } from "@/lib/db";
 import { Table, THead, TR, TH, TD } from "@/components/ui/table";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { ContactRowMenu } from "@/components/ContactRowMenu";
 
 export const metadata = { title: "Contatos — CRM AI Studio" };
 export const dynamic = "force-dynamic";
 
 export default async function ContatosPage({ searchParams }: { searchParams: { q?: string } }) {
   const q = searchParams.q ?? "";
-  const contacts = await getContactsList(q);
+  const [contacts, ctx] = await Promise.all([getContactsList(q), getAuthContext()]);
+  const canManage = ctx?.role === "owner" || ctx?.role === "admin";
+  const candidates = contacts.map((c) => ({ id: c.id, name: c.name, company: c.company }));
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
@@ -27,7 +30,7 @@ export default async function ContatosPage({ searchParams }: { searchParams: { q
       ) : (
         <Table>
           <THead>
-            <TR><TH>Nome</TH><TH>Empresa</TH><TH>Cargo</TH><TH>E-mail</TH><TH>Telefone</TH><TH>Cidade</TH></TR>
+            <TR><TH>Nome</TH><TH>Empresa</TH><TH>Cargo</TH><TH>E-mail</TH><TH>Telefone</TH><TH>Cidade</TH>{canManage && <TH>Ações</TH>}</TR>
           </THead>
           <tbody>
             {contacts.map((c) => (
@@ -38,6 +41,7 @@ export default async function ContatosPage({ searchParams }: { searchParams: { q
                 <TD className="text-slate-500">{c.email || "—"}</TD>
                 <TD className="text-slate-500">{c.phone || "—"}</TD>
                 <TD className="text-slate-500">{c.city || "—"}</TD>
+                {canManage && <TD><ContactRowMenu contactId={c.id} candidates={candidates} /></TD>}
               </TR>
             ))}
           </tbody>
