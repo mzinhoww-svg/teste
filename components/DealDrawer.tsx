@@ -246,7 +246,7 @@ function Field({ label, value }: { label: string; value: string }) {
 // o wa.me apenas abre a conversa — nada automático).
 const WA_TAB_KEYS = ["primeiro_contato", "confirmacao_reuniao", "envio_proposta", "followup_48h", "ligacao_5d", "ultimo_contato_10d", "posvenda", "upsell"] as const;
 
-function WhatsAppTab({ phone, name, company }: { phone?: string | null; name?: string | null; company?: string | null }) {
+function WhatsAppTab({ phone, name, company, overrides }: { phone?: string | null; name?: string | null; company?: string | null; overrides?: Record<string, string> }) {
   if (!phone) {
     return <p className="text-sm text-slate-400">Sem telefone no contato. Adicione um número (aba Visão geral → Contato) para enviar pelo WhatsApp.</p>;
   }
@@ -257,7 +257,7 @@ function WhatsAppTab({ phone, name, company }: { phone?: string | null; name?: s
       {WA_TAB_KEYS.map((k) => {
         const tpl = WA_TEMPLATES[k];
         if (!tpl) return null;
-        const msg = buildWaTemplate(k, ctx);
+        const msg = buildWaTemplate(k, ctx, overrides);
         const link = waMeLink(phone, msg);
         return (
           <a key={k} href={link ?? "#"} target="_blank" rel="noreferrer"
@@ -281,7 +281,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
   const isRunning = (kind: string) => Boolean(running[kind]);
   const [results, setResults] = useState<Record<string, any>>({});
   const [hydrating, setHydrating] = useState(true);
-  const [panels, setPanels] = useState<{ proposals: any[]; contracts: any[] }>({ proposals: [], contracts: [] });
+  const [panels, setPanels] = useState<{ proposals: any[]; contracts: any[]; waOverrides?: Record<string, string> }>({ proposals: [], contracts: [], waOverrides: {} });
   const [editOpen, setEditOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -565,7 +565,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
                   {!c.signed && link && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       <button onClick={() => { navigator.clipboard.writeText(link); toast.success("Link de assinatura copiado"); }} className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700"><Copy className="h-3 w-3" aria-hidden /> Copiar link</button>
-                      {contact?.phone && <a href={waMeLink(contact.phone, buildWaTemplate("link_opensign", { nome: (contact.name ?? "").split(" ")[0], link })) ?? "#"} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg bg-emerald-600 px-2.5 text-xs font-medium text-white hover:bg-emerald-700"><MessageCircle className="h-3 w-3" aria-hidden /> WhatsApp</a>}
+                      {contact?.phone && <a href={waMeLink(contact.phone, buildWaTemplate("link_opensign", { nome: (contact.name ?? "").split(" ")[0], link }, panels.waOverrides)) ?? "#"} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg bg-emerald-600 px-2.5 text-xs font-medium text-white hover:bg-emerald-700"><MessageCircle className="h-3 w-3" aria-hidden /> WhatsApp</a>}
                     </div>
                   )}
                   {c.signed && c.certificateUrl && <a href={c.certificateUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700"><ShieldCheck className="h-3 w-3" aria-hidden /> Documento assinado</a>}
@@ -575,7 +575,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
           </TabsContent>
 
           <TabsContent value="whatsapp" className="py-4">
-            <WhatsAppTab phone={contact?.phone} name={contact?.name} company={contact?.company} />
+            <WhatsAppTab phone={contact?.phone} name={contact?.name} company={contact?.company} overrides={panels.waOverrides} />
           </TabsContent>
 
           <TabsContent value="activity" className="py-4">

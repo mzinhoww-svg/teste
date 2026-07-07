@@ -28,14 +28,35 @@ export interface SendAndLogResult {
   error?: string;
 }
 
+function escapeHtml(s: string): string {
+  return String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+}
+
+// Injeta a assinatura da org (editada em /app/templates) no rodapé do e-mail.
+// O HTML é gerado por emailLayout e termina com "</center>" (âncora estável).
+async function withSignature(db: SendAndLogInput["db"], orgId: string, html: string): Promise<string> {
+  try {
+    const { data } = await db.from("message_templates")
+      .select("body").eq("org_id", orgId).eq("channel", "email").eq("key", "signature").maybeSingle();
+    const sig = (data?.body ?? "").trim();
+    if (!sig) return html;
+    const block = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="padding:0 12px 20px;"><div style="max-width:560px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:#94a3b8;">${escapeHtml(sig).replace(/\n/g, "<br>")}</div></td></tr></table>`;
+    return html.includes("</center>") ? html.replace("</center>", `${block}\n</center>`) : html + block;
+  } catch {
+    return html;
+  }
+}
+
 export async function sendAndLogEmail(input: SendAndLogInput): Promise<SendAndLogResult> {
   const provider = getEmailProvider();
   const first = Array.isArray(input.to) ? input.to[0]?.email : input.to.email;
+  const html = await withSignature(input.db, input.orgId, input.content.html);
 
   const res = await provider.send({
     to: input.to,
     subject: input.content.subject,
-    html: input.content.html,
+    html,
     attachments: input.attachments,
     tags: input.tags,
     sender: input.sender,

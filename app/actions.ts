@@ -63,6 +63,41 @@ export async function updateOrgBrand(brand: { primary?: string; accent?: string;
   revalidatePath("/", "layout");
 }
 
+/** Salva/limpa um template de WhatsApp editado pela org (owner/admin). */
+export async function saveWaTemplate(key: string, body: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const trimmed = (body ?? "").trim();
+  if (!trimmed) {
+    await supabase.from("message_templates").delete().eq("org_id", ctx.orgId).eq("channel", "whatsapp").eq("key", key);
+  } else {
+    const { error } = await supabase.from("message_templates").upsert(
+      { org_id: ctx.orgId, channel: "whatsapp", key, body: trimmed, updated_at: new Date().toISOString() },
+      { onConflict: "org_id,channel,key" },
+    );
+    if (error) throw error;
+  }
+  revalidatePath("/app/templates");
+  revalidatePath("/app");
+}
+
+/** Salva/limpa a assinatura de e-mail da org (owner/admin). */
+export async function saveEmailSignature(body: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const trimmed = (body ?? "").trim();
+  if (!trimmed) {
+    await supabase.from("message_templates").delete().eq("org_id", ctx.orgId).eq("channel", "email").eq("key", "signature");
+  } else {
+    const { error } = await supabase.from("message_templates").upsert(
+      { org_id: ctx.orgId, channel: "email", key: "signature", body: trimmed, updated_at: new Date().toISOString() },
+      { onConflict: "org_id,channel,key" },
+    );
+    if (error) throw error;
+  }
+  revalidatePath("/app/templates");
+}
+
 /** Liga/desliga a restrição "vendedores só veem seus próprios deals" (opt-in). */
 export async function setRestrictSellers(enabled: boolean) {
   const ctx = await requireRole(["owner", "admin"]);

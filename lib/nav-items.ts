@@ -41,6 +41,7 @@ export const NAV_GROUPS: NavGroup[] = [
     title: "Configuração",
     items: [
       { href: "/app/org", label: "Organização", icon: "Settings" },
+      { href: "/app/templates", label: "Templates", icon: "MessageSquare", adminOnly: true },
       { href: "/app/auditoria", label: "Auditoria", icon: "ScrollText" },
       { href: "/app/como-funciona", label: "Como funciona", icon: "HelpCircle" },
     ],

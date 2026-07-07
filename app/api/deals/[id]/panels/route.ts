@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAuthContext } from "@/lib/db";
+import { getAuthContext, getWaOverrides } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -9,6 +9,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   const auth = await getAuthContext();
   if (!auth) return NextResponse.json({ error: "não autenticado" }, { status: 401 });
   const supabase = createClient();
+  const waOverrides = await getWaOverrides();
 
   const [{ data: proposals }, { data: contracts }, { data: enrichment }] = await Promise.all([
     supabase.from("proposals").select("id, total, summary, share_token, approval_status, discount_pct, created_at").eq("org_id", auth.orgId).eq("deal_id", params.id).order("created_at", { ascending: false }),
@@ -17,6 +18,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   ]);
 
   return NextResponse.json({
+    waOverrides,
     enrichment: (enrichment ?? []).map((e: any) => ({ label: e.source_label, fact: e.extracted_fact, confidence: e.confidence, url: e.source_url })),
     proposals: (proposals ?? []).map((p: any) => ({ id: p.id, total: Number(p.total), summary: p.summary, shareToken: p.share_token, approvalStatus: p.approval_status, discountPct: Number(p.discount_pct), createdAt: p.created_at })),
     contracts: (contracts ?? []).map((c: any) => ({
