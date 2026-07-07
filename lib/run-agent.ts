@@ -190,6 +190,16 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
       const days = stale != null && stale > 3 ? 0 : 2; // parado > SLA → hoje
       const nextAt = new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
       await supabase.from("deals").update({ next_action_at: nextAt }).eq("id", dealId);
+      // Cadência vira TAREFA acionável (não só notificação).
+      {
+        const { createTask } = await import("@/lib/tasks");
+        await createTask(supabase, {
+          orgId: ctx.orgId, dealId, title: `Follow-up: ${deal.title}`,
+          dueAt: new Date(Date.now() + days * 86_400_000).toISOString(),
+          assigneeUserId: ctx.userId, priority: stale != null && stale > 3 ? "alta" : "normal",
+          source: "cadence", agentKind: kind,
+        });
+      }
       await supabase.from("notifications").insert({
         org_id: ctx.orgId, deal_id: dealId, contact_id: contact.id || null,
         type: "cadence", title: "Follow-up agendado", action_url: "/app",
@@ -205,11 +215,11 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
       result = await runAdvisory(deal, contact, agent);
       const items: string[] = Array.isArray(result?.items) ? result.items : [];
       if (items.length) {
-        const due = new Date(Date.now() + 2 * 86_400_000).toISOString().slice(0, 10);
-        await supabase.from("activities").insert({
-          org_id: ctx.orgId, deal_id: dealId, type: "note",
-          summary: `${agent.name}: ${items[0]}`.slice(0, 280),
-          author: agent.name, due_at: due,
+        const { createTask } = await import("@/lib/tasks");
+        await createTask(supabase, {
+          orgId: ctx.orgId, dealId, title: `${agent.name}: ${items[0]}`,
+          dueAt: new Date(Date.now() + 2 * 86_400_000).toISOString(),
+          assigneeUserId: ctx.userId, source: "agent", agentKind: kind,
         });
         extra.taskCreated = true;
       }

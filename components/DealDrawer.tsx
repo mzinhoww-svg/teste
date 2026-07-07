@@ -282,6 +282,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
   const [results, setResults] = useState<Record<string, any>>({});
   const [hydrating, setHydrating] = useState(true);
   const [panels, setPanels] = useState<{ proposals: any[]; contracts: any[] }>({ proposals: [], contracts: [] });
+  const [timeline, setTimeline] = useState<any[]>([]);
   const [editOpen, setEditOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -350,6 +351,10 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
     fetch(`/api/deals/${deal.id}/panels`)
       .then((r) => (r.ok ? r.json() : { proposals: [], contracts: [] }))
       .then((b) => { if (alive) setPanels(b); })
+      .catch(() => {});
+    fetch(`/api/deals/${deal.id}/timeline`)
+      .then((r) => (r.ok ? r.json() : { items: [] }))
+      .then((b) => { if (alive) setTimeline(b.items ?? []); })
       .catch(() => {});
     return () => { alive = false; };
   }, [deal.id]);
@@ -453,6 +458,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
             <TabsTrigger value="contracts">Contratos{panels.contracts.length ? ` (${panels.contracts.length})` : ""}</TabsTrigger>
             <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
             <TabsTrigger value="activity">Atividades</TabsTrigger>
+            <TabsTrigger value="history">Histórico</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4 py-4">
@@ -628,6 +634,25 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
                 );
               })}
             </ul>
+          </TabsContent>
+
+          <TabsContent value="history" className="py-4">
+            {timeline.length === 0 ? (
+              <p className="text-sm text-slate-400">Sem histórico ainda. Mudanças de estágio, valor, dono, agentes, propostas e contratos aparecem aqui.</p>
+            ) : (
+              <ul className="space-y-2.5">
+                {timeline.map((t) => (
+                  <li key={t.id} className="flex gap-2.5 text-sm">
+                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-400" aria-hidden />
+                    <div className="min-w-0">
+                      <span className="text-slate-700 dark:text-slate-300">{t.title}</span>
+                      {t.detail && <span className="text-slate-500"> — {t.detail}</span>}
+                      <div className="text-xs text-slate-400">{(t.at ?? "").slice(0, 16).replace("T", " ")} · {t.source}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </TabsContent>
         </Tabs>
 

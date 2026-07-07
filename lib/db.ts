@@ -601,25 +601,113 @@ export async function getContactsList(q?: string): Promise<ContactListRow[]> {
 export interface TaskRow {
   id: string; summary: string; type: string; due_at: string | null; author: string | null;
   deal_id: string | null; deal_title: string | null;
+  /** origem da linha: `task` (tabela tasks) ou `activity` (legado activities) */
+  source: "task" | "activity";
+  priority?: string;
+  assignee_user_id?: string | null;
 }
 
-/** Tarefas abertas (activities com prazo e sem conclusão) — a fila "Meu dia". */
+/**
+ * Fila "Meu dia": une a tabela `tasks` (F1.3) com o legado `activities` (com
+ * prazo e sem conclusão), enquanto os produtores migram. Ambas escopadas por org
+ * via RLS; o `source` diz ao TaskItem qual action usar para concluir/reagendar.
+ */
 export async function getOpenTasks(): Promise<TaskRow[]> {
   const supabase = createClient();
   const orgId = await getOrgId();
   if (!orgId) return [];
-  const { data } = await supabase
-    .from("activities")
-    .select("id,summary,type,due_at,author,deal_id,deals(title)")
-    .eq("org_id", orgId)
-    .not("due_at", "is", null)
-    .is("done_at", null)
-    .order("due_at", { ascending: true })
-    .limit(200);
-  return (data ?? []).map((r: any) => ({
-    id: r.id, summary: r.summary, type: r.type, due_at: r.due_at, author: r.author,
+
+  const [{ data: taskRows }, { data: actRows }] = await Promise.all([
+    supabase
+      .from("tasks")
+      .select("id,title,priority,due_at,assignee_user_id,deal_id,source,deals(title)")
+      .eq("org_id", orgId).eq("status", "aberta")
+      .order("due_at", { ascending: true }).limit(200),
+    supabase
+      .from("activities")
+      .select("id,summary,type,due_at,author,deal_id,deals(title)")
+      .eq("org_id", orgId)
+      .not("due_at", "is", null).is("done_at", null)
+      .order("due_at", { ascending: true }).limit(200),
+  ]);
+
+  const tasks: TaskRow[] = (taskRows ?? []).map((r: any) => ({
+    id: r.id, summary: r.title, type: r.source === "esteira" ? "esteira" : "task",
+    due_at: r.due_at ? String(r.due_at).slice(0, 10) : null, author: r.agent_kind ?? null,
     deal_id: r.deal_id, deal_title: r.deals?.title ?? null,
-  })) as TaskRow[];
+    source: "task", priority: r.priority, assignee_user_id: r.assignee_user_id,
+  }));
+  const acts: TaskRow[] = (actRows ?? []).map((r: any) => ({
+    id: r.id, summary: r.summary, type: r.type, due_at: r.due_at, author: r.author,
+    deal_id: r.deal_id, deal_title: r.deals?.title ?? null, source: "activity",
+  }));
+  return [...tasks, ...acts].sort((a, b) => (a.due_at ?? "").localeCompare(b.due_at ?? ""));
+}
+
+export interface OrgMember { userId: string; email: string; role: string }
+
+/** Membros da org (via RPC org_members) — usado em roteamento e reatribuição. */
+export async function getOrgMembers(): Promise<OrgMember[]> {
+  const supabase = createClient();
+  const ctx = await getAuthContext();
+  if (!ctx?.orgId) return [];
+  const { data } = await supabase.rpc("org_members", { p_org: ctx.orgId });
+  if (!data?.ok) return [];
+  return (data.members ?? []).map((m: any) => ({
+    userId: m.user_id ?? m.userId, email: m.email ?? "", role: m.member_role ?? m.role ?? "member",
+  }));
+}
+
+export interface LossReasonRow { id: string; label: string; category: string }
+export async function getLossReasons(): Promise<LossReasonRow[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase.from("loss_reasons").select("id,label,category").eq("org_id", orgId).eq("active", true).order("position");
+  return (data ?? []) as LossReasonRow[];
+}
+
+export interface TimelineItem {
+  id: string; at: string; kind: string; title: string; detail?: string; source: string;
+}
+
+/**
+ * F2.1 — Timeline unificada do deal: funde deal_events (estágio/dono/valor/score/
+ * negócio), agent_runs, messages e notas de activities numa linha única.
+ */
+export async function getDealTimeline(dealId: string): Promise<TimelineItem[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+
+  const [{ data: events }, { data: runs }, { data: msgs }, { data: acts }] = await Promise.all([
+    supabase.from("deal_events").select("id,kind,data,created_at,actor_user_id").eq("org_id", orgId).eq("deal_id", dealId).order("created_at", { ascending: false }).limit(200),
+    supabase.from("agent_runs").select("id,agent_kind,source,created_at").eq("org_id", orgId).eq("deal_id", dealId).order("created_at", { ascending: false }).limit(50),
+    supabase.from("messages").select("id,channel,direction,body,created_at").eq("deal_id", dealId).order("created_at", { ascending: false }).limit(50),
+    supabase.from("activities").select("id,type,summary,author,created_at").eq("org_id", orgId).eq("deal_id", dealId).eq("type", "note").order("created_at", { ascending: false }).limit(100),
+  ]);
+
+  const EVENT_LABEL: Record<string, string> = {
+    created: "Deal criado", stage_changed: "Mudou de estágio", owner_changed: "Dono alterado",
+    amount_changed: "Valor alterado", score_changed: "Score recalculado",
+    proposal_sent: "Proposta enviada", proposal_viewed: "Proposta visualizada",
+    contract_sent: "Contrato enviado", contract_signed: "Contrato assinado",
+    email_sent: "E-mail enviado", email_opened: "E-mail aberto",
+    whatsapp_in: "WhatsApp recebido", whatsapp_out: "WhatsApp enviado",
+    task_created: "Tarefa criada", task_done: "Tarefa concluída", agent_run: "Agente executado",
+  };
+
+  const items: TimelineItem[] = [];
+  for (const e of events ?? []) {
+    const d: any = e.data ?? {};
+    const detail = e.kind === "stage_changed" ? (d.to_name ?? "") : e.kind === "amount_changed" ? `${d.from ?? "—"} → ${d.to ?? "—"}` : d.title ?? undefined;
+    items.push({ id: `ev-${e.id}`, at: e.created_at, kind: e.kind, title: EVENT_LABEL[e.kind] ?? e.kind, detail, source: "evento" });
+  }
+  for (const r of runs ?? []) items.push({ id: `run-${r.id}`, at: r.created_at, kind: "agent_run", title: `Agente: ${r.agent_kind}`, detail: r.source, source: "agente" });
+  for (const m of msgs ?? []) items.push({ id: `msg-${m.id}`, at: m.created_at, kind: `msg_${m.direction}`, title: `${m.channel} (${m.direction})`, detail: (m.body ?? "").slice(0, 120), source: "mensagem" });
+  for (const a of acts ?? []) items.push({ id: `act-${a.id}`, at: a.created_at, kind: "note", title: a.summary, detail: a.author ?? undefined, source: "nota" });
+
+  return items.sort((a, b) => (b.at ?? "").localeCompare(a.at ?? ""));
 }
 
 export interface ClientInviteRow { id: string; email: string; token: string; status: string; client_account_id: string; client_name: string }
