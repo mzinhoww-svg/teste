@@ -151,6 +151,15 @@ export async function getProducts(): Promise<ProductListItem[]> {
   return (data ?? []) as ProductListItem[];
 }
 
+export interface ProductFull { id: string; name: string; description: string; price: number | null; pricing_type: string; active: boolean; position: number }
+export async function getProductsFull(): Promise<ProductFull[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase.from("products").select("id,name,description,price,pricing_type,active,position").eq("org_id", orgId).order("position");
+  return (data ?? []).map((p: any) => ({ ...p, price: p.price == null ? null : Number(p.price) })) as ProductFull[];
+}
+
 export interface BoardData {
   pipeline: Pipeline | null;
   pipelines: PipelineListItem[];
@@ -281,6 +290,49 @@ export async function getAutomations(): Promise<AutomationView[]> {
     agentName: nameByKind.get(r.agent_kind) ?? r.agent_kind ?? "—",
     enabled: r.enabled,
   }));
+}
+
+export interface AutomationSuggestion { stageId: string; stageName: string; agentKind: string; agentName: string; reason: string }
+
+/**
+ * Sugere automações "ao entrar no estágio X → agente Y" a partir das chaves dos
+ * estágios do funil, excluindo o que já está configurado. Base do ponto 3.
+ */
+export async function getSuggestedAutomations(): Promise<AutomationSuggestion[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+
+  const [{ data: pipe }, agents] = await Promise.all([
+    supabase.from("pipelines").select("id").eq("org_id", orgId).eq("archived", false).order("position").limit(1).maybeSingle(),
+    getAgents(),
+  ]);
+  if (!pipe) return [];
+  const [{ data: stages }, { data: existing }] = await Promise.all([
+    supabase.from("stages").select("id,name,key,is_won,is_lost").eq("pipeline_id", pipe.id).order("position"),
+    supabase.from("automations").select("trigger_stage_id").eq("org_id", orgId).eq("trigger_type", "stage_enter"),
+  ]);
+  const configured = new Set((existing ?? []).map((a: any) => a.trigger_stage_id));
+  const nameByKind = new Map(agents.filter((a) => a.enabled).map((a) => [a.id, a.name]));
+
+  const MAP: Array<{ match: (k: string, won: boolean, lost: boolean) => boolean; kind: string; reason: string }> = [
+    { match: (k) => ["reuniao", "reunião", "meeting"].includes(k), kind: "sales-copilot", reason: "Na reunião, sugerir próxima ação e mensagem." },
+    { match: (k) => ["proposta", "proposal"].includes(k), kind: "proposal", reason: "Ao chegar em proposta, montar escopo e preço com o catálogo." },
+    { match: (k) => ["negociacao", "negociação", "negotiation"].includes(k), kind: "activities", reason: "Em negociação, disciplinar cadência e follow-up." },
+    { match: (k) => ["contrato", "contract"].includes(k), kind: "legal-contract", reason: "Ao contratar, preparar minuta e assinatura." },
+    { match: (_k, won) => won, kind: "support-copilot", reason: "No ganho, iniciar onboarding e handoff." },
+    { match: (_k, _w, lost) => lost, kind: "sales-feedback", reason: "Na perda, extrair aprendizado e causa raiz." },
+  ];
+
+  const out: AutomationSuggestion[] = [];
+  for (const s of stages ?? []) {
+    if (configured.has(s.id)) continue;
+    const key = (s.key ?? "").toLowerCase();
+    const rule = MAP.find((m) => m.match(key, Boolean(s.is_won), Boolean(s.is_lost)));
+    if (!rule || !nameByKind.has(rule.kind)) continue;
+    out.push({ stageId: s.id, stageName: s.name, agentKind: rule.kind, agentName: nameByKind.get(rule.kind)!, reason: rule.reason });
+  }
+  return out;
 }
 
 export interface ContractView {

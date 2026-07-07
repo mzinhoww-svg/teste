@@ -356,7 +356,23 @@ export async function createLead(input: CreateLeadInput): Promise<{ dealId: stri
     });
   }
 
+  // Ponto 4 — "Meu dia" nasce populado: todo lead novo gera uma tarefa para o
+  // dono. Usa a próxima ação escolhida (com data) ou um primeiro contato hoje.
+  {
+    const { createTask } = await import("@/lib/tasks");
+    const due = input.nextActionAt || new Date().toISOString().slice(0, 10);
+    const taskTitle = input.nextAction
+      ? `${input.nextAction} — ${input.company || name}`
+      : `Primeiro contato: ${input.company || name}`;
+    await createTask(supabase, {
+      orgId, dealId: deal.id, contactId: contact.id, title: taskTitle,
+      dueAt: new Date(due).toISOString(), assigneeUserId: ownerUserId,
+      priority: missing.length ? "alta" : "normal", source: "manual", createdBy: ctx?.userId ?? null,
+    });
+  }
+
   revalidatePath("/app");
+  revalidatePath("/app/tarefas");
   return { dealId: deal.id, contactId: contact.id };
 }
 
@@ -538,10 +554,21 @@ export async function createActivity(dealId: string, input: { type?: string; sum
   if (error) throw error;
   if (input.nextActionAt !== undefined) {
     await supabase.from("deals").update({ next_action_at: input.nextActionAt || null, last_touch: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString() }).eq("id", dealId).eq("org_id", ctx.orgId);
+    // Próxima ação com data vira tarefa no "Meu dia" do responsável.
+    if (input.nextActionAt) {
+      const { data: d } = await supabase.from("deals").select("owner_user_id, title").eq("id", dealId).maybeSingle();
+      const { createTask } = await import("@/lib/tasks");
+      await createTask(supabase, {
+        orgId: ctx.orgId, dealId, title: `${summary || "Próxima ação"} — ${d?.title ?? "deal"}`,
+        dueAt: new Date(input.nextActionAt).toISOString(), assigneeUserId: d?.owner_user_id ?? ctx.userId,
+        source: "manual", createdBy: ctx.userId,
+      });
+    }
   } else {
     await supabase.from("deals").update({ last_touch: new Date().toISOString().slice(0, 10) }).eq("id", dealId).eq("org_id", ctx.orgId);
   }
   revalidatePath("/app");
+  revalidatePath("/app/tarefas");
 }
 
 export async function completeActivity(activityId: string, done: boolean) {
@@ -616,6 +643,45 @@ export async function rescheduleTask(taskId: string, dueAt: string) {
   if (error) throw error;
   revalidatePath("/app/tarefas");
   revalidatePath("/app");
+}
+
+// --- Produtos / serviços ----------------------------------------------------
+
+export async function createProduct(input: { name: string; description?: string; price?: number | null; pricingType?: string }) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const name = (input.name ?? "").trim();
+  if (!name) throw new Error("Nome do produto é obrigatório");
+  const supabase = createClient();
+  const { data: max } = await supabase.from("products").select("position").eq("org_id", ctx.orgId).order("position", { ascending: false }).limit(1).maybeSingle();
+  const { error } = await supabase.from("products").insert({
+    org_id: ctx.orgId, name, description: input.description ?? "",
+    price: input.price == null || input.price === ("" as any) ? null : Number(input.price),
+    pricing_type: input.pricingType ?? "fixo", position: (max?.position ?? 0) + 1,
+  });
+  if (error) throw error;
+  revalidatePath("/app/produtos");
+}
+
+export async function updateProduct(id: string, fields: { name?: string; description?: string; price?: number | null; pricingType?: string; active?: boolean }) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const patch: Record<string, unknown> = {};
+  if (fields.name !== undefined) patch.name = fields.name.trim();
+  if (fields.description !== undefined) patch.description = fields.description;
+  if (fields.price !== undefined) patch.price = fields.price == null || fields.price === ("" as any) ? null : Number(fields.price);
+  if (fields.pricingType !== undefined) patch.pricing_type = fields.pricingType;
+  if (fields.active !== undefined) patch.active = fields.active;
+  const { error } = await supabase.from("products").update(patch).eq("id", id).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/app/produtos");
+}
+
+export async function deleteProduct(id: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("products").delete().eq("id", id).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/app/produtos");
 }
 
 // --- Metas / gestão (F4) ----------------------------------------------------
@@ -1051,6 +1117,19 @@ export async function createAutomation(formData: FormData) {
 
   const { error } = await supabase.from("automations").insert({
     org_id: orgId, name: name || `Automação`, trigger_type: "stage_enter",
+    trigger_stage_id: stageId, agent_kind: agentKind, enabled: true,
+  });
+  if (error) throw error;
+  revalidatePath("/app/automacoes");
+}
+
+/** Cria uma automação a partir de uma sugestão (ponto 3), sem formulário. */
+export async function applyAutomationSuggestion(stageId: string, agentKind: string, name: string) {
+  const { orgId } = await requireRole(["owner", "admin"]);
+  if (!stageId || !agentKind) throw new Error("Estágio e agente são obrigatórios");
+  const supabase = createClient();
+  const { error } = await supabase.from("automations").insert({
+    org_id: orgId, name: name || "Automação sugerida", trigger_type: "stage_enter",
     trigger_stage_id: stageId, agent_kind: agentKind, enabled: true,
   });
   if (error) throw error;

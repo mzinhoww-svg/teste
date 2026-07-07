@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Filter, Users, Building2, FileSignature, FolderKanban, PackageCheck,
+  Filter, Users, Building2, FileSignature, FolderKanban, PackageCheck, Package,
   Receipt, BarChart3, Zap, Bot, Settings, ScrollText, HelpCircle, CheckSquare, Inbox, Target, Trophy, MessageSquare, type LucideIcon,
 } from "lucide-react";
 import { NAV_GROUPS, type NavItem } from "@/lib/nav-items";
 
 const ICONS: Record<string, LucideIcon> = {
-  Filter, Users, Building2, FileSignature, FolderKanban, PackageCheck,
+  Filter, Users, Building2, FileSignature, FolderKanban, PackageCheck, Package,
   Receipt, BarChart3, Zap, Bot, Settings, ScrollText, HelpCircle, CheckSquare, Inbox, Target, Trophy, MessageSquare,
 };
 

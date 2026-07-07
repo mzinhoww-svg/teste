@@ -159,17 +159,33 @@ export async function runCopilot(
 
 const MAX_DISCOUNT = 0.15;
 
+/** Item do catálogo de produtos da org (fonte de preços reais para a proposta). */
+export interface CatalogProduct { id: string; name: string; price: number | null; pricing_type?: string; description?: string }
+
 export async function runProposal(
   deal: Deal,
   contact: Contact,
   agent: Agent,
+  catalog: CatalogProduct[] = [],
 ): Promise<ProposalResult> {
+  // Produto de interesse do deal (por id do catálogo ou pelo rótulo em custom).
+  const interestLabel = (deal.custom?.product_interest as string) ?? "";
+  const chosen = catalog.find((p) => p.id === deal.productId)
+    ?? catalog.find((p) => p.name.toLowerCase() === interestLabel.toLowerCase())
+    ?? null;
+
   let llmError: string | undefined;
   if (hasLiveAI() && agent.enabled) {
     try {
       const text = await callLLM({
-        system: `Você é o "${agent.name}". ${agent.instructions} Teto de desconto ${MAX_DISCOUNT * 100}%. Responda SOMENTE com JSON {"items":[{"name":string,"qty":number,"unitPrice":number}],"discountPct":number,"summary":string,"terms":string}.`,
-        prompt: JSON.stringify({ deal: { title: deal.title, amount: deal.amount, tags: deal.tags }, contact: { company: contact.company, role: contact.role } }),
+        // O catálogo REAL vai no prompt: a IA precisa usar estes produtos e preços,
+        // e escrever "validar tabela vigente" quando o preço não estiver definido.
+        system: `Você é o "${agent.name}". ${agent.instructions} Teto de desconto ${MAX_DISCOUNT * 100}%. Use SOMENTE produtos do catálogo abaixo e seus preços; se o preço não existir (negociado), use o valor do deal ou 0 e sinalize em terms "validar tabela vigente". NÃO invente produtos nem preços. Responda SOMENTE com JSON {"items":[{"name":string,"qty":number,"unitPrice":number}],"discountPct":number,"summary":string,"terms":string}.`,
+        prompt: JSON.stringify({
+          deal: { title: deal.title, amount: deal.amount, tags: deal.tags, produto_interesse: interestLabel },
+          contact: { company: contact.company, role: contact.role },
+          catalogo: catalog.map((p) => ({ nome: p.name, preco: p.price, tipo: p.pricing_type, descricao: p.description })),
+        }),
         maxTokens: 800,
       });
       const parsed = extractJson<{ items: { name: string; qty: number; unitPrice: number }[]; discountPct: number; summary: string; terms: string }>(text);
@@ -185,22 +201,33 @@ export async function runProposal(
     }
   }
 
-  // Heurística: decompõe o valor do deal em plataforma + implantação + suporte.
-  const platform = Math.round(deal.amount * 0.62);
-  const setup = Math.round(deal.amount * 0.23);
-  const support = Math.round(deal.amount * 0.15);
-  const items = [
-    { name: "Plataforma CRM AI Studio — assinatura anual", qty: 1, unitPrice: platform },
-    { name: "Implantação e configuração de agentes", qty: 1, unitPrice: setup },
-    { name: "Suporte e sucesso do cliente (12 meses)", qty: 1, unitPrice: support },
-  ];
+  // Heurística baseada no CATÁLOGO real (não mais decomposição genérica de SaaS).
+  let items: { name: string; qty: number; unitPrice: number }[];
+  let needsPriceValidation = false;
+  if (chosen) {
+    // Preço: valor negociado no deal tem prioridade; senão o preço do catálogo.
+    const unit = deal.amount > 0 ? deal.amount : (Number(chosen.price) || 0);
+    if (unit === 0) needsPriceValidation = true;
+    items = [{ name: chosen.name, qty: 1, unitPrice: unit }];
+  } else if (catalog.length && deal.amount <= 0) {
+    // Sem produto escolhido e sem valor: lista o produto principal para validar.
+    const primary = catalog.find((p) => Number(p.price)) ?? catalog[0];
+    needsPriceValidation = !Number(primary.price);
+    items = [{ name: primary.name, qty: 1, unitPrice: Number(primary.price) || 0 }];
+  } else {
+    // Fallback final: usa o valor do deal como serviço único (sem inventar itens).
+    items = [{ name: interestLabel || deal.title || "Serviço", qty: 1, unitPrice: Math.max(0, deal.amount) }];
+    needsPriceValidation = deal.amount <= 0;
+  }
+
   const subtotal = items.reduce((s, i) => s + i.qty * i.unitPrice, 0);
-  const discountPct = deal.amount > 150000 ? 12 : deal.amount > 80000 ? 8 : 5;
+  const discountPct = subtotal > 150000 ? 12 : subtotal > 80000 ? 8 : subtotal > 0 ? 5 : 0;
   const total = Math.round(subtotal * (1 - discountPct / 100));
+  const prodName = chosen?.name ?? items[0]?.name ?? "serviço";
   return {
     dealId: deal.id, items, subtotal, discountPct, total, generatedBy: agent.name, source: "heuristic", llmError,
-    summary: `Proposta para ${contact.company}: plataforma, implantação e suporte com desconto de ${discountPct}% por volume. Retorno esperado em até 20 dias de uso.`,
-    terms: "Validade: 15 dias. Pagamento: 12x sem juros ou anual à vista. Inclui SLA de suporte e onboarding assistido.",
+    summary: `Proposta para ${contact.company || contact.name}: ${prodName}${discountPct ? ` com ${discountPct}% de desconto por volume` : ""}.`,
+    terms: `Validade: 15 dias.${needsPriceValidation ? " Preço a validar na tabela vigente antes do envio." : " Condições de pagamento conforme negociação."}`,
   };
 }
 
