@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { CheckCircle2, Copy, FileSignature, FileText, FlaskConical, Mail, MessageCircle, Pencil, Play, ShieldCheck, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
-import { approveProposal, completeActivity, createActivity, deleteContact, deleteDeal, moveDeal, rejectProposal, sendProposalEmail, updateContact, updateDealFull } from "@/app/actions";
+import { addDealContact, approveProposal, completeActivity, createActivity, deleteContact, deleteDeal, moveDeal, rejectProposal, removeDealContact, sendProposalEmail, updateContact, updateDealFull } from "@/app/actions";
 import { publicBaseUrl } from "@/lib/urls";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -272,9 +272,9 @@ function WhatsAppTab({ phone, name, company, overrides }: { phone?: string | nul
   );
 }
 
-export function DealDrawer({ deal, contact, agents, stages, products = [], myRole = "member", orgName = "", onClose }: {
+export function DealDrawer({ deal, contact, agents, stages, products = [], allContacts = [], myRole = "member", orgName = "", onClose }: {
   deal: Deal; contact: Contact | null; agents: Agent[]; stages: Stage[];
-  products?: ProductListItem[]; myRole?: string; orgName?: string; onClose: () => void;
+  products?: ProductListItem[]; allContacts?: Contact[]; myRole?: string; orgName?: string; onClose: () => void;
 }) {
   // Agentes rodando AGORA (por id) — permite disparar vários em paralelo sem que
   // um bloqueie ou apague o indicador do outro.
@@ -282,7 +282,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
   const isRunning = (kind: string) => Boolean(running[kind]);
   const [results, setResults] = useState<Record<string, any>>({});
   const [hydrating, setHydrating] = useState(true);
-  const [panels, setPanels] = useState<{ proposals: any[]; contracts: any[]; waOverrides?: Record<string, string> }>({ proposals: [], contracts: [], waOverrides: {} });
+  const [panels, setPanels] = useState<{ proposals: any[]; contracts: any[]; waOverrides?: Record<string, string>; dealContacts?: any[] }>({ proposals: [], contracts: [], waOverrides: {}, dealContacts: [] });
   const [timeline, setTimeline] = useState<any[]>([]);
   const [editOpen, setEditOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
@@ -505,6 +505,51 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
                 </div>
               </section>
             )}
+
+            {/* Envolvidos: múltiplos contatos por deal, com papel. */}
+            <section className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Envolvidos no negócio</div>
+              {(panels.dealContacts ?? []).length === 0 ? (
+                <p className="text-xs text-slate-400">Nenhum contato adicional. Adicione decisores/influenciadores abaixo.</p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {(panels.dealContacts ?? []).map((dc: any) => (
+                    <li key={dc.contactId} className="flex items-center justify-between gap-2 text-sm">
+                      <span className="truncate text-slate-700 dark:text-slate-200">{dc.name}{dc.jobTitle ? ` · ${dc.jobTitle}` : ""}</span>
+                      <span className="flex shrink-0 items-center gap-2">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500 dark:bg-slate-800">{dc.role}</span>
+                        <button aria-label="Remover envolvido" onClick={() => startEdit(async () => { try { await removeDealContact(deal.id, dc.contactId); setPanels((p) => ({ ...p, dealContacts: (p.dealContacts ?? []).filter((x: any) => x.contactId !== dc.contactId) })); } catch { toast.error("Falha"); } })} className="text-slate-400 hover:text-rose-500">×</button>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {allContacts.length > 0 && (
+                <form
+                  className="mt-3 flex flex-wrap items-center gap-2"
+                  action={(fd) => startEdit(async () => {
+                    const cid = String(fd.get("cid") ?? ""); const role = String(fd.get("role") ?? "influenciador");
+                    if (!cid) return;
+                    try {
+                      await addDealContact(deal.id, cid, role);
+                      const c = allContacts.find((x) => x.id === cid);
+                      setPanels((p) => ({ ...p, dealContacts: [...(p.dealContacts ?? []).filter((x: any) => x.contactId !== cid), { contactId: cid, role, name: c?.name ?? "—", jobTitle: c?.role ?? null }] }));
+                      toast.success("Envolvido adicionado");
+                    } catch (e) { toast.error(e instanceof Error ? e.message : "Falha"); }
+                  })}
+                >
+                  <select name="cid" className="h-8 flex-1 rounded-lg border border-slate-200 px-2 text-xs dark:border-slate-700 dark:bg-slate-800" defaultValue="">
+                    <option value="">Adicionar contato…</option>
+                    {allContacts.filter((c) => c.id !== contact?.id).map((c) => <option key={c.id} value={c.id}>{c.name}{c.company ? ` · ${c.company}` : ""}</option>)}
+                  </select>
+                  <select name="role" className="h-8 rounded-lg border border-slate-200 px-2 text-xs dark:border-slate-700 dark:bg-slate-800" defaultValue="influenciador">
+                    <option value="decisor">decisor</option><option value="influenciador">influenciador</option>
+                    <option value="comprador">comprador</option><option value="usuario">usuário</option><option value="outro">outro</option>
+                  </select>
+                  <Button type="submit" variant="outline" size="xs" disabled={pendingEdit}>Adicionar</Button>
+                </form>
+              )}
+            </section>
           </TabsContent>
 
           <TabsContent value="agents" className="space-y-4 py-4">

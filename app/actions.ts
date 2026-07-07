@@ -805,6 +805,76 @@ export async function deleteContact(contactId: string) {
   revalidatePath("/app");
 }
 
+// Mescla dois contatos: reatribui deals/mensagens/enriquecimento/papéis do
+// duplicado para o principal e remove o duplicado. Preserva histórico.
+export async function mergeContacts(primaryId: string, duplicateId: string) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  if (!primaryId || !duplicateId || primaryId === duplicateId) throw new Error("Selecione dois contatos diferentes");
+  const supabase = createClient();
+  const org = ctx.orgId;
+  const { data: both } = await supabase.from("contacts").select("id").eq("org_id", org).in("id", [primaryId, duplicateId]);
+  if ((both ?? []).length < 2) throw new Error("Contato não encontrado nesta organização");
+  await supabase.from("deals").update({ contact_id: primaryId }).eq("org_id", org).eq("contact_id", duplicateId);
+  await supabase.from("messages").update({ contact_id: primaryId }).eq("org_id", org).eq("contact_id", duplicateId);
+  await supabase.from("lead_enrichment").update({ contact_id: primaryId }).eq("org_id", org).eq("contact_id", duplicateId);
+  await supabase.from("notifications").update({ contact_id: primaryId }).eq("org_id", org).eq("contact_id", duplicateId);
+  await supabase.from("deal_contacts").delete().eq("org_id", org).eq("contact_id", duplicateId);
+  const { error } = await supabase.from("contacts").delete().eq("org_id", org).eq("id", duplicateId);
+  if (error) throw error;
+  revalidatePath("/app");
+  revalidatePath("/app/contatos");
+}
+
+// LGPD / direito ao esquecimento: anonimiza os dados pessoais do contato,
+// mantendo o histórico comercial agregado.
+export async function forgetContact(contactId: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("contacts").update({
+    name: "Contato removido (LGPD)", email: null, phone: null, notes: null, custom: {}, job_title: null, city: null,
+  }).eq("id", contactId).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  await supabase.from("lead_enrichment").delete().eq("org_id", ctx.orgId).eq("contact_id", contactId);
+  await supabase.from("notifications").insert({
+    org_id: ctx.orgId, type: "lgpd", title: "Dados anonimizados (LGPD)",
+    body: "Os dados pessoais de um contato foram anonimizados a pedido (direito ao esquecimento).",
+    action_url: "/app/contatos",
+  });
+  revalidatePath("/app");
+  revalidatePath("/app/contatos");
+}
+
+// Papéis de contato por deal (múltiplos contatos por oportunidade).
+export async function addDealContact(dealId: string, contactId: string, role: string) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const roles = ["decisor", "influenciador", "comprador", "usuario", "outro"];
+  const { error } = await supabase.from("deal_contacts").upsert({
+    org_id: ctx.orgId, deal_id: dealId, contact_id: contactId, role: roles.includes(role) ? role : "outro",
+  }, { onConflict: "deal_id,contact_id" });
+  if (error) throw error;
+  revalidatePath("/app");
+}
+
+export async function removeDealContact(dealId: string, contactId: string) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("deal_contacts").delete().eq("org_id", ctx.orgId).eq("deal_id", dealId).eq("contact_id", contactId);
+  if (error) throw error;
+  revalidatePath("/app");
+}
+
+// Custo de IA configurável (preço/câmbio/orçamento) em org.settings.
+export async function setAiPricing(fields: { usdPer1M?: number; usdBrl?: number; monthlyBudgetBRL?: number }) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { data: org } = await supabase.from("orgs").select("settings").eq("id", ctx.orgId).maybeSingle();
+  const settings = { ...(org?.settings ?? {}), ai_pricing: { ...((org?.settings as any)?.ai_pricing ?? {}), ...fields } };
+  const { error } = await supabase.from("orgs").update({ settings }).eq("id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/app/relatorios");
+}
+
 // --- Pipelines e estágios -----------------------------------------------------
 
 export async function createPipeline(name: string) {

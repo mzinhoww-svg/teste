@@ -3,6 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getAgentByKind, getDealFull } from "@/lib/db";
 import { resolveAgentByKind } from "@/lib/agents/resolve";
 import { getLeadCommunicationContext, buildWhatsAppPromptBlock } from "@/lib/lead-comm-context";
+import { buildEnrichmentPromptBlock } from "@/lib/agents/enrichment-context";
+import { buildLearningsPromptBlock, isLearningSource, recordLearning } from "@/lib/agents/learnings";
+import { guardProposal } from "@/lib/agents/guardrail";
 import { runWithUsage } from "@/lib/ai";
 import {
   runAdvisory, runContract, runCopilot, runLeadScoring, runProposal,
@@ -72,6 +75,16 @@ export async function dryRunAgentForDeal(kind: string, dealId: string, ctx: RunC
     (agent as any).__waUsed = true;
   }
 
+  // Injeta os fatos de enriquecimento já coletados (lead_enrichment) + a memória
+  // de aprendizados da org (loop de feedback) — camadas complementares ao #45.
+  const enrich = await buildEnrichmentPromptBlock(supabase, ctx.orgId, dealId);
+  if (enrich.block) {
+    agent.instructions = `${agent.instructions}\n\n${enrich.block}`;
+    (agent as any).__enrichUsed = enrich.count;
+  }
+  const learnings = await buildLearningsPromptBlock(supabase, ctx.orgId);
+  if (learnings.block) agent.instructions = `${agent.instructions}\n\n${learnings.block}`;
+
   let result: any;
   const extra: Record<string, unknown> = {};
   switch (kind) {
@@ -128,6 +141,16 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
     (agent as any).__waUsed = true;
   }
 
+  // Injeta os fatos de enriquecimento já coletados (lead_enrichment) + a memória
+  // de aprendizados da org (loop de feedback) — camadas complementares ao #45.
+  const enrich = await buildEnrichmentPromptBlock(supabase, ctx.orgId, dealId);
+  if (enrich.block) {
+    agent.instructions = `${agent.instructions}\n\n${enrich.block}`;
+    (agent as any).__enrichUsed = enrich.count;
+  }
+  const learnings = await buildLearningsPromptBlock(supabase, ctx.orgId);
+  if (learnings.block) agent.instructions = `${agent.instructions}\n\n${learnings.block}`;
+
   let result: any;
   const extra: Record<string, unknown> = {};
 
@@ -152,8 +175,15 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
       break;
     }
     case "proposal": {
+      // #49: proposta gerada a partir do catálogo de produtos ativo.
       const { data: catalog } = await supabase.from("products").select("id,name,price,pricing_type,description").eq("org_id", ctx.orgId).eq("active", true).order("position");
       result = await runProposal(deal, contact, agent, (catalog ?? []) as any);
+      // Guardrail (complemento): recomputa subtotal/total, aplica teto de desconto
+      // e alerta preço fora do catálogo antes de persistir (contém alucinação).
+      const catalogPrices = (catalog ?? []).map((p: any) => Number(p.price)).filter((n) => n > 0);
+      const guarded = guardProposal(result, catalogPrices);
+      Object.assign(result, guarded.proposal);
+      if (guarded.result.findings.length) extra.guardrail = guarded.result.findings;
       // Política: desconto NUNCA é aprovado automaticamente. Toda proposta com
       // desconto nasce "pendente" e só pode ser enviada após aprovação de gestor.
       const needsApproval = Number(result.discountPct) > 0;
@@ -238,6 +268,8 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
         });
         extra.taskCreated = true;
       }
+      // Aprendizado/Coaching alimentam a memória da org (loop fechado).
+      if (isLearningSource(kind)) await recordLearning(supabase, { orgId: ctx.orgId, sourceKind: kind, dealId, result });
     }
   }
   });
@@ -246,7 +278,7 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
   const persisted = { ...result, ...extra };
   await supabase.from("agent_runs").insert({
     org_id: ctx.orgId, agent_kind: kind, deal_id: dealId,
-    input: { title: deal.title, stage: deal.stageKey, via: ctx.via, agentKey: resolved?.key ?? null, templateVersion: resolved?.templateVersion ?? null, whatsappUsed: Boolean((agent as any).__waUsed), tokens, llmError: result?.llmError ?? null },
+    input: { title: deal.title, stage: deal.stageKey, via: ctx.via, agentKey: resolved?.key ?? null, templateVersion: resolved?.templateVersion ?? null, whatsappUsed: Boolean((agent as any).__waUsed), enrichmentUsed: Number((agent as any).__enrichUsed ?? 0), guardrail: (extra as any).guardrail ?? null, tokens, llmError: result?.llmError ?? null },
     output: persisted, source: result?.source ?? "n/a", model: agent.model, created_by: ctx.userId,
   });
 

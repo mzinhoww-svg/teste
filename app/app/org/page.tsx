@@ -1,5 +1,6 @@
 import { OrgManager } from "@/components/OrgManager";
 import { PermissionDenied } from "@/components/PermissionDenied";
+import { RevenueAiSettings } from "@/components/RevenueAiSettings";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthContext } from "@/lib/db";
 import { setRestrictSellers } from "@/app/actions";
@@ -24,6 +25,7 @@ export default async function OrgPage() {
 
   const baseUrl = crmBaseUrl();
   const restrictSellers = Boolean((org?.settings as any)?.restrict_sellers);
+  const aiPricing = (org?.settings as any)?.ai_pricing ?? {};
 
   return (
       <main className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
@@ -45,6 +47,8 @@ export default async function OrgPage() {
             </button>
           </form>
         </section>
+
+        <RevenueAiSettings ai={aiPricing} />
 
         <OrgManager
           orgName={ctx.orgName}
