@@ -80,7 +80,11 @@ export async function dryRunAgentForDeal(kind: string, dealId: string, ctx: RunC
       result = await runCopilot(deal, contact, agent);
       extra.waLink = waMeLink(contact.phone, result.message);
       break;
-    case "proposal": result = await runProposal(deal, contact, agent); break;
+    case "proposal": {
+      const { data: catalog } = await supabase.from("products").select("id,name,price,pricing_type,description").eq("org_id", ctx.orgId).eq("active", true).order("position");
+      result = await runProposal(deal, contact, agent, (catalog ?? []) as any);
+      break;
+    }
     case "legal-contract": result = await runContract(deal, contact, agent); break;
     default: result = await runAdvisory(deal, contact, agent);
   }
@@ -148,7 +152,8 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
       break;
     }
     case "proposal": {
-      result = await runProposal(deal, contact, agent);
+      const { data: catalog } = await supabase.from("products").select("id,name,price,pricing_type,description").eq("org_id", ctx.orgId).eq("active", true).order("position");
+      result = await runProposal(deal, contact, agent, (catalog ?? []) as any);
       // Política: desconto NUNCA é aprovado automaticamente. Toda proposta com
       // desconto nasce "pendente" e só pode ser enviada após aprovação de gestor.
       const needsApproval = Number(result.discountPct) > 0;
@@ -160,6 +165,16 @@ export async function runAgentForDeal(kind: string, dealId: string, ctx: RunCont
       }).select("id, share_token").single();
       if (prop?.share_token) extra.shareToken = prop.share_token;
       extra.approvalStatus = needsApproval ? "pendente" : "aprovada";
+      // Espelha os itens em proposal_items, ligando ao catálogo (product_id) para
+      // relatório de mix/margem (F0/F4).
+      if (prop?.id) {
+        const byName = new Map((catalog ?? []).map((p: any) => [p.name.toLowerCase(), p.id]));
+        const rows = (result.items ?? []).map((it: any, i: number) => ({
+          org_id: ctx.orgId, proposal_id: prop.id, product_id: byName.get(String(it.name).toLowerCase()) ?? null,
+          name: it.name, qty: it.qty, unit_price: it.unitPrice, position: i,
+        }));
+        if (rows.length) await supabase.from("proposal_items").insert(rows);
+      }
       if (needsApproval && prop?.id) {
         await supabase.from("notifications").insert({
           org_id: ctx.orgId, type: "discount_approval", title: "Desconto aguarda aprovação",

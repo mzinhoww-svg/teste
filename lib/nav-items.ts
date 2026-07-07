@@ -14,6 +14,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/app/tarefas", label: "Meu dia", icon: "CheckSquare" },
       { href: "/app/contatos", label: "Contatos", icon: "Users" },
       { href: "/app/clientes", label: "Clientes", icon: "Building2" },
+      { href: "/app/produtos", label: "Produtos", icon: "Package", adminOnly: true },
       { href: "/app/contracts", label: "Contratos", icon: "FileSignature" },
     ],
   },

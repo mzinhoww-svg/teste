@@ -1,6 +1,7 @@
 import { Nav } from "@/components/Nav";
 import { AutomationManager } from "@/components/AutomationManager";
-import { getAgents, getAuthContext, getAutomations, getBoard } from "@/lib/db";
+import { SuggestedAutomations } from "@/components/SuggestedAutomations";
+import { getAgents, getAuthContext, getAutomations, getBoard, getSuggestedAutomations } from "@/lib/db";
 import { PermissionDenied } from "@/components/PermissionDenied";
 
 export const metadata = { title: "Automações — CRM AI Studio" };
@@ -15,8 +16,8 @@ export default async function AutomationsPage() {
       </div>
     );
   }
-  const [automations, agents, { pipeline }] = await Promise.all([
-    getAutomations(), getAgents(), getBoard(),
+  const [automations, agents, { pipeline }, suggestions] = await Promise.all([
+    getAutomations(), getAgents(), getBoard(), getSuggestedAutomations(),
   ]);
 
   return (
@@ -27,6 +28,7 @@ export default async function AutomationsPage() {
           <h1 className="text-xl font-semibold text-slate-900">Automações</h1>
           <p className="text-sm text-slate-500">Orquestre os agentes sem clique: regras por estágio do funil.</p>
         </div>
+        <SuggestedAutomations suggestions={suggestions} />
         <AutomationManager automations={automations} stages={pipeline?.stages ?? []} agents={agents} orgName={ctx?.orgName ?? ""} />
       </main>
     </div>
