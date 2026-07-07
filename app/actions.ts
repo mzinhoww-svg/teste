@@ -583,6 +583,28 @@ export async function rescheduleTask(taskId: string, dueAt: string) {
   revalidatePath("/app");
 }
 
+// --- Metas / gestão (F4) ----------------------------------------------------
+
+export async function saveGoal(input: { ownerUserId?: string | null; periodMonth: string; metric: string; target: number }) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const period = /^\d{4}-\d{2}$/.test(input.periodMonth) ? `${input.periodMonth}-01` : input.periodMonth;
+  const { error } = await supabase.from("goals").insert({
+    org_id: ctx.orgId, owner_user_id: input.ownerUserId || null,
+    period_month: period, metric: input.metric, target: Number(input.target) || 0,
+  });
+  if (error) throw error;
+  revalidatePath("/app/metas");
+}
+
+export async function deleteGoal(id: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("goals").delete().eq("id", id).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/app/metas");
+}
+
 // --- Intake / caixa de entrada (F1.4) --------------------------------------
 
 /** Converte um item da caixa de entrada em lead/deal e marca como convertido. */

@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Filter, Users, Building2, FileSignature, FolderKanban, PackageCheck,
-  Receipt, BarChart3, Zap, Bot, Settings, ScrollText, HelpCircle, CheckSquare, Inbox, type LucideIcon,
+  Receipt, BarChart3, Zap, Bot, Settings, ScrollText, HelpCircle, CheckSquare, Inbox, Target, Trophy, type LucideIcon,
 } from "lucide-react";
 import { NAV_GROUPS, type NavItem } from "@/lib/nav-items";
 
 const ICONS: Record<string, LucideIcon> = {
   Filter, Users, Building2, FileSignature, FolderKanban, PackageCheck,
-  Receipt, BarChart3, Zap, Bot, Settings, ScrollText, HelpCircle, CheckSquare, Inbox,
+  Receipt, BarChart3, Zap, Bot, Settings, ScrollText, HelpCircle, CheckSquare, Inbox, Target, Trophy,
 };
 
 function isActive(pathname: string, item: NavItem): boolean {

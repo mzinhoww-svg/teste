@@ -17,10 +17,14 @@ describe("composeAgentPrompt", () => {
 });
 
 describe("catálogo de agentes da plataforma", () => {
-  it("tem exatamente 9 agentes com kinds únicos", () => {
-    expect(PLATFORM_AGENTS).toHaveLength(9);
+  it("tem 12 agentes (9 originais + 3 de gestão) com kinds únicos", () => {
+    expect(PLATFORM_AGENTS).toHaveLength(12);
     const kinds = new Set(PLATFORM_AGENTS.map((a) => a.kind));
-    expect(kinds.size).toBe(9);
+    expect(kinds.size).toBe(PLATFORM_AGENTS.length);
+    // novos agentes de gestão (F3.4)
+    for (const kind of ["pipeline-health", "reactivation", "data-quality"]) {
+      expect(kinds.has(kind)).toBe(true);
+    }
   });
   it("mapeia os kinds usados no runtime", () => {
     for (const kind of ["lead-scoring", "proposal", "legal-contract", "sales-copilot"]) {

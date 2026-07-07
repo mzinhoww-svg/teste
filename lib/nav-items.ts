@@ -34,6 +34,8 @@ export const NAV_GROUPS: NavGroup[] = [
     title: "Inteligência",
     items: [
       { href: "/app/relatorios", label: "Relatórios", icon: "BarChart3" },
+      { href: "/app/pipeline-review", label: "Pipeline review", icon: "Target", adminOnly: true },
+      { href: "/app/metas", label: "Metas", icon: "Trophy", adminOnly: true },
       { href: "/app/automacoes", label: "Automações", icon: "Zap", adminOnly: true },
       { href: "/app/studio", label: "Studio", icon: "Bot", adminOnly: true },
     ],
