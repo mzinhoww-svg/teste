@@ -1,5 +1,23 @@
 # Plano de implementação — evolução do CRM (F0 → F4)
 
+> **Status de execução (aplicado no PR #45):**
+> - **F0** ✅ migration `0013_foundation.sql` **aplicada no Supabase** (crm-ai-studio).
+> - **F1.1** ✅ roteamento de dono (`lib/routing.ts`) + `reassignDeal`.
+> - **F1.2** ✅ empresa desde o lead (`lib/company.ts`); esteira promove a `ativo`.
+> - **F1.3** ✅ tarefas com estado (`lib/tasks.ts`, tabela `tasks`); `getOpenTasks` une tasks+activities; esteira/agentes criam tasks.
+> - **F1.4** ✅ intake (`/api/intake`, `lead_inbox`), página `/app/inbox`, import CSV.
+> - **F1.5** ⚙️ gating base já existia em `moveDeal`; `loss_reasons` semeados. Select de motivo enumerado no card: **pendente**.
+> - **F2.1** ✅ timeline unificada (`getDealTimeline` + rota + aba Histórico).
+> - **F2.2** ⚙️ eventos instrumentados: `proposal_sent`, `contract_sent`, `contract_signed`. `proposal_viewed`/`email_opened` (webhooks): **pendente**.
+> - **F2.3** engajamento derivado: **pendente**.
+> - **F3.1** ✅ orquestrador (`lib/orchestrator.ts`, gated por `ORCHESTRATOR_ENABLED`).
+> - **F3.2** scoring contínuo: **pendente** (trigger já registra `score_changed`).
+> - **F3.3** ✅ next-best-action (`lib/nba.ts`) no drawer.
+> - **F3.4** ✅ 3 agentes novos (Saúde do Pipeline, Reativação, Qualidade de Dados) via `0014`. Fusão Coach+Aprendizado: **não feita** (seria destrutiva para `agent_runs`).
+> - **F4.1/4.2/4.3** ✅ metas (`/app/metas`), pipeline review (`/app/pipeline-review`), ranking, deals em risco.
+> - **F4.4/4.5** relatórios sobre a fundação e alertas de gestor: **parcial/pendente**.
+
+
 > Companion executável do `analise.md`. Traduz as ondas em **tarefas concretas**
 > com arquivos, funções, uso da migration `0013_foundation.sql`, critério de
 > aceite, esforço e dependências. **Integrações (F5) ficam de fora** deste plano.
