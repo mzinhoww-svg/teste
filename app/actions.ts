@@ -228,6 +228,8 @@ export interface CreateLeadInput {
   cnpj?: string;
   // Próxima ação
   nextAction?: string; nextActionAt?: string; createNotification?: boolean;
+  // F1.4 — intake multicanal / atribuição
+  intakeChannel?: string; attribution?: Record<string, unknown>;
 }
 
 export async function createLead(input: CreateLeadInput): Promise<{ dealId: string; contactId: string }> {
@@ -286,6 +288,19 @@ export async function createLead(input: CreateLeadInput): Promise<{ dealId: stri
     .select("id").single();
   if (cErr) throw cErr;
 
+  // F1.1 — dono por roteamento (routing_rules); fallback = quem criou.
+  // F1.2 — empresa (client_account 'lead') desde a criação, dedup por slug/domínio.
+  const { resolveOwner } = await import("@/lib/routing");
+  const { ensureCompanyForLead } = await import("@/lib/company");
+  const routedOwner = await resolveOwner(supabase, orgId, {
+    segment: input.segment, channel: input.channel, clientType: input.clientType,
+  });
+  const ownerUserId = routedOwner ?? ctx?.userId ?? null;
+  const clientAccountId = await ensureCompanyForLead(supabase, orgId, {
+    company: input.company, cnpj: input.cnpj, email: input.email, contactId: contact.id, ownerUserId,
+  });
+  if (clientAccountId) await supabase.from("contacts").update({ client_account_id: clientAccountId }).eq("id", contact.id);
+
   const title = (input.title ?? "").trim() || `${input.company || name} — ${input.productLabel || "nova oportunidade"}`;
   const dealCustom: Record<string, unknown> = {};
   for (const [k, v] of Object.entries({
@@ -297,11 +312,14 @@ export async function createLead(input: CreateLeadInput): Promise<{ dealId: stri
 
   const { data: deal, error: dErr } = await supabase.from("deals").insert({
     org_id: orgId, pipeline_id: pipe.id, stage_id: stageId, contact_id: contact.id,
-    owner_user_id: ctx?.userId ?? null,
+    owner_user_id: ownerUserId, owner_assigned_at: ownerUserId ? new Date().toISOString() : null,
+    client_account_id: clientAccountId,
     title, amount: Number(input.amount) || 0, engagement: 40,
     probability: input.probability != null ? Number(input.probability) : null,
     temperature: input.temperature || null, product_id: input.productId || null,
     origin: input.channel || null, next_action_at: input.nextActionAt || null,
+    intake_channel: (input as any).intakeChannel || input.channel || null,
+    attribution: (input as any).attribution ?? {},
     tags: input.tags ?? [], custom: dealCustom, last_touch: new Date().toISOString().slice(0, 10),
   }).select("id, stage_id").single();
   if (dErr) throw dErr;
@@ -418,6 +436,16 @@ export async function moveDeal(dealId: string, stageId: string) {
         // registrado via ausência em agent_runs; não propaga
       }
     }
+  }
+
+  // Orquestrador (F3.1): se não houver automação explícita e ORCHESTRATOR_ENABLED,
+  // roda o agente-padrão do estágio. Best-effort, não bloqueia o movimento.
+  if (!autos?.length && st) {
+    try {
+      const { onStageChanged } = await import("@/lib/orchestrator");
+      const { data: { user } } = await createClient().auth.getUser();
+      await onStageChanged(supabase, dealId, stageId, { orgId, userId: user?.id ?? null, stageKey: st.key ?? null });
+    } catch { /* não propaga */ }
   }
 
   // Esteira Ganhou→Entrega: ao entrar num estágio de ganho, monta o pós-venda
@@ -539,6 +567,134 @@ export async function deleteDeal(dealId: string) {
   await requireRole(["owner", "admin"]);
   const supabase = createClient();
   const { error } = await supabase.from("deals").delete().eq("id", dealId);
+  if (error) throw error;
+  revalidatePath("/app");
+}
+
+// --- Tarefas com estado (F1.3) ---------------------------------------------
+
+export async function createTaskAction(input: {
+  title: string; dealId?: string | null; dueAt?: string | null;
+  assigneeUserId?: string | null; priority?: "baixa" | "normal" | "alta" | "urgente";
+}) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const title = (input.title ?? "").trim();
+  if (!title) throw new Error("Descrição da tarefa obrigatória");
+  const supabase = createClient();
+  const { createTask } = await import("@/lib/tasks");
+  await createTask(supabase, {
+    orgId: ctx.orgId, title, dealId: input.dealId ?? null, dueAt: input.dueAt ?? null,
+    assigneeUserId: input.assigneeUserId ?? ctx.userId, priority: input.priority ?? "normal",
+    source: "manual", createdBy: ctx.userId,
+  });
+  revalidatePath("/app/tarefas");
+  revalidatePath("/app");
+}
+
+export async function completeTask(taskId: string, done: boolean) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { data: t } = await supabase.from("tasks").select("deal_id, title")
+    .eq("id", taskId).eq("org_id", ctx.orgId).maybeSingle();
+  const { error } = await supabase.from("tasks")
+    .update({ status: done ? "concluida" : "aberta", done_at: done ? new Date().toISOString() : null, updated_at: new Date().toISOString() })
+    .eq("id", taskId).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  if (done && t?.deal_id) {
+    await supabase.rpc("log_deal_event", { p_deal_id: t.deal_id, p_kind: "task_done", p_data: { title: t.title } });
+  }
+  revalidatePath("/app/tarefas");
+  revalidatePath("/app");
+}
+
+export async function rescheduleTask(taskId: string, dueAt: string) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("tasks")
+    .update({ due_at: dueAt || null, updated_at: new Date().toISOString() })
+    .eq("id", taskId).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/app/tarefas");
+  revalidatePath("/app");
+}
+
+// --- Metas / gestão (F4) ----------------------------------------------------
+
+export async function saveGoal(input: { ownerUserId?: string | null; periodMonth: string; metric: string; target: number }) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const period = /^\d{4}-\d{2}$/.test(input.periodMonth) ? `${input.periodMonth}-01` : input.periodMonth;
+  const { error } = await supabase.from("goals").insert({
+    org_id: ctx.orgId, owner_user_id: input.ownerUserId || null,
+    period_month: period, metric: input.metric, target: Number(input.target) || 0,
+  });
+  if (error) throw error;
+  revalidatePath("/app/metas");
+}
+
+export async function deleteGoal(id: string) {
+  const ctx = await requireRole(["owner", "admin"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("goals").delete().eq("id", id).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/app/metas");
+}
+
+// --- Intake / caixa de entrada (F1.4) --------------------------------------
+
+/** Converte um item da caixa de entrada em lead/deal e marca como convertido. */
+export async function convertInboxLead(inboxId: string, overrides?: Partial<CreateLeadInput>) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { data: item } = await supabase.from("lead_inbox").select("id,channel,payload,status").eq("id", inboxId).eq("org_id", ctx.orgId).maybeSingle();
+  if (!item) throw new Error("Item não encontrado");
+  if (item.status !== "novo") throw new Error("Item já processado");
+  const p: any = item.payload ?? {};
+  const { dealId } = await createLead({
+    name: overrides?.name ?? p.name ?? p.nome ?? p.from_identifier ?? "Lead",
+    company: overrides?.company ?? p.company ?? p.empresa ?? undefined,
+    email: overrides?.email ?? p.email ?? undefined,
+    phone: overrides?.phone ?? p.phone ?? p.telefone ?? undefined,
+    notes: overrides?.notes ?? p.message ?? p.mensagem ?? undefined,
+    channel: overrides?.channel ?? "form",
+    intakeChannel: item.channel,
+    attribution: p.utm ?? p.attribution ?? {},
+    createNotification: true,
+  });
+  await supabase.from("lead_inbox").update({ status: "convertido", deal_id: dealId, processed_at: new Date().toISOString() }).eq("id", inboxId);
+  revalidatePath("/app/inbox");
+  revalidatePath("/app");
+  return { dealId };
+}
+
+export async function discardInboxLead(inboxId: string) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("lead_inbox").update({ status: "descartado", processed_at: new Date().toISOString() }).eq("id", inboxId).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/app/inbox");
+}
+
+/** Importa uma lista de leads (ex.: CSV parseado no cliente). Best-effort por linha. */
+export async function importLeads(rows: Array<Partial<CreateLeadInput>>): Promise<{ created: number; failed: number }> {
+  await requireRole(["owner", "admin", "member"]);
+  let created = 0, failed = 0;
+  for (const r of rows.slice(0, 500)) {
+    if (!r.name || !String(r.name).trim()) { failed++; continue; }
+    try { await createLead({ ...r, name: String(r.name), channel: r.channel ?? "form", intakeChannel: "import", createNotification: false }); created++; }
+    catch { failed++; }
+  }
+  revalidatePath("/app");
+  return { created, failed };
+}
+
+/** Reatribui o dono de um deal (F1.1). O evento owner_changed sai pelo trigger. */
+export async function reassignDeal(dealId: string, ownerUserId: string | null) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("deals")
+    .update({ owner_user_id: ownerUserId, owner_assigned_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq("id", dealId).eq("org_id", ctx.orgId);
   if (error) throw error;
   revalidatePath("/app");
 }
@@ -828,6 +984,7 @@ export async function sendContractForSignature(contractId: string) {
       org_id: ctx.orgId, deal_id: c.deal_id, type: "note",
       summary: `Contrato ${c.reference} enviado para assinatura (${env.provider})`, author: "Agente Jurídico",
     });
+    await supabase.rpc("log_deal_event", { p_deal_id: c.deal_id, p_kind: "contract_sent", p_data: { reference: c.reference, provider: env.provider } });
   }
 
   // E-mail para cada signatário com o link de assinatura interno (/sign/contracts/[token]).
@@ -875,6 +1032,8 @@ export async function refreshContractStatus(contractId: string) {
   }).eq("contract_id", contractId);
   if (st.status === "assinado") {
     await supabase.from("contract_signers").update({ status: "signed", signed_at: now, updated_at: now }).eq("contract_id", contractId);
+    const { data: cd } = await supabase.from("contracts").select("deal_id, reference").eq("id", contractId).maybeSingle();
+    if (cd?.deal_id) await supabase.rpc("log_deal_event", { p_deal_id: cd.deal_id, p_kind: "contract_signed", p_data: { reference: cd.reference } });
   }
   revalidatePath("/app/contracts");
   return { status: st.status };
@@ -999,6 +1158,7 @@ export async function sendProposalEmail(proposalId: string): Promise<{ ok: boole
       org_id: ctx.orgId, deal_id: (proposal as any).deal_id, type: "email",
       summary: `Proposta enviada por e-mail para ${toEmail}`, author: ctx.email ?? "Você",
     });
+    await supabase.rpc("log_deal_event", { p_deal_id: (proposal as any).deal_id, p_kind: "proposal_sent", p_data: { to: toEmail, total: Number((proposal as any).total) || 0 } });
   }
   revalidatePath("/app");
   return { ok: result.ok, error: result.error };

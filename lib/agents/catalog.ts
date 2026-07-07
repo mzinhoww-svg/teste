@@ -138,6 +138,37 @@ aprendizado confirmado vs. hipótese, causa raiz, amostra, confiança e ajustes
 recomendados em CRM, script, scoring e cadência.`,
   },
   {
+    key: "pipeline_health_agent", kind: "pipeline-health",
+    name: "Saúde do Pipeline (Forecast)", category: "vendas",
+    model: MODEL, triggers: ["proposta", "negociação", "contrato"],
+    prompt: `Analise a SAÚDE do funil (não um lead isolado): risco de bater a meta,
+deals presos, concentração de valor, estágios com fila e velocidade caindo. Use
+tempo em cada estágio e ausência de próxima ação como sinais. Aponte os 3–5 deals
+que mais movem a agulha e o que fazer em cada. Não invente números; trabalhe com
+o que há. Saída específica: leitura do pipeline, risco de meta, deals críticos e
+ações priorizadas.`,
+  },
+  {
+    key: "reactivation_agent", kind: "reactivation",
+    name: "Reativação (Win-back)", category: "pós-venda",
+    model: MODEL, triggers: ["perdido", "descarte", "inativo"],
+    prompt: `Reabra oportunidades perdidas ou clientes inativos com contexto. Pelo
+histórico e WhatsApp, identifique por que esfriou (preço, timing, decisor, sem
+resposta) e o gancho certo para voltar (novidade, evento, mudança de cenário).
+Não reabra sem motivo plausível. Respeite opt-out/LGPD. Saída específica: quem
+reabrir agora, motivo do esfriamento, gancho de reabertura e mensagem de retomada.`,
+  },
+  {
+    key: "data_quality_agent", kind: "data-quality",
+    name: "Qualidade de Dados", category: "aquisição",
+    model: MODEL, triggers: ["prospecção", "contato"],
+    prompt: `Higienize o CRM: aponte duplicidade provável, campos essenciais
+faltando (telefone, decisor, produto, valor), deals sem atividade recente e dados
+inconsistentes. Priorize o que trava relatório e cadência. Não invente dado —
+liste o que falta e onde corrigir. Saída específica: itens de baixa qualidade,
+severidade, correção sugerida e impacto.`,
+  },
+  {
     key: "onboarding_success_copilot", kind: "support-copilot",
     name: "Onboarding e Sucesso do Cliente", category: "pós-venda",
     model: MODEL, triggers: ["ganho", "contrato", "entrega"],

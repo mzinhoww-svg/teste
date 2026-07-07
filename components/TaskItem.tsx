@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Check, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { completeActivity, rescheduleActivity } from "@/app/actions";
+import { completeActivity, rescheduleActivity, completeTask, rescheduleTask } from "@/app/actions";
 import type { TaskRow } from "@/lib/db";
 
 export function TaskItem({ task }: { task: TaskRow }) {
@@ -13,13 +13,16 @@ export function TaskItem({ task }: { task: TaskRow }) {
   const [done, setDone] = useState(false);
   if (done) return null;
 
+  const doComplete = () => task.source === "task" ? completeTask(task.id, true) : completeActivity(task.id, true);
+  const doReschedule = (v: string) => task.source === "task" ? rescheduleTask(task.id, v) : rescheduleActivity(task.id, v);
+
   return (
     <li className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
       <button
         aria-label="Concluir tarefa"
         disabled={pending}
         onClick={() => start(async () => {
-          try { await completeActivity(task.id, true); setDone(true); toast.success("Tarefa concluída"); }
+          try { await doComplete(); setDone(true); toast.success("Tarefa concluída"); }
           catch (e) { toast.error(e instanceof Error ? e.message : "Falha ao concluir"); }
         })}
         className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-slate-300 text-transparent hover:border-emerald-500 hover:text-emerald-500 dark:border-slate-600"
@@ -42,7 +45,7 @@ export function TaskItem({ task }: { task: TaskRow }) {
           defaultValue={task.due_at?.slice(0, 10) ?? ""}
           disabled={pending}
           onChange={(e) => start(async () => {
-            try { await rescheduleActivity(task.id, e.target.value); setReschedule(false); toast.success("Reagendada"); }
+            try { await doReschedule(e.target.value); setReschedule(false); toast.success("Reagendada"); }
             catch (err) { toast.error(err instanceof Error ? err.message : "Falha ao reagendar"); }
           })}
           className="rounded-lg border border-slate-300 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-800"

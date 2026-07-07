@@ -49,6 +49,12 @@ export async function runWonEsteira(db: SupabaseClient, orgId: string, dealId: s
   const clientAccountId = await ensureClientAccount(db, orgId, deal);
   if (!clientAccountId) return { ran: false, projectCreated: false, invoiceCreated: false, clientAccountId: null };
 
+  // F1.2 — fecho do deal promove a empresa para o ciclo de vida 'ativo'.
+  try {
+    const { promoteCompanyToActive } = await import("@/lib/company");
+    await promoteCompanyToActive(db, orgId, clientAccountId);
+  } catch { /* não bloqueia a esteira */ }
+
   // Projeto (idempotente por deal_id).
   let projectCreated = false;
   const { data: existingProject } = await db.from("projects").select("id").eq("deal_id", dealId).maybeSingle();
@@ -76,11 +82,11 @@ export async function runWonEsteira(db: SupabaseClient, orgId: string, dealId: s
 
   // Tarefa de onboarding (só na primeira vez que a esteira roda de fato).
   if (projectCreated) {
-    const due = new Date(Date.now() + 2 * 86_400_000).toISOString().slice(0, 10);
-    await db.from("activities").insert({
-      org_id: orgId, deal_id: dealId, type: "note",
-      summary: `Onboarding: agendar kickoff e confirmar escopo/entregas com o cliente`,
-      author: "Esteira", due_at: due,
+    const due = new Date(Date.now() + 2 * 86_400_000).toISOString();
+    const { createTask } = await import("@/lib/tasks");
+    await createTask(db, {
+      orgId, dealId, title: "Onboarding: agendar kickoff e confirmar escopo/entregas com o cliente",
+      dueAt: due, priority: "alta", source: "esteira",
     });
     await db.from("notifications").insert({
       org_id: orgId, type: "handoff", title: "Pós-venda iniciado",
