@@ -403,6 +403,16 @@ export async function moveDeal(dealId: string, stageId: string) {
     }
   }
 
+  // Orquestrador (F3.1): se não houver automação explícita e ORCHESTRATOR_ENABLED,
+  // roda o agente-padrão do estágio. Best-effort, não bloqueia o movimento.
+  if (!autos?.length && st) {
+    try {
+      const { onStageChanged } = await import("@/lib/orchestrator");
+      const { data: { user } } = await createClient().auth.getUser();
+      await onStageChanged(supabase, dealId, stageId, { orgId, userId: user?.id ?? null, stageKey: st.key ?? null });
+    } catch { /* não propaga */ }
+  }
+
   // Esteira Ganhou→Entrega: ao entrar num estágio de ganho, monta o pós-venda
   // (conta do cliente + projeto + fatura rascunho + tarefa de onboarding).
   // Best-effort e idempotente — não bloqueia o movimento do card.
@@ -571,6 +581,54 @@ export async function rescheduleTask(taskId: string, dueAt: string) {
   if (error) throw error;
   revalidatePath("/app/tarefas");
   revalidatePath("/app");
+}
+
+// --- Intake / caixa de entrada (F1.4) --------------------------------------
+
+/** Converte um item da caixa de entrada em lead/deal e marca como convertido. */
+export async function convertInboxLead(inboxId: string, overrides?: Partial<CreateLeadInput>) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { data: item } = await supabase.from("lead_inbox").select("id,channel,payload,status").eq("id", inboxId).eq("org_id", ctx.orgId).maybeSingle();
+  if (!item) throw new Error("Item não encontrado");
+  if (item.status !== "novo") throw new Error("Item já processado");
+  const p: any = item.payload ?? {};
+  const { dealId } = await createLead({
+    name: overrides?.name ?? p.name ?? p.nome ?? p.from_identifier ?? "Lead",
+    company: overrides?.company ?? p.company ?? p.empresa ?? undefined,
+    email: overrides?.email ?? p.email ?? undefined,
+    phone: overrides?.phone ?? p.phone ?? p.telefone ?? undefined,
+    notes: overrides?.notes ?? p.message ?? p.mensagem ?? undefined,
+    channel: overrides?.channel ?? "form",
+    intakeChannel: item.channel,
+    attribution: p.utm ?? p.attribution ?? {},
+    createNotification: true,
+  });
+  await supabase.from("lead_inbox").update({ status: "convertido", deal_id: dealId, processed_at: new Date().toISOString() }).eq("id", inboxId);
+  revalidatePath("/app/inbox");
+  revalidatePath("/app");
+  return { dealId };
+}
+
+export async function discardInboxLead(inboxId: string) {
+  const ctx = await requireRole(["owner", "admin", "member"]);
+  const supabase = createClient();
+  const { error } = await supabase.from("lead_inbox").update({ status: "descartado", processed_at: new Date().toISOString() }).eq("id", inboxId).eq("org_id", ctx.orgId);
+  if (error) throw error;
+  revalidatePath("/app/inbox");
+}
+
+/** Importa uma lista de leads (ex.: CSV parseado no cliente). Best-effort por linha. */
+export async function importLeads(rows: Array<Partial<CreateLeadInput>>): Promise<{ created: number; failed: number }> {
+  await requireRole(["owner", "admin", "member"]);
+  let created = 0, failed = 0;
+  for (const r of rows.slice(0, 500)) {
+    if (!r.name || !String(r.name).trim()) { failed++; continue; }
+    try { await createLead({ ...r, name: String(r.name), channel: r.channel ?? "form", intakeChannel: "import", createNotification: false }); created++; }
+    catch { failed++; }
+  }
+  revalidatePath("/app");
+  return { created, failed };
 }
 
 /** Reatribui o dono de um deal (F1.1). O evento owner_changed sai pelo trigger. */

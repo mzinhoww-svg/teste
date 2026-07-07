@@ -658,6 +658,22 @@ export async function getOrgMembers(): Promise<OrgMember[]> {
   }));
 }
 
+export interface InboxRow {
+  id: string; channel: string; from_identifier: string | null; payload: any;
+  status: string; received_at: string;
+}
+export async function getInbox(): Promise<InboxRow[]> {
+  const supabase = createClient();
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+  const { data } = await supabase
+    .from("lead_inbox")
+    .select("id,channel,from_identifier,payload,status,received_at")
+    .eq("org_id", orgId).eq("status", "novo")
+    .order("received_at", { ascending: false }).limit(100);
+  return (data ?? []) as InboxRow[];
+}
+
 export interface LossReasonRow { id: string; label: string; category: string }
 export async function getLossReasons(): Promise<LossReasonRow[]> {
   const supabase = createClient();

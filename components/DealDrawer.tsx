@@ -18,6 +18,7 @@ import { EnrichmentPanel } from "@/components/EnrichmentPanel";
 import { REINERS_PRODUCTS } from "@/components/leads/CreateLeadSheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AGENT_LABEL_BY_KIND, suggestAgentKind } from "@/lib/agent-suggest";
+import { nextBestAction } from "@/lib/nba";
 import { WA_TEMPLATES } from "@/lib/whatsapp";
 import type { Agent, Contact, Deal, Stage } from "@/lib/types";
 import type { ProductListItem } from "@/lib/db";
@@ -389,6 +390,7 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
     stageKey: deal.stageKey, hasDecisor: deal.custom?.decisor === "sim",
     hasBudget: Boolean(deal.custom?.budget), complete: missingOverview.length === 0,
   });
+  const nba = nextBestAction(deal);
 
   // Status operacional pela próxima ação.
   const today = new Date().toISOString().slice(0, 10);
@@ -475,6 +477,10 @@ export function DealDrawer({ deal, contact, agents, stages, products = [], myRol
               {missingOverview.length > 0 && (
                 <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1 text-xs text-amber-800">Falta para proposta: {missingOverview.join(", ")}.</span>
               )}
+            </div>
+            <div className={`rounded-lg border px-3 py-2 text-xs ${nba.urgency === "alta" ? "border-rose-200 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/30" : "border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900"}`}>
+              <span className="font-semibold text-slate-700 dark:text-slate-200">Próxima melhor ação:</span> {nba.label}
+              <span className="ml-1 text-slate-400">· urgência {nba.urgency}</span>
             </div>
             <div className="rounded-lg border border-brand-200 bg-brand-50/60 px-3 py-2 text-xs dark:border-brand-900 dark:bg-brand-950/30">
               <span className="font-semibold text-brand-700 dark:text-brand-300">Agente recomendado:</span>{" "}
