@@ -27,7 +27,11 @@ export function EnrichmentPanel({ dealId, initialFacts }: { dealId: string; init
       try {
         const r = await enrichDeal(dealId);
         setFacts(r.facts);
-        toast.success(r.hadCnpj ? `Enriquecido: ${r.count} evidência(s)` : "Sem CNPJ — geradas buscas recomendadas");
+        toast.success(
+          r.enriched > 0
+            ? `Enriquecido: ${r.enriched} evidência(s)${r.hadCnpj ? " (CNPJ + IA)" : " (IA)"}`
+            : "Sem dados públicos — geradas buscas recomendadas",
+        );
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "Falha ao enriquecer");
       }
