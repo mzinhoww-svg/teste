@@ -1,0 +1,80 @@
+{
+  "combo": "D10xP1",
+  "data": "2026-08-06",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D10",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Miami alem da praia com a familia",
+  "persona": "Familia Orlando",
+  "dor": "acha que Miami com crianca e so praia e shopping",
+  "imagem": "acervo/destinos/ny-skyline-crianca.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "miami com criancas",
+      "titulo": "Miami com criancas nao e so praia e shopping.",
+      "sub": "Tem cidade, natureza e bicho, se voce souber onde.",
+      "destaques": [
+        "so"
+      ],
+      "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Natureza pertinho",
+      "corpo": "Os Everglades sao um bate e volta. Passeio de aerobarco e jacare de perto viram o melhor dia da crianca.",
+      "destaques": [
+        "Everglades"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Cidade colorida",
+      "corpo": "Wynwood pras fotos, o mercado de Little Havana, o farol de Key Biscayne. Miami tem muito alem da orla.",
+      "destaques": [
+        "alem"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Bicho e ciencia",
+      "corpo": "Zoo, aquario e o museu de ciencia com planetario. Dia quente demais pra praia vira dia de ar-condicionado util.",
+      "destaques": [
+        "util."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Miami cansa quem so vai pra praia. Rende pra quem mistura cidade, natureza e descanso.",
+      "destaques": [
+        "mistura"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que vem antes do aviao",
+      "corpo": "Miami com a familia comeca meses antes, no visto de todo mundo aprovado e no prazo.",
+      "destaques": [
+        "antes,"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta MIAMIKIDS que eu te mando o roteiro alem da praia. Ou link na bio.",
+      "acao": "Comenta MIAMIKIDS",
+      "destaques": [
+        "MIAMIKIDS"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Miami com criancas nao e so praia e shopping. Tem cidade, natureza e bicho, se voce souber onde.\n\nOs Everglades sao um bate e volta com aerobarco e jacare de perto, o melhor dia pra crianca. Tem Wynwood, Little Havana e o farol de Key Biscayne. E pros dias quentes demais: zoo, aquario e o museu de ciencia com planetario. Miami cansa quem so vai pra praia, rende pra quem mistura.\n\nE tudo isso comeca meses antes, no visto de todo mundo no prazo.\n\nComenta MIAMIKIDS que eu te mando o roteiro alem da praia. Ou toca no link da bio.\n\n#miami #viagememfamilia #everglades #eua #vistoamericano #vistoeua #feriascomcriancas"
+}

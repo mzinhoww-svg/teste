@@ -1,0 +1,105 @@
+# Grade de agendamento - Viajaly
+
+26 carrosseis unicos, 2/dia, 13 dias. Denuncia no maximo 1/dia. Combo nunca repete.
+
+**Mix de pilar:** desejo 13 (50%) · utilidade 4 (15%) · antidoto 4 (15%) · denuncia 3 (12%) · prova 2 (8%)
+
+**Tema:** engine 16 · destino 10  |  **Conta:** @viajaly 20 · @leticia 6
+
+**Antes de agendar:**
+- A19 (HISTORIA) e A20 (PROVA) sao prova RETIDA: so publicar apos inserir depoimento/numero REAL com autorizacao LGPD.
+- Dados pereciveis (A03, A05, A07, A08, A10): revalidar fonte antes de publicar (fila ate ~14 dias, taxa/regra ate ~30 dias da verificacao em 2026-07-12).
+- Palavra CTA = gatilho de comentario (DM automatico). Configurar no ManyChat/afins.
+- Linha 'destino' e topo de funil (viagem); 'engine' e visa-first (converte).
+
+
+### 2026-07-13 (seg)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @leticia | denuncia | engine | Te prometeram visto garantido? Salva esse post e corre | VERDADE | familia-selfie.jpg | - |
+| 18:00 | @viajaly | prova | engine | Ela foi negada. Voltou e passou. Sem sorte, com metodo | HISTORIA | mae-crianca-selfie.jpg | - |
+
+### 2026-07-14 (ter)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @leticia | denuncia | engine | 750 dolares pra furar a fila. Leia antes de pagar. | FONTE | ny-skyline-menina.jpg | sim |
+| 18:00 | @viajaly | prova | engine | Sem promessa: esse e o numero de casais que passaram e | PROVA | neve-mae-crianca.jpg | - |
+
+### 2026-07-15 (qua)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @leticia | denuncia | engine | 99 reais ou 3 mil? Os dois deviam te assustar. | PRECO | disney-main-street.jpg | sim |
+| 18:00 | @viajaly | desejo | engine | Orlando com tres filhos: o erro do dia 4 que arruina a | ORLANDO | disney-castelo-familia.jpg | - |
+
+### 2026-07-16 (qui)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @viajaly | desejo | engine | Essa foto de familia comecou num formulario. Nao no ae | COMECO | familia-selfie2.jpg | - |
+| 18:00 | @leticia | desejo | engine | A foto na praia e a parte facil. O carimbo foi a dific | RECOMECO | mae-crianca-selfie.jpg | - |
+
+### 2026-07-17 (sex)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @viajaly | desejo | destino | Nova York com crianca pequena: o que funciona e o que  | NOVAYORK | ny-ponte-brooklyn.jpg | - |
+| 18:00 | @viajaly | utilidade | engine | Da pra antecipar a entrevista de graca. Sem pagar 750. | GRATIS | universal-globo.jpg | sim |
+
+### 2026-07-18 (sab)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @viajaly | desejo | destino | Miami nao e so praia. E o que quase todo grupo erra. | MIAMI | ny-skyline-menina.jpg | - |
+| 18:00 | @viajaly | utilidade | engine | Quanto custa o visto de verdade em 2026? Nao e o que v | CONTA | ny-skyline-crianca.jpg | sim |
+
+### 2026-07-19 (dom)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @viajaly | desejo | destino | A Disneyland da California e diferente da Disney de Or | CALIFORNIA | disney-castelo-familia.jpg | - |
+| 18:00 | @viajaly | utilidade | engine | Ninguem te conta: sao DUAS visitas, em dias diferentes | CASV | praia-por-do-sol.jpg | - |
+
+### 2026-07-20 (seg)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @viajaly | desejo | destino | Universal ou Disney primeiro? A idade do seu filho dec | PARQUES | universal-globo.jpg | - |
+| 18:00 | @viajaly | utilidade | engine | Mudou a regra: menor de idade agora vai na entrevista. | MENOR | disney-goofy.jpg | sim |
+
+### 2026-07-21 (ter)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @viajaly | desejo | destino | Levar a familia pra neve nos EUA: quando ir e o que ni | NEVE | montanha-neve.jpg | - |
+| 18:00 | @leticia | antidoto | engine | Ele decide nos primeiros 10 segundos. Voce tem 1 minut | ENTREVISTA | praia-crianca-areia.jpg | - |
+
+### 2026-07-22 (qua)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @viajaly | desejo | destino | Orlando em 7 dias que nao cansa a familia. | ORLANDO7 | disney-main-street.jpg | - |
+| 18:00 | @leticia | antidoto | engine | Aquela pasta gorda de documentos? Ele nem abre. | PASTA | familia-selfie2.jpg | - |
+
+### 2026-07-23 (qui)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @viajaly | desejo | destino | Praia americana tem 3 detalhes que pegam o brasileiro. | PRAIA | praia-por-do-sol.jpg | - |
+| 18:00 | @viajaly | antidoto | engine | Existe UMA pergunta na cabeca do consulo. E nao e sobr | VOLTA | neve-familia.jpg | - |
+
+### 2026-07-24 (sex)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @viajaly | desejo | destino | Cafe com personagem na Disney: vale a pena? A conta ho | DISNEY | disney-goofy.jpg | - |
+| 18:00 | @viajaly | antidoto | engine | 7 campos do DS-160 derrubam mais que perfil ruim. | DS160 | praia-crianca.jpg | - |
+
+### 2026-07-25 (sab)
+
+| hora | conta | pilar | tema | titulo | palavra CTA | imagem | fonte |
+|------|-------|-------|------|--------|-------------|--------|-------|
+| 09:00 | @viajaly | desejo | destino | Praia com crianca pequena nos EUA: o kit que salva o d | PRAIAKIDS | praia-crianca.jpg | - |
+| 18:00 | @viajaly | desejo | destino | Miami com criancas nao e so praia e shopping. | MIAMIKIDS | ny-skyline-crianca.jpg | - |

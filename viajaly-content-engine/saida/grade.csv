@@ -1,0 +1,27 @@
+data,hora,dia,conta,pilar,tema,combo,titulo,palavra,imagem,fonte,editor
+2026-07-13,09:00,seg,@leticia,denuncia,engine,A01xP2,Te prometeram visto garantido? Salva esse post e corre.,VERDADE,familia-selfie.jpg,-,saida/pecas/2026-07-15_A01xP2.html
+2026-07-13,18:00,seg,@viajaly,prova,engine,A19xP3,"Ela foi negada. Voltou e passou. Sem sorte, com metodo.",HISTORIA,mae-crianca-selfie.jpg,-,saida/pecas/2026-07-17_A19xP3.html
+2026-07-14,09:00,ter,@leticia,denuncia,engine,A03xP7,750 dolares pra furar a fila. Leia antes de pagar.,FONTE,ny-skyline-menina.jpg,sim,saida/pecas/2026-07-18_A03xP7.html
+2026-07-14,18:00,ter,@viajaly,prova,engine,A20xP2,Sem promessa: esse e o numero de casais que passaram em 2026.,PROVA,neve-mae-crianca.jpg,-,saida/pecas/2026-07-16_A20xP2.html
+2026-07-15,09:00,qua,@leticia,denuncia,engine,A05xP6,99 reais ou 3 mil? Os dois deviam te assustar.,PRECO,disney-main-street.jpg,sim,saida/pecas/2026-07-14_A05xP6.html
+2026-07-15,18:00,qua,@viajaly,desejo,engine,A21xP1,Orlando com tres filhos: o erro do dia 4 que arruina a viagem.,ORLANDO,disney-castelo-familia.jpg,-,saida/pecas/2026-07-18_A21xP1.html
+2026-07-16,09:00,qui,@viajaly,desejo,engine,A23xP2,Essa foto de familia comecou num formulario. Nao no aeroporto.,COMECO,familia-selfie2.jpg,-,saida/roteiros_pecas/2026-07-21_A23xP2.html
+2026-07-16,18:00,qui,@leticia,desejo,engine,A29xP3,A foto na praia e a parte facil. O carimbo foi a dificil.,RECOMECO,mae-crianca-selfie.jpg,-,saida/roteiros_pecas/2026-07-25_A29xP3.html
+2026-07-17,09:00,sex,@viajaly,desejo,destino,D01xP1,Nova York com crianca pequena: o que funciona e o que e cilada.,NOVAYORK,ny-ponte-brooklyn.jpg,-,saida/destinos_pecas/2026-07-28_D01xP1.html
+2026-07-17,18:00,sex,@viajaly,utilidade,engine,A07xP7,Da pra antecipar a entrevista de graca. Sem pagar 750.,GRATIS,universal-globo.jpg,sim,saida/pecas/2026-07-12_A07xP7.html
+2026-07-18,09:00,sab,@viajaly,desejo,destino,D02xP6,Miami nao e so praia. E o que quase todo grupo erra.,MIAMI,ny-skyline-menina.jpg,-,saida/destinos_pecas/2026-07-29_D02xP6.html
+2026-07-18,18:00,sab,@viajaly,utilidade,engine,A08xP5,Quanto custa o visto de verdade em 2026? Nao e o que voce lembra.,CONTA,ny-skyline-crianca.jpg,sim,saida/pecas/2026-07-13_A08xP5.html
+2026-07-19,09:00,dom,@viajaly,desejo,destino,D03xP1,A Disneyland da California e diferente da Disney de Orlando.,CALIFORNIA,disney-castelo-familia.jpg,-,saida/destinos_pecas/2026-07-30_D03xP1.html
+2026-07-19,18:00,dom,@viajaly,utilidade,engine,A09xP7,"Ninguem te conta: sao DUAS visitas, em dias diferentes.",CASV,praia-por-do-sol.jpg,-,saida/pecas/2026-07-14_A09xP7.html
+2026-07-20,09:00,seg,@viajaly,desejo,destino,D04xP1,Universal ou Disney primeiro? A idade do seu filho decide.,PARQUES,universal-globo.jpg,-,saida/destinos_pecas/2026-07-31_D04xP1.html
+2026-07-20,18:00,seg,@viajaly,utilidade,engine,A10xP3,Mudou a regra: menor de idade agora vai na entrevista.,MENOR,disney-goofy.jpg,sim,saida/pecas/2026-07-13_A10xP3.html
+2026-07-21,09:00,ter,@viajaly,desejo,destino,D05xP1,Levar a familia pra neve nos EUA: quando ir e o que ninguem avisa.,NEVE,montanha-neve.jpg,-,saida/destinos_pecas/2026-08-01_D05xP1.html
+2026-07-21,18:00,ter,@leticia,antidoto,engine,A12xP4,Ele decide nos primeiros 10 segundos. Voce tem 1 minuto no total.,ENTREVISTA,praia-crianca-areia.jpg,-,saida/pecas/2026-07-17_A12xP4.html
+2026-07-22,09:00,qua,@viajaly,desejo,destino,D06xP1,Orlando em 7 dias que nao cansa a familia.,ORLANDO7,disney-main-street.jpg,-,saida/destinos_pecas/2026-08-03_D06xP1.html
+2026-07-22,18:00,qua,@leticia,antidoto,engine,A13xP7,Aquela pasta gorda de documentos? Ele nem abre.,PASTA,familia-selfie2.jpg,-,saida/pecas/2026-07-16_A13xP7.html
+2026-07-23,09:00,qui,@viajaly,desejo,destino,D07xP2,Praia americana tem 3 detalhes que pegam o brasileiro.,PRAIA,praia-por-do-sol.jpg,-,saida/destinos_pecas/2026-08-02_D07xP2.html
+2026-07-23,18:00,qui,@viajaly,antidoto,engine,A14xP5,Existe UMA pergunta na cabeca do consulo. E nao e sobre dinheiro.,VOLTA,neve-familia.jpg,-,saida/pecas/2026-07-16_A14xP5.html
+2026-07-24,09:00,sex,@viajaly,desejo,destino,D08xP1,Cafe com personagem na Disney: vale a pena? A conta honesta.,DISNEY,disney-goofy.jpg,-,saida/destinos_pecas/2026-08-04_D08xP1.html
+2026-07-24,18:00,sex,@viajaly,antidoto,engine,A15xP4,7 campos do DS-160 derrubam mais que perfil ruim.,DS160,praia-crianca.jpg,-,saida/pecas/2026-07-15_A15xP4.html
+2026-07-25,09:00,sab,@viajaly,desejo,destino,D09xP1,Praia com crianca pequena nos EUA: o kit que salva o dia.,PRAIAKIDS,praia-crianca.jpg,-,saida/destinos_pecas/2026-08-05_D09xP1.html
+2026-07-25,18:00,sab,@viajaly,desejo,destino,D10xP1,Miami com criancas nao e so praia e shopping.,MIAMIKIDS,ny-skyline-crianca.jpg,-,saida/destinos_pecas/2026-08-06_D10xP1.html
