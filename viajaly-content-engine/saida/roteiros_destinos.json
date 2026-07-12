@@ -1,0 +1,101 @@
+{
+  "_doc": "Linha DESTINOS. Lidera pela viagem (Orlando, Disney, Universal, Miami, NY, LA, neve, praia) com valor real de roteiro; o visto entra como o que DESTRAVA, so no penultimo slide + CTA. Foto = o destino. Voz: voce, sem emoji, sem travessao. Coral na palavra que carrega o argumento. Perene, sem dado perecivel. Disclaimer no CTA. Sem escassez inventada.",
+  "pecas": [
+    {
+      "combo": "D01xP1", "data": "2026-07-28", "conta": "@viajaly", "pilar": "desejo", "tema": "destino",
+      "angulo_id": "D01", "persona_id": "P1", "formato": "carrossel", "kit": "corporate",
+      "tese": "Nova York com crianca pequena", "persona": "Familia Orlando",
+      "dor": "medo de que a viagem canse demais as criancas", "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg",
+      "slides": [
+        {"tipo": "capa_foto", "kicker": "nova york com crianca", "titulo": "Nova York com crianca pequena: o que funciona e o que e cilada.", "sub": "A cidade que parece impossivel com filho, resolvida.", "destaques": ["cilada."], "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg"},
+        {"tipo": "passo", "numero": "02", "titulo": "Onde ficar", "corpo": "Perto do metro em Midtown poupa perna de crianca. Bairro bonito e longe vira choro no fim do dia.", "destaques": ["metro"]},
+        {"tipo": "passo", "numero": "03", "titulo": "O erro dos pais", "corpo": "Querer ver tudo. Nova York com crianca rende com tres pontos por dia, nao oito.", "destaques": ["tres"]},
+        {"tipo": "passo", "numero": "04", "titulo": "O que crianca ama", "corpo": "Central Park, o carrossel, atravessar a ponte a pe. O simples ganha do caro toda vez.", "destaques": ["ponte"]},
+        {"tipo": "insight", "texto": "Nova York com filho nao e a de stories. E melhor, se voce baixar o ritmo.", "destaques": ["ritmo."]},
+        {"tipo": "passo", "numero": "06", "titulo": "Antes de tudo isso", "corpo": "Nao existe Nova York sem o visto na mao. E ele leva tempo pra sair, entao ele vem primeiro, com calma.", "destaques": ["primeiro,"]},
+        {"tipo": "cta", "titulo": "Comenta NOVAYORK que eu te mando o roteiro de 4 dias com crianca. Ou link na bio.", "acao": "Comenta NOVAYORK", "destaques": ["NOVAYORK"], "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+      ],
+      "legenda": "Nova York com crianca pequena parece impossivel, mas so parece.\n\nFique perto do metro em Midtown pra poupar perna. Nao tente ver tudo: tres pontos por dia, nao oito. E o que a crianca mais ama e o simples, Central Park, o carrossel, atravessar a ponte a pe. Nova York com filho nao e a dos stories, e melhor, se voce baixar o ritmo.\n\nSo tem uma coisa antes de tudo isso: o visto. Ele leva tempo pra sair, entao vem primeiro.\n\nComenta NOVAYORK que eu te mando o roteiro de 4 dias. Ou toca no link da bio.\n\n#novayork #viagememfamilia #eua #vistoamericano #vistoeua #nyc #feriascomcriancas"
+    },
+    {
+      "combo": "D02xP6", "data": "2026-07-29", "conta": "@viajaly", "pilar": "desejo", "tema": "destino",
+      "angulo_id": "D02", "persona_id": "P6", "formato": "carrossel", "kit": "corporate",
+      "tese": "Miami em 4 dias sem enlouquecer", "persona": "Grupo de amigos",
+      "dor": "coordenar o gosto de todo mundo", "imagem": "acervo/destinos/ny-skyline-menina.jpg",
+      "slides": [
+        {"tipo": "capa_foto", "kicker": "miami de verdade", "titulo": "Miami nao e so praia. E o que quase todo grupo erra.", "sub": "4 dias de praia, cidade e compras sem correria.", "destaques": ["erra."], "imagem": "acervo/destinos/ny-skyline-menina.jpg"},
+        {"tipo": "passo", "numero": "02", "titulo": "Divida por bloco", "corpo": "Praia de manha, cidade a tarde, um dia de outlet. Assim cada um do grupo pega o que quer.", "destaques": ["bloco"]},
+        {"tipo": "passo", "numero": "03", "titulo": "A praia certa", "corpo": "South Beach pra agito, Key Biscayne pra familia com crianca. Escolher errado e meio dia perdido.", "destaques": ["familia"]},
+        {"tipo": "passo", "numero": "04", "titulo": "Alem da praia", "corpo": "Wynwood pras fotos, Brickell pra comer, um bate e volta pros Everglades. Miami tem mais que orla.", "destaques": ["mais"]},
+        {"tipo": "insight", "texto": "Grupo nao briga por gosto. Briga por falta de plano.", "destaques": ["plano."]},
+        {"tipo": "passo", "numero": "06", "titulo": "O que vem antes", "corpo": "Miami em grupo so acontece com os vistos de todo mundo prontos. Um pendente segura a viagem inteira.", "destaques": ["todo"]},
+        {"tipo": "cta", "titulo": "Comenta MIAMI que eu te mando o roteiro de 4 dias pra grupo. Ou link na bio.", "acao": "Comenta MIAMI", "destaques": ["MIAMI"], "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+      ],
+      "legenda": "Miami nao e so praia, e e ai que quase todo grupo erra.\n\nDivida por bloco: praia de manha, cidade a tarde, um dia de outlet. Escolha a praia certa (South Beach pra agito, Key Biscayne pra familia). E lembre que Miami tem Wynwood, Brickell e ate os Everglades. Grupo nao briga por gosto, briga por falta de plano.\n\nE Miami em grupo so acontece com os vistos de todo mundo prontos. Um pendente segura a viagem inteira.\n\nComenta MIAMI que eu te mando o roteiro. Ou toca no link da bio.\n\n#miami #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua #southbeach"
+    },
+    {
+      "combo": "D03xP1", "data": "2026-07-30", "conta": "@viajaly", "pilar": "desejo", "tema": "destino",
+      "angulo_id": "D03", "persona_id": "P1", "formato": "carrossel", "kit": "corporate",
+      "tese": "California: Disneyland e Los Angeles com filhos", "persona": "Familia Orlando",
+      "dor": "acha que Disney so existe em Orlando", "imagem": "acervo/destinos/disney-castelo-familia.jpg",
+      "slides": [
+        {"tipo": "capa_foto", "kicker": "california com filhos", "titulo": "A Disneyland da California e diferente da Disney de Orlando.", "sub": "Menor, mais tranquila, e ainda te da Los Angeles junto.", "destaques": ["diferente"], "imagem": "acervo/destinos/disney-castelo-familia.jpg"},
+        {"tipo": "passo", "numero": "02", "titulo": "Por que a California", "corpo": "A Disneyland original e compacta. Da pra fazer com crianca pequena sem a maratona de Orlando.", "destaques": ["compacta."]},
+        {"tipo": "passo", "numero": "03", "titulo": "Junte LA na conta", "corpo": "Santa Monica, o pier, uma tarde na praia. A Costa Oeste entrega parque e cidade no mesmo pacote.", "destaques": ["praia."]},
+        {"tipo": "passo", "numero": "04", "titulo": "O ritmo que segura", "corpo": "Um dia de parque, um dia de cidade, um dia de praia. Familia com crianca precisa desse respiro.", "destaques": ["respiro."]},
+        {"tipo": "insight", "texto": "Nem toda familia precisa de Orlando. Precisa do destino certo pra idade dos filhos.", "destaques": ["certo"]},
+        {"tipo": "passo", "numero": "06", "titulo": "O que abre a porta", "corpo": "California, Orlando ou as duas, tudo comeca no mesmo lugar: o visto da familia aprovado e no prazo.", "destaques": ["mesmo"]},
+        {"tipo": "cta", "titulo": "Comenta CALIFORNIA que eu te mando o roteiro Disneyland + LA. Ou link na bio.", "acao": "Comenta CALIFORNIA", "destaques": ["CALIFORNIA"], "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+      ],
+      "legenda": "A Disneyland da California e diferente da Disney de Orlando, e para muita familia ela encaixa melhor.\n\nA original e compacta, da pra fazer com crianca pequena sem maratona. E o melhor: junta Los Angeles na conta, Santa Monica, o pier, a praia. Um dia de parque, um dia de cidade, um dia de praia, com respiro. Nem toda familia precisa de Orlando, precisa do destino certo pra idade dos filhos.\n\nCalifornia, Orlando ou as duas, tudo comeca no mesmo lugar: o visto da familia no prazo.\n\nComenta CALIFORNIA que eu te mando o roteiro. Ou toca no link da bio.\n\n#california #losangeles #disneyland #viagememfamilia #eua #vistoamericano #vistoeua"
+    },
+    {
+      "combo": "D04xP1", "data": "2026-07-31", "conta": "@viajaly", "pilar": "desejo", "tema": "destino",
+      "angulo_id": "D04", "persona_id": "P1", "formato": "carrossel", "kit": "corporate",
+      "tese": "Universal ou Disney primeiro, pela idade", "persona": "Familia Orlando",
+      "dor": "gastar caro no parque errado pra idade do filho", "imagem": "acervo/destinos/universal-globo.jpg",
+      "slides": [
+        {"tipo": "capa_foto", "kicker": "qual parque primeiro", "titulo": "Universal ou Disney primeiro? A idade do seu filho decide.", "sub": "Escolher errado e dinheiro e dia perdidos.", "destaques": ["idade"], "imagem": "acervo/destinos/universal-globo.jpg"},
+        {"tipo": "passo", "numero": "02", "titulo": "Ate uns 7 anos", "corpo": "A Disney rende mais: personagem, ritmo lento, magia que crianca pequena entende.", "destaques": ["Disney"]},
+        {"tipo": "passo", "numero": "03", "titulo": "Dos 8 em diante", "corpo": "A Universal brilha: montanha-russa, Harry Potter, adrenalina que os maiores querem.", "destaques": ["Universal"]},
+        {"tipo": "passo", "numero": "04", "titulo": "Se der pra fazer os dois", "corpo": "Alterne. Um dia pesado, um dia leve. Nao emende dois parques grandes seguidos com crianca.", "destaques": ["Alterne."]},
+        {"tipo": "insight", "texto": "Parque certo pra idade errada e o jeito mais caro de cansar a familia.", "destaques": ["idade"]},
+        {"tipo": "passo", "numero": "06", "titulo": "Antes da escolha", "corpo": "Disney, Universal, tanto faz: nenhum acontece sem o visto da familia pronto e no prazo.", "destaques": ["nenhum"]},
+        {"tipo": "cta", "titulo": "Comenta PARQUES que eu te mando o guia por idade. Ou link na bio.", "acao": "Comenta PARQUES", "destaques": ["PARQUES"], "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+      ],
+      "legenda": "Universal ou Disney primeiro? A idade do seu filho decide, e escolher errado e dinheiro e dia perdidos.\n\nAte uns 7 anos a Disney rende mais: personagem, ritmo lento, magia. Dos 8 em diante a Universal brilha: montanha-russa, Harry Potter, adrenalina. Se for fazer os dois, alterne um dia pesado com um leve. Parque certo pra idade errada e o jeito mais caro de cansar a familia.\n\nDisney ou Universal, nenhum acontece sem o visto da familia pronto.\n\nComenta PARQUES que eu te mando o guia por idade. Ou toca no link da bio.\n\n#orlando #disney #universal #viagememfamilia #eua #vistoamericano #feriascomcriancas"
+    },
+    {
+      "combo": "D05xP1", "data": "2026-08-01", "conta": "@viajaly", "pilar": "desejo", "tema": "destino",
+      "angulo_id": "D05", "persona_id": "P1", "formato": "carrossel", "kit": "corporate",
+      "tese": "Primeira neve da familia nos EUA", "persona": "Familia Orlando",
+      "dor": "nunca levou a familia pra neve e nao sabe como", "imagem": "acervo/destinos/montanha-neve.jpg",
+      "slides": [
+        {"tipo": "capa_foto", "kicker": "primeira neve", "titulo": "Levar a familia pra neve nos EUA: quando ir e o que ninguem avisa.", "sub": "A cena que a sua filha nunca esquece.", "destaques": ["neve"], "imagem": "acervo/destinos/montanha-neve.jpg"},
+        {"tipo": "passo", "numero": "02", "titulo": "Quando tem neve", "corpo": "Dezembro a marco na maioria das montanhas. Fora disso, voce viaja e nao ve neve nenhuma.", "destaques": ["marco"]},
+        {"tipo": "passo", "numero": "03", "titulo": "O que levar", "corpo": "Luva impermeavel, segunda pele, bota. Roupa de frio de cidade nao segura crianca na neve.", "destaques": ["impermeavel,"]},
+        {"tipo": "passo", "numero": "04", "titulo": "Onde estrear", "corpo": "Estacoes perto de cidade grande facilitam com crianca: aula, aluguel de equipamento, e hospital por perto.", "destaques": ["perto"]},
+        {"tipo": "insight", "texto": "Ver seu filho tocar neve pela primeira vez paga a viagem inteira.", "destaques": ["primeira"]},
+        {"tipo": "passo", "numero": "06", "titulo": "A parte que tem prazo", "corpo": "A neve tem epoca, e o visto tem o tempo dele pra sair. Por isso o visto vem primeiro, com folga.", "destaques": ["primeiro,"]},
+        {"tipo": "cta", "titulo": "Comenta NEVE que eu te mando o guia da primeira viagem de inverno. Ou link na bio.", "acao": "Comenta NEVE", "destaques": ["NEVE"], "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+      ],
+      "legenda": "Levar a familia pra neve nos EUA pela primeira vez: quando ir e o que ninguem avisa.\n\nNeve boa vai de dezembro a marco na maioria das montanhas. Leve luva impermeavel, segunda pele e bota, porque roupa de frio de cidade nao segura crianca na neve. E estreie numa estacao perto de cidade grande: aula, aluguel e hospital por perto. Ver seu filho tocar neve pela primeira vez paga a viagem inteira.\n\nA neve tem epoca e o visto tem o tempo dele. Por isso o visto vem primeiro.\n\nComenta NEVE que eu te mando o guia. Ou toca no link da bio.\n\n#neve #inverno #viagememfamilia #eua #vistoamericano #vistoeua #ski"
+    },
+    {
+      "combo": "D07xP2", "data": "2026-08-02", "conta": "@viajaly", "pilar": "desejo", "tema": "destino",
+      "angulo_id": "D07", "persona_id": "P2", "formato": "carrossel", "kit": "corporate",
+      "tese": "Praia nos EUA: o que muda pro brasileiro", "persona": "Casal primeira viagem",
+      "dor": "acha que praia americana e igual a daqui", "imagem": "acervo/destinos/praia-por-do-sol.jpg",
+      "slides": [
+        {"tipo": "capa_foto", "kicker": "praia nos eua", "titulo": "Praia americana tem 3 detalhes que pegam o brasileiro.", "sub": "Bonita, mas com regras que ninguem te conta.", "destaques": ["3"], "imagem": "acervo/destinos/praia-por-do-sol.jpg"},
+        {"tipo": "passo", "numero": "02", "titulo": "1. Nao tem barraquinha", "corpo": "Esqueca o quiosque com petisco na areia. Leve agua, lanche e guarda-sol, ou compre antes.", "destaques": ["antes."]},
+        {"tipo": "passo", "numero": "03", "titulo": "2. Bandeira e lei", "corpo": "O salva-vidas manda. Bandeira vermelha e mar fechado de verdade, nao sugestao.", "destaques": ["lei"]},
+        {"tipo": "passo", "numero": "04", "titulo": "3. Alcool e proibido", "corpo": "Na maioria das praias, bebida na areia rende multa. Curta o por do sol sem susto.", "destaques": ["multa."]},
+        {"tipo": "insight", "texto": "Praia americana nao e pior. E diferente. Saber antes evita o mico.", "destaques": ["diferente."]},
+        {"tipo": "passo", "numero": "06", "titulo": "O que vem antes do mar", "corpo": "Toda praia dos EUA comeca longe dela: no visto do casal aprovado e no prazo.", "destaques": ["visto"]},
+        {"tipo": "cta", "titulo": "Comenta PRAIA que eu te mando o guia de praias por regiao. Ou link na bio.", "acao": "Comenta PRAIA", "destaques": ["PRAIA"], "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+      ],
+      "legenda": "Praia americana tem 3 detalhes que pegam o brasileiro de primeira viagem.\n\n1. Nao tem barraquinha: leve agua, lanche e guarda-sol. 2. Bandeira e lei: o salva-vidas manda, vermelha e mar fechado. 3. Alcool na areia rende multa na maioria das praias. Praia americana nao e pior, e diferente, e saber antes evita o mico.\n\nE toda praia dos EUA comeca longe dela: no visto do casal, no prazo.\n\nComenta PRAIA que eu te mando o guia por regiao. Ou toca no link da bio.\n\n#praia #eua #viagemacasal #primeiraviagem #vistoamericano #vistoeua #florida"
+    }
+  ]
+}

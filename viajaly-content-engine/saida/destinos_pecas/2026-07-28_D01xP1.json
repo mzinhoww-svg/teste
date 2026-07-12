@@ -1,0 +1,80 @@
+{
+  "combo": "D01xP1",
+  "data": "2026-07-28",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D01",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Nova York com crianca pequena",
+  "persona": "Familia Orlando",
+  "dor": "medo de que a viagem canse demais as criancas",
+  "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "nova york com crianca",
+      "titulo": "Nova York com crianca pequena: o que funciona e o que e cilada.",
+      "sub": "A cidade que parece impossivel com filho, resolvida.",
+      "destaques": [
+        "cilada."
+      ],
+      "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Onde ficar",
+      "corpo": "Perto do metro em Midtown poupa perna de crianca. Bairro bonito e longe vira choro no fim do dia.",
+      "destaques": [
+        "metro"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O erro dos pais",
+      "corpo": "Querer ver tudo. Nova York com crianca rende com tres pontos por dia, nao oito.",
+      "destaques": [
+        "tres"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "O que crianca ama",
+      "corpo": "Central Park, o carrossel, atravessar a ponte a pe. O simples ganha do caro toda vez.",
+      "destaques": [
+        "ponte"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Nova York com filho nao e a de stories. E melhor, se voce baixar o ritmo.",
+      "destaques": [
+        "ritmo."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Antes de tudo isso",
+      "corpo": "Nao existe Nova York sem o visto na mao. E ele leva tempo pra sair, entao ele vem primeiro, com calma.",
+      "destaques": [
+        "primeiro,"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta NOVAYORK que eu te mando o roteiro de 4 dias com crianca. Ou link na bio.",
+      "acao": "Comenta NOVAYORK",
+      "destaques": [
+        "NOVAYORK"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Nova York com crianca pequena parece impossivel, mas so parece.\n\nFique perto do metro em Midtown pra poupar perna. Nao tente ver tudo: tres pontos por dia, nao oito. E o que a crianca mais ama e o simples, Central Park, o carrossel, atravessar a ponte a pe. Nova York com filho nao e a dos stories, e melhor, se voce baixar o ritmo.\n\nSo tem uma coisa antes de tudo isso: o visto. Ele leva tempo pra sair, entao vem primeiro.\n\nComenta NOVAYORK que eu te mando o roteiro de 4 dias. Ou toca no link da bio.\n\n#novayork #viagememfamilia #eua #vistoamericano #vistoeua #nyc #feriascomcriancas"
+}

@@ -1,0 +1,80 @@
+{
+  "combo": "D07xP2",
+  "data": "2026-08-02",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D07",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Praia nos EUA: o que muda pro brasileiro",
+  "persona": "Casal primeira viagem",
+  "dor": "acha que praia americana e igual a daqui",
+  "imagem": "acervo/destinos/praia-por-do-sol.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "praia nos eua",
+      "titulo": "Praia americana tem 3 detalhes que pegam o brasileiro.",
+      "sub": "Bonita, mas com regras que ninguem te conta.",
+      "destaques": [
+        "3"
+      ],
+      "imagem": "acervo/destinos/praia-por-do-sol.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "1. Nao tem barraquinha",
+      "corpo": "Esqueca o quiosque com petisco na areia. Leve agua, lanche e guarda-sol, ou compre antes.",
+      "destaques": [
+        "antes."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "2. Bandeira e lei",
+      "corpo": "O salva-vidas manda. Bandeira vermelha e mar fechado de verdade, nao sugestao.",
+      "destaques": [
+        "lei"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "3. Alcool e proibido",
+      "corpo": "Na maioria das praias, bebida na areia rende multa. Curta o por do sol sem susto.",
+      "destaques": [
+        "multa."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Praia americana nao e pior. E diferente. Saber antes evita o mico.",
+      "destaques": [
+        "diferente."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que vem antes do mar",
+      "corpo": "Toda praia dos EUA comeca longe dela: no visto do casal aprovado e no prazo.",
+      "destaques": [
+        "visto"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta PRAIA que eu te mando o guia de praias por regiao. Ou link na bio.",
+      "acao": "Comenta PRAIA",
+      "destaques": [
+        "PRAIA"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Praia americana tem 3 detalhes que pegam o brasileiro de primeira viagem.\n\n1. Nao tem barraquinha: leve agua, lanche e guarda-sol. 2. Bandeira e lei: o salva-vidas manda, vermelha e mar fechado. 3. Alcool na areia rende multa na maioria das praias. Praia americana nao e pior, e diferente, e saber antes evita o mico.\n\nE toda praia dos EUA comeca longe dela: no visto do casal, no prazo.\n\nComenta PRAIA que eu te mando o guia por regiao. Ou toca no link da bio.\n\n#praia #eua #viagemacasal #primeiraviagem #vistoamericano #vistoeua #florida"
+}
