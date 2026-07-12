@@ -16,8 +16,8 @@
     {
       "tipo": "capa_foto",
       "kicker": "o numero que eu tenho",
-      "titulo": "Os casais que passaram em 2026.",
-      "sub": "Sem promessa. So o que aconteceu de verdade.",
+      "titulo": "Sem promessa: esse e o numero de casais que passaram em 2026.",
+      "sub": "Nao e projecao. E o que aconteceu de verdade.",
       "destaques": [
         "verdade."
       ],
@@ -68,11 +68,14 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Quer ser o proximo casal preparado de 2026? Fala comigo.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta PROVA que eu te mostro como esses casais se prepararam. Ou link na bio.",
+      "acao": "Comenta PROVA",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "PROVA"
+      ]
     }
   ],
-  "legenda": "[COMPLETAR COM O NUMERO REAL] Os casais que se prepararam por aqui e passaram em 2026.\n\n[N] pessoas aprovadas. E o dado que eu tenho pra mostrar, nao uma projecao. E ele nao significa que voce esta garantido: cada caso e um caso, a decisao e do consulo. Significa que preparo muda a media.\n\nSe voces sao casal de primeira viagem e nao sabem por onde comecar, ver gente como voces passar tira o medo do escuro.\n\nQuer ser o proximo casal preparado? Chama no WhatsApp.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagemacasal #luademel #eua",
+  "legenda": "[COMPLETAR COM O NUMERO REAL] Sem promessa: esse e o numero de casais que se prepararam por aqui e passaram em 2026.\n\n[N] pessoas aprovadas. E o dado que eu tenho pra mostrar, nao uma projecao. Ele nao significa que voce esta garantido: cada caso e um caso, a decisao e do consulo. Significa que preparo muda a media. Chegaram com historia coerente e sem pressa comprada.\n\nComenta PROVA que eu te mostro o que esses casais fizeram diferente. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagemacasal #luademel #eua",
   "imagem": "acervo/familia/neve-mae-crianca.jpg"
 }

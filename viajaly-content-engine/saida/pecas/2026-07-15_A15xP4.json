@@ -15,7 +15,7 @@
       "tipo": "capa_foto",
       "kicker": "o formulario decide",
       "titulo": "7 campos do DS-160 derrubam mais que perfil ruim.",
-      "sub": "Voce tem ingresso e a janela ta fechando. Nao erre aqui.",
+      "sub": "Voce tem ingresso da Copa. Nao perca o jogo por um dado torto.",
       "destaques": [
         "7"
       ],
@@ -66,11 +66,14 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Antes de enviar o DS-160, deixa eu revisar os 7 campos.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta DS160 que eu te mando os 7 campos pra revisar. Ou link na bio.",
+      "acao": "Comenta DS160",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "DS160"
+      ]
     }
   ],
-  "legenda": "Sete campos do DS-160 derrubam mais gente que perfil ruim.\n\nO oficial le o seu formulario antes de te ver. Se ele ja te contradiz, voce entra em desvantagem. Os sete que mais pegam: profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil.\n\nCom a Copa e o prazo curto, todo mundo preenche correndo, e e correndo que nascem os erros. Uma revisao desses campos leva menos que voce imagina.\n\nAntes de enviar, deixa eu revisar com voce. Chama no WhatsApp.\n\n#vistoamericano #ds160 #copadomundo #vistoeua #b1b2 #futebol #dicasdevisto",
+  "legenda": "Sete campos do DS-160 derrubam mais gente que perfil ruim. E voce, com ingresso da Copa, nao pode perder o jogo por um dado torto.\n\nO oficial le o seu formulario antes de te ver. Se ele ja te contradiz, voce entra em desvantagem. Os que mais pegam: profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil.\n\nComenta DS160 que eu te mando a lista dos 7 campos pra revisar hoje. Ou toca no link da bio.\n\n#vistoamericano #ds160 #copadomundo #vistoeua #b1b2 #futebol #dicasdevisto",
   "imagem": "acervo/destinos/praia-crianca.jpg"
 }

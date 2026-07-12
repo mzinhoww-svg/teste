@@ -14,10 +14,10 @@
     {
       "tipo": "capa_foto",
       "kicker": "o que ele quer saber",
-      "titulo": "Existe uma unica pergunta na cabeca do consulo.",
-      "sub": "E nao e sobre quanto voce ganha.",
+      "titulo": "Existe UMA pergunta na cabeca do consulo. E nao e sobre dinheiro.",
+      "sub": "Errar a resposta dela reprova mais que qualquer documento.",
       "destaques": [
-        "unica"
+        "UMA"
       ],
       "imagem": "acervo/destinos/neve-familia.jpg"
     },
@@ -66,11 +66,14 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Vamos treinar a sua resposta pra unica pergunta que importa.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta VOLTA que eu te mando como responder essa pergunta. Ou link na bio.",
+      "acao": "Comenta VOLTA",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "VOLTA"
+      ]
     }
   ],
-  "legenda": "Existe uma unica pergunta na cabeca do consulo, e nao e sobre quanto voce ganha. E: voce volta?\n\nA lei presume que voce quer imigrar. Seu papel e mostrar que nao. E se o seu visto venceu ha mais de um ano, esquece a ideia de renovacao automatica. Voce prova de novo que volta.\n\nVinculo nao e um papel, e uma vida que fica aqui te aguardando: trabalho, familia, casa, rotina. O erro classico da renovacao e achar que ja e formalidade e relaxar.\n\nVamos treinar a sua resposta? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #entrevistavisto #dicasdevisto",
+  "legenda": "Existe UMA pergunta na cabeca do consulo, e nao e sobre quanto voce ganha. E: voce volta?\n\nA lei presume que voce quer imigrar. Seu papel e mostrar que nao. Se o seu visto venceu ha mais de um ano, esquece renovacao automatica: voce prova de novo que volta. Vinculo nao e um papel, e uma vida que fica aqui te aguardando: trabalho, familia, casa, rotina.\n\nComenta VOLTA que eu te mando como treinar essa resposta. Ou toca no link da bio.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #entrevistavisto #dicasdevisto",
   "imagem": "acervo/destinos/neve-familia.jpg"
 }

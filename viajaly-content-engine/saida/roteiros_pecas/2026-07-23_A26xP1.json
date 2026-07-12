@@ -15,10 +15,10 @@
     {
       "tipo": "capa_foto",
       "kicker": "a cena que voce quer",
-      "titulo": "A primeira vez da sua filha na neve.",
-      "sub": "Tem janela de inverno, e tem a agenda do consulado. As duas contam.",
+      "titulo": "A primeira vez da sua filha na neve tem prazo. Dois, na verdade.",
+      "sub": "A janela do inverno e a agenda do consulado, as duas contam.",
       "destaques": [
-        "neve."
+        "neve"
       ],
       "imagem": "acervo/destinos/neve-familia.jpg"
     },
@@ -67,10 +67,13 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Quer a neve marcada no calendario? Comeca pelo visto.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta NEVE que eu te mando como encaixar visto e inverno. Ou link na bio.",
+      "acao": "Comenta NEVE",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "NEVE"
+      ]
     }
   ],
-  "legenda": "Ver sua filha tocar neve pela primeira vez e uma cena que vale a viagem inteira. So que ela depende de duas coisas: a janela do inverno e a agenda do consulado.\n\nNeve boa nos EUA tem epoca. Voce nao remarca o inverno pra quando o visto sair, entao ele tem que sair antes. E a agenda do consulado anda no tempo dela. Numa familia, um DS-160 torto de um filho trava o grupo todo.\n\nA ordem que funciona: vistos da familia primeiro, com folga. Depois a neve vira so alegria.\n\nChama no WhatsApp que a gente organiza o antes.\n\n#neve #viagememfamilia #inverno #vistoamericano #vistoeua #b1b2 #eua"
+  "legenda": "Ver sua filha tocar neve pela primeira vez tem prazo. Dois, na verdade: a janela do inverno e a agenda do consulado.\n\nNeve boa nos EUA tem epoca. Voce nao remarca o inverno pra quando o visto sair, entao ele tem que sair antes. E numa familia, um DS-160 torto de um filho trava o grupo todo. A ordem: vistos da familia primeiro, com folga.\n\nComenta NEVE que eu te mando como encaixar o visto na janela do inverno. Ou toca no link da bio.\n\n#neve #viagememfamilia #inverno #vistoamericano #vistoeua #b1b2 #eua"
 }

@@ -14,10 +14,10 @@
     {
       "tipo": "capa_foto",
       "kicker": "planeje os dois dias",
-      "titulo": "Sao duas visitas, em dias diferentes.",
-      "sub": "Muita gente descobre isso tarde demais.",
+      "titulo": "Ninguem te conta: sao DUAS visitas, em dias diferentes.",
+      "sub": "E autonomo perde dois dias de trabalho, nao um.",
       "destaques": [
-        "duas"
+        "DUAS"
       ],
       "imagem": "acervo/destinos/praia-por-do-sol.jpg"
     },
@@ -66,11 +66,14 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Quer os dois dias organizados numa viagem so? Fala comigo.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta CASV que eu te mando como marcar os dois no mesmo dia. Ou link na bio.",
+      "acao": "Comenta CASV",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "CASV"
+      ]
     }
   ],
-  "legenda": "Voce sabia que tirar o visto americano sao DUAS visitas, em dias diferentes?\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista com o oficial, que pode ser noutra data e ate noutra cidade.\n\nPra quem e autonomo, isso e dois dias de trabalho parado, nao um. Saber antes e o que separa quem se planeja de quem se atrapalha. Em muitos postos da pra marcar os dois proximos, numa viagem so.\n\nQuer isso organizado direito? Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #casv #vistoeua #b1b2 #dicasdevisto",
+  "legenda": "Ninguem te conta, mas tirar o visto americano sao DUAS visitas, em dias diferentes.\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista com o oficial, que pode ser noutra data e ate noutra cidade. Pra quem e autonomo, isso e dois dias de trabalho parado, nao um. Em muitos postos da pra marcar os dois proximos, numa viagem so.\n\nComenta CASV que eu te mando o passo a passo pra otimizar. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #casv #vistoeua #b1b2 #dicasdevisto",
   "imagem": "acervo/destinos/praia-por-do-sol.jpg"
 }

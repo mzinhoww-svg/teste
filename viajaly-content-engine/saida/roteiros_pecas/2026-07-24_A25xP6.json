@@ -15,10 +15,10 @@
     {
       "tipo": "capa_foto",
       "kicker": "miami de verdade",
-      "titulo": "Miami nao e so praia. E o que o grupo erra.",
-      "sub": "3 dias, varias pessoas, zero briga de agenda.",
+      "titulo": "Miami com o grupo vira briga de lobby sem uma coisa.",
+      "sub": "3 dias, varias pessoas, um plano que todo mundo aceita.",
       "destaques": [
-        "erra."
+        "briga"
       ],
       "imagem": "acervo/destinos/ny-skyline-menina.jpg"
     },
@@ -67,10 +67,13 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Fecha o grupo com a gente e cuida do antes.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta MIAMI que eu te mando o roteiro de 3 dias. Ou link na bio.",
+      "acao": "Comenta MIAMI",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "MIAMI"
+      ]
     }
   ],
-  "legenda": "Miami nao e so praia, e e ai que o grupo erra. Sem plano, cada um quer uma coisa e o dia vira discussao no lobby.\n\nO truque e dividir por bloco: praia de manha, cidade a tarde, um dia de outlet. Todo mundo pega o que quer. Mas o que trava o grupo e antes da viagem: varios vistos, varios DS-160 sem se contradizer, agendados juntos.\n\nA ordem certa e alinhar os vistos primeiro. Depois Miami roda sozinha.\n\nFecha o grupo com a gente. Chama no WhatsApp.\n\n#miami #viagemcomamigos #grupodeamigos #vistoamericano #vistoeua #b1b2 #eua"
+  "legenda": "Miami com o grupo vira briga no lobby do hotel sem uma coisa: plano.\n\nSem plano, cada um quer uma coisa e o dia trava. O truque e dividir por bloco: praia de manha, cidade a tarde, um dia de outlet. Mas o que trava o grupo e antes: varios vistos, varios DS-160 sem se contradizer, agendados juntos. Alinha os vistos primeiro e Miami roda sozinha.\n\nComenta MIAMI que eu te mando o roteiro de 3 dias pra grupo. Ou toca no link da bio.\n\n#miami #viagemcomamigos #grupodeamigos #vistoamericano #vistoeua #b1b2 #eua"
 }

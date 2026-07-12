@@ -17,8 +17,8 @@
     {
       "tipo": "capa_foto",
       "kicker": "o preco da sua pressa",
-      "titulo": "O governo botou preco na fila. 750 dolares.",
-      "sub": "Federal Register, doc 2026-11513. Ta na fonte, nao e boato.",
+      "titulo": "750 dolares pra furar a fila. Leia antes de pagar.",
+      "sub": "O governo botou preco na sua pressa. E tem um detalhe que quase ninguem viu.",
       "destaques": [
         "750"
       ],
@@ -70,10 +70,13 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Antes de gastar 750 na pressa, fala comigo.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta FONTE que eu te mando o documento oficial. Ou link na bio.",
+      "acao": "Comenta FONTE",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "FONTE"
+      ]
     }
   ],
-  "legenda": "O governo americano botou preco na sua pressa: 750 dolares pra antecipar a entrevista.\n\nTa no Federal Register (doc 2026-11513), vale de julho a dezembro de 2026, e serve pra uma coisa so: date de entrevista em ate 10 dias uteis. Nao aprova o visto. A analise e a mesma.\n\nSe voce e autonomo e ja tao te oferecendo isso como solucao, cuidado: pressa nao e preparo. E na maioria dos casos, esse dinheiro resolveria melhor a sua preparacao do que a sua fila.\n\nA gente nao garante seu visto. Ninguem pode. Mas te preparo pra chegar sem medo. Chama no WhatsApp.\n\n#vistoamericano #vistoeua #b1b2 #autonomo #mei #viagemeua #consuladoamericano"
+  "legenda": "750 dolares pra furar a fila do visto. Antes de pagar, leia isto.\n\nEsta no Federal Register (doc 2026-11513), vale de julho a dezembro de 2026, e serve pra UMA coisa: data de entrevista em ate 10 dias uteis. Nao aprova o visto. A analise e a mesma. Se voce e autonomo e ja te ofereceram isso como solucao, cuidado: pressa nao e preparo.\n\nComenta FONTE que eu te mando o link do documento oficial pra voce ler com seus olhos. Ou toca no link da bio.\n\n#vistoamericano #vistoeua #b1b2 #autonomo #mei #consuladoamericano #federalregister"
 }

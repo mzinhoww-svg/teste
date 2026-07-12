@@ -15,10 +15,10 @@
     {
       "tipo": "capa_foto",
       "kicker": "o antes que ninguem mostra",
-      "titulo": "Essa foto so existe por causa de um carimbo.",
-      "sub": "E o carimbo quase nao veio.",
+      "titulo": "Essa foto de familia comecou num formulario. Nao no aeroporto.",
+      "sub": "O feed mostra o depois. Ninguem mostra o antes.",
       "destaques": [
-        "carimbo."
+        "formulario."
       ],
       "imagem": "acervo/familia/familia-selfie2.jpg"
     },
@@ -67,10 +67,13 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Quer chegar na sua foto? Vamos cuidar do antes.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta COMECO que eu te mando o primeiro passo. Ou link na bio.",
+      "acao": "Comenta COMECO",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "COMECO"
+      ]
     }
   ],
-  "legenda": "Essa foto de familia viajando so existe por causa de um carimbo que quase nao veio.\n\nO feed mostra o depois: bonito, pronto. Ninguem mostra o antes, que e um DS-160, uma entrevista de um minuto e o medo de ouvir nao. Se voce ta nessa parte agora, na primeira viagem, saiba: todo mundo que ja viajou passou por aqui.\n\nA ordem que funciona e simples. Primeiro o visto, bem preparado. Depois a foto acontece sozinha.\n\nA gente cuida do antes. Chama no WhatsApp.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagememfamilia #eua #luademel"
+  "legenda": "Essa foto de familia viajando comecou num formulario, nao no aeroporto.\n\nO feed mostra o depois: bonito, pronto. Ninguem mostra o antes, que e um DS-160, uma entrevista de um minuto e o medo de ouvir nao. Se voce ta nessa parte agora, na primeira viagem, todo mundo que ja viajou passou por aqui. A ordem que funciona: primeiro o visto, depois a foto acontece sozinha.\n\nComenta COMECO que eu te mando o primeiro passo do jeito certo. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagememfamilia #eua #luademel"
 }

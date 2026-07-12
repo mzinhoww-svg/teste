@@ -16,8 +16,8 @@
     {
       "tipo": "capa_foto",
       "kicker": "a conta real",
-      "titulo": "Quanto custa renovar o visto de verdade em 2026.",
-      "sub": "Spoiler: nao e so a taxa que voce lembra.",
+      "titulo": "Quanto custa o visto de verdade em 2026? Nao e o que voce lembra.",
+      "sub": "Tem uma taxa nova que a maioria descobre tarde.",
       "destaques": [
         "verdade"
       ],
@@ -68,11 +68,14 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Quer sua conta fechada, item por item? Eu monto com voce.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta CONTA que eu te mando o custo real fechado. Ou link na bio.",
+      "acao": "Comenta CONTA",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "CONTA"
+      ]
     }
   ],
-  "legenda": "Quanto custa renovar o visto americano de verdade em 2026?\n\nNao e so a MRV de 185 dolares que voce lembra. Entrou uma taxa de integridade de 250 dolares cobrada na emissao (confere no travel.state.gov). E tem os 750 opcionais de quem quer furar fila, que voce nao precisa.\n\nE atencao: se o seu visto venceu ha mais de 12 meses, a renovacao nao e automatica. Voce cai na fila de entrevista.\n\nA conta honesta soma taxa, passaporte e consultoria, sem surpresa no fim. Quer a sua fechada item por item? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #taxavisto #consuladoamericano",
+  "legenda": "Quanto custa renovar o visto americano DE VERDADE em 2026? Nao e so a taxa que voce lembra.\n\nAlem da MRV de 185 dolares, entrou uma taxa de integridade de 250 dolares cobrada na emissao (confere no travel.state.gov). E tem os 750 opcionais de quem quer furar fila, que voce nao precisa. Atencao: se o visto venceu ha mais de 12 meses, a renovacao nao e automatica.\n\nComenta CONTA que eu te mando o custo real fechado pro seu caso. Ou toca no link da bio.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #taxavisto #consuladoamericano",
   "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
 }

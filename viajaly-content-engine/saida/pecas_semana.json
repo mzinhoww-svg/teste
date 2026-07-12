@@ -20,8 +20,8 @@
         {
           "tipo": "capa_foto",
           "kicker": "o preco da sua pressa",
-          "titulo": "O governo botou preco na fila. 750 dolares.",
-          "sub": "Federal Register, doc 2026-11513. Ta na fonte, nao e boato.",
+          "titulo": "750 dolares pra furar a fila. Leia antes de pagar.",
+          "sub": "O governo botou preco na sua pressa. E tem um detalhe que quase ninguem viu.",
           "destaques": [
             "750"
           ],
@@ -73,12 +73,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Antes de gastar 750 na pressa, fala comigo.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta FONTE que eu te mando o documento oficial. Ou link na bio.",
+          "acao": "Comenta FONTE",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "FONTE"
+          ]
         }
       ],
-      "legenda": "O governo americano botou preco na sua pressa: 750 dolares pra antecipar a entrevista.\n\nTa no Federal Register (doc 2026-11513), vale de julho a dezembro de 2026, e serve pra uma coisa so: date de entrevista em ate 10 dias uteis. Nao aprova o visto. A analise e a mesma.\n\nSe voce e autonomo e ja tao te oferecendo isso como solucao, cuidado: pressa nao e preparo. E na maioria dos casos, esse dinheiro resolveria melhor a sua preparacao do que a sua fila.\n\nA gente nao garante seu visto. Ninguem pode. Mas te preparo pra chegar sem medo. Chama no WhatsApp.\n\n#vistoamericano #vistoeua #b1b2 #autonomo #mei #viagemeua #consuladoamericano"
+      "legenda": "750 dolares pra furar a fila do visto. Antes de pagar, leia isto.\n\nEsta no Federal Register (doc 2026-11513), vale de julho a dezembro de 2026, e serve pra UMA coisa: data de entrevista em ate 10 dias uteis. Nao aprova o visto. A analise e a mesma. Se voce e autonomo e ja te ofereceram isso como solucao, cuidado: pressa nao e preparo.\n\nComenta FONTE que eu te mando o link do documento oficial pra voce ler com seus olhos. Ou toca no link da bio.\n\n#vistoamericano #vistoeua #b1b2 #autonomo #mei #consuladoamericano #federalregister"
     },
     {
       "combo": "A01xP2",
@@ -96,10 +99,10 @@
         {
           "tipo": "capa_foto",
           "kicker": "a verdade incomoda",
-          "titulo": "Se prometeram visto garantido pra voces, corram.",
-          "sub": "E a primeira viagem de voces. Comeca por aqui.",
+          "titulo": "Te prometeram visto garantido? Salva esse post e corre.",
+          "sub": "E a primeira viagem de voces. Nao comecem pelo golpe mais comum.",
           "destaques": [
-            "corram."
+            "corre."
           ],
           "imagem": "acervo/familia/familia-selfie.jpg"
         },
@@ -148,12 +151,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "A gente nao garante seu visto. E por isso que da pra confiar.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta VERDADE e eu te explico como comecar sem cair em promessa. Ou link na bio.",
+          "acao": "Comenta VERDADE",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "VERDADE"
+          ]
         }
       ],
-      "legenda": "Primeira viagem internacional de voces e ja apareceu alguem prometendo visto garantido?\n\nCorram. Ninguem garante visto. A decisao e de um oficial no consulado, na hora, olhando pra voces. Quem promete garantia ta vendendo o seu medo de nao saber por onde comecar.\n\nO que da pra garantir e preparo: DS-160 coerente, voces sabendo responder. Isso a gente faz. O carimbo e do consulo.\n\nA gente nao garante seu visto. Ninguem pode. Quem garante ta mentindo pra voce. Chama no WhatsApp e comeca do jeito certo.\n\n#vistoamericano #primeiraviagem #luademel #vistoeua #b1b2 #viagemacasal #eua",
+      "legenda": "Te prometeram visto garantido na sua primeira viagem? Salva esse post e corre.\n\nNinguem garante visto. A decisao e de um oficial no consulado, na hora, olhando pra voces. Quem promete garantia ta vendendo o seu medo de nao saber por onde comecar. O que da pra garantir e preparo: DS-160 coerente e voces sabendo responder.\n\nComenta VERDADE que eu te mando o primeiro passo do jeito certo. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #luademel #vistoeua #b1b2 #viagemacasal #eua",
       "imagem": "acervo/familia/familia-selfie.jpg"
     },
     {
@@ -174,10 +180,10 @@
         {
           "tipo": "capa_foto",
           "kicker": "os dois extremos",
-          "titulo": "Cobraram 99 reais? Cobraram 3 mil? Os dois sao sinal.",
+          "titulo": "99 reais ou 3 mil? Os dois deviam te assustar.",
           "sub": "Voces sao um grupo. Errar aqui multiplica por seis.",
           "destaques": [
-            "sinal."
+            "assustar."
           ],
           "imagem": "acervo/destinos/disney-main-street.jpg"
         },
@@ -227,12 +233,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Grupo fechado, preco explicado, taxa a parte. Fala comigo.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta PRECO que eu te mando a faixa justa item por item. Ou link na bio.",
+          "acao": "Comenta PRECO",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "PRECO"
+          ]
         }
       ],
-      "legenda": "Cobraram 99 reais pra fazer o visto do grupo? Ou cobraram 3 mil por cabeca? Os dois sao sinal de alerta.\n\nBarato demais quase sempre e so preenchimento, ou some no meio. Caro demais vende status. O consulo nao cobra mais caro de quem pagou assessoria cara.\n\nGrupo de amigos trava no que importa: seis DS-160 sem contradicao, agendamento junto, cada um sabendo a propria historia. E a taxa consular de 185 dolares por pessoa entra sempre a parte.\n\nA gente nao garante seu visto. A gente explica cada centavo. Chama no WhatsApp.\n\n#vistoamericano #grupodeamigos #viagemcomamigos #vistoeua #b1b2 #miami #novayork",
+      "legenda": "Cobraram 99 reais pra fazer o visto do grupo? Ou 3 mil por cabeca? Os dois deviam te assustar.\n\nBarato demais quase sempre e so preenchimento, ou some no meio. Caro demais vende status. O consulo nao cobra mais caro de quem pagou assessoria cara. E a taxa consular de 185 dolares por pessoa entra sempre a parte.\n\nComenta PRECO que eu te mando a faixa justa, item por item. Ou toca no link da bio.\n\n#vistoamericano #grupodeamigos #viagemcomamigos #vistoeua #b1b2 #miami #novayork",
       "imagem": "acervo/destinos/disney-main-street.jpg"
     },
     {
@@ -253,8 +262,8 @@
         {
           "tipo": "capa_foto",
           "kicker": "o que nao te contam",
-          "titulo": "Da pra antecipar sua entrevista de graca.",
-          "sub": "Sem pagar os 750 dolares. Em caso de emergencia real.",
+          "titulo": "Da pra antecipar a entrevista de graca. Sem pagar 750.",
+          "sub": "O consulado nao faz questao de te contar isso.",
           "destaques": [
             "graca."
           ],
@@ -305,12 +314,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Quer saber se o seu caso e emergencia? Eu te falo de graca.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta GRATIS que eu te explico se o seu caso se encaixa. Ou link na bio.",
+          "acao": "Comenta GRATIS",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "GRATIS"
+          ]
         }
       ],
-      "legenda": "Da pra antecipar sua entrevista do visto de graca. O consulado nao faz questao de contar.\n\nExiste o pedido de emergencia: quando ha motivo real (saude, trabalho, familia) voce pede uma data mais cedo sem pagar os 750 dolares da fila premium. Precisa de motivo e de prova.\n\nSe voce e autonomo, uma feira ou um cliente la fora pode ser a sua emergencia legitima. Mas pedido mal justificado e negado, e voce perde a vez.\n\nQuer saber se o seu caso se encaixa? Eu te falo de graca. Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #dicasdeviagem #consuladoamericano",
+      "legenda": "Da pra antecipar a entrevista do visto DE GRACA, sem pagar os 750 dolares da fila premium.\n\nExiste o pedido de emergencia: com motivo real (saude, trabalho, familia) voce pede uma data mais cedo. Precisa de motivo e de prova. Se voce e autonomo, uma feira ou um cliente la fora pode ser a sua emergencia legitima. Mas pedido mal justificado e negado, e voce perde a vez.\n\nComenta GRATIS que eu te falo se o seu caso se encaixa. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #dicasdeviagem #consuladoamericano",
       "imagem": "acervo/destinos/universal-globo.jpg"
     },
     {
@@ -331,8 +343,8 @@
         {
           "tipo": "capa_foto",
           "kicker": "a conta real",
-          "titulo": "Quanto custa renovar o visto de verdade em 2026.",
-          "sub": "Spoiler: nao e so a taxa que voce lembra.",
+          "titulo": "Quanto custa o visto de verdade em 2026? Nao e o que voce lembra.",
+          "sub": "Tem uma taxa nova que a maioria descobre tarde.",
           "destaques": [
             "verdade"
           ],
@@ -383,12 +395,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Quer sua conta fechada, item por item? Eu monto com voce.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta CONTA que eu te mando o custo real fechado. Ou link na bio.",
+          "acao": "Comenta CONTA",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "CONTA"
+          ]
         }
       ],
-      "legenda": "Quanto custa renovar o visto americano de verdade em 2026?\n\nNao e so a MRV de 185 dolares que voce lembra. Entrou uma taxa de integridade de 250 dolares cobrada na emissao (confere no travel.state.gov). E tem os 750 opcionais de quem quer furar fila, que voce nao precisa.\n\nE atencao: se o seu visto venceu ha mais de 12 meses, a renovacao nao e automatica. Voce cai na fila de entrevista.\n\nA conta honesta soma taxa, passaporte e consultoria, sem surpresa no fim. Quer a sua fechada item por item? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #taxavisto #consuladoamericano",
+      "legenda": "Quanto custa renovar o visto americano DE VERDADE em 2026? Nao e so a taxa que voce lembra.\n\nAlem da MRV de 185 dolares, entrou uma taxa de integridade de 250 dolares cobrada na emissao (confere no travel.state.gov). E tem os 750 opcionais de quem quer furar fila, que voce nao precisa. Atencao: se o visto venceu ha mais de 12 meses, a renovacao nao e automatica.\n\nComenta CONTA que eu te mando o custo real fechado pro seu caso. Ou toca no link da bio.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #taxavisto #consuladoamericano",
       "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
     },
     {
@@ -407,10 +422,10 @@
         {
           "tipo": "capa_foto",
           "kicker": "planeje os dois dias",
-          "titulo": "Sao duas visitas, em dias diferentes.",
-          "sub": "Muita gente descobre isso tarde demais.",
+          "titulo": "Ninguem te conta: sao DUAS visitas, em dias diferentes.",
+          "sub": "E autonomo perde dois dias de trabalho, nao um.",
           "destaques": [
-            "duas"
+            "DUAS"
           ],
           "imagem": "acervo/destinos/praia-por-do-sol.jpg"
         },
@@ -459,12 +474,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Quer os dois dias organizados numa viagem so? Fala comigo.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta CASV que eu te mando como marcar os dois no mesmo dia. Ou link na bio.",
+          "acao": "Comenta CASV",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "CASV"
+          ]
         }
       ],
-      "legenda": "Voce sabia que tirar o visto americano sao DUAS visitas, em dias diferentes?\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista com o oficial, que pode ser noutra data e ate noutra cidade.\n\nPra quem e autonomo, isso e dois dias de trabalho parado, nao um. Saber antes e o que separa quem se planeja de quem se atrapalha. Em muitos postos da pra marcar os dois proximos, numa viagem so.\n\nQuer isso organizado direito? Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #casv #vistoeua #b1b2 #dicasdevisto",
+      "legenda": "Ninguem te conta, mas tirar o visto americano sao DUAS visitas, em dias diferentes.\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista com o oficial, que pode ser noutra data e ate noutra cidade. Pra quem e autonomo, isso e dois dias de trabalho parado, nao um. Em muitos postos da pra marcar os dois proximos, numa viagem so.\n\nComenta CASV que eu te mando o passo a passo pra otimizar. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #casv #vistoeua #b1b2 #dicasdevisto",
       "imagem": "acervo/destinos/praia-por-do-sol.jpg"
     },
     {
@@ -485,8 +503,8 @@
         {
           "tipo": "capa_foto",
           "kicker": "mudou a regra",
-          "titulo": "Menor de idade agora precisa comparecer.",
-          "sub": "Se voce ja foi negado, essa muda o seu planejamento.",
+          "titulo": "Mudou a regra: menor de idade agora vai na entrevista.",
+          "sub": "Se voce ja foi negado, isso muda o seu planejamento inteiro.",
           "destaques": [
             "comparecer."
           ],
@@ -537,12 +555,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Sua segunda tentativa merece ser a certa. Fala comigo.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta MENOR que eu te mando o que confirmar no consulado. Ou link na bio.",
+          "acao": "Comenta MENOR",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "MENOR"
+          ]
         }
       ],
-      "legenda": "Mudou a regra: menor de idade agora costuma precisar comparecer na entrevista. Confirme sempre no site do consulado (br.usembassy.gov).\n\nSe voce ja foi negado uma vez, isso muda o seu planejamento. Refazer tudo ja pesa. Agora conte com a agenda das criancas no mesmo dia.\n\nSer negado nao foi o fim. Repetir sem entender o que mudou, esse sim seria o erro caro. E a taxa de 185 dolares por pessoa, criancas incluidas, nao volta.\n\nSua segunda tentativa merece ser bem feita. Chama no WhatsApp.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #familia #consuladoamericano",
+      "legenda": "Mudou a regra: menor de idade agora costuma precisar comparecer na entrevista. Confirme sempre no site do consulado (br.usembassy.gov).\n\nSe voce ja foi negado uma vez, isso muda o seu planejamento. Refazer tudo ja pesa, e agora conte com a agenda das criancas no mesmo dia. Ser negado nao foi o fim. Repetir sem entender o que mudou, esse sim seria o erro caro.\n\nComenta MENOR que eu te mando o checklist do que confirmar antes. Ou toca no link da bio.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #familia #consuladoamericano",
       "imagem": "acervo/destinos/disney-goofy.jpg"
     },
     {
@@ -562,7 +583,7 @@
           "tipo": "capa_foto",
           "kicker": "o formulario decide",
           "titulo": "7 campos do DS-160 derrubam mais que perfil ruim.",
-          "sub": "Voce tem ingresso e a janela ta fechando. Nao erre aqui.",
+          "sub": "Voce tem ingresso da Copa. Nao perca o jogo por um dado torto.",
           "destaques": [
             "7"
           ],
@@ -613,12 +634,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Antes de enviar o DS-160, deixa eu revisar os 7 campos.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta DS160 que eu te mando os 7 campos pra revisar. Ou link na bio.",
+          "acao": "Comenta DS160",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "DS160"
+          ]
         }
       ],
-      "legenda": "Sete campos do DS-160 derrubam mais gente que perfil ruim.\n\nO oficial le o seu formulario antes de te ver. Se ele ja te contradiz, voce entra em desvantagem. Os sete que mais pegam: profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil.\n\nCom a Copa e o prazo curto, todo mundo preenche correndo, e e correndo que nascem os erros. Uma revisao desses campos leva menos que voce imagina.\n\nAntes de enviar, deixa eu revisar com voce. Chama no WhatsApp.\n\n#vistoamericano #ds160 #copadomundo #vistoeua #b1b2 #futebol #dicasdevisto",
+      "legenda": "Sete campos do DS-160 derrubam mais gente que perfil ruim. E voce, com ingresso da Copa, nao pode perder o jogo por um dado torto.\n\nO oficial le o seu formulario antes de te ver. Se ele ja te contradiz, voce entra em desvantagem. Os que mais pegam: profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil.\n\nComenta DS160 que eu te mando a lista dos 7 campos pra revisar hoje. Ou toca no link da bio.\n\n#vistoamericano #ds160 #copadomundo #vistoeua #b1b2 #futebol #dicasdevisto",
       "imagem": "acervo/destinos/praia-crianca.jpg"
     },
     {
@@ -689,12 +713,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Deixa eu te ensinar a contar a sua historia em uma frase.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta PASTA que eu te mando o que realmente pesa na entrevista. Ou link na bio.",
+          "acao": "Comenta PASTA",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "PASTA"
+          ]
         }
       ],
-      "legenda": "Aquela pasta gorda de documentos que voce, autonomo, junta com tanto medo? O oficial nem abre.\n\nA entrevista dura menos de um minuto. Nao da tempo de folhear extrato e contrato. O que pesa e a coerencia do que voce fala, nao a espessura da pasta.\n\nSem carteira assinada voce nao precisa provar mais. Precisa explicar melhor: faturamento, clientes, familia, uma vida que te traz de volta. Isso se diz em uma frase segura.\n\nDeixa eu te ensinar a contar a sua historia. Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #entrevistavisto #consuladoamericano",
+      "legenda": "Aquela pasta gorda de documentos que voce, autonomo, junta com tanto medo? O oficial nem abre.\n\nA entrevista dura menos de um minuto. Nao da tempo de folhear extrato e contrato. O que pesa e a coerencia do que voce fala. Sem carteira assinada voce nao precisa provar mais, precisa explicar melhor: faturamento, clientes, familia, uma vida que te traz de volta.\n\nComenta PASTA que eu te ensino a contar a sua historia em uma frase. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #entrevistavisto #consuladoamericano",
       "imagem": "acervo/familia/familia-selfie2.jpg"
     },
     {
@@ -713,10 +740,10 @@
         {
           "tipo": "capa_foto",
           "kicker": "o que ele quer saber",
-          "titulo": "Existe uma unica pergunta na cabeca do consulo.",
-          "sub": "E nao e sobre quanto voce ganha.",
+          "titulo": "Existe UMA pergunta na cabeca do consulo. E nao e sobre dinheiro.",
+          "sub": "Errar a resposta dela reprova mais que qualquer documento.",
           "destaques": [
-            "unica"
+            "UMA"
           ],
           "imagem": "acervo/destinos/neve-familia.jpg"
         },
@@ -765,12 +792,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Vamos treinar a sua resposta pra unica pergunta que importa.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta VOLTA que eu te mando como responder essa pergunta. Ou link na bio.",
+          "acao": "Comenta VOLTA",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "VOLTA"
+          ]
         }
       ],
-      "legenda": "Existe uma unica pergunta na cabeca do consulo, e nao e sobre quanto voce ganha. E: voce volta?\n\nA lei presume que voce quer imigrar. Seu papel e mostrar que nao. E se o seu visto venceu ha mais de um ano, esquece a ideia de renovacao automatica. Voce prova de novo que volta.\n\nVinculo nao e um papel, e uma vida que fica aqui te aguardando: trabalho, familia, casa, rotina. O erro classico da renovacao e achar que ja e formalidade e relaxar.\n\nVamos treinar a sua resposta? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #entrevistavisto #dicasdevisto",
+      "legenda": "Existe UMA pergunta na cabeca do consulo, e nao e sobre quanto voce ganha. E: voce volta?\n\nA lei presume que voce quer imigrar. Seu papel e mostrar que nao. Se o seu visto venceu ha mais de um ano, esquece renovacao automatica: voce prova de novo que volta. Vinculo nao e um papel, e uma vida que fica aqui te aguardando: trabalho, familia, casa, rotina.\n\nComenta VOLTA que eu te mando como treinar essa resposta. Ou toca no link da bio.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #entrevistavisto #dicasdevisto",
       "imagem": "acervo/destinos/neve-familia.jpg"
     },
     {
@@ -789,8 +819,8 @@
         {
           "tipo": "capa_foto",
           "kicker": "os primeiros segundos",
-          "titulo": "Ele decide nos primeiros 10 segundos.",
-          "sub": "Voce tem ingresso da Copa. Nao desperdice a abertura.",
+          "titulo": "Ele decide nos primeiros 10 segundos. Voce tem 1 minuto no total.",
+          "sub": "Torcedor ansioso perde o visto falando demais.",
           "destaques": [
             "10"
           ],
@@ -841,12 +871,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Vamos ensaiar os seus 10 primeiros segundos antes do jogo.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta ENTREVISTA que eu te mando o roteiro dos 10 segundos. Ou link na bio.",
+          "acao": "Comenta ENTREVISTA",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "ENTREVISTA"
+          ]
         }
       ],
-      "legenda": "A entrevista do visto dura menos de um minuto. E o consulo decide nos primeiros 10 segundos.\n\nComo voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta. Nao e representar um personagem, e chegar tao preparado que a verdade sai sem gaguejo.\n\nO torcedor com prazo de Copa erra falando demais e justificando demais. O oficial nao perguntou a sua vida. Responda o que foi perguntado.\n\nVamos ensaiar os seus 10 primeiros segundos? Chama no WhatsApp.\n\n#vistoamericano #copadomundo #vistoeua #b1b2 #entrevistavisto #futebol #eua",
+      "legenda": "A entrevista do visto dura menos de um minuto, e o consulo decide nos primeiros 10 segundos.\n\nComo voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta. Nao e representar um personagem, e chegar tao preparado que a verdade sai sem gaguejo. O torcedor com prazo de Copa erra falando demais. Responda o que foi perguntado.\n\nComenta ENTREVISTA que eu te mando o roteiro dos primeiros 10 segundos. Ou toca no link da bio.\n\n#vistoamericano #copadomundo #vistoeua #b1b2 #entrevistavisto #futebol #eua",
       "imagem": "acervo/destinos/praia-crianca-areia.jpg"
     },
     {
@@ -867,8 +900,8 @@
         {
           "tipo": "capa_foto",
           "kicker": "quem ja ouviu um nao",
-          "titulo": "Ela tinha sido negada. Voltou e passou.",
-          "sub": "Historia real de cliente. Com autorizacao.",
+          "titulo": "Ela foi negada. Voltou e passou. Sem sorte, com metodo.",
+          "sub": "Historia real de cliente, com autorizacao.",
           "destaques": [
             "negada."
           ],
@@ -914,12 +947,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Ja ouviu um nao? Vamos entender o que mudar antes da proxima.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta HISTORIA que eu te conto o que foi ajustado. Ou link na bio.",
+          "acao": "Comenta HISTORIA",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "HISTORIA"
+          ]
         }
       ],
-      "legenda": "[LEGENDA A COMPLETAR COM O DEPOIMENTO REAL] Ela tinha sido negada uma vez. Sentiu a vergonha, o medo de repetir, e a taxa que ja tinha perdido.\n\n[Resumo real do caso, com autorizacao da cliente. O que estava errado, o que foi ajustado, e como foi a segunda entrevista.]\n\nEu nao mostro isso pra dizer que sempre da certo. Da pra dar errado. Mostro pra voce ver que negado nao e sentenca.\n\nJa ouviu um nao? Chama no WhatsApp e vamos entender o que mudar.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #depoimento #consuladoamericano",
+      "legenda": "[COMPLETAR COM DEPOIMENTO REAL] Ela tinha sido negada uma vez. Voltou, ajustou o que precisava, e passou. Sem sorte, com metodo.\n\n[Resumo real do caso, com autorizacao: o que estava errado, o que foi corrigido, como foi a segunda entrevista.] Eu nao mostro isso pra dizer que sempre da certo. Mostro pra voce ver que negado nao e sentenca.\n\nComenta HISTORIA que eu te conto o que costuma mudar entre o nao e o sim. Ou toca no link da bio.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #depoimento #consuladoamericano",
       "imagem": "acervo/familia/mae-crianca-selfie.jpg"
     },
     {
@@ -940,8 +976,8 @@
         {
           "tipo": "capa_foto",
           "kicker": "o numero que eu tenho",
-          "titulo": "Os casais que passaram em 2026.",
-          "sub": "Sem promessa. So o que aconteceu de verdade.",
+          "titulo": "Sem promessa: esse e o numero de casais que passaram em 2026.",
+          "sub": "Nao e projecao. E o que aconteceu de verdade.",
           "destaques": [
             "verdade."
           ],
@@ -992,12 +1028,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Quer ser o proximo casal preparado de 2026? Fala comigo.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta PROVA que eu te mostro como esses casais se prepararam. Ou link na bio.",
+          "acao": "Comenta PROVA",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "PROVA"
+          ]
         }
       ],
-      "legenda": "[COMPLETAR COM O NUMERO REAL] Os casais que se prepararam por aqui e passaram em 2026.\n\n[N] pessoas aprovadas. E o dado que eu tenho pra mostrar, nao uma projecao. E ele nao significa que voce esta garantido: cada caso e um caso, a decisao e do consulo. Significa que preparo muda a media.\n\nSe voces sao casal de primeira viagem e nao sabem por onde comecar, ver gente como voces passar tira o medo do escuro.\n\nQuer ser o proximo casal preparado? Chama no WhatsApp.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagemacasal #luademel #eua",
+      "legenda": "[COMPLETAR COM O NUMERO REAL] Sem promessa: esse e o numero de casais que se prepararam por aqui e passaram em 2026.\n\n[N] pessoas aprovadas. E o dado que eu tenho pra mostrar, nao uma projecao. Ele nao significa que voce esta garantido: cada caso e um caso, a decisao e do consulo. Significa que preparo muda a media. Chegaram com historia coerente e sem pressa comprada.\n\nComenta PROVA que eu te mostro o que esses casais fizeram diferente. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagemacasal #luademel #eua",
       "imagem": "acervo/familia/neve-mae-crianca.jpg"
     },
     {
@@ -1019,8 +1058,8 @@
           "tipo": "capa_foto",
           "imagem": "acervo/destinos/disney-castelo-familia.jpg",
           "kicker": "roteiro que segura",
-          "titulo": "Orlando com tres filhos sem o colapso do dia 4.",
-          "sub": "Porque no quarto dia todo mundo quebra. Menos quem planeja.",
+          "titulo": "Orlando com tres filhos: o erro do dia 4 que arruina a viagem.",
+          "sub": "No quarto dia todo mundo quebra. Menos quem planeja.",
           "destaques": [
             "colapso"
           ]
@@ -1070,12 +1109,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Vamos garantir a familia toda preparada, e depois o roteiro.",
-          "acao": "Chama no WhatsApp",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "titulo": "Comenta ORLANDO que eu te mando o roteiro que evita o colapso. Ou link na bio.",
+          "acao": "Comenta ORLANDO",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "destaques": [
+            "ORLANDO"
+          ]
         }
       ],
-      "legenda": "Orlando com tres filhos: o roteiro que evita o colapso do quarto dia.\n\nFamilia empolgada faz parque pesado quatro dias seguidos, e no quarto as criancas quebram. O segredo e intercalar: parque, dia leve, parque, dia leve. Respiro tambem e roteiro.\n\nMas nada disso acontece se os vistos nao sairem, e numa familia um nao derruba a viagem inteira. Entao a ordem e: primeiro a familia toda bem preparada, depois o roteiro.\n\nVamos comecar pela parte que sustenta o sonho? Chama no WhatsApp.\n\n#orlando #viagememfamilia #disney #vistoamericano #vistoeua #b1b2 #feriascomcriancas"
+      "legenda": "Orlando com tres filhos: o erro do dia 4 que arruina a viagem inteira.\n\nFamilia empolgada faz parque pesado quatro dias seguidos, e no quarto as criancas quebram. O segredo e intercalar: parque, dia leve, parque, dia leve. Mas nada disso acontece se um visto da familia for negado, e um nao derruba a viagem toda. Entao a ordem e: familia preparada primeiro, depois o roteiro.\n\nComenta ORLANDO que eu te mando o roteiro que testei, dia a dia. Ou toca no link da bio.\n\n#orlando #viagememfamilia #disney #vistoamericano #vistoeua #b1b2 #feriascomcriancas"
     }
   ]
 }

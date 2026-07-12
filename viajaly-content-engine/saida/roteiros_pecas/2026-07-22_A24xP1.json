@@ -15,8 +15,8 @@
     {
       "tipo": "capa_foto",
       "kicker": "roteiro que funciona",
-      "titulo": "Disney e Universal no mesmo dia e o erro classico.",
-      "sub": "A crianca surta e voce paga caro pra ver.",
+      "titulo": "Disney e Universal no mesmo dia e o erro que faz a crianca surtar.",
+      "sub": "A empolgacao custa caro la pelas duas da tarde.",
       "destaques": [
         "erro"
       ],
@@ -67,10 +67,13 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Primeiro a familia preparada, depois o roteiro.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta PARQUES que eu te mando o roteiro por idade. Ou link na bio.",
+      "acao": "Comenta PARQUES",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "PARQUES"
+      ]
     }
   ],
-  "legenda": "Disney e Universal no mesmo dia e o erro classico de quem viaja empolgado. A crianca surta as duas da tarde e voce paga caro pra ver.\n\nA regra da idade ajuda: ate uns 7 anos a Disney rende mais, a Universal brilha com os maiores. Escolha por filho, nao por hype. E o ritmo que segura a viagem e um parque por dia, tarde livre, o quarto dia sem alarme.\n\nMas antes do roteiro tem o basico: numa familia, um visto negado derruba a viagem toda. Entao a ordem e a familia preparada primeiro.\n\nChama no WhatsApp que a gente cuida do antes.\n\n#orlando #disney #universal #viagememfamilia #vistoamericano #vistoeua #feriascomcriancas"
+  "legenda": "Disney e Universal no mesmo dia e o erro que faz a crianca surtar as duas da tarde. E voce paga caro pra ver.\n\nA regra da idade ajuda: ate uns 7 anos a Disney rende mais, a Universal brilha com os maiores. Um parque por dia, tarde livre, o quarto dia sem alarme. Mas antes do roteiro: numa familia, um visto negado derruba a viagem toda.\n\nComenta PARQUES que eu te mando o roteiro por idade dos seus filhos. Ou toca no link da bio.\n\n#orlando #disney #universal #viagememfamilia #vistoamericano #vistoeua #feriascomcriancas"
 }

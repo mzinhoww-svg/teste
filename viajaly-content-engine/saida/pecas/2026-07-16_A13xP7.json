@@ -66,11 +66,14 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Deixa eu te ensinar a contar a sua historia em uma frase.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta PASTA que eu te mando o que realmente pesa na entrevista. Ou link na bio.",
+      "acao": "Comenta PASTA",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "PASTA"
+      ]
     }
   ],
-  "legenda": "Aquela pasta gorda de documentos que voce, autonomo, junta com tanto medo? O oficial nem abre.\n\nA entrevista dura menos de um minuto. Nao da tempo de folhear extrato e contrato. O que pesa e a coerencia do que voce fala, nao a espessura da pasta.\n\nSem carteira assinada voce nao precisa provar mais. Precisa explicar melhor: faturamento, clientes, familia, uma vida que te traz de volta. Isso se diz em uma frase segura.\n\nDeixa eu te ensinar a contar a sua historia. Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #entrevistavisto #consuladoamericano",
+  "legenda": "Aquela pasta gorda de documentos que voce, autonomo, junta com tanto medo? O oficial nem abre.\n\nA entrevista dura menos de um minuto. Nao da tempo de folhear extrato e contrato. O que pesa e a coerencia do que voce fala. Sem carteira assinada voce nao precisa provar mais, precisa explicar melhor: faturamento, clientes, familia, uma vida que te traz de volta.\n\nComenta PASTA que eu te ensino a contar a sua historia em uma frase. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #entrevistavisto #consuladoamericano",
   "imagem": "acervo/familia/familia-selfie2.jpg"
 }

@@ -14,8 +14,8 @@
     {
       "tipo": "capa_foto",
       "kicker": "os primeiros segundos",
-      "titulo": "Ele decide nos primeiros 10 segundos.",
-      "sub": "Voce tem ingresso da Copa. Nao desperdice a abertura.",
+      "titulo": "Ele decide nos primeiros 10 segundos. Voce tem 1 minuto no total.",
+      "sub": "Torcedor ansioso perde o visto falando demais.",
       "destaques": [
         "10"
       ],
@@ -66,11 +66,14 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Vamos ensaiar os seus 10 primeiros segundos antes do jogo.",
-      "acao": "Chama no WhatsApp",
-      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+      "titulo": "Comenta ENTREVISTA que eu te mando o roteiro dos 10 segundos. Ou link na bio.",
+      "acao": "Comenta ENTREVISTA",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "ENTREVISTA"
+      ]
     }
   ],
-  "legenda": "A entrevista do visto dura menos de um minuto. E o consulo decide nos primeiros 10 segundos.\n\nComo voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta. Nao e representar um personagem, e chegar tao preparado que a verdade sai sem gaguejo.\n\nO torcedor com prazo de Copa erra falando demais e justificando demais. O oficial nao perguntou a sua vida. Responda o que foi perguntado.\n\nVamos ensaiar os seus 10 primeiros segundos? Chama no WhatsApp.\n\n#vistoamericano #copadomundo #vistoeua #b1b2 #entrevistavisto #futebol #eua",
+  "legenda": "A entrevista do visto dura menos de um minuto, e o consulo decide nos primeiros 10 segundos.\n\nComo voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta. Nao e representar um personagem, e chegar tao preparado que a verdade sai sem gaguejo. O torcedor com prazo de Copa erra falando demais. Responda o que foi perguntado.\n\nComenta ENTREVISTA que eu te mando o roteiro dos primeiros 10 segundos. Ou toca no link da bio.\n\n#vistoamericano #copadomundo #vistoeua #b1b2 #entrevistavisto #futebol #eua",
   "imagem": "acervo/destinos/praia-crianca-areia.jpg"
 }
