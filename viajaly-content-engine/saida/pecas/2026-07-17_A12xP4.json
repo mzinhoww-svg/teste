@@ -12,14 +12,14 @@
   "dor": "prazo. janela fecha",
   "slides": [
     {
-      "tipo": "capa",
+      "tipo": "capa_foto",
       "kicker": "os primeiros segundos",
-      "ghost": "01",
       "titulo": "Ele decide nos primeiros 10 segundos.",
       "sub": "Voce tem ingresso da Copa. Nao desperdice a abertura.",
       "destaques": [
         "10"
-      ]
+      ],
+      "imagem": "acervo/destinos/praia-crianca-areia.jpg"
     },
     {
       "tipo": "passo",
@@ -71,5 +71,6 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "A entrevista do visto dura menos de um minuto. E o consulo decide nos primeiros 10 segundos.\n\nComo voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta. Nao e representar um personagem, e chegar tao preparado que a verdade sai sem gaguejo.\n\nO torcedor com prazo de Copa erra falando demais e justificando demais. O oficial nao perguntou a sua vida. Responda o que foi perguntado.\n\nVamos ensaiar os seus 10 primeiros segundos? Chama no WhatsApp.\n\n#vistoamericano #copadomundo #vistoeua #b1b2 #entrevistavisto #futebol #eua"
+  "legenda": "A entrevista do visto dura menos de um minuto. E o consulo decide nos primeiros 10 segundos.\n\nComo voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta. Nao e representar um personagem, e chegar tao preparado que a verdade sai sem gaguejo.\n\nO torcedor com prazo de Copa erra falando demais e justificando demais. O oficial nao perguntou a sua vida. Responda o que foi perguntado.\n\nVamos ensaiar os seus 10 primeiros segundos? Chama no WhatsApp.\n\n#vistoamericano #copadomundo #vistoeua #b1b2 #entrevistavisto #futebol #eua",
+  "imagem": "acervo/destinos/praia-crianca-areia.jpg"
 }

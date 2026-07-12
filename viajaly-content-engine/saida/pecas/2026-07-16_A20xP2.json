@@ -14,14 +14,14 @@
   "nota_producao": "PROVA: substituir [N] pelo numero REAL de aprovados de 2026 da base interna, e so publicar se o numero for verdadeiro e conferivel. Ao inserir o numero, preencher fonte_verificada_em. Sem numero real, esta peca fica retida.",
   "slides": [
     {
-      "tipo": "capa",
+      "tipo": "capa_foto",
       "kicker": "o numero que eu tenho",
-      "ghost": "01",
       "titulo": "Os casais que passaram em 2026.",
       "sub": "Sem promessa. So o que aconteceu de verdade.",
       "destaques": [
         "verdade."
-      ]
+      ],
+      "imagem": "acervo/familia/neve-mae-crianca.jpg"
     },
     {
       "tipo": "passo",
@@ -73,5 +73,6 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "[COMPLETAR COM O NUMERO REAL] Os casais que se prepararam por aqui e passaram em 2026.\n\n[N] pessoas aprovadas. E o dado que eu tenho pra mostrar, nao uma projecao. E ele nao significa que voce esta garantido: cada caso e um caso, a decisao e do consulo. Significa que preparo muda a media.\n\nSe voces sao casal de primeira viagem e nao sabem por onde comecar, ver gente como voces passar tira o medo do escuro.\n\nQuer ser o proximo casal preparado? Chama no WhatsApp.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagemacasal #luademel #eua"
+  "legenda": "[COMPLETAR COM O NUMERO REAL] Os casais que se prepararam por aqui e passaram em 2026.\n\n[N] pessoas aprovadas. E o dado que eu tenho pra mostrar, nao uma projecao. E ele nao significa que voce esta garantido: cada caso e um caso, a decisao e do consulo. Significa que preparo muda a media.\n\nSe voces sao casal de primeira viagem e nao sabem por onde comecar, ver gente como voces passar tira o medo do escuro.\n\nQuer ser o proximo casal preparado? Chama no WhatsApp.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagemacasal #luademel #eua",
+  "imagem": "acervo/familia/neve-mae-crianca.jpg"
 }

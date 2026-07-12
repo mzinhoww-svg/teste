@@ -13,17 +13,70 @@
       "tese": "O governo cobra US$750 pra furar fila; consultoria completa custa menos de um terco",
       "persona": "Autonomo / MEI",
       "dor": "acha que vai ser negado por nao ter vinculo formal",
-      "imagem": "acervo/fontes/taxa-750.png",
+      "imagem": "acervo/destinos/ny-skyline-menina.jpg",
       "fonte_url": "https://www.federalregister.gov/documents/2026/06/09/2026-11513/schedule-of-fees-for-consular-services-department-of-state-and-overseas-embassies-and",
       "fonte_verificada_em": "2026-07-12",
       "slides": [
-        {"tipo": "capa", "kicker": "o preco da sua pressa", "ghost": "01", "titulo": "O governo botou preco na fila. 750 dolares.", "sub": "Federal Register, doc 2026-11513. Ta na fonte, nao e boato.", "destaques": ["750"]},
-        {"tipo": "passo", "numero": "02", "titulo": "O que os 750 compram", "corpo": "Uma data de entrevista em ate 10 dias uteis, num posto selecionado. So isso. Vale de julho a dezembro de 2026.", "destaques": ["data"]},
-        {"tipo": "passo", "numero": "03", "titulo": "O que eles NAO compram", "corpo": "A analise do seu caso continua igual. O oficial olha o mesmo que olharia. Voce paga pra esperar menos, nao pra passar.", "destaques": ["igual."]},
-        {"tipo": "insight", "texto": "Voce nao tem holerite. Vao te vender pressa porque sabem que voce tem medo. Pressa nao e preparo.", "destaques": ["medo.", "preparo."]},
-        {"tipo": "passo", "numero": "05", "titulo": "A conta que ninguem faz", "corpo": "750 dolares so pra antecipar. Nao aprova nada. Uma consultoria completa, que te prepara de verdade, custa menos de um terco disso.", "destaques": ["terco"]},
-        {"tipo": "passo", "numero": "06", "titulo": "Ser MEI nao te derruba", "corpo": "Vinculo se comprova de varias formas. O que derruba e chegar despreparado e com pressa comprada. Nao a sua carteira.", "destaques": ["despreparado"]},
-        {"tipo": "cta", "titulo": "Antes de gastar 750 na pressa, fala comigo.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "o preco da sua pressa",
+          "titulo": "O governo botou preco na fila. 750 dolares.",
+          "sub": "Federal Register, doc 2026-11513. Ta na fonte, nao e boato.",
+          "destaques": [
+            "750"
+          ],
+          "imagem": "acervo/destinos/ny-skyline-menina.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "O que os 750 compram",
+          "corpo": "Uma data de entrevista em ate 10 dias uteis, num posto selecionado. So isso. Vale de julho a dezembro de 2026.",
+          "destaques": [
+            "data"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "O que eles NAO compram",
+          "corpo": "A analise do seu caso continua igual. O oficial olha o mesmo que olharia. Voce paga pra esperar menos, nao pra passar.",
+          "destaques": [
+            "igual."
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Voce nao tem holerite. Vao te vender pressa porque sabem que voce tem medo. Pressa nao e preparo.",
+          "destaques": [
+            "medo.",
+            "preparo."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "A conta que ninguem faz",
+          "corpo": "750 dolares so pra antecipar. Nao aprova nada. Uma consultoria completa, que te prepara de verdade, custa menos de um terco disso.",
+          "destaques": [
+            "terco"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Ser MEI nao te derruba",
+          "corpo": "Vinculo se comprova de varias formas. O que derruba e chegar despreparado e com pressa comprada. Nao a sua carteira.",
+          "destaques": [
+            "despreparado"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Antes de gastar 750 na pressa, fala comigo.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
       "legenda": "O governo americano botou preco na sua pressa: 750 dolares pra antecipar a entrevista.\n\nTa no Federal Register (doc 2026-11513), vale de julho a dezembro de 2026, e serve pra uma coisa so: date de entrevista em ate 10 dias uteis. Nao aprova o visto. A analise e a mesma.\n\nSe voce e autonomo e ja tao te oferecendo isso como solucao, cuidado: pressa nao e preparo. E na maioria dos casos, esse dinheiro resolveria melhor a sua preparacao do que a sua fila.\n\nA gente nao garante seu visto. Ninguem pode. Mas te preparo pra chegar sem medo. Chama no WhatsApp.\n\n#vistoamericano #vistoeua #b1b2 #autonomo #mei #viagemeua #consuladoamericano"
     },
@@ -40,15 +93,68 @@
       "persona": "Casal primeira viagem",
       "dor": "nao sabe por onde comecar",
       "slides": [
-        {"tipo": "capa", "kicker": "a verdade incomoda", "ghost": "01", "titulo": "Se prometeram visto garantido pra voces, corram.", "sub": "E a primeira viagem de voces. Comeca por aqui.", "destaques": ["corram."]},
-        {"tipo": "passo", "numero": "02", "titulo": "Quem decide", "corpo": "Nao e o site. Nao e a assessoria. E um oficial no consulado, na hora, olhando pra voces. Ninguem no Brasil manda nessa decisao.", "destaques": ["ninguem"]},
-        {"tipo": "passo", "numero": "03", "titulo": "Por que prometem", "corpo": "Porque voces estao inseguros e e a primeira vez. Promessa de garantia vende medo. E medo paga caro.", "destaques": ["medo."]},
-        {"tipo": "insight", "texto": "A pergunta certa nao e quem garante. E quem fica com voces quando da errado.", "destaques": ["fica"]},
-        {"tipo": "passo", "numero": "05", "titulo": "O que da pra garantir", "corpo": "Preparo. DS-160 coerente. Voces sabendo responder sem gaguejar. Isso muda o jogo. O carimbo, nao.", "destaques": ["Preparo."]},
-        {"tipo": "passo", "numero": "06", "titulo": "O disclaimer e o teste", "corpo": "Pergunta pra quem tao contratando: voces garantem? Se disser sim, ja sabe. Quem e honesto diz que nao pode garantir.", "destaques": ["nao"]},
-        {"tipo": "cta", "titulo": "A gente nao garante seu visto. E por isso que da pra confiar.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "a verdade incomoda",
+          "titulo": "Se prometeram visto garantido pra voces, corram.",
+          "sub": "E a primeira viagem de voces. Comeca por aqui.",
+          "destaques": [
+            "corram."
+          ],
+          "imagem": "acervo/familia/familia-selfie.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Quem decide",
+          "corpo": "Nao e o site. Nao e a assessoria. E um oficial no consulado, na hora, olhando pra voces. Ninguem no Brasil manda nessa decisao.",
+          "destaques": [
+            "ninguem"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Por que prometem",
+          "corpo": "Porque voces estao inseguros e e a primeira vez. Promessa de garantia vende medo. E medo paga caro.",
+          "destaques": [
+            "medo."
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "A pergunta certa nao e quem garante. E quem fica com voces quando da errado.",
+          "destaques": [
+            "fica"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O que da pra garantir",
+          "corpo": "Preparo. DS-160 coerente. Voces sabendo responder sem gaguejar. Isso muda o jogo. O carimbo, nao.",
+          "destaques": [
+            "Preparo."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O disclaimer e o teste",
+          "corpo": "Pergunta pra quem tao contratando: voces garantem? Se disser sim, ja sabe. Quem e honesto diz que nao pode garantir.",
+          "destaques": [
+            "nao"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "A gente nao garante seu visto. E por isso que da pra confiar.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "Primeira viagem internacional de voces e ja apareceu alguem prometendo visto garantido?\n\nCorram. Ninguem garante visto. A decisao e de um oficial no consulado, na hora, olhando pra voces. Quem promete garantia ta vendendo o seu medo de nao saber por onde comecar.\n\nO que da pra garantir e preparo: DS-160 coerente, voces sabendo responder. Isso a gente faz. O carimbo e do consulo.\n\nA gente nao garante seu visto. Ninguem pode. Quem garante ta mentindo pra voce. Chama no WhatsApp e comeca do jeito certo.\n\n#vistoamericano #primeiraviagem #luademel #vistoeua #b1b2 #viagemacasal #eua"
+      "legenda": "Primeira viagem internacional de voces e ja apareceu alguem prometendo visto garantido?\n\nCorram. Ninguem garante visto. A decisao e de um oficial no consulado, na hora, olhando pra voces. Quem promete garantia ta vendendo o seu medo de nao saber por onde comecar.\n\nO que da pra garantir e preparo: DS-160 coerente, voces sabendo responder. Isso a gente faz. O carimbo e do consulo.\n\nA gente nao garante seu visto. Ninguem pode. Quem garante ta mentindo pra voce. Chama no WhatsApp e comeca do jeito certo.\n\n#vistoamericano #primeiraviagem #luademel #vistoeua #b1b2 #viagemacasal #eua",
+      "imagem": "acervo/familia/familia-selfie.jpg"
     },
     {
       "combo": "A05xP6",
@@ -65,15 +171,69 @@
       "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
       "fonte_verificada_em": "2026-07-12",
       "slides": [
-        {"tipo": "capa", "kicker": "os dois extremos", "ghost": "01", "titulo": "Cobraram 99 reais? Cobraram 3 mil? Os dois sao sinal.", "sub": "Voces sao um grupo. Errar aqui multiplica por seis.", "destaques": ["sinal."]},
-        {"tipo": "passo", "numero": "02", "titulo": "Barato demais", "corpo": "99 reais nao paga o trabalho de preparar seis pessoas. Ou e so preenchimento de formulario, ou some no meio do caminho.", "destaques": ["some"]},
-        {"tipo": "passo", "numero": "03", "titulo": "Caro demais", "corpo": "3 mil por pessoa vende status, nao resultado. O consulo nao cobra mais caro de quem pagou assessoria cara.", "destaques": ["status,"]},
-        {"tipo": "insight", "texto": "Preco de menos esconde ausencia. Preco de mais esconde promessa. O justo fica no meio, e explica cada centavo.", "destaques": ["ausencia.", "promessa."]},
-        {"tipo": "passo", "numero": "05", "titulo": "O que importa pro grupo", "corpo": "Coordenar seis DS-160 sem contradicao entre eles, agendar junto, e cada um saber a propria historia. E isso que trava um grupo, nao o preco.", "destaques": ["contradicao"]},
-        {"tipo": "passo", "numero": "06", "titulo": "Pergunta o que ta incluso", "corpo": "Taxa consular de 185 dolares por pessoa entra a parte, sempre. Quem junta tudo num preco redondo ta escondendo alguma coisa.", "destaques": ["185"]},
-        {"tipo": "cta", "titulo": "Grupo fechado, preco explicado, taxa a parte. Fala comigo.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "os dois extremos",
+          "titulo": "Cobraram 99 reais? Cobraram 3 mil? Os dois sao sinal.",
+          "sub": "Voces sao um grupo. Errar aqui multiplica por seis.",
+          "destaques": [
+            "sinal."
+          ],
+          "imagem": "acervo/destinos/disney-main-street.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Barato demais",
+          "corpo": "99 reais nao paga o trabalho de preparar seis pessoas. Ou e so preenchimento de formulario, ou some no meio do caminho.",
+          "destaques": [
+            "some"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Caro demais",
+          "corpo": "3 mil por pessoa vende status, nao resultado. O consulo nao cobra mais caro de quem pagou assessoria cara.",
+          "destaques": [
+            "status,"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Preco de menos esconde ausencia. Preco de mais esconde promessa. O justo fica no meio, e explica cada centavo.",
+          "destaques": [
+            "ausencia.",
+            "promessa."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O que importa pro grupo",
+          "corpo": "Coordenar seis DS-160 sem contradicao entre eles, agendar junto, e cada um saber a propria historia. E isso que trava um grupo, nao o preco.",
+          "destaques": [
+            "contradicao"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Pergunta o que ta incluso",
+          "corpo": "Taxa consular de 185 dolares por pessoa entra a parte, sempre. Quem junta tudo num preco redondo ta escondendo alguma coisa.",
+          "destaques": [
+            "185"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Grupo fechado, preco explicado, taxa a parte. Fala comigo.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "Cobraram 99 reais pra fazer o visto do grupo? Ou cobraram 3 mil por cabeca? Os dois sao sinal de alerta.\n\nBarato demais quase sempre e so preenchimento, ou some no meio. Caro demais vende status. O consulo nao cobra mais caro de quem pagou assessoria cara.\n\nGrupo de amigos trava no que importa: seis DS-160 sem contradicao, agendamento junto, cada um sabendo a propria historia. E a taxa consular de 185 dolares por pessoa entra sempre a parte.\n\nA gente nao garante seu visto. A gente explica cada centavo. Chama no WhatsApp.\n\n#vistoamericano #grupodeamigos #viagemcomamigos #vistoeua #b1b2 #miami #novayork"
+      "legenda": "Cobraram 99 reais pra fazer o visto do grupo? Ou cobraram 3 mil por cabeca? Os dois sao sinal de alerta.\n\nBarato demais quase sempre e so preenchimento, ou some no meio. Caro demais vende status. O consulo nao cobra mais caro de quem pagou assessoria cara.\n\nGrupo de amigos trava no que importa: seis DS-160 sem contradicao, agendamento junto, cada um sabendo a propria historia. E a taxa consular de 185 dolares por pessoa entra sempre a parte.\n\nA gente nao garante seu visto. A gente explica cada centavo. Chama no WhatsApp.\n\n#vistoamericano #grupodeamigos #viagemcomamigos #vistoeua #b1b2 #miami #novayork",
+      "imagem": "acervo/destinos/disney-main-street.jpg"
     },
     {
       "combo": "A07xP7",
@@ -90,15 +250,68 @@
       "fonte_url": "https://www.federalregister.gov/documents/2026/06/09/2026-11513/schedule-of-fees-for-consular-services-department-of-state-and-overseas-embassies-and",
       "fonte_verificada_em": "2026-07-12",
       "slides": [
-        {"tipo": "capa", "kicker": "o que nao te contam", "ghost": "01", "titulo": "Da pra antecipar sua entrevista de graca.", "sub": "Sem pagar os 750 dolares. Em caso de emergencia real.", "destaques": ["graca."]},
-        {"tipo": "passo", "numero": "02", "titulo": "Existe o pedido de emergencia", "corpo": "O consulado tem um canal pra remarcar mais cedo quando ha motivo real: saude, trabalho, familia. Sem custo extra.", "destaques": ["real:"]},
-        {"tipo": "passo", "numero": "03", "titulo": "Precisa de motivo e prova", "corpo": "Nao e pra qualquer um e nao e pra furar fila por vontade. Voce descreve a emergencia e anexa o que comprova. Sem documento, nao rola.", "destaques": ["comprova."]},
-        {"tipo": "insight", "texto": "A gente ganha te vendendo pressa. Mas se da pra resolver de graca, eu prefiro te contar. E isso que muda a confianca.", "destaques": ["graca,"]},
-        {"tipo": "passo", "numero": "05", "titulo": "Por que isso importa pra voce", "corpo": "Autonomo costuma ter demanda que surge do nada. Uma feira, um cliente la fora. Isso pode ser a sua emergencia legitima.", "destaques": ["legitima."]},
-        {"tipo": "passo", "numero": "06", "titulo": "O risco de fazer errado", "corpo": "Pedido de emergencia mal justificado e negado, e voce perde a vez. Por isso vale escrever certo da primeira vez.", "destaques": ["negado,"]},
-        {"tipo": "cta", "titulo": "Quer saber se o seu caso e emergencia? Eu te falo de graca.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "o que nao te contam",
+          "titulo": "Da pra antecipar sua entrevista de graca.",
+          "sub": "Sem pagar os 750 dolares. Em caso de emergencia real.",
+          "destaques": [
+            "graca."
+          ],
+          "imagem": "acervo/destinos/universal-globo.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Existe o pedido de emergencia",
+          "corpo": "O consulado tem um canal pra remarcar mais cedo quando ha motivo real: saude, trabalho, familia. Sem custo extra.",
+          "destaques": [
+            "real:"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Precisa de motivo e prova",
+          "corpo": "Nao e pra qualquer um e nao e pra furar fila por vontade. Voce descreve a emergencia e anexa o que comprova. Sem documento, nao rola.",
+          "destaques": [
+            "comprova."
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "A gente ganha te vendendo pressa. Mas se da pra resolver de graca, eu prefiro te contar. E isso que muda a confianca.",
+          "destaques": [
+            "graca,"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "Por que isso importa pra voce",
+          "corpo": "Autonomo costuma ter demanda que surge do nada. Uma feira, um cliente la fora. Isso pode ser a sua emergencia legitima.",
+          "destaques": [
+            "legitima."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O risco de fazer errado",
+          "corpo": "Pedido de emergencia mal justificado e negado, e voce perde a vez. Por isso vale escrever certo da primeira vez.",
+          "destaques": [
+            "negado,"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Quer saber se o seu caso e emergencia? Eu te falo de graca.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "Da pra antecipar sua entrevista do visto de graca. O consulado nao faz questao de contar.\n\nExiste o pedido de emergencia: quando ha motivo real (saude, trabalho, familia) voce pede uma data mais cedo sem pagar os 750 dolares da fila premium. Precisa de motivo e de prova.\n\nSe voce e autonomo, uma feira ou um cliente la fora pode ser a sua emergencia legitima. Mas pedido mal justificado e negado, e voce perde a vez.\n\nQuer saber se o seu caso se encaixa? Eu te falo de graca. Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #dicasdeviagem #consuladoamericano"
+      "legenda": "Da pra antecipar sua entrevista do visto de graca. O consulado nao faz questao de contar.\n\nExiste o pedido de emergencia: quando ha motivo real (saude, trabalho, familia) voce pede uma data mais cedo sem pagar os 750 dolares da fila premium. Precisa de motivo e de prova.\n\nSe voce e autonomo, uma feira ou um cliente la fora pode ser a sua emergencia legitima. Mas pedido mal justificado e negado, e voce perde a vez.\n\nQuer saber se o seu caso se encaixa? Eu te falo de graca. Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #dicasdeviagem #consuladoamericano",
+      "imagem": "acervo/destinos/universal-globo.jpg"
     },
     {
       "combo": "A08xP5",
@@ -115,15 +328,68 @@
       "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
       "fonte_verificada_em": "2026-07-12",
       "slides": [
-        {"tipo": "capa", "kicker": "a conta real", "ghost": "01", "titulo": "Quanto custa renovar o visto de verdade em 2026.", "sub": "Spoiler: nao e so a taxa que voce lembra.", "destaques": ["verdade"]},
-        {"tipo": "passo", "numero": "02", "titulo": "A taxa base", "corpo": "MRV de 185 dolares por pessoa. Essa e a que todo mundo conhece. E ela nao volta se for negado.", "destaques": ["185"]},
-        {"tipo": "passo", "numero": "03", "titulo": "A taxa nova de 2026", "corpo": "Entrou uma taxa de integridade de 250 dolares, cobrada quando o visto e emitido. Confere no travel.state.gov antes de fechar conta.", "destaques": ["250"]},
-        {"tipo": "passo", "numero": "04", "titulo": "A pressa e opcional", "corpo": "Aquele valor de 750 dolares pra antecipar e opcional, so em postos selecionados. Voce nao precisa dele pra renovar.", "destaques": ["opcional,"]},
-        {"tipo": "insight", "texto": "Renovacao nao e automatica quando o visto venceu ha mais de 12 meses. Voce cai na fila de entrevista como todo mundo.", "destaques": ["nao"]},
-        {"tipo": "passo", "numero": "06", "titulo": "A conta honesta", "corpo": "Taxa base, taxa nova, passaporte se preciso, e a consultoria se voce quer preparo. Somado e transparente, sem surpresa no fim.", "destaques": ["transparente,"]},
-        {"tipo": "cta", "titulo": "Quer sua conta fechada, item por item? Eu monto com voce.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "a conta real",
+          "titulo": "Quanto custa renovar o visto de verdade em 2026.",
+          "sub": "Spoiler: nao e so a taxa que voce lembra.",
+          "destaques": [
+            "verdade"
+          ],
+          "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "A taxa base",
+          "corpo": "MRV de 185 dolares por pessoa. Essa e a que todo mundo conhece. E ela nao volta se for negado.",
+          "destaques": [
+            "185"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "A taxa nova de 2026",
+          "corpo": "Entrou uma taxa de integridade de 250 dolares, cobrada quando o visto e emitido. Confere no travel.state.gov antes de fechar conta.",
+          "destaques": [
+            "250"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "04",
+          "titulo": "A pressa e opcional",
+          "corpo": "Aquele valor de 750 dolares pra antecipar e opcional, so em postos selecionados. Voce nao precisa dele pra renovar.",
+          "destaques": [
+            "opcional,"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Renovacao nao e automatica quando o visto venceu ha mais de 12 meses. Voce cai na fila de entrevista como todo mundo.",
+          "destaques": [
+            "nao"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "A conta honesta",
+          "corpo": "Taxa base, taxa nova, passaporte se preciso, e a consultoria se voce quer preparo. Somado e transparente, sem surpresa no fim.",
+          "destaques": [
+            "transparente,"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Quer sua conta fechada, item por item? Eu monto com voce.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "Quanto custa renovar o visto americano de verdade em 2026?\n\nNao e so a MRV de 185 dolares que voce lembra. Entrou uma taxa de integridade de 250 dolares cobrada na emissao (confere no travel.state.gov). E tem os 750 opcionais de quem quer furar fila, que voce nao precisa.\n\nE atencao: se o seu visto venceu ha mais de 12 meses, a renovacao nao e automatica. Voce cai na fila de entrevista.\n\nA conta honesta soma taxa, passaporte e consultoria, sem surpresa no fim. Quer a sua fechada item por item? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #taxavisto #consuladoamericano"
+      "legenda": "Quanto custa renovar o visto americano de verdade em 2026?\n\nNao e so a MRV de 185 dolares que voce lembra. Entrou uma taxa de integridade de 250 dolares cobrada na emissao (confere no travel.state.gov). E tem os 750 opcionais de quem quer furar fila, que voce nao precisa.\n\nE atencao: se o seu visto venceu ha mais de 12 meses, a renovacao nao e automatica. Voce cai na fila de entrevista.\n\nA conta honesta soma taxa, passaporte e consultoria, sem surpresa no fim. Quer a sua fechada item por item? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #taxavisto #consuladoamericano",
+      "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
     },
     {
       "combo": "A09xP7",
@@ -138,15 +404,68 @@
       "persona": "Autonomo / MEI",
       "dor": "acha que vai ser negado por nao ter vinculo formal",
       "slides": [
-        {"tipo": "capa", "kicker": "planeje os dois dias", "ghost": "01", "titulo": "Sao duas visitas, em dias diferentes.", "sub": "Muita gente descobre isso tarde demais.", "destaques": ["duas"]},
-        {"tipo": "passo", "numero": "02", "titulo": "Dia 1: o CASV", "corpo": "E onde tiram sua foto e coletam digitais. Rapido, mas e um deslocamento inteiro. Nao e a entrevista.", "destaques": ["digitais."]},
-        {"tipo": "passo", "numero": "03", "titulo": "Dia 2: o consulado", "corpo": "Aqui e a entrevista de verdade, com o oficial. Pode ser noutra data e ate noutra cidade. Planeje.", "destaques": ["entrevista"]},
-        {"tipo": "insight", "texto": "Autonomo perde dois dias de trabalho, nao um. Saber disso antes e o que separa quem se planeja de quem se atrapalha.", "destaques": ["dois"]},
-        {"tipo": "passo", "numero": "05", "titulo": "Por que isso pega o autonomo", "corpo": "Sem carteira assinada, cada dia parado e dinheiro que voce mesmo banca. Agendar os dois juntos, na mesma viagem, economiza.", "destaques": ["juntos,"]},
-        {"tipo": "passo", "numero": "06", "titulo": "Da pra otimizar", "corpo": "Em varios postos da pra marcar CASV e entrevista em dias proximos. A gente organiza pra voce nao ir e voltar duas vezes.", "destaques": ["proximos."]},
-        {"tipo": "cta", "titulo": "Quer os dois dias organizados numa viagem so? Fala comigo.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "planeje os dois dias",
+          "titulo": "Sao duas visitas, em dias diferentes.",
+          "sub": "Muita gente descobre isso tarde demais.",
+          "destaques": [
+            "duas"
+          ],
+          "imagem": "acervo/destinos/praia-por-do-sol.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Dia 1: o CASV",
+          "corpo": "E onde tiram sua foto e coletam digitais. Rapido, mas e um deslocamento inteiro. Nao e a entrevista.",
+          "destaques": [
+            "digitais."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Dia 2: o consulado",
+          "corpo": "Aqui e a entrevista de verdade, com o oficial. Pode ser noutra data e ate noutra cidade. Planeje.",
+          "destaques": [
+            "entrevista"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Autonomo perde dois dias de trabalho, nao um. Saber disso antes e o que separa quem se planeja de quem se atrapalha.",
+          "destaques": [
+            "dois"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "Por que isso pega o autonomo",
+          "corpo": "Sem carteira assinada, cada dia parado e dinheiro que voce mesmo banca. Agendar os dois juntos, na mesma viagem, economiza.",
+          "destaques": [
+            "juntos,"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Da pra otimizar",
+          "corpo": "Em varios postos da pra marcar CASV e entrevista em dias proximos. A gente organiza pra voce nao ir e voltar duas vezes.",
+          "destaques": [
+            "proximos."
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Quer os dois dias organizados numa viagem so? Fala comigo.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "Voce sabia que tirar o visto americano sao DUAS visitas, em dias diferentes?\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista com o oficial, que pode ser noutra data e ate noutra cidade.\n\nPra quem e autonomo, isso e dois dias de trabalho parado, nao um. Saber antes e o que separa quem se planeja de quem se atrapalha. Em muitos postos da pra marcar os dois proximos, numa viagem so.\n\nQuer isso organizado direito? Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #casv #vistoeua #b1b2 #dicasdevisto"
+      "legenda": "Voce sabia que tirar o visto americano sao DUAS visitas, em dias diferentes?\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista com o oficial, que pode ser noutra data e ate noutra cidade.\n\nPra quem e autonomo, isso e dois dias de trabalho parado, nao um. Saber antes e o que separa quem se planeja de quem se atrapalha. Em muitos postos da pra marcar os dois proximos, numa viagem so.\n\nQuer isso organizado direito? Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #casv #vistoeua #b1b2 #dicasdevisto",
+      "imagem": "acervo/destinos/praia-por-do-sol.jpg"
     },
     {
       "combo": "A10xP3",
@@ -163,15 +482,68 @@
       "fonte_url": "https://br.usembassy.gov/pt/vistos/",
       "fonte_verificada_em": "2026-07-12",
       "slides": [
-        {"tipo": "capa", "kicker": "mudou a regra", "ghost": "01", "titulo": "Menor de idade agora precisa comparecer.", "sub": "Se voce ja foi negado, essa muda o seu planejamento.", "destaques": ["comparecer."]},
-        {"tipo": "passo", "numero": "02", "titulo": "O que mudou", "corpo": "Antes, em varios casos, menor era dispensado da entrevista. Agora costuma precisar aparecer. Confirme sempre no site do consulado.", "destaques": ["aparecer."]},
-        {"tipo": "passo", "numero": "03", "titulo": "Por que isso te afeta", "corpo": "Voce ja levou um nao e sabe o peso de refazer tudo. Agora conte com a agenda das criancas tambem no dia.", "destaques": ["nao"]},
-        {"tipo": "insight", "texto": "Ser negado nao foi o fim. Repetir sem entender o que mudou, esse sim seria o erro caro.", "destaques": ["mudou,"]},
-        {"tipo": "passo", "numero": "05", "titulo": "Organize a familia", "corpo": "Datas escolares, quem leva, quem responde por cada crianca. Um imprevisto de agenda derruba um dia inteiro de entrevista.", "destaques": ["imprevisto"]},
-        {"tipo": "passo", "numero": "06", "titulo": "A taxa nao volta", "corpo": "Sao 185 dolares por pessoa, criancas incluidas, e nao reembolsa se negar. Por isso a segunda tentativa tem que ser bem feita.", "destaques": ["185"]},
-        {"tipo": "cta", "titulo": "Sua segunda tentativa merece ser a certa. Fala comigo.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "mudou a regra",
+          "titulo": "Menor de idade agora precisa comparecer.",
+          "sub": "Se voce ja foi negado, essa muda o seu planejamento.",
+          "destaques": [
+            "comparecer."
+          ],
+          "imagem": "acervo/destinos/disney-goofy.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "O que mudou",
+          "corpo": "Antes, em varios casos, menor era dispensado da entrevista. Agora costuma precisar aparecer. Confirme sempre no site do consulado.",
+          "destaques": [
+            "aparecer."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Por que isso te afeta",
+          "corpo": "Voce ja levou um nao e sabe o peso de refazer tudo. Agora conte com a agenda das criancas tambem no dia.",
+          "destaques": [
+            "nao"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Ser negado nao foi o fim. Repetir sem entender o que mudou, esse sim seria o erro caro.",
+          "destaques": [
+            "mudou,"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "Organize a familia",
+          "corpo": "Datas escolares, quem leva, quem responde por cada crianca. Um imprevisto de agenda derruba um dia inteiro de entrevista.",
+          "destaques": [
+            "imprevisto"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "A taxa nao volta",
+          "corpo": "Sao 185 dolares por pessoa, criancas incluidas, e nao reembolsa se negar. Por isso a segunda tentativa tem que ser bem feita.",
+          "destaques": [
+            "185"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Sua segunda tentativa merece ser a certa. Fala comigo.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "Mudou a regra: menor de idade agora costuma precisar comparecer na entrevista. Confirme sempre no site do consulado (br.usembassy.gov).\n\nSe voce ja foi negado uma vez, isso muda o seu planejamento. Refazer tudo ja pesa. Agora conte com a agenda das criancas no mesmo dia.\n\nSer negado nao foi o fim. Repetir sem entender o que mudou, esse sim seria o erro caro. E a taxa de 185 dolares por pessoa, criancas incluidas, nao volta.\n\nSua segunda tentativa merece ser bem feita. Chama no WhatsApp.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #familia #consuladoamericano"
+      "legenda": "Mudou a regra: menor de idade agora costuma precisar comparecer na entrevista. Confirme sempre no site do consulado (br.usembassy.gov).\n\nSe voce ja foi negado uma vez, isso muda o seu planejamento. Refazer tudo ja pesa. Agora conte com a agenda das criancas no mesmo dia.\n\nSer negado nao foi o fim. Repetir sem entender o que mudou, esse sim seria o erro caro. E a taxa de 185 dolares por pessoa, criancas incluidas, nao volta.\n\nSua segunda tentativa merece ser bem feita. Chama no WhatsApp.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #familia #consuladoamericano",
+      "imagem": "acervo/destinos/disney-goofy.jpg"
     },
     {
       "combo": "A15xP4",
@@ -186,15 +558,68 @@
       "persona": "Torcedor Copa",
       "dor": "prazo. janela fecha",
       "slides": [
-        {"tipo": "capa", "kicker": "o formulario decide", "ghost": "01", "titulo": "7 campos do DS-160 derrubam mais que perfil ruim.", "sub": "Voce tem ingresso e a janela ta fechando. Nao erre aqui.", "destaques": ["7"]},
-        {"tipo": "passo", "numero": "02", "titulo": "O DS-160 e sua primeira entrevista", "corpo": "O oficial le ele antes de te ver. Se o formulario ja te contradiz, voce entra em desvantagem.", "destaques": ["contradiz,"]},
-        {"tipo": "passo", "numero": "03", "titulo": "Onde mais se erra", "corpo": "Profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil. Sete campos.", "destaques": ["Sete"]},
-        {"tipo": "insight", "texto": "Nao e o seu perfil que reprova na maioria dos casos. E a incoerencia entre o que voce escreveu e o que voce fala.", "destaques": ["incoerencia"]},
-        {"tipo": "passo", "numero": "05", "titulo": "A pressa da Copa piora isso", "corpo": "Com prazo curto, todo mundo preenche correndo. E correndo que nascem os erros que travam o visto na hora.", "destaques": ["correndo"]},
-        {"tipo": "passo", "numero": "06", "titulo": "Revisar leva pouco", "corpo": "Uma revisao dos sete campos criticos leva menos tempo que voce imagina. E evita voce perder o jogo por um dado torto.", "destaques": ["sete"]},
-        {"tipo": "cta", "titulo": "Antes de enviar o DS-160, deixa eu revisar os 7 campos.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "o formulario decide",
+          "titulo": "7 campos do DS-160 derrubam mais que perfil ruim.",
+          "sub": "Voce tem ingresso e a janela ta fechando. Nao erre aqui.",
+          "destaques": [
+            "7"
+          ],
+          "imagem": "acervo/destinos/praia-crianca.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "O DS-160 e sua primeira entrevista",
+          "corpo": "O oficial le ele antes de te ver. Se o formulario ja te contradiz, voce entra em desvantagem.",
+          "destaques": [
+            "contradiz,"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Onde mais se erra",
+          "corpo": "Profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil. Sete campos.",
+          "destaques": [
+            "Sete"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Nao e o seu perfil que reprova na maioria dos casos. E a incoerencia entre o que voce escreveu e o que voce fala.",
+          "destaques": [
+            "incoerencia"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "A pressa da Copa piora isso",
+          "corpo": "Com prazo curto, todo mundo preenche correndo. E correndo que nascem os erros que travam o visto na hora.",
+          "destaques": [
+            "correndo"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Revisar leva pouco",
+          "corpo": "Uma revisao dos sete campos criticos leva menos tempo que voce imagina. E evita voce perder o jogo por um dado torto.",
+          "destaques": [
+            "sete"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Antes de enviar o DS-160, deixa eu revisar os 7 campos.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "Sete campos do DS-160 derrubam mais gente que perfil ruim.\n\nO oficial le o seu formulario antes de te ver. Se ele ja te contradiz, voce entra em desvantagem. Os sete que mais pegam: profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil.\n\nCom a Copa e o prazo curto, todo mundo preenche correndo, e e correndo que nascem os erros. Uma revisao desses campos leva menos que voce imagina.\n\nAntes de enviar, deixa eu revisar com voce. Chama no WhatsApp.\n\n#vistoamericano #ds160 #copadomundo #vistoeua #b1b2 #futebol #dicasdevisto"
+      "legenda": "Sete campos do DS-160 derrubam mais gente que perfil ruim.\n\nO oficial le o seu formulario antes de te ver. Se ele ja te contradiz, voce entra em desvantagem. Os sete que mais pegam: profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil.\n\nCom a Copa e o prazo curto, todo mundo preenche correndo, e e correndo que nascem os erros. Uma revisao desses campos leva menos que voce imagina.\n\nAntes de enviar, deixa eu revisar com voce. Chama no WhatsApp.\n\n#vistoamericano #ds160 #copadomundo #vistoeua #b1b2 #futebol #dicasdevisto",
+      "imagem": "acervo/destinos/praia-crianca.jpg"
     },
     {
       "combo": "A13xP7",
@@ -209,15 +634,68 @@
       "persona": "Autonomo / MEI",
       "dor": "acha que vai ser negado por nao ter vinculo formal",
       "slides": [
-        {"tipo": "capa", "kicker": "mito de documento", "ghost": "01", "titulo": "Aquela pasta gorda de documentos? Ele nem abre.", "sub": "Voce e autonomo e junta papel achando que salva. Calma.", "destaques": ["abre."]},
-        {"tipo": "passo", "numero": "02", "titulo": "A entrevista e curta", "corpo": "Dura menos de um minuto na maioria dos casos. Nao da tempo de folhear extrato, contrato, imposto de renda.", "destaques": ["minuto"]},
-        {"tipo": "passo", "numero": "03", "titulo": "O que pesa e a sua fala", "corpo": "O oficial decide pela coerencia do que voce responde, nao pela espessura da pasta. Autonomo forte fala claro.", "destaques": ["coerencia"]},
-        {"tipo": "insight", "texto": "Voce acha que sem carteira assinada precisa provar mais. Precisa e explicar melhor. Sao coisas diferentes.", "destaques": ["explicar"]},
-        {"tipo": "passo", "numero": "05", "titulo": "Como o autonomo comprova vinculo", "corpo": "Faturamento, clientes, familia, bens, uma vida que te traz de volta. Isso se diz em uma frase segura, nao numa pilha de folha.", "destaques": ["volta."]},
-        {"tipo": "passo", "numero": "06", "titulo": "Leve o basico, saiba a historia", "corpo": "Tenha os documentos, sim, mas organizados e na cabeca. O que ganha e voce sabendo contar quem voce e.", "destaques": ["historia"]},
-        {"tipo": "cta", "titulo": "Deixa eu te ensinar a contar a sua historia em uma frase.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "mito de documento",
+          "titulo": "Aquela pasta gorda de documentos? Ele nem abre.",
+          "sub": "Voce e autonomo e junta papel achando que salva. Calma.",
+          "destaques": [
+            "abre."
+          ],
+          "imagem": "acervo/familia/familia-selfie2.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "A entrevista e curta",
+          "corpo": "Dura menos de um minuto na maioria dos casos. Nao da tempo de folhear extrato, contrato, imposto de renda.",
+          "destaques": [
+            "minuto"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "O que pesa e a sua fala",
+          "corpo": "O oficial decide pela coerencia do que voce responde, nao pela espessura da pasta. Autonomo forte fala claro.",
+          "destaques": [
+            "coerencia"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Voce acha que sem carteira assinada precisa provar mais. Precisa e explicar melhor. Sao coisas diferentes.",
+          "destaques": [
+            "explicar"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "Como o autonomo comprova vinculo",
+          "corpo": "Faturamento, clientes, familia, bens, uma vida que te traz de volta. Isso se diz em uma frase segura, nao numa pilha de folha.",
+          "destaques": [
+            "volta."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Leve o basico, saiba a historia",
+          "corpo": "Tenha os documentos, sim, mas organizados e na cabeca. O que ganha e voce sabendo contar quem voce e.",
+          "destaques": [
+            "historia"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Deixa eu te ensinar a contar a sua historia em uma frase.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "Aquela pasta gorda de documentos que voce, autonomo, junta com tanto medo? O oficial nem abre.\n\nA entrevista dura menos de um minuto. Nao da tempo de folhear extrato e contrato. O que pesa e a coerencia do que voce fala, nao a espessura da pasta.\n\nSem carteira assinada voce nao precisa provar mais. Precisa explicar melhor: faturamento, clientes, familia, uma vida que te traz de volta. Isso se diz em uma frase segura.\n\nDeixa eu te ensinar a contar a sua historia. Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #entrevistavisto #consuladoamericano"
+      "legenda": "Aquela pasta gorda de documentos que voce, autonomo, junta com tanto medo? O oficial nem abre.\n\nA entrevista dura menos de um minuto. Nao da tempo de folhear extrato e contrato. O que pesa e a coerencia do que voce fala, nao a espessura da pasta.\n\nSem carteira assinada voce nao precisa provar mais. Precisa explicar melhor: faturamento, clientes, familia, uma vida que te traz de volta. Isso se diz em uma frase segura.\n\nDeixa eu te ensinar a contar a sua historia. Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #entrevistavisto #consuladoamericano",
+      "imagem": "acervo/familia/familia-selfie2.jpg"
     },
     {
       "combo": "A14xP5",
@@ -232,15 +710,68 @@
       "persona": "Renovacao vencida",
       "dor": "achava que era automatico e nao e",
       "slides": [
-        {"tipo": "capa", "kicker": "o que ele quer saber", "ghost": "01", "titulo": "Existe uma unica pergunta na cabeca do consulo.", "sub": "E nao e sobre quanto voce ganha.", "destaques": ["unica"]},
-        {"tipo": "passo", "numero": "02", "titulo": "A pergunta e: voce volta?", "corpo": "Todo o resto gira em torno disso. A lei presume que voce quer imigrar. Seu papel e mostrar que nao.", "destaques": ["volta?"]},
-        {"tipo": "passo", "numero": "03", "titulo": "Por que renovacao cai nisso", "corpo": "Seu visto venceu ha mais de um ano e voce achou que renovava automatico. Nao renova. Voce prova de novo que volta.", "destaques": ["nao"]},
-        {"tipo": "insight", "texto": "Vinculo com o Brasil nao e um documento. E uma vida que continua aqui, te aguardando. E isso que voce mostra.", "destaques": ["vida"]},
-        {"tipo": "passo", "numero": "05", "titulo": "O que responde a pergunta", "corpo": "Trabalho, familia, casa, rotina. Coisas que so fazem sentido se voce voltar. Diga elas com naturalidade.", "destaques": ["voltar."]},
-        {"tipo": "passo", "numero": "06", "titulo": "O erro comum na renovacao", "corpo": "Achar que ja tem visto entao e formalidade. Relaxa, gagueja no obvio, e transforma um sim facil num nao evitavel.", "destaques": ["evitavel."]},
-        {"tipo": "cta", "titulo": "Vamos treinar a sua resposta pra unica pergunta que importa.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "o que ele quer saber",
+          "titulo": "Existe uma unica pergunta na cabeca do consulo.",
+          "sub": "E nao e sobre quanto voce ganha.",
+          "destaques": [
+            "unica"
+          ],
+          "imagem": "acervo/destinos/neve-familia.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "A pergunta e: voce volta?",
+          "corpo": "Todo o resto gira em torno disso. A lei presume que voce quer imigrar. Seu papel e mostrar que nao.",
+          "destaques": [
+            "volta?"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Por que renovacao cai nisso",
+          "corpo": "Seu visto venceu ha mais de um ano e voce achou que renovava automatico. Nao renova. Voce prova de novo que volta.",
+          "destaques": [
+            "nao"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Vinculo com o Brasil nao e um documento. E uma vida que continua aqui, te aguardando. E isso que voce mostra.",
+          "destaques": [
+            "vida"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O que responde a pergunta",
+          "corpo": "Trabalho, familia, casa, rotina. Coisas que so fazem sentido se voce voltar. Diga elas com naturalidade.",
+          "destaques": [
+            "voltar."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O erro comum na renovacao",
+          "corpo": "Achar que ja tem visto entao e formalidade. Relaxa, gagueja no obvio, e transforma um sim facil num nao evitavel.",
+          "destaques": [
+            "evitavel."
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Vamos treinar a sua resposta pra unica pergunta que importa.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "Existe uma unica pergunta na cabeca do consulo, e nao e sobre quanto voce ganha. E: voce volta?\n\nA lei presume que voce quer imigrar. Seu papel e mostrar que nao. E se o seu visto venceu ha mais de um ano, esquece a ideia de renovacao automatica. Voce prova de novo que volta.\n\nVinculo nao e um papel, e uma vida que fica aqui te aguardando: trabalho, familia, casa, rotina. O erro classico da renovacao e achar que ja e formalidade e relaxar.\n\nVamos treinar a sua resposta? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #entrevistavisto #dicasdevisto"
+      "legenda": "Existe uma unica pergunta na cabeca do consulo, e nao e sobre quanto voce ganha. E: voce volta?\n\nA lei presume que voce quer imigrar. Seu papel e mostrar que nao. E se o seu visto venceu ha mais de um ano, esquece a ideia de renovacao automatica. Voce prova de novo que volta.\n\nVinculo nao e um papel, e uma vida que fica aqui te aguardando: trabalho, familia, casa, rotina. O erro classico da renovacao e achar que ja e formalidade e relaxar.\n\nVamos treinar a sua resposta? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #entrevistavisto #dicasdevisto",
+      "imagem": "acervo/destinos/neve-familia.jpg"
     },
     {
       "combo": "A12xP4",
@@ -255,15 +786,68 @@
       "persona": "Torcedor Copa",
       "dor": "prazo. janela fecha",
       "slides": [
-        {"tipo": "capa", "kicker": "os primeiros segundos", "ghost": "01", "titulo": "Ele decide nos primeiros 10 segundos.", "sub": "Voce tem ingresso da Copa. Nao desperdice a abertura.", "destaques": ["10"]},
-        {"tipo": "passo", "numero": "02", "titulo": "A janela e minuscula", "corpo": "A entrevista inteira dura menos de um minuto. A impressao dos primeiros segundos carrega o resto.", "destaques": ["minuto."]},
-        {"tipo": "passo", "numero": "03", "titulo": "O que conta nesses segundos", "corpo": "Como voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta.", "destaques": ["Seguranca"]},
-        {"tipo": "insight", "texto": "Nao e representar um personagem. E chegar tao preparado que a verdade sai sem gaguejo.", "destaques": ["preparado"]},
-        {"tipo": "passo", "numero": "05", "titulo": "O torcedor tende a errar aqui", "corpo": "Ansioso com o prazo do jogo, fala demais, justifica demais. O oficial nao perguntou sua vida. Responda o que foi perguntado.", "destaques": ["demais."]},
-        {"tipo": "passo", "numero": "06", "titulo": "Treino resolve", "corpo": "Ensaiar a primeira pergunta e a resposta sobre o motivo da viagem tira 90 por cento do nervosismo.", "destaques": ["primeira"]},
-        {"tipo": "cta", "titulo": "Vamos ensaiar os seus 10 primeiros segundos antes do jogo.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "os primeiros segundos",
+          "titulo": "Ele decide nos primeiros 10 segundos.",
+          "sub": "Voce tem ingresso da Copa. Nao desperdice a abertura.",
+          "destaques": [
+            "10"
+          ],
+          "imagem": "acervo/destinos/praia-crianca-areia.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "A janela e minuscula",
+          "corpo": "A entrevista inteira dura menos de um minuto. A impressao dos primeiros segundos carrega o resto.",
+          "destaques": [
+            "minuto."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "O que conta nesses segundos",
+          "corpo": "Como voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta.",
+          "destaques": [
+            "Seguranca"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Nao e representar um personagem. E chegar tao preparado que a verdade sai sem gaguejo.",
+          "destaques": [
+            "preparado"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O torcedor tende a errar aqui",
+          "corpo": "Ansioso com o prazo do jogo, fala demais, justifica demais. O oficial nao perguntou sua vida. Responda o que foi perguntado.",
+          "destaques": [
+            "demais."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Treino resolve",
+          "corpo": "Ensaiar a primeira pergunta e a resposta sobre o motivo da viagem tira 90 por cento do nervosismo.",
+          "destaques": [
+            "primeira"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Vamos ensaiar os seus 10 primeiros segundos antes do jogo.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "A entrevista do visto dura menos de um minuto. E o consulo decide nos primeiros 10 segundos.\n\nComo voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta. Nao e representar um personagem, e chegar tao preparado que a verdade sai sem gaguejo.\n\nO torcedor com prazo de Copa erra falando demais e justificando demais. O oficial nao perguntou a sua vida. Responda o que foi perguntado.\n\nVamos ensaiar os seus 10 primeiros segundos? Chama no WhatsApp.\n\n#vistoamericano #copadomundo #vistoeua #b1b2 #entrevistavisto #futebol #eua"
+      "legenda": "A entrevista do visto dura menos de um minuto. E o consulo decide nos primeiros 10 segundos.\n\nComo voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta. Nao e representar um personagem, e chegar tao preparado que a verdade sai sem gaguejo.\n\nO torcedor com prazo de Copa erra falando demais e justificando demais. O oficial nao perguntou a sua vida. Responda o que foi perguntado.\n\nVamos ensaiar os seus 10 primeiros segundos? Chama no WhatsApp.\n\n#vistoamericano #copadomundo #vistoeua #b1b2 #entrevistavisto #futebol #eua",
+      "imagem": "acervo/destinos/praia-crianca-areia.jpg"
     },
     {
       "combo": "A19xP3",
@@ -280,15 +864,63 @@
       "exige_dado_real": true,
       "nota_producao": "PROVA: nao publicar sem depoimento REAL de cliente com autorizacao LGPD por escrito. Substituir os campos [DEPOIMENTO ...] pela fala verdadeira. Preferir print/video do cliente no acervo/clientes/ com dados borrados. Sem isso, esta peca fica retida.",
       "slides": [
-        {"tipo": "capa", "kicker": "quem ja ouviu um nao", "ghost": "01", "titulo": "Ela tinha sido negada. Voltou e passou.", "sub": "Historia real de cliente. Com autorizacao.", "destaques": ["negada."]},
-        {"tipo": "passo", "numero": "02", "titulo": "O ponto de partida", "corpo": "[DEPOIMENTO: como ela se sentia depois do primeiro nao. Vergonha, medo de repetir, a taxa que ja tinha perdido.]", "destaques": []},
-        {"tipo": "passo", "numero": "03", "titulo": "O que a gente ajustou", "corpo": "[DEPOIMENTO: o que estava errado da primeira vez e o que foi corrigido. DS-160, a fala, a coerencia.]", "destaques": []},
-        {"tipo": "insight", "texto": "Ser negado nao te marca pra sempre. Repetir os mesmos erros, sim.", "destaques": ["nao"], "fonte": "Cliente real, nome preservado, com autorizacao"},
-        {"tipo": "passo", "numero": "05", "titulo": "O resultado", "corpo": "[DEPOIMENTO: a segunda entrevista, a aprovacao, o alivio. Na voz dela, sem exagero.]", "destaques": []},
-        {"tipo": "passo", "numero": "06", "titulo": "Por que eu mostro isso", "corpo": "Nao pra dizer que sempre da certo. Da pra dar errado. Mostro pra voce ver que negado nao e sentenca.", "destaques": ["nao"]},
-        {"tipo": "cta", "titulo": "Ja ouviu um nao? Vamos entender o que mudar antes da proxima.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "quem ja ouviu um nao",
+          "titulo": "Ela tinha sido negada. Voltou e passou.",
+          "sub": "Historia real de cliente. Com autorizacao.",
+          "destaques": [
+            "negada."
+          ],
+          "imagem": "acervo/familia/mae-crianca-selfie.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "O ponto de partida",
+          "corpo": "[DEPOIMENTO: como ela se sentia depois do primeiro nao. Vergonha, medo de repetir, a taxa que ja tinha perdido.]",
+          "destaques": []
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "O que a gente ajustou",
+          "corpo": "[DEPOIMENTO: o que estava errado da primeira vez e o que foi corrigido. DS-160, a fala, a coerencia.]",
+          "destaques": []
+        },
+        {
+          "tipo": "insight",
+          "texto": "Ser negado nao te marca pra sempre. Repetir os mesmos erros, sim.",
+          "destaques": [
+            "nao"
+          ],
+          "fonte": "Cliente real, nome preservado, com autorizacao"
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O resultado",
+          "corpo": "[DEPOIMENTO: a segunda entrevista, a aprovacao, o alivio. Na voz dela, sem exagero.]",
+          "destaques": []
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Por que eu mostro isso",
+          "corpo": "Nao pra dizer que sempre da certo. Da pra dar errado. Mostro pra voce ver que negado nao e sentenca.",
+          "destaques": [
+            "nao"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Ja ouviu um nao? Vamos entender o que mudar antes da proxima.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "[LEGENDA A COMPLETAR COM O DEPOIMENTO REAL] Ela tinha sido negada uma vez. Sentiu a vergonha, o medo de repetir, e a taxa que ja tinha perdido.\n\n[Resumo real do caso, com autorizacao da cliente. O que estava errado, o que foi ajustado, e como foi a segunda entrevista.]\n\nEu nao mostro isso pra dizer que sempre da certo. Da pra dar errado. Mostro pra voce ver que negado nao e sentenca.\n\nJa ouviu um nao? Chama no WhatsApp e vamos entender o que mudar.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #depoimento #consuladoamericano"
+      "legenda": "[LEGENDA A COMPLETAR COM O DEPOIMENTO REAL] Ela tinha sido negada uma vez. Sentiu a vergonha, o medo de repetir, e a taxa que ja tinha perdido.\n\n[Resumo real do caso, com autorizacao da cliente. O que estava errado, o que foi ajustado, e como foi a segunda entrevista.]\n\nEu nao mostro isso pra dizer que sempre da certo. Da pra dar errado. Mostro pra voce ver que negado nao e sentenca.\n\nJa ouviu um nao? Chama no WhatsApp e vamos entender o que mudar.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #depoimento #consuladoamericano",
+      "imagem": "acervo/familia/mae-crianca-selfie.jpg"
     },
     {
       "combo": "A20xP2",
@@ -305,15 +937,68 @@
       "exige_dado_real": true,
       "nota_producao": "PROVA: substituir [N] pelo numero REAL de aprovados de 2026 da base interna, e so publicar se o numero for verdadeiro e conferivel. Ao inserir o numero, preencher fonte_verificada_em. Sem numero real, esta peca fica retida.",
       "slides": [
-        {"tipo": "capa", "kicker": "o numero que eu tenho", "ghost": "01", "titulo": "Os casais que passaram em 2026.", "sub": "Sem promessa. So o que aconteceu de verdade.", "destaques": ["verdade."]},
-        {"tipo": "passo", "numero": "02", "titulo": "O numero", "corpo": "[N] pessoas preparadas por aqui foram aprovadas em 2026. E o dado que eu tenho pra te mostrar, nao uma projecao.", "destaques": ["dado"]},
-        {"tipo": "passo", "numero": "03", "titulo": "O que ele nao significa", "corpo": "Nao significa que voce esta garantido. Cada caso e um caso e a decisao e do consulo. Significa que preparo muda a media.", "destaques": ["nao"]},
-        {"tipo": "insight", "texto": "Numero sem contexto e propaganda. Numero com metodo por tras e prova. A diferenca e o preparo.", "destaques": ["prova."]},
-        {"tipo": "passo", "numero": "05", "titulo": "Por que isso te ajuda", "corpo": "Voce e casal de primeira viagem e nao sabe por onde comecar. Ver que gente como voces passou tira o medo do escuro.", "destaques": ["medo"]},
-        {"tipo": "passo", "numero": "06", "titulo": "O que esses casais fizeram", "corpo": "Chegaram preparados, com historia coerente e sem pressa comprada. Foi isso, nao sorte, que arrumou a estatistica.", "destaques": ["preparados,"]},
-        {"tipo": "cta", "titulo": "Quer ser o proximo casal preparado de 2026? Fala comigo.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "kicker": "o numero que eu tenho",
+          "titulo": "Os casais que passaram em 2026.",
+          "sub": "Sem promessa. So o que aconteceu de verdade.",
+          "destaques": [
+            "verdade."
+          ],
+          "imagem": "acervo/familia/neve-mae-crianca.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "O numero",
+          "corpo": "[N] pessoas preparadas por aqui foram aprovadas em 2026. E o dado que eu tenho pra te mostrar, nao uma projecao.",
+          "destaques": [
+            "dado"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "O que ele nao significa",
+          "corpo": "Nao significa que voce esta garantido. Cada caso e um caso e a decisao e do consulo. Significa que preparo muda a media.",
+          "destaques": [
+            "nao"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Numero sem contexto e propaganda. Numero com metodo por tras e prova. A diferenca e o preparo.",
+          "destaques": [
+            "prova."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "Por que isso te ajuda",
+          "corpo": "Voce e casal de primeira viagem e nao sabe por onde comecar. Ver que gente como voces passou tira o medo do escuro.",
+          "destaques": [
+            "medo"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O que esses casais fizeram",
+          "corpo": "Chegaram preparados, com historia coerente e sem pressa comprada. Foi isso, nao sorte, que arrumou a estatistica.",
+          "destaques": [
+            "preparados,"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Quer ser o proximo casal preparado de 2026? Fala comigo.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
-      "legenda": "[COMPLETAR COM O NUMERO REAL] Os casais que se prepararam por aqui e passaram em 2026.\n\n[N] pessoas aprovadas. E o dado que eu tenho pra mostrar, nao uma projecao. E ele nao significa que voce esta garantido: cada caso e um caso, a decisao e do consulo. Significa que preparo muda a media.\n\nSe voces sao casal de primeira viagem e nao sabem por onde comecar, ver gente como voces passar tira o medo do escuro.\n\nQuer ser o proximo casal preparado? Chama no WhatsApp.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagemacasal #luademel #eua"
+      "legenda": "[COMPLETAR COM O NUMERO REAL] Os casais que se prepararam por aqui e passaram em 2026.\n\n[N] pessoas aprovadas. E o dado que eu tenho pra mostrar, nao uma projecao. E ele nao significa que voce esta garantido: cada caso e um caso, a decisao e do consulo. Significa que preparo muda a media.\n\nSe voces sao casal de primeira viagem e nao sabem por onde comecar, ver gente como voces passar tira o medo do escuro.\n\nQuer ser o proximo casal preparado? Chama no WhatsApp.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagemacasal #luademel #eua",
+      "imagem": "acervo/familia/neve-mae-crianca.jpg"
     },
     {
       "combo": "A21xP1",
@@ -330,13 +1015,65 @@
       "imagem": "acervo/destinos/disney-castelo-familia.jpg",
       "nota_producao": "DESEJO: capa usa foto propria da familia (acervo autorizado, Disney/Orlando) com overlay navy. Peca de desejo, sem dado perecivel.",
       "slides": [
-        {"tipo": "capa_foto", "imagem": "acervo/destinos/disney-castelo-familia.jpg", "kicker": "roteiro que segura", "titulo": "Orlando com tres filhos sem o colapso do dia 4.", "sub": "Porque no quarto dia todo mundo quebra. Menos quem planeja.", "destaques": ["colapso"]},
-        {"tipo": "passo", "numero": "02", "titulo": "O erro do dia 4", "corpo": "Familia empolgada faz parque pesado quatro dias seguidos. No quarto, as criancas colapsam e o passeio vira briga.", "destaques": ["colapsam"]},
-        {"tipo": "passo", "numero": "03", "titulo": "Intercale o ritmo", "corpo": "Parque, dia leve, parque, dia leve. Piscina, outlet, um dia sem alarme. E isso que salva o astral da viagem.", "destaques": ["Intercale"]},
-        {"tipo": "insight", "texto": "A viagem dos sonhos nao morre de cansaco. Morre de agenda apertada. Respiro tambem e roteiro.", "destaques": ["Respiro"]},
-        {"tipo": "passo", "numero": "05", "titulo": "Antes de sonhar com o roteiro", "corpo": "Tudo isso so acontece se os vistos sairem. E numa familia, um nao derruba a viagem inteira. Comece por ai.", "destaques": ["um"]},
-        {"tipo": "passo", "numero": "06", "titulo": "A ordem certa", "corpo": "Primeiro os vistos da familia toda, bem preparados. Depois o roteiro que evita o colapso. Nessa ordem, sem susto.", "destaques": ["Primeiro"]},
-        {"tipo": "cta", "titulo": "Vamos garantir a familia toda preparada, e depois o roteiro.", "acao": "Chama no WhatsApp", "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."}
+        {
+          "tipo": "capa_foto",
+          "imagem": "acervo/destinos/disney-castelo-familia.jpg",
+          "kicker": "roteiro que segura",
+          "titulo": "Orlando com tres filhos sem o colapso do dia 4.",
+          "sub": "Porque no quarto dia todo mundo quebra. Menos quem planeja.",
+          "destaques": [
+            "colapso"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "O erro do dia 4",
+          "corpo": "Familia empolgada faz parque pesado quatro dias seguidos. No quarto, as criancas colapsam e o passeio vira briga.",
+          "destaques": [
+            "colapsam"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Intercale o ritmo",
+          "corpo": "Parque, dia leve, parque, dia leve. Piscina, outlet, um dia sem alarme. E isso que salva o astral da viagem.",
+          "destaques": [
+            "Intercale"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "A viagem dos sonhos nao morre de cansaco. Morre de agenda apertada. Respiro tambem e roteiro.",
+          "destaques": [
+            "Respiro"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "Antes de sonhar com o roteiro",
+          "corpo": "Tudo isso so acontece se os vistos sairem. E numa familia, um nao derruba a viagem inteira. Comece por ai.",
+          "destaques": [
+            "um"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "A ordem certa",
+          "corpo": "Primeiro os vistos da familia toda, bem preparados. Depois o roteiro que evita o colapso. Nessa ordem, sem susto.",
+          "destaques": [
+            "Primeiro"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Vamos garantir a familia toda preparada, e depois o roteiro.",
+          "acao": "Chama no WhatsApp",
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
       ],
       "legenda": "Orlando com tres filhos: o roteiro que evita o colapso do quarto dia.\n\nFamilia empolgada faz parque pesado quatro dias seguidos, e no quarto as criancas quebram. O segredo e intercalar: parque, dia leve, parque, dia leve. Respiro tambem e roteiro.\n\nMas nada disso acontece se os vistos nao sairem, e numa familia um nao derruba a viagem inteira. Entao a ordem e: primeiro a familia toda bem preparada, depois o roteiro.\n\nVamos comecar pela parte que sustenta o sonho? Chama no WhatsApp.\n\n#orlando #viagememfamilia #disney #vistoamericano #vistoeua #b1b2 #feriascomcriancas"
     }

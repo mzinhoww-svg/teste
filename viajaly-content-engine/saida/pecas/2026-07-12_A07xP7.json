@@ -14,14 +14,14 @@
   "fonte_verificada_em": "2026-07-12",
   "slides": [
     {
-      "tipo": "capa",
+      "tipo": "capa_foto",
       "kicker": "o que nao te contam",
-      "ghost": "01",
       "titulo": "Da pra antecipar sua entrevista de graca.",
       "sub": "Sem pagar os 750 dolares. Em caso de emergencia real.",
       "destaques": [
         "graca."
-      ]
+      ],
+      "imagem": "acervo/destinos/universal-globo.jpg"
     },
     {
       "tipo": "passo",
@@ -73,5 +73,6 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Da pra antecipar sua entrevista do visto de graca. O consulado nao faz questao de contar.\n\nExiste o pedido de emergencia: quando ha motivo real (saude, trabalho, familia) voce pede uma data mais cedo sem pagar os 750 dolares da fila premium. Precisa de motivo e de prova.\n\nSe voce e autonomo, uma feira ou um cliente la fora pode ser a sua emergencia legitima. Mas pedido mal justificado e negado, e voce perde a vez.\n\nQuer saber se o seu caso se encaixa? Eu te falo de graca. Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #dicasdeviagem #consuladoamericano"
+  "legenda": "Da pra antecipar sua entrevista do visto de graca. O consulado nao faz questao de contar.\n\nExiste o pedido de emergencia: quando ha motivo real (saude, trabalho, familia) voce pede uma data mais cedo sem pagar os 750 dolares da fila premium. Precisa de motivo e de prova.\n\nSe voce e autonomo, uma feira ou um cliente la fora pode ser a sua emergencia legitima. Mas pedido mal justificado e negado, e voce perde a vez.\n\nQuer saber se o seu caso se encaixa? Eu te falo de graca. Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #dicasdeviagem #consuladoamericano",
+  "imagem": "acervo/destinos/universal-globo.jpg"
 }

@@ -10,19 +10,19 @@
   "tese": "O governo cobra US$750 pra furar fila; consultoria completa custa menos de um terco",
   "persona": "Autonomo / MEI",
   "dor": "acha que vai ser negado por nao ter vinculo formal",
-  "imagem": "acervo/fontes/taxa-750.png",
+  "imagem": "acervo/destinos/ny-skyline-menina.jpg",
   "fonte_url": "https://www.federalregister.gov/documents/2026/06/09/2026-11513/schedule-of-fees-for-consular-services-department-of-state-and-overseas-embassies-and",
   "fonte_verificada_em": "2026-07-12",
   "slides": [
     {
-      "tipo": "capa",
+      "tipo": "capa_foto",
       "kicker": "o preco da sua pressa",
-      "ghost": "01",
       "titulo": "O governo botou preco na fila. 750 dolares.",
       "sub": "Federal Register, doc 2026-11513. Ta na fonte, nao e boato.",
       "destaques": [
         "750"
-      ]
+      ],
+      "imagem": "acervo/destinos/ny-skyline-menina.jpg"
     },
     {
       "tipo": "passo",

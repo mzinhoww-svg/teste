@@ -12,14 +12,14 @@
   "dor": "achava que era automatico e nao e",
   "slides": [
     {
-      "tipo": "capa",
+      "tipo": "capa_foto",
       "kicker": "o que ele quer saber",
-      "ghost": "01",
       "titulo": "Existe uma unica pergunta na cabeca do consulo.",
       "sub": "E nao e sobre quanto voce ganha.",
       "destaques": [
         "unica"
-      ]
+      ],
+      "imagem": "acervo/destinos/neve-familia.jpg"
     },
     {
       "tipo": "passo",
@@ -71,5 +71,6 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Existe uma unica pergunta na cabeca do consulo, e nao e sobre quanto voce ganha. E: voce volta?\n\nA lei presume que voce quer imigrar. Seu papel e mostrar que nao. E se o seu visto venceu ha mais de um ano, esquece a ideia de renovacao automatica. Voce prova de novo que volta.\n\nVinculo nao e um papel, e uma vida que fica aqui te aguardando: trabalho, familia, casa, rotina. O erro classico da renovacao e achar que ja e formalidade e relaxar.\n\nVamos treinar a sua resposta? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #entrevistavisto #dicasdevisto"
+  "legenda": "Existe uma unica pergunta na cabeca do consulo, e nao e sobre quanto voce ganha. E: voce volta?\n\nA lei presume que voce quer imigrar. Seu papel e mostrar que nao. E se o seu visto venceu ha mais de um ano, esquece a ideia de renovacao automatica. Voce prova de novo que volta.\n\nVinculo nao e um papel, e uma vida que fica aqui te aguardando: trabalho, familia, casa, rotina. O erro classico da renovacao e achar que ja e formalidade e relaxar.\n\nVamos treinar a sua resposta? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #entrevistavisto #dicasdevisto",
+  "imagem": "acervo/destinos/neve-familia.jpg"
 }

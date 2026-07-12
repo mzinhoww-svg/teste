@@ -12,14 +12,14 @@
   "dor": "nao sabe por onde comecar",
   "slides": [
     {
-      "tipo": "capa",
+      "tipo": "capa_foto",
       "kicker": "a verdade incomoda",
-      "ghost": "01",
       "titulo": "Se prometeram visto garantido pra voces, corram.",
       "sub": "E a primeira viagem de voces. Comeca por aqui.",
       "destaques": [
         "corram."
-      ]
+      ],
+      "imagem": "acervo/familia/familia-selfie.jpg"
     },
     {
       "tipo": "passo",
@@ -71,5 +71,6 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Primeira viagem internacional de voces e ja apareceu alguem prometendo visto garantido?\n\nCorram. Ninguem garante visto. A decisao e de um oficial no consulado, na hora, olhando pra voces. Quem promete garantia ta vendendo o seu medo de nao saber por onde comecar.\n\nO que da pra garantir e preparo: DS-160 coerente, voces sabendo responder. Isso a gente faz. O carimbo e do consulo.\n\nA gente nao garante seu visto. Ninguem pode. Quem garante ta mentindo pra voce. Chama no WhatsApp e comeca do jeito certo.\n\n#vistoamericano #primeiraviagem #luademel #vistoeua #b1b2 #viagemacasal #eua"
+  "legenda": "Primeira viagem internacional de voces e ja apareceu alguem prometendo visto garantido?\n\nCorram. Ninguem garante visto. A decisao e de um oficial no consulado, na hora, olhando pra voces. Quem promete garantia ta vendendo o seu medo de nao saber por onde comecar.\n\nO que da pra garantir e preparo: DS-160 coerente, voces sabendo responder. Isso a gente faz. O carimbo e do consulo.\n\nA gente nao garante seu visto. Ninguem pode. Quem garante ta mentindo pra voce. Chama no WhatsApp e comeca do jeito certo.\n\n#vistoamericano #primeiraviagem #luademel #vistoeua #b1b2 #viagemacasal #eua",
+  "imagem": "acervo/familia/familia-selfie.jpg"
 }

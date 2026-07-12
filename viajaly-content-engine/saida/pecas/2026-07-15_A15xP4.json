@@ -12,14 +12,14 @@
   "dor": "prazo. janela fecha",
   "slides": [
     {
-      "tipo": "capa",
+      "tipo": "capa_foto",
       "kicker": "o formulario decide",
-      "ghost": "01",
       "titulo": "7 campos do DS-160 derrubam mais que perfil ruim.",
       "sub": "Voce tem ingresso e a janela ta fechando. Nao erre aqui.",
       "destaques": [
         "7"
-      ]
+      ],
+      "imagem": "acervo/destinos/praia-crianca.jpg"
     },
     {
       "tipo": "passo",
@@ -71,5 +71,6 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Sete campos do DS-160 derrubam mais gente que perfil ruim.\n\nO oficial le o seu formulario antes de te ver. Se ele ja te contradiz, voce entra em desvantagem. Os sete que mais pegam: profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil.\n\nCom a Copa e o prazo curto, todo mundo preenche correndo, e e correndo que nascem os erros. Uma revisao desses campos leva menos que voce imagina.\n\nAntes de enviar, deixa eu revisar com voce. Chama no WhatsApp.\n\n#vistoamericano #ds160 #copadomundo #vistoeua #b1b2 #futebol #dicasdevisto"
+  "legenda": "Sete campos do DS-160 derrubam mais gente que perfil ruim.\n\nO oficial le o seu formulario antes de te ver. Se ele ja te contradiz, voce entra em desvantagem. Os sete que mais pegam: profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil.\n\nCom a Copa e o prazo curto, todo mundo preenche correndo, e e correndo que nascem os erros. Uma revisao desses campos leva menos que voce imagina.\n\nAntes de enviar, deixa eu revisar com voce. Chama no WhatsApp.\n\n#vistoamericano #ds160 #copadomundo #vistoeua #b1b2 #futebol #dicasdevisto",
+  "imagem": "acervo/destinos/praia-crianca.jpg"
 }

@@ -12,14 +12,14 @@
   "dor": "acha que vai ser negado por nao ter vinculo formal",
   "slides": [
     {
-      "tipo": "capa",
+      "tipo": "capa_foto",
       "kicker": "planeje os dois dias",
-      "ghost": "01",
       "titulo": "Sao duas visitas, em dias diferentes.",
       "sub": "Muita gente descobre isso tarde demais.",
       "destaques": [
         "duas"
-      ]
+      ],
+      "imagem": "acervo/destinos/praia-por-do-sol.jpg"
     },
     {
       "tipo": "passo",
@@ -71,5 +71,6 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Voce sabia que tirar o visto americano sao DUAS visitas, em dias diferentes?\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista com o oficial, que pode ser noutra data e ate noutra cidade.\n\nPra quem e autonomo, isso e dois dias de trabalho parado, nao um. Saber antes e o que separa quem se planeja de quem se atrapalha. Em muitos postos da pra marcar os dois proximos, numa viagem so.\n\nQuer isso organizado direito? Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #casv #vistoeua #b1b2 #dicasdevisto"
+  "legenda": "Voce sabia que tirar o visto americano sao DUAS visitas, em dias diferentes?\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista com o oficial, que pode ser noutra data e ate noutra cidade.\n\nPra quem e autonomo, isso e dois dias de trabalho parado, nao um. Saber antes e o que separa quem se planeja de quem se atrapalha. Em muitos postos da pra marcar os dois proximos, numa viagem so.\n\nQuer isso organizado direito? Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #casv #vistoeua #b1b2 #dicasdevisto",
+  "imagem": "acervo/destinos/praia-por-do-sol.jpg"
 }

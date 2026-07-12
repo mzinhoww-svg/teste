@@ -14,14 +14,14 @@
   "fonte_verificada_em": "2026-07-12",
   "slides": [
     {
-      "tipo": "capa",
+      "tipo": "capa_foto",
       "kicker": "a conta real",
-      "ghost": "01",
       "titulo": "Quanto custa renovar o visto de verdade em 2026.",
       "sub": "Spoiler: nao e so a taxa que voce lembra.",
       "destaques": [
         "verdade"
-      ]
+      ],
+      "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
     },
     {
       "tipo": "passo",
@@ -73,5 +73,6 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Quanto custa renovar o visto americano de verdade em 2026?\n\nNao e so a MRV de 185 dolares que voce lembra. Entrou uma taxa de integridade de 250 dolares cobrada na emissao (confere no travel.state.gov). E tem os 750 opcionais de quem quer furar fila, que voce nao precisa.\n\nE atencao: se o seu visto venceu ha mais de 12 meses, a renovacao nao e automatica. Voce cai na fila de entrevista.\n\nA conta honesta soma taxa, passaporte e consultoria, sem surpresa no fim. Quer a sua fechada item por item? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #taxavisto #consuladoamericano"
+  "legenda": "Quanto custa renovar o visto americano de verdade em 2026?\n\nNao e so a MRV de 185 dolares que voce lembra. Entrou uma taxa de integridade de 250 dolares cobrada na emissao (confere no travel.state.gov). E tem os 750 opcionais de quem quer furar fila, que voce nao precisa.\n\nE atencao: se o seu visto venceu ha mais de 12 meses, a renovacao nao e automatica. Voce cai na fila de entrevista.\n\nA conta honesta soma taxa, passaporte e consultoria, sem surpresa no fim. Quer a sua fechada item por item? Chama no WhatsApp.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #taxavisto #consuladoamericano",
+  "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
 }
