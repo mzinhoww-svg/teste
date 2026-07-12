@@ -1,0 +1,76 @@
+{
+  "combo": "A23xP2",
+  "data": "2026-07-21",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "angulo_id": "A23",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Toda foto dos sonhos comeca num consulado",
+  "persona": "Casal primeira viagem",
+  "dor": "nao sabe por onde comecar",
+  "imagem": "acervo/familia/familia-selfie2.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "o antes que ninguem mostra",
+      "titulo": "Essa foto so existe por causa de um carimbo.",
+      "sub": "E o carimbo quase nao veio.",
+      "destaques": [
+        "carimbo."
+      ],
+      "imagem": "acervo/familia/familia-selfie2.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O que voce ve",
+      "corpo": "Uma familia viajando, feliz. O feed so mostra isso: o depois, bonito e pronto.",
+      "destaques": [
+        "depois,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que voce nao ve",
+      "corpo": "Semanas antes teve um DS-160, uma entrevista de um minuto e o medo de ouvir nao.",
+      "destaques": [
+        "medo"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "A viagem dos sonhos nao comeca no aeroporto. Comeca num formulario.",
+      "destaques": [
+        "formulario."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Por que isso e pra voce",
+      "corpo": "Voce ta na parte do medo agora, na primeira viagem. Todo mundo que ja viajou passou por aqui.",
+      "destaques": [
+        "medo"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "A ordem certa",
+      "corpo": "Primeiro o visto, bem preparado. Depois a foto acontece sozinha.",
+      "destaques": [
+        "Primeiro"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Quer chegar na sua foto? Vamos cuidar do antes.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Essa foto de familia viajando so existe por causa de um carimbo que quase nao veio.\n\nO feed mostra o depois: bonito, pronto. Ninguem mostra o antes, que e um DS-160, uma entrevista de um minuto e o medo de ouvir nao. Se voce ta nessa parte agora, na primeira viagem, saiba: todo mundo que ja viajou passou por aqui.\n\nA ordem que funciona e simples. Primeiro o visto, bem preparado. Depois a foto acontece sozinha.\n\nA gente cuida do antes. Chama no WhatsApp.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagememfamilia #eua #luademel"
+}

@@ -1,0 +1,76 @@
+{
+  "combo": "A29xP3",
+  "data": "2026-07-25",
+  "conta": "@leticia",
+  "pilar": "desejo",
+  "angulo_id": "A29",
+  "persona_id": "P3",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "A foto e a parte facil; o carimbo foi a dificil",
+  "persona": "Negado antes",
+  "dor": "vergonha + medo de repetir o erro + ja perdeu US$185",
+  "imagem": "acervo/familia/mae-crianca-selfie.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "pra quem ja ouviu um nao",
+      "titulo": "A foto e a parte facil. O carimbo foi a dificil.",
+      "sub": "E sim, da pra virar o nao.",
+      "destaques": [
+        "facil."
+      ],
+      "imagem": "acervo/familia/mae-crianca-selfie.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Onde voce ta",
+      "corpo": "Voce ja ouviu um nao. A vergonha, o medo de repetir tudo de novo. Eu sei como pesa.",
+      "destaques": [
+        "nao."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que muda um segundo pedido",
+      "corpo": "Nao e sorte. E entender o que te derrubou e corrigir com honestidade, sem inventar historia.",
+      "destaques": [
+        "corrigir"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Ser negado nao te marca pra sempre. Repetir o erro, sim.",
+      "destaques": [
+        "erro,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "A cena que vem depois",
+      "corpo": "Essa foto na praia, na neve, no parque. Ela nao e sonho distante. E consequencia de preparo.",
+      "destaques": [
+        "preparo."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que eu nao prometo",
+      "corpo": "Eu nao garanto seu visto. Ninguem garante. Mas te preparo pra chegar sem repetir o erro que ja te custou caro.",
+      "destaques": [
+        "Ninguem"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Ja ouviu um nao? Vamos entender o proximo passo.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "A foto na praia com a familia e a parte facil. O carimbo no passaporte foi a dificil. E sim, quando ja veio um nao, da pra virar o jogo.\n\nSe voce ja ouviu um nao, conhece a vergonha e o medo de repetir. O que muda um segundo pedido nao e sorte: e entender o que te derrubou e corrigir com honestidade.\n\nEu nao garanto seu visto. Ninguem garante. Mas te preparo pra chegar sem repetir o erro que ja te custou caro.\n\nJa ouviu um nao? Chama no WhatsApp e vamos entender o proximo passo.\n\n#vistonegado #vistoamericano #segundatentativa #vistoeua #b1b2 #naodesista #eua"
+}

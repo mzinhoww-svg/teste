@@ -74,17 +74,24 @@ def deck(peca):
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--spec", default=str(SPEC))
+    ap.add_argument("--out", default=str(PECAS))
+    args = ap.parse_args()
+    out = Path(args.out)
+
     tpl = STUDIO.read_text(encoding="utf-8")
     assert DECK_TAG in tpl, "bloco deck-data nao encontrado no Carousel Studio"
-    pecas = json.loads(SPEC.read_text(encoding="utf-8"))["pecas"]
-    PECAS.mkdir(parents=True, exist_ok=True)
+    pecas = json.loads(Path(args.spec).read_text(encoding="utf-8"))["pecas"]
+    out.mkdir(parents=True, exist_ok=True)
     for p in pecas:
         d = json.dumps(deck(p), ensure_ascii=False)
         html = tpl.replace(DECK_TAG, f'<script id="deck-data" type="application/json">{d}</script>')
         stem = f"{p['data']}_{p['combo']}"
-        (PECAS / f"{stem}.html").write_text(html, encoding="utf-8")
+        (out / f"{stem}.html").write_text(html, encoding="utf-8")
         print(f"  ok {stem}.html  ({len(p['slides'])} slides, {len(html)//1024}KB)")
-    print(f"\n{len(pecas)} editores Carousel Studio -> {PECAS}")
+    print(f"\n{len(pecas)} editores Carousel Studio -> {out}")
 
 
 if __name__ == "__main__":

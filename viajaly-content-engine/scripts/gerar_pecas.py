@@ -226,11 +226,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", default=str(SPEC))
     ap.add_argument("--render", action="store_true")
+    ap.add_argument("--out", default=str(PECAS))
+    ap.add_argument("--render-out", default=str(RENDER))
     args = ap.parse_args()
 
+    pecas_dir = Path(args.out)
+    render_dir = Path(args.render_out)
     spec = json.loads(Path(args.spec).read_text(encoding="utf-8"))
     pecas = spec["pecas"]
-    PECAS.mkdir(parents=True, exist_ok=True)
+    pecas_dir.mkdir(parents=True, exist_ok=True)
 
     if args.render:
         import sys
@@ -243,15 +247,15 @@ def main():
         ultimo = p["slides"][-1]
         if ultimo["tipo"] == "cta" and DISCLAIMER.split(".")[0] not in ultimo.get("sub", ""):
             ultimo["sub"] = DISCLAIMER
-        (PECAS / f"{stem}.json").write_text(
+        (pecas_dir / f"{stem}.json").write_text(
             json.dumps(p, ensure_ascii=False, indent=2), encoding="utf-8")
-        (PECAS / f"{stem}.html").write_text(build(p), encoding="utf-8")
-        (PECAS / f"{stem}.txt").write_text(p.get("legenda", ""), encoding="utf-8")
+        (pecas_dir / f"{stem}.html").write_text(build(p), encoding="utf-8")
+        (pecas_dir / f"{stem}.txt").write_text(p.get("legenda", ""), encoding="utf-8")
         if args.render:
-            render_peca({**p, "_base_dir": str(BASE)}, RENDER / p["combo"])
+            render_peca({**p, "_base_dir": str(BASE)}, render_dir / p["combo"])
         print(f"  ok {stem}  ({len(p['slides'])} slides)")
 
-    print(f"\n{len(pecas)} pecas -> {PECAS}")
+    print(f"\n{len(pecas)} pecas -> {pecas_dir}")
 
 
 if __name__ == "__main__":

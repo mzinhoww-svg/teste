@@ -1,0 +1,76 @@
+{
+  "combo": "A24xP1",
+  "data": "2026-07-22",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "angulo_id": "A24",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Disney e Universal sem quebrar as criancas",
+  "persona": "Familia Orlando",
+  "dor": "se um for negado, a viagem inteira desmonta",
+  "imagem": "acervo/destinos/universal-globo.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "roteiro que funciona",
+      "titulo": "Disney e Universal no mesmo dia e o erro classico.",
+      "sub": "A crianca surta e voce paga caro pra ver.",
+      "destaques": [
+        "erro"
+      ],
+      "imagem": "acervo/destinos/universal-globo.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O erro",
+      "corpo": "A empolgacao faz voce espremer dois parques num dia so. As pernas das criancas discordam la pelas duas da tarde.",
+      "destaques": [
+        "pernas"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "A regra da idade",
+      "corpo": "Ate uns 7 anos, a Disney rende mais. A Universal brilha com os maiores. Escolha por filho, nao por hype.",
+      "destaques": [
+        "idade"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Parque nao e maratona. Menos parque, mais memoria.",
+      "destaques": [
+        "memoria."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O ritmo que segura",
+      "corpo": "Um parque por dia, tarde livre, piscina. E o quarto dia sem alarme, pra ninguem quebrar.",
+      "destaques": [
+        "um"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Antes de montar o roteiro",
+      "corpo": "Nada disso acontece se um visto da familia for negado. Numa familia, um nao derruba a viagem toda.",
+      "destaques": [
+        "um"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Primeiro a familia preparada, depois o roteiro.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Disney e Universal no mesmo dia e o erro classico de quem viaja empolgado. A crianca surta as duas da tarde e voce paga caro pra ver.\n\nA regra da idade ajuda: ate uns 7 anos a Disney rende mais, a Universal brilha com os maiores. Escolha por filho, nao por hype. E o ritmo que segura a viagem e um parque por dia, tarde livre, o quarto dia sem alarme.\n\nMas antes do roteiro tem o basico: numa familia, um visto negado derruba a viagem toda. Entao a ordem e a familia preparada primeiro.\n\nChama no WhatsApp que a gente cuida do antes.\n\n#orlando #disney #universal #viagememfamilia #vistoamericano #vistoeua #feriascomcriancas"
+}

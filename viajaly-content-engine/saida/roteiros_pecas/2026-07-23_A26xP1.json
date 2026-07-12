@@ -1,0 +1,76 @@
+{
+  "combo": "A26xP1",
+  "data": "2026-07-23",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "angulo_id": "A26",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "A primeira vez dela na neve",
+  "persona": "Familia Orlando",
+  "dor": "se um for negado, a viagem inteira desmonta",
+  "imagem": "acervo/destinos/neve-familia.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "a cena que voce quer",
+      "titulo": "A primeira vez da sua filha na neve.",
+      "sub": "Tem janela de inverno, e tem a agenda do consulado. As duas contam.",
+      "destaques": [
+        "neve."
+      ],
+      "imagem": "acervo/destinos/neve-familia.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "A janela do inverno",
+      "corpo": "Neve boa nos EUA tem epoca certa. Voce nao remarca o inverno pra quando o visto sair.",
+      "destaques": [
+        "epoca"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "A agenda nao para por voce",
+      "corpo": "Se a viagem e no inverno, o visto tem que sair antes. E a agenda do consulado anda no tempo dela, nao no seu.",
+      "destaques": [
+        "antes."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "O inverno tem data. Sua preparacao tambem devia ter.",
+      "destaques": [
+        "data."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O que atrasa a familia",
+      "corpo": "Um DS-160 torto de um dos filhos trava o grupo inteiro. Precisa de coerencia entre todos.",
+      "destaques": [
+        "coerencia"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "A ordem",
+      "corpo": "Vistos da familia primeiro, com folga na agenda. Depois a neve vira so alegria.",
+      "destaques": [
+        "folga"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Quer a neve marcada no calendario? Comeca pelo visto.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Ver sua filha tocar neve pela primeira vez e uma cena que vale a viagem inteira. So que ela depende de duas coisas: a janela do inverno e a agenda do consulado.\n\nNeve boa nos EUA tem epoca. Voce nao remarca o inverno pra quando o visto sair, entao ele tem que sair antes. E a agenda do consulado anda no tempo dela. Numa familia, um DS-160 torto de um filho trava o grupo todo.\n\nA ordem que funciona: vistos da familia primeiro, com folga. Depois a neve vira so alegria.\n\nChama no WhatsApp que a gente organiza o antes.\n\n#neve #viagememfamilia #inverno #vistoamericano #vistoeua #b1b2 #eua"
+}
