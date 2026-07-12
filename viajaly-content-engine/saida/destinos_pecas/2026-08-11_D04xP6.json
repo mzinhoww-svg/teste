@@ -1,0 +1,80 @@
+{
+  "combo": "D04xP6",
+  "data": "2026-08-11",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D04",
+  "persona_id": "P6",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Parques em grupo de amigos",
+  "persona": "Grupo de amigos",
+  "dor": "gosto e pique diferentes no mesmo grupo",
+  "imagem": "acervo/destinos/universal-globo.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "parque em grupo",
+      "titulo": "Grupo de amigos no parque: como nao brigar no dia.",
+      "sub": "Pique diferente e o que estraga o dia, nao o parque.",
+      "destaques": [
+        "brigar"
+      ],
+      "imagem": "acervo/destinos/universal-globo.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Combine o ponto de encontro",
+      "corpo": "Nem todo mundo anda junto o dia todo. Marquem horario e lugar, cada um faz o que quer no meio.",
+      "destaques": [
+        "encontro"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Radical x tranquilo",
+      "corpo": "A Universal serve o grupo que quer adrenalina. Quem foge de montanha-russa tem area calma tambem.",
+      "destaques": [
+        "adrenalina."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Divida o custo antes",
+      "corpo": "Ingresso, comida, transporte. Acertem quem paga o que antes, pra ninguem azedar no fim.",
+      "destaques": [
+        "antes,"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Grupo no parque nao precisa fazer tudo junto. Precisa combinar o basico.",
+      "destaques": [
+        "combinar"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que trava o grupo antes",
+      "corpo": "O parque so acontece com os vistos de todo mundo prontos. Um pendente segura a viagem inteira.",
+      "destaques": [
+        "todo"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta PARQUEGRUPO que eu te mando o guia pra grupo. Ou link na bio.",
+      "acao": "Comenta PARQUEGRUPO",
+      "destaques": [
+        "PARQUEGRUPO"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Grupo de amigos no parque: o que estraga o dia e o pique diferente, nao o parque.\n\nCombinem ponto de encontro e horario, e no meio cada um faz o que quer. A Universal serve quem quer adrenalina e tem area calma pra quem foge de montanha-russa. E dividam o custo antes (ingresso, comida, transporte) pra ninguem azedar no fim.\n\nMas o parque so acontece com os vistos de todo mundo prontos. Um pendente segura a viagem inteira.\n\nComenta PARQUEGRUPO que eu te mando o guia. Ou toca no link da bio.\n\n#parquesorlando #universal #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua"
+}

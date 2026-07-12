@@ -1,0 +1,80 @@
+{
+  "combo": "D09xP2",
+  "data": "2026-08-14",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D09",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Praia a dois nos EUA",
+  "persona": "Casal primeira viagem",
+  "dor": "quer praia tranquila e nao festa",
+  "imagem": "acervo/destinos/praia-por-do-sol.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "praia a dois",
+      "titulo": "A praia mais bonita dos EUA quase nunca e a mais famosa.",
+      "sub": "Pro casal que quer paz, nao festa.",
+      "destaques": [
+        "famosa."
+      ],
+      "imagem": "acervo/destinos/praia-por-do-sol.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Fuja do obvio",
+      "corpo": "As praias de cartao postal vivem lotadas. Um pouco mais longe, a mesma agua sem a multidao.",
+      "destaques": [
+        "multidao."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Fim de tarde e de voces",
+      "corpo": "Cheguem pro por do sol, quando o dia esvazia. E a hora que a praia americana fica romantica.",
+      "destaques": [
+        "romantica."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Regras que pegam",
+      "corpo": "Bandeira e lei e alcool na areia rende multa. Curtir sem susto e saber isso antes.",
+      "destaques": [
+        "antes."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "A dois, praia boa nao e a badalada. E a que deixa voces conversarem.",
+      "destaques": [
+        "conversarem."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que vem antes do mar",
+      "corpo": "Toda praia dos EUA comeca longe dela, no visto do casal aprovado e no prazo.",
+      "destaques": [
+        "visto"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta PRAIADOIS que eu te mando as praias calmas por regiao. Ou link na bio.",
+      "acao": "Comenta PRAIADOIS",
+      "destaques": [
+        "PRAIADOIS"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "A praia mais bonita dos EUA quase nunca e a mais famosa. Pro casal que quer paz, isso e ouro.\n\nFuja do obvio: as de cartao postal vivem lotadas, e um pouco mais longe tem a mesma agua sem multidao. Cheguem pro por do sol, quando o dia esvazia e a praia fica romantica. E saibam as regras que pegam: bandeira e lei, alcool na areia rende multa.\n\nE toda praia comeca longe dela, no visto do casal no prazo.\n\nComenta PRAIADOIS que eu te mando as praias calmas. Ou toca no link da bio.\n\n#praia #viagemacasal #luademel #eua #vistoamericano #vistoeua #florida"
+}

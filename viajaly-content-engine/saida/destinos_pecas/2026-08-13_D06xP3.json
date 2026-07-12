@@ -1,0 +1,80 @@
+{
+  "combo": "D06xP3",
+  "data": "2026-08-13",
+  "conta": "@leticia",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D06",
+  "persona_id": "P3",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Orlando pra quem ja foi negado",
+  "persona": "Negado antes",
+  "dor": "vergonha do nao e medo de sonhar de novo",
+  "imagem": "acervo/destinos/disney-main-street.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "o sonho continua de pe",
+      "titulo": "Voce foi negado. O sonho de levar seus filhos pra Orlando nao acabou.",
+      "sub": "Um nao nao e o fim da historia.",
+      "destaques": [
+        "nao"
+      ],
+      "imagem": "acervo/destinos/disney-main-street.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O que o nao significa",
+      "corpo": "Significa que algo naquele pedido nao convenceu. Nao que voce nao merece a viagem.",
+      "destaques": [
+        "algo"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que muda na volta",
+      "corpo": "Entender o motivo e corrigir com honestidade. Repetir igual e o unico caminho pro mesmo resultado.",
+      "destaques": [
+        "corrigir"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "A foto no parque com seus filhos nao e sonho distante. E consequencia de preparo.",
+      "destaques": [
+        "preparo."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O roteiro que te aguarda",
+      "corpo": "Castelo, parada, o abraco do personagem. Tudo isso continua ali, pronto pra quando voce voltar preparado.",
+      "destaques": [
+        "preparado."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que eu nao prometo",
+      "corpo": "Eu nao garanto seu visto. Ninguem garante. Mas te ajudo a nao repetir o erro que ja doeu.",
+      "destaques": [
+        "Ninguem"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta RECOMECAR que eu te falo o proximo passo. Ou link na bio.",
+      "acao": "Comenta RECOMECAR",
+      "destaques": [
+        "RECOMECAR"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Voce foi negado, e mesmo assim o sonho de levar seus filhos pra Orlando nao acabou. Um nao nao e o fim da historia.\n\nO nao significa que algo no pedido nao convenceu, nao que voce nao merece a viagem. O que muda na volta e entender o motivo e corrigir com honestidade. A foto no parque com seus filhos nao e sonho distante, e consequencia de preparo.\n\nEu nao garanto seu visto. Ninguem garante. Mas te ajudo a nao repetir o erro que ja doeu.\n\nComenta RECOMECAR que eu te falo o proximo passo. Ou toca no link da bio.\n\n#vistonegado #orlando #naodesista #segundatentativa #eua #vistoamericano #vistoeua"
+}

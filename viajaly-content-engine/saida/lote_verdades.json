@@ -1,0 +1,720 @@
+{
+  "_doc": "Parcela 2: verdades visa-first repetidas em novas personas (a mesma tese, dor diferente). Voz voce, sem emoji/travessao. Coral na palavra que carrega o argumento. Disclaimer no CTA. Fonte onde ha dado factual.",
+  "pecas": [
+    {
+      "combo": "A01xP3",
+      "data": "2026-08-16",
+      "conta": "@leticia",
+      "pilar": "denuncia",
+      "angulo_id": "A01",
+      "persona_id": "P3",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Ninguem garante visto (pra quem ja foi negado)",
+      "persona": "Negado antes",
+      "dor": "te prometeram garantia, voce foi negado e eles sumiram",
+      "imagem": "acervo/familia/mae-crianca-selfie.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "a verdade que doi",
+          "titulo": "Te prometeram garantia. Voce foi negado. E eles sumiram.",
+          "sub": "O golpe favorito do nicho tem uma vitima preferida: quem ja tem medo.",
+          "destaques": [
+            "sumiram."
+          ],
+          "imagem": "acervo/familia/mae-crianca-selfie.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Por que prometeram",
+          "corpo": "Porque voce estava com medo depois do primeiro nao. Medo compra promessa. E promessa nao passa na entrevista.",
+          "destaques": [
+            "medo"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Quem some e quem fica",
+          "corpo": "Quem garante desaparece quando da errado. Quem e honesto fica, entende o nao e te prepara pro proximo.",
+          "destaques": [
+            "fica,"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Ninguem garante seu visto. Quem garantiu e sumiu ja te provou isso.",
+          "destaques": [
+            "Ninguem"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O que da pra garantir",
+          "corpo": "Entender o que derrubou voce e corrigir. Isso muda o jogo. O carimbo continua sendo do consulo.",
+          "destaques": [
+            "corrigir."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O teste da honestidade",
+          "corpo": "Pergunta pra proxima assessoria: voces garantem? Se disser sim, voce ja conhece esse final.",
+          "destaques": [
+            "garantem?"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta PROMESSA que eu te explico o que muda no segundo pedido. Ou link na bio.",
+          "acao": "Comenta PROMESSA",
+          "destaques": [
+            "PROMESSA"
+          ],
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Te prometeram garantia, voce foi negado, e eles sumiram do WhatsApp. Reconhece?\n\nPrometeram porque voce estava com medo depois do primeiro nao, e medo compra promessa. Mas promessa nao passa na entrevista. Quem garante some quando da errado. Quem e honesto fica, entende o nao e te prepara pro proximo. Ninguem garante seu visto, e quem garantiu e sumiu ja te provou isso.\n\nComenta PROMESSA que eu te explico o que muda no segundo pedido. Ou toca no link da bio.\n\n#vistonegado #vistoamericano #segundatentativa #vistoeua #b1b2 #naodesista #consuladoamericano"
+    },
+    {
+      "combo": "A01xP7",
+      "data": "2026-08-17",
+      "conta": "@leticia",
+      "pilar": "denuncia",
+      "angulo_id": "A01",
+      "persona_id": "P7",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Ninguem garante visto (autonomo)",
+      "persona": "Autonomo / MEI",
+      "dor": "acha que vai ser negado por ser MEI e te vendem garantia",
+      "imagem": "acervo/familia/familia-selfie.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "cuidado autonomo",
+          "titulo": "Te venderam garantia porque voce e MEI e tem medo. E ai que pegam.",
+          "sub": "O medo do autonomo e o produto mais vendido do nicho.",
+          "destaques": [
+            "pegam."
+          ],
+          "imagem": "acervo/familia/familia-selfie.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "O gancho do medo",
+          "corpo": "Sem carteira assinada, voce acha que sera negado. A promessa de garantia se vende exatamente nesse medo.",
+          "destaques": [
+            "medo."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "A verdade sobre ser MEI",
+          "corpo": "Autonomo aprova visto todo dia. Vinculo se comprova de varias formas. O que derruba e despreparo, nao o CNPJ.",
+          "destaques": [
+            "despreparo,"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Ninguem garante seu visto. Quem promete isso pro autonomo so ta vendendo o seu medo.",
+          "destaques": [
+            "Ninguem"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O que muda o jogo",
+          "corpo": "Saber contar a sua vida de autonomo em uma frase segura. Isso da pra preparar. O carimbo, nao.",
+          "destaques": [
+            "preparar."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O teste",
+          "corpo": "Pergunta pra quem promete: voces garantem? Quem e honesto diz que ninguem pode garantir.",
+          "destaques": [
+            "ninguem"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta MEIVISTO que eu te mostro como o autonomo se prepara. Ou link na bio.",
+          "acao": "Comenta MEIVISTO",
+          "destaques": [
+            "MEIVISTO"
+          ],
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Te prometeram visto garantido porque voce e MEI e tem medo de ser negado por isso. E exatamente ai que pegam.\n\nSem carteira assinada, voce acha que sera negado, e a promessa se vende nesse medo. Mas autonomo aprova visto todo dia: vinculo se comprova de varias formas, e o que derruba e despreparo, nao o CNPJ. Ninguem garante seu visto. Quem promete isso pro autonomo so ta vendendo o seu medo.\n\nComenta MEIVISTO que eu te mostro como o autonomo se prepara. Ou toca no link da bio.\n\n#autonomo #mei #vistoamericano #vistoeua #b1b2 #empreendedor #consuladoamericano"
+    },
+    {
+      "combo": "A04xP1",
+      "data": "2026-08-18",
+      "conta": "@leticia",
+      "pilar": "denuncia",
+      "angulo_id": "A04",
+      "persona_id": "P1",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "A taxa nao volta, e por familia isso multiplica",
+      "persona": "Familia Orlando",
+      "dor": "se um filho for negado, perde a taxa de cada um",
+      "imagem": "acervo/destinos/disney-goofy.jpg",
+      "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
+      "fonte_verificada_em": "2026-07-12",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "a conta que assusta",
+          "titulo": "A taxa nao volta. E numa familia de quatro, isso multiplica.",
+          "sub": "185 dolares por pessoa, criancas incluidas, sem reembolso.",
+          "destaques": [
+            "multiplica."
+          ],
+          "imagem": "acervo/destinos/disney-goofy.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "A regra fria",
+          "corpo": "A taxa consular e paga por pessoa e nao volta se for negado. Vale pra adulto e pra crianca igual.",
+          "destaques": [
+            "igual."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Por que isso pesa na familia",
+          "corpo": "Quatro pessoas e quatro taxas. Se um for negado, alem da frustracao, aquele valor ja era.",
+          "destaques": [
+            "quatro"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Quem paga quatro taxas nao pode tratar a preparacao como aposta.",
+          "destaques": [
+            "aposta."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O que reduz o risco",
+          "corpo": "Preparo coerente pra cada membro da familia. Nao elimina o risco, mas para de jogar dinheiro fora.",
+          "destaques": [
+            "coerente"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "A conta honesta",
+          "corpo": "Some as taxas, o preparo e so entao decida. Confere o valor atual no travel.state.gov antes.",
+          "destaques": [
+            "honesta"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta TAXA que eu te mando a conta da familia fechada. Ou link na bio.",
+          "acao": "Comenta TAXA",
+          "destaques": [
+            "TAXA"
+          ],
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "A taxa do visto nao volta. E numa familia de quatro, isso multiplica: 185 dolares por pessoa, criancas incluidas, sem reembolso (confere no travel.state.gov).\n\nA taxa consular e paga por pessoa e nao volta se for negado, adulto ou crianca. Quatro pessoas, quatro taxas. Se um for negado, aquele valor ja era. Quem paga quatro taxas nao pode tratar a preparacao como aposta.\n\nComenta TAXA que eu te mando a conta da familia fechada. Ou toca no link da bio.\n\n#vistoamericano #viagememfamilia #vistoeua #b1b2 #taxavisto #orlando #consuladoamericano"
+    },
+    {
+      "combo": "A04xP2",
+      "data": "2026-08-19",
+      "conta": "@leticia",
+      "pilar": "denuncia",
+      "angulo_id": "A04",
+      "persona_id": "P2",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "A taxa nao volta (casal)",
+      "persona": "Casal primeira viagem",
+      "dor": "primeira vez, nao sabe que a taxa nao reembolsa",
+      "imagem": "acervo/destinos/praia-crianca.jpg",
+      "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
+      "fonte_verificada_em": "2026-07-12",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "antes de pagar",
+          "titulo": "Voces sabem que a taxa do visto nao volta se for negado?",
+          "sub": "Muita gente na primeira viagem descobre tarde demais.",
+          "destaques": [
+            "nao"
+          ],
+          "imagem": "acervo/destinos/praia-crianca.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "A regra",
+          "corpo": "A taxa consular de 185 dolares por pessoa e paga antes e nao reembolsa. Aprovado ou negado, ela fica la.",
+          "destaques": [
+            "185"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Por que isso importa pra voces",
+          "corpo": "E a primeira vez e voces vao pagar duas taxas. Tratar a entrevista como sorte e caro.",
+          "destaques": [
+            "duas"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Se a taxa nao volta, o barato de verdade e chegar preparado da primeira vez.",
+          "destaques": [
+            "preparado"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O que evita o desperdicio",
+          "corpo": "DS-160 coerente pros dois e voces sabendo responder. Nao garante nada, mas para de apostar.",
+          "destaques": [
+            "coerente"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Confere na fonte",
+          "corpo": "O valor atual esta no travel.state.gov. Sempre confira antes de fechar qualquer coisa.",
+          "destaques": [
+            "fonte"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta NAOVOLTA que eu te mando o que preparar antes de pagar. Ou link na bio.",
+          "acao": "Comenta NAOVOLTA",
+          "destaques": [
+            "NAOVOLTA"
+          ],
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Voces sabem que a taxa do visto nao volta se for negado? Muita gente na primeira viagem descobre tarde demais.\n\nA taxa consular de 185 dolares por pessoa e paga antes e nao reembolsa, aprovado ou negado (confere no travel.state.gov). E a primeira vez, sao duas taxas, e tratar a entrevista como sorte e caro. Se a taxa nao volta, o barato de verdade e chegar preparado da primeira vez.\n\nComenta NAOVOLTA que eu te mando o que preparar antes de pagar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #taxavisto #viagemacasal #consuladoamericano"
+    },
+    {
+      "combo": "A14xP7",
+      "data": "2026-08-20",
+      "conta": "@viajaly",
+      "pilar": "antidoto",
+      "angulo_id": "A14",
+      "persona_id": "P7",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "A unica pergunta e: voce volta? (autonomo)",
+      "persona": "Autonomo / MEI",
+      "dor": "acha que a pergunta e sobre renda e vinculo formal",
+      "imagem": "acervo/familia/familia-selfie2.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "o que ele quer saber",
+          "titulo": "O consulo nao quer saber quanto o autonomo ganha. Quer saber se voce volta.",
+          "sub": "Voce ta se preparando pra pergunta errada.",
+          "destaques": [
+            "volta."
+          ],
+          "imagem": "acervo/familia/familia-selfie2.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "A pergunta real",
+          "corpo": "A lei presume que voce quer ficar. Seu papel e mostrar que a sua vida te traz de volta pro Brasil.",
+          "destaques": [
+            "volta"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Por que o autonomo trava",
+          "corpo": "Voce foca em provar renda e esquece o essencial: mostrar os lacos que te fazem voltar.",
+          "destaques": [
+            "lacos"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Vinculo nao e carteira assinada. E uma vida que continua aqui te aguardando.",
+          "destaques": [
+            "vida"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O que responde a pergunta",
+          "corpo": "Clientes, familia, casa, projetos em andamento. Coisas que so fazem sentido se voce voltar.",
+          "destaques": [
+            "voltar."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Como dizer isso",
+          "corpo": "Com naturalidade, em poucas frases. Autonomo preparado responde melhor que assalariado despreparado.",
+          "destaques": [
+            "preparado"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta VOLTAMEI que eu te ajudo a montar a sua resposta. Ou link na bio.",
+          "acao": "Comenta VOLTAMEI",
+          "destaques": [
+            "VOLTAMEI"
+          ],
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "O consulo nao quer saber quanto o autonomo ganha. Quer saber uma coisa so: voce volta?\n\nA lei presume que voce quer ficar, e seu papel e mostrar que a sua vida te traz de volta. O autonomo trava porque foca em provar renda e esquece os lacos: clientes, familia, casa, projetos. Vinculo nao e carteira assinada, e uma vida que continua aqui te aguardando. Autonomo preparado responde melhor que assalariado despreparado.\n\nComenta VOLTAMEI que eu te ajudo a montar a sua resposta. Ou toca no link da bio.\n\n#autonomo #mei #vistoamericano #vistoeua #b1b2 #entrevistavisto #empreendedor"
+    },
+    {
+      "combo": "A16xP7",
+      "data": "2026-08-21",
+      "conta": "@viajaly",
+      "pilar": "antidoto",
+      "angulo_id": "A16",
+      "persona_id": "P7",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Nao ter carteira assinada nao te reprova",
+      "persona": "Autonomo / MEI",
+      "dor": "medo de ser reprovado so por ser autonomo",
+      "imagem": "acervo/destinos/praia-crianca-areia.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "mito do autonomo",
+          "titulo": "Nao ter carteira assinada nao reprova o seu visto. Calma.",
+          "sub": "O mito que faz autonomo desistir antes de tentar.",
+          "destaques": [
+            "nao"
+          ],
+          "imagem": "acervo/destinos/praia-crianca-areia.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "De onde vem o medo",
+          "corpo": "A cabeca acha que sem holerite nao ha prova de vinculo. Falso. Vinculo se comprova de muitas formas.",
+          "destaques": [
+            "Falso."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Como o autonomo comprova",
+          "corpo": "Faturamento, contrato de clientes, imovel, familia, movimentacao. A sua vida inteira e a prova.",
+          "destaques": [
+            "vida"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "O consulo nao reprova quem e autonomo. Reprova quem chega sem saber se explicar.",
+          "destaques": [
+            "explicar."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O que realmente conta",
+          "corpo": "Coerencia entre o que voce declara e o que voce fala. Autonomo coerente passa mais que voce imagina.",
+          "destaques": [
+            "Coerencia"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O ajuste que muda tudo",
+          "corpo": "Parar de esconder que e autonomo e aprender a apresentar isso como forca, nao fraqueza.",
+          "destaques": [
+            "forca,"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta AUTONOMO que eu te mando como comprovar vinculo sem holerite. Ou link na bio.",
+          "acao": "Comenta AUTONOMO",
+          "destaques": [
+            "AUTONOMO"
+          ],
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Nao ter carteira assinada nao reprova o seu visto. Esse mito faz autonomo desistir antes de tentar.\n\nO medo vem de achar que sem holerite nao ha prova de vinculo. Falso: faturamento, contrato de clientes, imovel, familia, movimentacao. A sua vida inteira e a prova. O consulo nao reprova quem e autonomo, reprova quem chega sem saber se explicar. Autonomo coerente passa mais que voce imagina.\n\nComenta AUTONOMO que eu te mando como comprovar vinculo sem holerite. Ou toca no link da bio.\n\n#autonomo #mei #vistoamericano #vistoeua #b1b2 #empreendedor #entrevistavisto"
+    },
+    {
+      "combo": "A17xP3",
+      "data": "2026-08-22",
+      "conta": "@leticia",
+      "pilar": "antidoto",
+      "angulo_id": "A17",
+      "persona_id": "P3",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Negado nao e o fim, mas tem uma coisa que voce NAO pode fazer",
+      "persona": "Negado antes",
+      "dor": "vontade de reaplicar rapido do mesmo jeito",
+      "imagem": "acervo/familia/neve-mae-crianca.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "depois do nao",
+          "titulo": "Foi negado? Tem uma coisa que voce nao pode fazer de jeito nenhum agora.",
+          "sub": "E quase todo mundo faz, e leva outro nao.",
+          "destaques": [
+            "nao"
+          ],
+          "imagem": "acervo/familia/neve-mae-crianca.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "O erro que repete o nao",
+          "corpo": "Reaplicar correndo, do mesmo jeito, sem mudar nada. Mesmo pedido, mesmo resultado, taxa perdida de novo.",
+          "destaques": [
+            "nada."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "O que fazer primeiro",
+          "corpo": "Entender o motivo provavel do nao antes de marcar de novo. Sem diagnostico, e so repetir o erro.",
+          "destaques": [
+            "motivo"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Ser negado nao te marca pra sempre. Reaplicar identico, sim.",
+          "destaques": [
+            "identico,"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O que muda de verdade",
+          "corpo": "Ajustar o DS-160, alinhar a historia, treinar a entrevista. Ai a segunda tentativa faz sentido.",
+          "destaques": [
+            "Ajustar"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Sem pressa e sem promessa",
+          "corpo": "Ninguem garante a virada. Mas dar o segundo passo sem entender o primeiro e desperdicio na certa.",
+          "destaques": [
+            "Ninguem"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta SEGUNDAVEZ que eu te falo o que checar antes de reaplicar. Ou link na bio.",
+          "acao": "Comenta SEGUNDAVEZ",
+          "destaques": [
+            "SEGUNDAVEZ"
+          ],
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Foi negado? Tem uma coisa que voce nao pode fazer de jeito nenhum agora, e quase todo mundo faz: reaplicar correndo, do mesmo jeito.\n\nMesmo pedido, mesmo resultado, e a taxa perdida de novo. O certo e entender o motivo provavel do nao antes de marcar. Ser negado nao te marca pra sempre, reaplicar identico, sim. Ajuste o DS-160, alinhe a historia, treine a entrevista. Ai a segunda tentativa faz sentido.\n\nComenta SEGUNDAVEZ que eu te falo o que checar antes de reaplicar. Ou toca no link da bio.\n\n#vistonegado #vistoamericano #segundatentativa #vistoeua #b1b2 #naodesista #consuladoamericano"
+    },
+    {
+      "combo": "A18xP2",
+      "data": "2026-08-23",
+      "conta": "@viajaly",
+      "pilar": "antidoto",
+      "angulo_id": "A18",
+      "persona_id": "P2",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Incoerencia entre DS-160 e entrevista e a causa n1 de negativa",
+      "persona": "Casal primeira viagem",
+      "dor": "acha que basta ter bom perfil pra passar",
+      "imagem": "acervo/destinos/ny-skyline-menina.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "a causa numero 1",
+          "titulo": "Nao e o perfil de voces que reprova. E a incoerencia.",
+          "sub": "Casal bem preparado erra aqui sem perceber.",
+          "destaques": [
+            "incoerencia."
+          ],
+          "imagem": "acervo/destinos/ny-skyline-menina.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "O que e incoerencia",
+          "corpo": "O que voces escrevem no DS-160 dizer uma coisa e a fala na entrevista dizer outra. O oficial nota na hora.",
+          "destaques": [
+            "outra."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Onde o casal se enrola",
+          "corpo": "Quem paga a viagem, o que cada um faz, quanto tempo ficam. Se as versoes de voces batem, ponto a favor.",
+          "destaques": [
+            "batem,"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "O oficial nao busca mentira. Busca a linha que nao fecha. Coerencia e o jogo.",
+          "destaques": [
+            "Coerencia"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "Como alinhar a dois",
+          "corpo": "Preencham o DS-160 juntos e combinem as respostas antes. Nao pra decorar, pra nao se contradizer.",
+          "destaques": [
+            "juntos"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O detalhe que salva",
+          "corpo": "Uma revisao dos campos e um ensaio curto elimina a maior causa de nao. E rapido.",
+          "destaques": [
+            "revisao"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta COERENCIA que eu te mando o checklist do casal. Ou link na bio.",
+          "acao": "Comenta COERENCIA",
+          "destaques": [
+            "COERENCIA"
+          ],
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Nao e o perfil de voces que reprova. E a incoerencia, e casal bem preparado erra aqui sem perceber.\n\nIncoerencia e o DS-160 dizer uma coisa e a fala na entrevista dizer outra. O oficial nota na hora. Onde o casal se enrola: quem paga, o que cada um faz, quanto tempo fica. Se as versoes batem, ponto a favor. O oficial nao busca mentira, busca a linha que nao fecha.\n\nPreencham o DS-160 juntos e combinem antes, nao pra decorar, pra nao se contradizer.\n\nComenta COERENCIA que eu te mando o checklist do casal. Ou toca no link da bio.\n\n#vistoamericano #ds160 #primeiraviagem #vistoeua #b1b2 #viagemacasal #entrevistavisto"
+    },
+    {
+      "combo": "A11xP5",
+      "data": "2026-08-24",
+      "conta": "@viajaly",
+      "pilar": "utilidade",
+      "angulo_id": "A11",
+      "persona_id": "P5",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Renovacao sem entrevista so vale se venceu ha menos de 12 meses",
+      "persona": "Renovacao vencida",
+      "dor": "achava que renovar era automatico e caiu na entrevista",
+      "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "renovacao nao e automatica",
+          "titulo": "Seu visto venceu ha mais de um ano? Voce caiu na entrevista de novo.",
+          "sub": "E quem nao sabe disso se planeja errado.",
+          "destaques": [
+            "entrevista"
+          ],
+          "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "A regra da dispensa",
+          "corpo": "A dispensa de entrevista costuma valer so se o visto venceu ha pouco tempo. Passou de 12 meses, entrevista.",
+          "destaques": [
+            "12"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Por que isso pega voce",
+          "corpo": "Voce achava que renovar era so pagar e enviar. Ai descobre que precisa comparecer, e o prazo aperta.",
+          "destaques": [
+            "comparecer,"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Renovar nao e automatico. Tratar como se fosse e o caminho pro susto.",
+          "destaques": [
+            "automatico."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O que muda no seu caso",
+          "corpo": "Voce volta pra entrevista como na primeira vez. Preparo conta de novo, mesmo com visto anterior.",
+          "destaques": [
+            "conta"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Confirme sempre",
+          "corpo": "As condicoes de dispensa mudam. Confira no site do consulado antes de assumir qualquer coisa.",
+          "destaques": [
+            "Confira"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta RENOVAR que eu te mando o checklist da renovacao. Ou link na bio.",
+          "acao": "Comenta RENOVAR",
+          "destaques": [
+            "RENOVAR"
+          ],
+          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Seu visto venceu ha mais de um ano? Entao voce caiu na entrevista de novo, e quem nao sabe disso se planeja errado.\n\nA dispensa de entrevista costuma valer so se o visto venceu ha pouco tempo. Passou de 12 meses, e entrevista. Voce achava que renovar era so pagar e enviar, ai descobre que precisa comparecer e o prazo aperta. Renovar nao e automatico. Preparo conta de novo, mesmo com visto anterior.\n\nAs condicoes mudam, entao confirme sempre no site do consulado.\n\nComenta RENOVAR que eu te mando o checklist. Ou toca no link da bio.\n\n#renovacaovisto #vistoamericano #vistoeua #b1b2 #dicasdevisto #consuladoamericano"
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "combo": "D10xP6",
+  "data": "2026-08-15",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D10",
+  "persona_id": "P6",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Miami em grupo alem da praia",
+  "persona": "Grupo de amigos",
+  "dor": "grupo so pensa em praia e balada e enjoa",
+  "imagem": "acervo/destinos/ny-skyline-crianca.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "miami em grupo",
+      "titulo": "Grupo em Miami que so faz praia e balada volta cansado.",
+      "sub": "Faltou o que faz a viagem valer a pena.",
+      "destaques": [
+        "cansado."
+      ],
+      "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Um dia diferente",
+      "corpo": "Everglades de aerobarco, jacare de perto. O grupo lembra desse dia mais que da decima balada.",
+      "destaques": [
+        "lembra"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Comer bem e barato",
+      "corpo": "Little Havana e os food halls alimentam o grupo sem o preco da orla. Rende mais dia de viagem.",
+      "destaques": [
+        "barato"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Foto que rende",
+      "corpo": "Wynwood colorido, o farol de Key Biscayne. Conteudo bom pro grupo sem pagar por passeio caro.",
+      "destaques": [
+        "Wynwood"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Miami em grupo cansa quem repete. Rende pra quem mistura praia, cidade e natureza.",
+      "destaques": [
+        "mistura"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que trava o grupo antes",
+      "corpo": "Miami em grupo so acontece com os vistos de todo mundo prontos e no prazo.",
+      "destaques": [
+        "todo"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta MIAMIGRUPO que eu te mando o roteiro do grupo. Ou link na bio.",
+      "acao": "Comenta MIAMIGRUPO",
+      "destaques": [
+        "MIAMIGRUPO"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Grupo em Miami que so faz praia e balada volta cansado. Faltou o que faz a viagem valer a pena.\n\nReserve um dia diferente: Everglades de aerobarco, jacare de perto, o grupo lembra disso mais que da decima balada. Coma bem e barato em Little Havana e nos food halls. E faca foto boa de graca em Wynwood e no farol de Key Biscayne. Miami cansa quem repete e rende pra quem mistura.\n\nE so acontece com os vistos de todo mundo prontos.\n\nComenta MIAMIGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#miami #viagemcomamigos #grupodeamigos #everglades #eua #vistoamericano #vistoeua"
+}

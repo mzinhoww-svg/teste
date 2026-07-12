@@ -1,0 +1,79 @@
+{
+  "combo": "A11xP5",
+  "data": "2026-08-24",
+  "conta": "@viajaly",
+  "pilar": "utilidade",
+  "angulo_id": "A11",
+  "persona_id": "P5",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Renovacao sem entrevista so vale se venceu ha menos de 12 meses",
+  "persona": "Renovacao vencida",
+  "dor": "achava que renovar era automatico e caiu na entrevista",
+  "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "renovacao nao e automatica",
+      "titulo": "Seu visto venceu ha mais de um ano? Voce caiu na entrevista de novo.",
+      "sub": "E quem nao sabe disso se planeja errado.",
+      "destaques": [
+        "entrevista"
+      ],
+      "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "A regra da dispensa",
+      "corpo": "A dispensa de entrevista costuma valer so se o visto venceu ha pouco tempo. Passou de 12 meses, entrevista.",
+      "destaques": [
+        "12"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Por que isso pega voce",
+      "corpo": "Voce achava que renovar era so pagar e enviar. Ai descobre que precisa comparecer, e o prazo aperta.",
+      "destaques": [
+        "comparecer,"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Renovar nao e automatico. Tratar como se fosse e o caminho pro susto.",
+      "destaques": [
+        "automatico."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O que muda no seu caso",
+      "corpo": "Voce volta pra entrevista como na primeira vez. Preparo conta de novo, mesmo com visto anterior.",
+      "destaques": [
+        "conta"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Confirme sempre",
+      "corpo": "As condicoes de dispensa mudam. Confira no site do consulado antes de assumir qualquer coisa.",
+      "destaques": [
+        "Confira"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta RENOVAR que eu te mando o checklist da renovacao. Ou link na bio.",
+      "acao": "Comenta RENOVAR",
+      "destaques": [
+        "RENOVAR"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Seu visto venceu ha mais de um ano? Entao voce caiu na entrevista de novo, e quem nao sabe disso se planeja errado.\n\nA dispensa de entrevista costuma valer so se o visto venceu ha pouco tempo. Passou de 12 meses, e entrevista. Voce achava que renovar era so pagar e enviar, ai descobre que precisa comparecer e o prazo aperta. Renovar nao e automatico. Preparo conta de novo, mesmo com visto anterior.\n\nAs condicoes mudam, entao confirme sempre no site do consulado.\n\nComenta RENOVAR que eu te mando o checklist. Ou toca no link da bio.\n\n#renovacaovisto #vistoamericano #vistoeua #b1b2 #dicasdevisto #consuladoamericano"
+}

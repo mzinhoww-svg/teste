@@ -1,0 +1,80 @@
+{
+  "combo": "D05xP2",
+  "data": "2026-08-10",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D05",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Neve a dois",
+  "persona": "Casal primeira viagem",
+  "dor": "nunca viu neve e quer a experiencia certa",
+  "imagem": "acervo/destinos/montanha-neve.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "primeira neve a dois",
+      "titulo": "A primeira neve do casal tem epoca certa. Nao erre a data.",
+      "sub": "Viajar no mes errado e ver montanha sem neve.",
+      "destaques": [
+        "epoca"
+      ],
+      "imagem": "acervo/destinos/montanha-neve.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Quando ir",
+      "corpo": "Dezembro a marco na maioria das montanhas. Fora disso, voces sobem e nao tem neve nenhuma.",
+      "destaques": [
+        "marco"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Estreante nao precisa de pista",
+      "corpo": "Sem saber esquiar? Tem trenó, tubing e so brincar. Aula de meio dia ja da o gostinho.",
+      "destaques": [
+        "aula"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Roupa faz o dia",
+      "corpo": "Luva impermeavel e segunda pele. Casaco de cidade bonito nao segura o frio da montanha.",
+      "destaques": [
+        "impermeavel"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Neve no mes errado e so montanha marrom. A data importa mais que o hotel.",
+      "destaques": [
+        "data"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "A parte que tem prazo",
+      "corpo": "A neve tem janela e o visto tem o tempo dele. Por isso o visto dos dois vem primeiro, com folga.",
+      "destaques": [
+        "primeiro,"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta NEVEDOIS que eu te mando o guia da primeira neve. Ou link na bio.",
+      "acao": "Comenta NEVEDOIS",
+      "destaques": [
+        "NEVEDOIS"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "A primeira neve do casal tem epoca certa. Viajar no mes errado e ver montanha sem neve.\n\nVa de dezembro a marco. Nao precisa saber esquiar: trenó, tubing e uma aula de meio dia ja dao o gostinho. E roupa faz o dia, luva impermeavel e segunda pele, porque casaco de cidade nao segura o frio da montanha. A data importa mais que o hotel.\n\nA neve tem janela e o visto tem o tempo dele. O visto vem primeiro.\n\nComenta NEVEDOIS que eu te mando o guia. Ou toca no link da bio.\n\n#neve #viagemacasal #inverno #eua #vistoamericano #vistoeua #ski"
+}

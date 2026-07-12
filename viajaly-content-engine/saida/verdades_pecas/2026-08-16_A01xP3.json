@@ -1,0 +1,79 @@
+{
+  "combo": "A01xP3",
+  "data": "2026-08-16",
+  "conta": "@leticia",
+  "pilar": "denuncia",
+  "angulo_id": "A01",
+  "persona_id": "P3",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Ninguem garante visto (pra quem ja foi negado)",
+  "persona": "Negado antes",
+  "dor": "te prometeram garantia, voce foi negado e eles sumiram",
+  "imagem": "acervo/familia/mae-crianca-selfie.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "a verdade que doi",
+      "titulo": "Te prometeram garantia. Voce foi negado. E eles sumiram.",
+      "sub": "O golpe favorito do nicho tem uma vitima preferida: quem ja tem medo.",
+      "destaques": [
+        "sumiram."
+      ],
+      "imagem": "acervo/familia/mae-crianca-selfie.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Por que prometeram",
+      "corpo": "Porque voce estava com medo depois do primeiro nao. Medo compra promessa. E promessa nao passa na entrevista.",
+      "destaques": [
+        "medo"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Quem some e quem fica",
+      "corpo": "Quem garante desaparece quando da errado. Quem e honesto fica, entende o nao e te prepara pro proximo.",
+      "destaques": [
+        "fica,"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Ninguem garante seu visto. Quem garantiu e sumiu ja te provou isso.",
+      "destaques": [
+        "Ninguem"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O que da pra garantir",
+      "corpo": "Entender o que derrubou voce e corrigir. Isso muda o jogo. O carimbo continua sendo do consulo.",
+      "destaques": [
+        "corrigir."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O teste da honestidade",
+      "corpo": "Pergunta pra proxima assessoria: voces garantem? Se disser sim, voce ja conhece esse final.",
+      "destaques": [
+        "garantem?"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta PROMESSA que eu te explico o que muda no segundo pedido. Ou link na bio.",
+      "acao": "Comenta PROMESSA",
+      "destaques": [
+        "PROMESSA"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Te prometeram garantia, voce foi negado, e eles sumiram do WhatsApp. Reconhece?\n\nPrometeram porque voce estava com medo depois do primeiro nao, e medo compra promessa. Mas promessa nao passa na entrevista. Quem garante some quando da errado. Quem e honesto fica, entende o nao e te prepara pro proximo. Ninguem garante seu visto, e quem garantiu e sumiu ja te provou isso.\n\nComenta PROMESSA que eu te explico o que muda no segundo pedido. Ou toca no link da bio.\n\n#vistonegado #vistoamericano #segundatentativa #vistoeua #b1b2 #naodesista #consuladoamericano"
+}

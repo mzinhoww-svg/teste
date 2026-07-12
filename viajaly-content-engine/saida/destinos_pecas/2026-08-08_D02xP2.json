@@ -1,0 +1,80 @@
+{
+  "combo": "D02xP2",
+  "data": "2026-08-08",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D02",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Miami a dois",
+  "persona": "Casal primeira viagem",
+  "dor": "quer roteiro romantico e nao so balada",
+  "imagem": "acervo/destinos/ny-skyline-menina.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "miami a dois",
+      "titulo": "Miami a dois nao e so balada e piscina de hotel.",
+      "sub": "Tem um lado romantico que o Instagram esconde.",
+      "destaques": [
+        "so"
+      ],
+      "imagem": "acervo/destinos/ny-skyline-menina.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Por do sol certo",
+      "corpo": "Key Biscayne e o farol pro fim de tarde. Menos gente, mais vista, o momento que rende foto e memoria.",
+      "destaques": [
+        "memoria."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Jantar sem cilada",
+      "corpo": "Fuja da orla turistica. Little Havana e os bairros comem melhor e cobram justo.",
+      "destaques": [
+        "justo."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Um dia fora",
+      "corpo": "Um bate e volta pros Everglades ou Keys quebra a rotina de praia e vira a melhor lembranca.",
+      "destaques": [
+        "fora"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Miami romantica existe. Ela so nao mora na avenida principal.",
+      "destaques": [
+        "romantica"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que vem antes do voo",
+      "corpo": "Miami a dois comeca meses antes, com o visto do casal aprovado e no prazo.",
+      "destaques": [
+        "antes,"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta MIAMIDOIS que eu te mando o roteiro romantico. Ou link na bio.",
+      "acao": "Comenta MIAMIDOIS",
+      "destaques": [
+        "MIAMIDOIS"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Miami a dois nao e so balada e piscina de hotel. Tem um lado romantico que o Instagram esconde.\n\nKey Biscayne e o farol pro por do sol, com menos gente e mais vista. Fuja da orla turistica na hora de comer, os bairros cobram justo. E um bate e volta pros Everglades ou Keys vira a melhor lembranca. Miami romantica existe, so nao mora na avenida principal.\n\nE ela comeca meses antes, com o visto do casal no prazo.\n\nComenta MIAMIDOIS que eu te mando o roteiro. Ou toca no link da bio.\n\n#miami #viagemacasal #luademel #eua #vistoamericano #vistoeua #keybiscayne"
+}
