@@ -1,6 +1,6 @@
 # Lista de automacao: palavra-chave -> DM
 
-44 palavras-chave, uma por peca. Configure no ManyChat (ou similar): quando alguem comentar a palavra no post, o bot envia o DM correspondente.
+60 palavras-chave, uma por peca. Configure no ManyChat (ou similar): quando alguem comentar a palavra no post, o bot envia o DM correspondente.
 
 | palavra | conta | combo | entrega (o DM manda) |
 |---------|-------|-------|----------------------|
@@ -46,6 +46,22 @@
 | **SEGUNDAVEZ** | @leticia | A17xP3 | o que checar antes de reaplicar |
 | **COERENCIA** | @viajaly | A18xP2 | o checklist do casal |
 | **RENOVAR** | @viajaly | A11xP5 | o checklist da renovacao |
+| **CONTAFAMILIA** | @viajaly | A08xP1 | o custo fechado pra sua familia |
+| **DOISDIAS** | @viajaly | A09xP2 | como marcar os dois numa viagem |
+| **SEGUNDOS** | @leticia | A12xP2 | o roteiro dos 10 primeiros |
+| **PASTADOIS** | @leticia | A13xP2 | o material que combinei |
+| **DS160MEI** | @viajaly | A15xP7 | os 7 campos do autonomo |
+| **VOCEVOLTA** | @viajaly | A14xP2 | a montar a resposta do casal |
+| **ROBO** | @leticia | A02xP7 | o jeito legitimo de antecipar |
+| **COERENCIACOPA** | @viajaly | A18xP4 | o material que combinei |
+| **NYGRUPO** | @viajaly | D01xP6 | o roteiro de grupo em NY |
+| **MIAMIFAM** | @viajaly | D02xP1 | o combo Orlando + Miami |
+| **CALIGRUPO** | @viajaly | D03xP6 | o roteiro de road trip |
+| **NEVEGRUPO** | @viajaly | D05xP6 | o roteiro de neve pra grupo |
+| **ORLANDODOIS** | @viajaly | D06xP2 | o roteiro de casal |
+| **PRAIAGRUPO** | @viajaly | D07xP6 | o guia de praia pra grupo |
+| **MIAMICASAL** | @viajaly | D10xP2 | o roteiro alem da orla |
+| **ORLANDOGRUPO** | @viajaly | D06xP6 | o roteiro de grupo |
 | **COMECO** | @viajaly | A23xP2 | o primeiro passo |
 | **RECOMECO** | @leticia | A29xP3 | o proximo passo |
 
@@ -178,6 +194,54 @@
 
 ### RENOVAR  (A11xP5 - @viajaly)
 > Oi! Obrigada por comentar RENOVAR. Como prometi, aqui vai o checklist da renovacao. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### CONTAFAMILIA  (A08xP1 - @viajaly)
+> Oi! Obrigada por comentar CONTAFAMILIA. Como prometi, aqui vai o custo fechado pra sua familia. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### DOISDIAS  (A09xP2 - @viajaly)
+> Oi! Obrigada por comentar DOISDIAS. Como prometi, aqui vai como marcar os dois numa viagem. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### SEGUNDOS  (A12xP2 - @leticia)
+> Oii, que bom que voce comentou SEGUNDOS. Como prometi, aqui vai o roteiro dos 10 primeiros. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### PASTADOIS  (A13xP2 - @leticia)
+> Oii, que bom que voce comentou PASTADOIS. Como prometi, aqui vai o material que combinei. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### DS160MEI  (A15xP7 - @viajaly)
+> Oi! Obrigada por comentar DS160MEI. Como prometi, aqui vai os 7 campos do autonomo. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### VOCEVOLTA  (A14xP2 - @viajaly)
+> Oi! Obrigada por comentar VOCEVOLTA. Como prometi, aqui vai a montar a resposta do casal. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### ROBO  (A02xP7 - @leticia)
+> Oii, que bom que voce comentou ROBO. Como prometi, aqui vai o jeito legitimo de antecipar. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### COERENCIACOPA  (A18xP4 - @viajaly)
+> Oi! Obrigada por comentar COERENCIACOPA. Como prometi, aqui vai o material que combinei. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### NYGRUPO  (D01xP6 - @viajaly)
+> Oi! Obrigada por comentar NYGRUPO. Como prometi, aqui vai o roteiro de grupo em NY. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### MIAMIFAM  (D02xP1 - @viajaly)
+> Oi! Obrigada por comentar MIAMIFAM. Como prometi, aqui vai o combo Orlando + Miami. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### CALIGRUPO  (D03xP6 - @viajaly)
+> Oi! Obrigada por comentar CALIGRUPO. Como prometi, aqui vai o roteiro de road trip. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### NEVEGRUPO  (D05xP6 - @viajaly)
+> Oi! Obrigada por comentar NEVEGRUPO. Como prometi, aqui vai o roteiro de neve pra grupo. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### ORLANDODOIS  (D06xP2 - @viajaly)
+> Oi! Obrigada por comentar ORLANDODOIS. Como prometi, aqui vai o roteiro de casal. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### PRAIAGRUPO  (D07xP6 - @viajaly)
+> Oi! Obrigada por comentar PRAIAGRUPO. Como prometi, aqui vai o guia de praia pra grupo. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### MIAMICASAL  (D10xP2 - @viajaly)
+> Oi! Obrigada por comentar MIAMICASAL. Como prometi, aqui vai o roteiro alem da orla. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
+
+### ORLANDOGRUPO  (D06xP6 - @viajaly)
+> Oi! Obrigada por comentar ORLANDOGRUPO. Como prometi, aqui vai o roteiro de grupo. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.
 
 ### COMECO  (A23xP2 - @viajaly)
 > Oi! Obrigada por comentar COMECO. Como prometi, aqui vai o primeiro passo. Quer que eu veja o seu caso? Me manda um oi por aqui ou toca no link da bio. Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.

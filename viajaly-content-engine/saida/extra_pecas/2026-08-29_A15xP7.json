@@ -1,0 +1,79 @@
+{
+  "combo": "A15xP7",
+  "data": "2026-08-29",
+  "conta": "@viajaly",
+  "pilar": "antidoto",
+  "angulo_id": "A15",
+  "persona_id": "P7",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "7 campos do DS-160 derrubam mais que perfil (autonomo)",
+  "persona": "Autonomo / MEI",
+  "dor": "medo do formulario por nao ter emprego formal",
+  "imagem": "acervo/familia/familia-selfie2.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "o formulario decide",
+      "titulo": "7 campos do DS-160 derrubam mais que nao ter carteira assinada.",
+      "sub": "Autonomo trava no formulario, nao na entrevista.",
+      "destaques": [
+        "7"
+      ],
+      "imagem": "acervo/familia/familia-selfie2.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Profissao e o mais delicado",
+      "corpo": "Descrever mal o que voce faz como autonomo gera duvida. Clareza aqui vale ouro.",
+      "destaques": [
+        "Clareza"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Os campos que mais pegam",
+      "corpo": "Profissao, renda, viagens, redes sociais, quem paga, tempo de estadia e vinculo. Sete pontos.",
+      "destaques": [
+        "Sete"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Nao e o CNPJ que reprova. E o formulario que se contradiz com a sua fala.",
+      "destaques": [
+        "contradiz"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Coerencia acima de tudo",
+      "corpo": "O que voce escreve tem que bater com o que voce fala e com o que voce vive. So isso.",
+      "destaques": [
+        "bater"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Revisar leva pouco",
+      "corpo": "Uma revisao dos sete campos criticos evita o erro que trava o autonomo na hora.",
+      "destaques": [
+        "sete"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta DS160MEI que eu te mando os 7 campos do autonomo. Ou link na bio.",
+      "acao": "Comenta DS160MEI",
+      "destaques": [
+        "DS160MEI"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Sete campos do DS-160 derrubam o autonomo mais que nao ter carteira assinada. O problema mora no formulario, nao na entrevista.\n\nProfissao e o mais delicado: descrever mal o que voce faz gera duvida. Os que mais pegam: profissao, renda, viagens, redes sociais, quem paga, tempo de estadia e vinculo. Nao e o CNPJ que reprova, e o formulario que se contradiz com a sua fala. O que voce escreve tem que bater com o que voce vive.\n\nComenta DS160MEI que eu te mando os 7 campos do autonomo. Ou toca no link da bio.\n\n#autonomo #mei #ds160 #vistoamericano #vistoeua #b1b2 #empreendedor"
+}

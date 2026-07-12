@@ -1,0 +1,79 @@
+{
+  "combo": "A14xP2",
+  "data": "2026-08-30",
+  "conta": "@viajaly",
+  "pilar": "antidoto",
+  "angulo_id": "A14",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "A unica pergunta e: voces voltam? (casal)",
+  "persona": "Casal primeira viagem",
+  "dor": "acha que precisa provar dinheiro",
+  "imagem": "acervo/destinos/praia-crianca-areia.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "o que ele quer saber",
+      "titulo": "Existe UMA pergunta na cabeca do consulo. E nao e quanto voces tem.",
+      "sub": "Casal na lua de mel precisa saber responder isso.",
+      "destaques": [
+        "UMA"
+      ],
+      "imagem": "acervo/destinos/praia-crianca-areia.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "A pergunta e: voces voltam?",
+      "corpo": "A lei presume que voces querem ficar. O papel de voces e mostrar que a vida esta no Brasil.",
+      "destaques": [
+        "voltam?"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Casal chama atencao",
+      "corpo": "Dois jovens juntos as vezes acende o alerta de imigracao. Coerencia e vinculo desarmam isso.",
+      "destaques": [
+        "vinculo"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Vinculo nao e saldo no banco. E uma vida que continua aqui aguardando voces.",
+      "destaques": [
+        "vida"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O que responde a pergunta",
+      "corpo": "Trabalho, familia, planos no Brasil. Coisas que so fazem sentido se voces voltarem.",
+      "destaques": [
+        "voltarem."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Treinem a dois",
+      "corpo": "Combinem como cada um responde sobre a volta. Sem decorar, so alinhados.",
+      "destaques": [
+        "alinhados."
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta VOCEVOLTA que eu te ajudo a montar a resposta do casal. Ou link na bio.",
+      "acao": "Comenta VOCEVOLTA",
+      "destaques": [
+        "VOCEVOLTA"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Existe UMA pergunta na cabeca do consulo, e nao e quanto voces tem. E: voces voltam?\n\nA lei presume que querem ficar, e o papel de voces e mostrar que a vida esta no Brasil. Casal jovem junto as vezes acende o alerta de imigracao, e coerencia e vinculo desarmam isso. Vinculo nao e saldo no banco, e uma vida que continua aqui aguardando voces: trabalho, familia, planos.\n\nComenta VOCEVOLTA que eu te ajudo a montar a resposta. Ou toca no link da bio.\n\n#vistoamericano #luademel #primeiraviagem #vistoeua #b1b2 #entrevistavisto #viagemacasal"
+}

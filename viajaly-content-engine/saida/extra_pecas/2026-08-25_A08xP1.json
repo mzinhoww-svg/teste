@@ -1,0 +1,81 @@
+{
+  "combo": "A08xP1",
+  "data": "2026-08-25",
+  "conta": "@viajaly",
+  "pilar": "utilidade",
+  "angulo_id": "A08",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Quanto custa o visto da familia de verdade",
+  "persona": "Familia Orlando",
+  "dor": "so calcula a taxa e leva susto no total",
+  "imagem": "acervo/destinos/ny-skyline-crianca.jpg",
+  "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
+  "fonte_verificada_em": "2026-07-12",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "a conta da familia",
+      "titulo": "Quanto custa o visto de uma familia de quatro de verdade.",
+      "sub": "Nao e so a taxa que voce multiplicou de cabeca.",
+      "destaques": [
+        "verdade."
+      ],
+      "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "A taxa base",
+      "corpo": "MRV de 185 dolares por pessoa. Numa familia de quatro, ja sao quatro taxas que nao voltam.",
+      "destaques": [
+        "quatro"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "A taxa nova de 2026",
+      "corpo": "Entrou uma taxa de integridade de 250 dolares cobrada na emissao. Confere no travel.state.gov.",
+      "destaques": [
+        "250"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "O que e opcional",
+      "corpo": "Os 750 pra antecipar sao opcionais. Familia planejada com tempo nao precisa disso.",
+      "destaques": [
+        "opcionais."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "A conta da familia assusta menos quando voce ve ela inteira antes, nao no fim.",
+      "destaques": [
+        "antes,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "A conta honesta",
+      "corpo": "Taxas de todos, passaporte de quem precisa e a consultoria. Somado e transparente, sem surpresa.",
+      "destaques": [
+        "transparente,"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta CONTAFAMILIA que eu te mando o custo fechado pra sua familia. Ou link na bio.",
+      "acao": "Comenta CONTAFAMILIA",
+      "destaques": [
+        "CONTAFAMILIA"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Quanto custa o visto de uma familia de quatro de verdade? Nao e so a taxa que voce multiplicou de cabeca.\n\nA MRV e 185 dolares por pessoa, quatro taxas que nao voltam. Entrou a taxa de integridade de 250 dolares na emissao (confere no travel.state.gov). E os 750 pra antecipar sao opcionais, familia com tempo nao precisa. A conta assusta menos quando voce ve ela inteira antes.\n\nComenta CONTAFAMILIA que eu te mando o custo fechado. Ou toca no link da bio.\n\n#vistoamericano #viagememfamilia #vistoeua #b1b2 #taxavisto #orlando #consuladoamericano"
+}

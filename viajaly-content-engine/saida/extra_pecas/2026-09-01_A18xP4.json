@@ -1,0 +1,79 @@
+{
+  "combo": "A18xP4",
+  "data": "2026-09-01",
+  "conta": "@viajaly",
+  "pilar": "antidoto",
+  "angulo_id": "A18",
+  "persona_id": "P4",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Incoerencia derruba mais que perfil (torcedor Copa)",
+  "persona": "Torcedor Copa",
+  "dor": "prazo curto, preenche correndo e se contradiz",
+  "imagem": "acervo/destinos/ny-skyline-menina.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "a causa numero 1",
+      "titulo": "Nao e o seu perfil que reprova. E a pressa que te faz se contradizer.",
+      "sub": "Com prazo de Copa, todo mundo preenche correndo.",
+      "destaques": [
+        "contradizer."
+      ],
+      "imagem": "acervo/destinos/ny-skyline-menina.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O que e incoerencia",
+      "corpo": "O DS-160 dizer uma coisa e voce falar outra na entrevista. O oficial percebe na hora.",
+      "destaques": [
+        "outra."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Por que a Copa piora",
+      "corpo": "Prazo curto faz preencher no automatico. E no automatico que nascem os dados tortos.",
+      "destaques": [
+        "tortos."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "O oficial nao caca mentira. Caca a linha que nao fecha. Coerencia e o jogo.",
+      "destaques": [
+        "Coerencia"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Antes de enviar",
+      "corpo": "Releia o formulario inteiro pensando: isso bate com o que vou dizer? Se nao bate, corrige.",
+      "destaques": [
+        "bate"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Revisao rapida salva o jogo",
+      "corpo": "Uma conferida nos campos criticos evita perder a viagem por um detalhe torto.",
+      "destaques": [
+        "conferida"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta COERENCIACOPA que eu reviso os pontos que mais pegam. Ou link na bio.",
+      "acao": "Comenta COERENCIACOPA",
+      "destaques": [
+        "COERENCIACOPA"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Nao e o seu perfil que reprova. E a pressa da Copa que te faz se contradizer.\n\nIncoerencia e o DS-160 dizer uma coisa e voce falar outra na entrevista, e o oficial percebe na hora. Prazo curto faz preencher no automatico, e e ai que nascem os dados tortos. O oficial nao caca mentira, caca a linha que nao fecha. Antes de enviar, releia tudo pensando: isso bate com o que vou dizer?\n\nComenta COERENCIACOPA que eu reviso os pontos que mais pegam. Ou toca no link da bio.\n\n#vistoamericano #copadomundo #ds160 #vistoeua #b1b2 #futebol #entrevistavisto"
+}

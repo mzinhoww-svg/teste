@@ -1,0 +1,79 @@
+{
+  "combo": "A13xP2",
+  "data": "2026-08-28",
+  "conta": "@leticia",
+  "pilar": "antidoto",
+  "angulo_id": "A13",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "A pasta de documentos ele nem abre (casal)",
+  "persona": "Casal primeira viagem",
+  "dor": "junta documento demais achando que garante",
+  "imagem": "acervo/familia/familia-selfie.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "mito de documento",
+      "titulo": "A pasta gorda de documentos que voces prepararam? Ele nem abre.",
+      "sub": "Primeira viagem junta papel demais por medo.",
+      "destaques": [
+        "abre."
+      ],
+      "imagem": "acervo/familia/familia-selfie.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "A entrevista e curta",
+      "corpo": "Menos de um minuto. Nao da tempo de folhear extrato, reserva e imposto de renda.",
+      "destaques": [
+        "minuto."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que pesa e a fala",
+      "corpo": "A coerencia do que voces respondem decide, nao a espessura da pasta.",
+      "destaques": [
+        "coerencia"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Documento e apoio, nao argumento. Quem ganha e o casal que sabe se explicar.",
+      "destaques": [
+        "explicar."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Leve o basico organizado",
+      "corpo": "Tenham os documentos, sim, mas na cabeca e na ordem. O que conta e saber contar quem voces sao.",
+      "destaques": [
+        "ordem."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Ensaiem a historia",
+      "corpo": "Por que vao, quanto tempo, quem paga, quando voltam. Uma versao so, os dois afinados.",
+      "destaques": [
+        "afinados."
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta PASTADOIS que eu te ensino o que realmente levar. Ou link na bio.",
+      "acao": "Comenta PASTADOIS",
+      "destaques": [
+        "PASTADOIS"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "A pasta gorda de documentos que voces prepararam pra primeira viagem? O oficial nem abre.\n\nA entrevista dura menos de um minuto. O que pesa e a coerencia do que voces falam, nao a espessura da pasta. Documento e apoio, nao argumento. Levem o basico organizado e, principalmente, ensaiem a historia: por que vao, quanto tempo, quem paga, quando voltam. Uma versao so, os dois afinados.\n\nComenta PASTADOIS que eu te ensino o que levar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #entrevistavisto #vistoeua #b1b2 #viagemacasal #ds160"
+}

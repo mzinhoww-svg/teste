@@ -1,0 +1,79 @@
+{
+  "combo": "A12xP2",
+  "data": "2026-08-27",
+  "conta": "@leticia",
+  "pilar": "antidoto",
+  "angulo_id": "A12",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "O consulo decide nos primeiros 10 segundos (casal)",
+  "persona": "Casal primeira viagem",
+  "dor": "acha que a entrevista e longa e tecnica",
+  "imagem": "acervo/destinos/praia-por-do-sol.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "os primeiros segundos",
+      "titulo": "A entrevista dura 1 minuto. Ele decide nos primeiros 10 segundos.",
+      "sub": "Voces se preparam pra prova errada.",
+      "destaques": [
+        "10"
+      ],
+      "imagem": "acervo/destinos/praia-por-do-sol.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Nao e prova de conhecimento",
+      "corpo": "Ninguem vai testar ingles ou geografia. E impressao: como voces chegam e respondem o obvio.",
+      "destaques": [
+        "impressao"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que pesa a dois",
+      "corpo": "Coerencia entre voces e seguranca na primeira resposta. Gaguejar no facil abre suspeita.",
+      "destaques": [
+        "Coerencia"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Nao e decorar. E chegar tao preparado que a verdade sai sem tremer.",
+      "destaques": [
+        "preparado"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O erro do casal ansioso",
+      "corpo": "Falar demais, justificar demais. O oficial nao perguntou a historia de voces. Respondam o que foi perguntado.",
+      "destaques": [
+        "demais."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Treino curto resolve",
+      "corpo": "Ensaiar a primeira pergunta e o motivo da viagem tira quase todo o nervosismo.",
+      "destaques": [
+        "primeira"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta SEGUNDOS que eu te mando o roteiro dos 10 primeiros. Ou link na bio.",
+      "acao": "Comenta SEGUNDOS",
+      "destaques": [
+        "SEGUNDOS"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "A entrevista do visto dura 1 minuto, e o consulo decide nos primeiros 10 segundos. Voces se preparam pra prova errada.\n\nNinguem testa ingles ou geografia. E impressao: como voces chegam e respondem o obvio, com coerencia entre voces. Nao e decorar, e chegar tao preparado que a verdade sai sem tremer. O erro do casal ansioso e falar demais. Respondam o que foi perguntado.\n\nComenta SEGUNDOS que eu te mando o roteiro dos 10 primeiros. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #entrevistavisto #vistoeua #b1b2 #viagemacasal #eua"
+}

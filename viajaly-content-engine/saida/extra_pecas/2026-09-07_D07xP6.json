@@ -1,0 +1,80 @@
+{
+  "combo": "D07xP6",
+  "data": "2026-09-07",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D07",
+  "persona_id": "P6",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Praia em grupo nos EUA",
+  "persona": "Grupo de amigos",
+  "dor": "grupo quer praia mas some o dia inteiro no hotel",
+  "imagem": "acervo/destinos/praia-crianca.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "praia em grupo",
+      "titulo": "Praia em grupo nos EUA tem 3 regras que o brasileiro nao sabe.",
+      "sub": "Errar uma estraga o dia de todo mundo.",
+      "destaques": [
+        "3"
+      ],
+      "imagem": "acervo/destinos/praia-crianca.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "1. Sem barraquinha",
+      "corpo": "Nao tem quiosque servindo na areia. Combinem levar cooler, agua e comida, ou comprar antes.",
+      "destaques": [
+        "antes."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "2. Alcool rende multa",
+      "corpo": "Na maioria das praias, bebida na areia e proibida. O grupo todo paga o vacilo de um.",
+      "destaques": [
+        "multa."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "3. Bandeira e lei",
+      "corpo": "Salva-vidas manda. Bandeira vermelha e mar fechado, mesmo pro grupo que quer foto.",
+      "destaques": [
+        "lei"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Praia americana nao e a do Brasil. Grupo que sabe as regras aproveita, o resto leva susto.",
+      "destaques": [
+        "regras"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que vem antes do mar",
+      "corpo": "Praia em grupo so acontece com os vistos de todo mundo prontos e no prazo.",
+      "destaques": [
+        "todo"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta PRAIAGRUPO que eu te mando o guia de praia pra grupo. Ou link na bio.",
+      "acao": "Comenta PRAIAGRUPO",
+      "destaques": [
+        "PRAIAGRUPO"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Praia em grupo nos EUA tem 3 regras que o brasileiro nao sabe, e errar uma estraga o dia de todo mundo.\n\n1. Sem barraquinha: levem cooler, agua e comida. 2. Alcool na areia rende multa na maioria das praias, e o grupo todo paga o vacilo de um. 3. Bandeira e lei: vermelha e mar fechado. Praia americana nao e a do Brasil, quem sabe as regras aproveita.\n\nE so acontece com os vistos de todo mundo prontos.\n\nComenta PRAIAGRUPO que eu te mando o guia. Ou toca no link da bio.\n\n#praia #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua #florida"
+}

@@ -19,7 +19,7 @@ import re
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parent.parent
-DIRS = ["saida/pecas", "saida/destinos_pecas", "saida/verdades_pecas", "saida/roteiros_pecas"]
+DIRS = ["saida/pecas", "saida/destinos_pecas", "saida/verdades_pecas", "saida/extra_pecas", "saida/roteiros_pecas"]
 EXCLUIR = {"A24xP1", "A25xP6", "A26xP1"}
 DISC = ("Lembrando: a Viajaly nao garante aprovacao de vistos. A decisao e "
         "exclusiva das autoridades consulares.")
