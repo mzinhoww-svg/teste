@@ -1,0 +1,77 @@
+{
+  "combo": "A07xP7",
+  "data": "2026-07-12",
+  "conta": "@viajaly",
+  "pilar": "utilidade",
+  "angulo_id": "A07",
+  "persona_id": "P7",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Da pra antecipar de graca por emergencia",
+  "persona": "Autonomo / MEI",
+  "dor": "acha que vai ser negado por nao ter vinculo formal",
+  "fonte_url": "https://www.federalregister.gov/documents/2026/06/09/2026-11513/schedule-of-fees-for-consular-services-department-of-state-and-overseas-embassies-and",
+  "fonte_verificada_em": "2026-07-12",
+  "slides": [
+    {
+      "tipo": "capa",
+      "kicker": "o que nao te contam",
+      "ghost": "01",
+      "titulo": "Da pra antecipar sua entrevista de graca.",
+      "sub": "Sem pagar os 750 dolares. Em caso de emergencia real.",
+      "destaques": [
+        "graca."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Existe o pedido de emergencia",
+      "corpo": "O consulado tem um canal pra remarcar mais cedo quando ha motivo real: saude, trabalho, familia. Sem custo extra.",
+      "destaques": [
+        "real:"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Precisa de motivo e prova",
+      "corpo": "Nao e pra qualquer um e nao e pra furar fila por vontade. Voce descreve a emergencia e anexa o que comprova. Sem documento, nao rola.",
+      "destaques": [
+        "comprova."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "A gente ganha te vendendo pressa. Mas se da pra resolver de graca, eu prefiro te contar. E isso que muda a confianca.",
+      "destaques": [
+        "graca,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Por que isso importa pra voce",
+      "corpo": "Autonomo costuma ter demanda que surge do nada. Uma feira, um cliente la fora. Isso pode ser a sua emergencia legitima.",
+      "destaques": [
+        "legitima."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O risco de fazer errado",
+      "corpo": "Pedido de emergencia mal justificado e negado, e voce perde a vez. Por isso vale escrever certo da primeira vez.",
+      "destaques": [
+        "negado,"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Quer saber se o seu caso e emergencia? Eu te falo de graca.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Da pra antecipar sua entrevista do visto de graca. O consulado nao faz questao de contar.\n\nExiste o pedido de emergencia: quando ha motivo real (saude, trabalho, familia) voce pede uma data mais cedo sem pagar os 750 dolares da fila premium. Precisa de motivo e de prova.\n\nSe voce e autonomo, uma feira ou um cliente la fora pode ser a sua emergencia legitima. Mas pedido mal justificado e negado, e voce perde a vez.\n\nQuer saber se o seu caso se encaixa? Eu te falo de graca. Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #dicasdeviagem #consuladoamericano"
+}

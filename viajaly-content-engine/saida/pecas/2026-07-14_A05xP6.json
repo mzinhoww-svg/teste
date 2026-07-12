@@ -1,0 +1,78 @@
+{
+  "combo": "A05xP6",
+  "data": "2026-07-14",
+  "conta": "@leticia",
+  "pilar": "denuncia",
+  "angulo_id": "A05",
+  "persona_id": "P6",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Assessoria barata demais e cara demais sao os dois sinais de alerta",
+  "persona": "Grupo de amigos",
+  "dor": "coordenar datas de todo mundo",
+  "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
+  "fonte_verificada_em": "2026-07-12",
+  "slides": [
+    {
+      "tipo": "capa",
+      "kicker": "os dois extremos",
+      "ghost": "01",
+      "titulo": "Cobraram 99 reais? Cobraram 3 mil? Os dois sao sinal.",
+      "sub": "Voces sao um grupo. Errar aqui multiplica por seis.",
+      "destaques": [
+        "sinal."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Barato demais",
+      "corpo": "99 reais nao paga o trabalho de preparar seis pessoas. Ou e so preenchimento de formulario, ou some no meio do caminho.",
+      "destaques": [
+        "some"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Caro demais",
+      "corpo": "3 mil por pessoa vende status, nao resultado. O consulo nao cobra mais caro de quem pagou assessoria cara.",
+      "destaques": [
+        "status,"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Preco de menos esconde ausencia. Preco de mais esconde promessa. O justo fica no meio, e explica cada centavo.",
+      "destaques": [
+        "ausencia.",
+        "promessa."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O que importa pro grupo",
+      "corpo": "Coordenar seis DS-160 sem contradicao entre eles, agendar junto, e cada um saber a propria historia. E isso que trava um grupo, nao o preco.",
+      "destaques": [
+        "contradicao"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Pergunta o que ta incluso",
+      "corpo": "Taxa consular de 185 dolares por pessoa entra a parte, sempre. Quem junta tudo num preco redondo ta escondendo alguma coisa.",
+      "destaques": [
+        "185"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Grupo fechado, preco explicado, taxa a parte. Fala comigo.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Cobraram 99 reais pra fazer o visto do grupo? Ou cobraram 3 mil por cabeca? Os dois sao sinal de alerta.\n\nBarato demais quase sempre e so preenchimento, ou some no meio. Caro demais vende status. O consulo nao cobra mais caro de quem pagou assessoria cara.\n\nGrupo de amigos trava no que importa: seis DS-160 sem contradicao, agendamento junto, cada um sabendo a propria historia. E a taxa consular de 185 dolares por pessoa entra sempre a parte.\n\nA gente nao garante seu visto. A gente explica cada centavo. Chama no WhatsApp.\n\n#vistoamericano #grupodeamigos #viagemcomamigos #vistoeua #b1b2 #miami #novayork"
+}

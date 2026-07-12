@@ -1,0 +1,77 @@
+{
+  "combo": "A10xP3",
+  "data": "2026-07-13",
+  "conta": "@viajaly",
+  "pilar": "utilidade",
+  "angulo_id": "A10",
+  "persona_id": "P3",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Menor de idade agora precisa ir na entrevista",
+  "persona": "Negado antes",
+  "dor": "vergonha + medo de repetir o erro + ja perdeu US$185",
+  "fonte_url": "https://br.usembassy.gov/pt/vistos/",
+  "fonte_verificada_em": "2026-07-12",
+  "slides": [
+    {
+      "tipo": "capa",
+      "kicker": "mudou a regra",
+      "ghost": "01",
+      "titulo": "Menor de idade agora precisa comparecer.",
+      "sub": "Se voce ja foi negado, essa muda o seu planejamento.",
+      "destaques": [
+        "comparecer."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O que mudou",
+      "corpo": "Antes, em varios casos, menor era dispensado da entrevista. Agora costuma precisar aparecer. Confirme sempre no site do consulado.",
+      "destaques": [
+        "aparecer."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Por que isso te afeta",
+      "corpo": "Voce ja levou um nao e sabe o peso de refazer tudo. Agora conte com a agenda das criancas tambem no dia.",
+      "destaques": [
+        "nao"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Ser negado nao foi o fim. Repetir sem entender o que mudou, esse sim seria o erro caro.",
+      "destaques": [
+        "mudou,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Organize a familia",
+      "corpo": "Datas escolares, quem leva, quem responde por cada crianca. Um imprevisto de agenda derruba um dia inteiro de entrevista.",
+      "destaques": [
+        "imprevisto"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "A taxa nao volta",
+      "corpo": "Sao 185 dolares por pessoa, criancas incluidas, e nao reembolsa se negar. Por isso a segunda tentativa tem que ser bem feita.",
+      "destaques": [
+        "185"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Sua segunda tentativa merece ser a certa. Fala comigo.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Mudou a regra: menor de idade agora costuma precisar comparecer na entrevista. Confirme sempre no site do consulado (br.usembassy.gov).\n\nSe voce ja foi negado uma vez, isso muda o seu planejamento. Refazer tudo ja pesa. Agora conte com a agenda das criancas no mesmo dia.\n\nSer negado nao foi o fim. Repetir sem entender o que mudou, esse sim seria o erro caro. E a taxa de 185 dolares por pessoa, criancas incluidas, nao volta.\n\nSua segunda tentativa merece ser bem feita. Chama no WhatsApp.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #familia #consuladoamericano"
+}

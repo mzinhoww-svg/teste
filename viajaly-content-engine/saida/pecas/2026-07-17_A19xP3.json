@@ -1,0 +1,72 @@
+{
+  "combo": "A19xP3",
+  "data": "2026-07-17",
+  "conta": "@viajaly",
+  "pilar": "prova",
+  "angulo_id": "A19",
+  "persona_id": "P3",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Depoimento real de cliente aprovado",
+  "persona": "Negado antes",
+  "dor": "vergonha + medo de repetir o erro + ja perdeu US$185",
+  "exige_dado_real": true,
+  "nota_producao": "PROVA: nao publicar sem depoimento REAL de cliente com autorizacao LGPD por escrito. Substituir os campos [DEPOIMENTO ...] pela fala verdadeira. Preferir print/video do cliente no acervo/clientes/ com dados borrados. Sem isso, esta peca fica retida.",
+  "slides": [
+    {
+      "tipo": "capa",
+      "kicker": "quem ja ouviu um nao",
+      "ghost": "01",
+      "titulo": "Ela tinha sido negada. Voltou e passou.",
+      "sub": "Historia real de cliente. Com autorizacao.",
+      "destaques": [
+        "negada."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O ponto de partida",
+      "corpo": "[DEPOIMENTO: como ela se sentia depois do primeiro nao. Vergonha, medo de repetir, a taxa que ja tinha perdido.]",
+      "destaques": []
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que a gente ajustou",
+      "corpo": "[DEPOIMENTO: o que estava errado da primeira vez e o que foi corrigido. DS-160, a fala, a coerencia.]",
+      "destaques": []
+    },
+    {
+      "tipo": "insight",
+      "texto": "Ser negado nao te marca pra sempre. Repetir os mesmos erros, sim.",
+      "destaques": [
+        "nao"
+      ],
+      "fonte": "Cliente real, nome preservado, com autorizacao"
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O resultado",
+      "corpo": "[DEPOIMENTO: a segunda entrevista, a aprovacao, o alivio. Na voz dela, sem exagero.]",
+      "destaques": []
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Por que eu mostro isso",
+      "corpo": "Nao pra dizer que sempre da certo. Da pra dar errado. Mostro pra voce ver que negado nao e sentenca.",
+      "destaques": [
+        "nao"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Ja ouviu um nao? Vamos entender o que mudar antes da proxima.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "[LEGENDA A COMPLETAR COM O DEPOIMENTO REAL] Ela tinha sido negada uma vez. Sentiu a vergonha, o medo de repetir, e a taxa que ja tinha perdido.\n\n[Resumo real do caso, com autorizacao da cliente. O que estava errado, o que foi ajustado, e como foi a segunda entrevista.]\n\nEu nao mostro isso pra dizer que sempre da certo. Da pra dar errado. Mostro pra voce ver que negado nao e sentenca.\n\nJa ouviu um nao? Chama no WhatsApp e vamos entender o que mudar.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #depoimento #consuladoamericano"
+}

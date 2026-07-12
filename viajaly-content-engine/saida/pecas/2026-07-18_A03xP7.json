@@ -1,0 +1,79 @@
+{
+  "combo": "A03xP7",
+  "data": "2026-07-18",
+  "conta": "@leticia",
+  "pilar": "denuncia",
+  "angulo_id": "A03",
+  "persona_id": "P7",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "O governo cobra US$750 pra furar fila; consultoria completa custa menos de um terco",
+  "persona": "Autonomo / MEI",
+  "dor": "acha que vai ser negado por nao ter vinculo formal",
+  "imagem": "acervo/fontes/taxa-750.png",
+  "fonte_url": "https://www.federalregister.gov/documents/2026/06/09/2026-11513/schedule-of-fees-for-consular-services-department-of-state-and-overseas-embassies-and",
+  "fonte_verificada_em": "2026-07-12",
+  "slides": [
+    {
+      "tipo": "capa",
+      "kicker": "o preco da sua pressa",
+      "ghost": "01",
+      "titulo": "O governo botou preco na fila. 750 dolares.",
+      "sub": "Federal Register, doc 2026-11513. Ta na fonte, nao e boato.",
+      "destaques": [
+        "750"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O que os 750 compram",
+      "corpo": "Uma data de entrevista em ate 10 dias uteis, num posto selecionado. So isso. Vale de julho a dezembro de 2026.",
+      "destaques": [
+        "data"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que eles NAO compram",
+      "corpo": "A analise do seu caso continua igual. O oficial olha o mesmo que olharia. Voce paga pra esperar menos, nao pra passar.",
+      "destaques": [
+        "igual."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Voce nao tem holerite. Vao te vender pressa porque sabem que voce tem medo. Pressa nao e preparo.",
+      "destaques": [
+        "medo.",
+        "preparo."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "A conta que ninguem faz",
+      "corpo": "750 dolares so pra antecipar. Nao aprova nada. Uma consultoria completa, que te prepara de verdade, custa menos de um terco disso.",
+      "destaques": [
+        "terco"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Ser MEI nao te derruba",
+      "corpo": "Vinculo se comprova de varias formas. O que derruba e chegar despreparado e com pressa comprada. Nao a sua carteira.",
+      "destaques": [
+        "despreparado"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Antes de gastar 750 na pressa, fala comigo.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "O governo americano botou preco na sua pressa: 750 dolares pra antecipar a entrevista.\n\nTa no Federal Register (doc 2026-11513), vale de julho a dezembro de 2026, e serve pra uma coisa so: date de entrevista em ate 10 dias uteis. Nao aprova o visto. A analise e a mesma.\n\nSe voce e autonomo e ja tao te oferecendo isso como solucao, cuidado: pressa nao e preparo. E na maioria dos casos, esse dinheiro resolveria melhor a sua preparacao do que a sua fila.\n\nA gente nao garante seu visto. Ninguem pode. Mas te preparo pra chegar sem medo. Chama no WhatsApp.\n\n#vistoamericano #vistoeua #b1b2 #autonomo #mei #viagemeua #consuladoamericano"
+}

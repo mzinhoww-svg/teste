@@ -1,0 +1,75 @@
+{
+  "combo": "A12xP4",
+  "data": "2026-07-17",
+  "conta": "@leticia",
+  "pilar": "antidoto",
+  "angulo_id": "A12",
+  "persona_id": "P4",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "O consul decide nos primeiros 10 segundos",
+  "persona": "Torcedor Copa",
+  "dor": "prazo. janela fecha",
+  "slides": [
+    {
+      "tipo": "capa",
+      "kicker": "os primeiros segundos",
+      "ghost": "01",
+      "titulo": "Ele decide nos primeiros 10 segundos.",
+      "sub": "Voce tem ingresso da Copa. Nao desperdice a abertura.",
+      "destaques": [
+        "10"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "A janela e minuscula",
+      "corpo": "A entrevista inteira dura menos de um minuto. A impressao dos primeiros segundos carrega o resto.",
+      "destaques": [
+        "minuto."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que conta nesses segundos",
+      "corpo": "Como voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta.",
+      "destaques": [
+        "Seguranca"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Nao e representar um personagem. E chegar tao preparado que a verdade sai sem gaguejo.",
+      "destaques": [
+        "preparado"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O torcedor tende a errar aqui",
+      "corpo": "Ansioso com o prazo do jogo, fala demais, justifica demais. O oficial nao perguntou sua vida. Responda o que foi perguntado.",
+      "destaques": [
+        "demais."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Treino resolve",
+      "corpo": "Ensaiar a primeira pergunta e a resposta sobre o motivo da viagem tira 90 por cento do nervosismo.",
+      "destaques": [
+        "primeira"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Vamos ensaiar os seus 10 primeiros segundos antes do jogo.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "A entrevista do visto dura menos de um minuto. E o consulo decide nos primeiros 10 segundos.\n\nComo voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta. Nao e representar um personagem, e chegar tao preparado que a verdade sai sem gaguejo.\n\nO torcedor com prazo de Copa erra falando demais e justificando demais. O oficial nao perguntou a sua vida. Responda o que foi perguntado.\n\nVamos ensaiar os seus 10 primeiros segundos? Chama no WhatsApp.\n\n#vistoamericano #copadomundo #vistoeua #b1b2 #entrevistavisto #futebol #eua"
+}

@@ -1,0 +1,75 @@
+{
+  "combo": "A09xP7",
+  "data": "2026-07-14",
+  "conta": "@viajaly",
+  "pilar": "utilidade",
+  "angulo_id": "A09",
+  "persona_id": "P7",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "CASV e consulado sao dois dias diferentes",
+  "persona": "Autonomo / MEI",
+  "dor": "acha que vai ser negado por nao ter vinculo formal",
+  "slides": [
+    {
+      "tipo": "capa",
+      "kicker": "planeje os dois dias",
+      "ghost": "01",
+      "titulo": "Sao duas visitas, em dias diferentes.",
+      "sub": "Muita gente descobre isso tarde demais.",
+      "destaques": [
+        "duas"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Dia 1: o CASV",
+      "corpo": "E onde tiram sua foto e coletam digitais. Rapido, mas e um deslocamento inteiro. Nao e a entrevista.",
+      "destaques": [
+        "digitais."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Dia 2: o consulado",
+      "corpo": "Aqui e a entrevista de verdade, com o oficial. Pode ser noutra data e ate noutra cidade. Planeje.",
+      "destaques": [
+        "entrevista"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Autonomo perde dois dias de trabalho, nao um. Saber disso antes e o que separa quem se planeja de quem se atrapalha.",
+      "destaques": [
+        "dois"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Por que isso pega o autonomo",
+      "corpo": "Sem carteira assinada, cada dia parado e dinheiro que voce mesmo banca. Agendar os dois juntos, na mesma viagem, economiza.",
+      "destaques": [
+        "juntos,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Da pra otimizar",
+      "corpo": "Em varios postos da pra marcar CASV e entrevista em dias proximos. A gente organiza pra voce nao ir e voltar duas vezes.",
+      "destaques": [
+        "proximos."
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Quer os dois dias organizados numa viagem so? Fala comigo.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Voce sabia que tirar o visto americano sao DUAS visitas, em dias diferentes?\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista com o oficial, que pode ser noutra data e ate noutra cidade.\n\nPra quem e autonomo, isso e dois dias de trabalho parado, nao um. Saber antes e o que separa quem se planeja de quem se atrapalha. Em muitos postos da pra marcar os dois proximos, numa viagem so.\n\nQuer isso organizado direito? Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #casv #vistoeua #b1b2 #dicasdevisto"
+}

@@ -1,0 +1,75 @@
+{
+  "combo": "A13xP7",
+  "data": "2026-07-16",
+  "conta": "@leticia",
+  "pilar": "antidoto",
+  "angulo_id": "A13",
+  "persona_id": "P7",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Ele nao olha sua pasta de documentos do jeito que voce pensa",
+  "persona": "Autonomo / MEI",
+  "dor": "acha que vai ser negado por nao ter vinculo formal",
+  "slides": [
+    {
+      "tipo": "capa",
+      "kicker": "mito de documento",
+      "ghost": "01",
+      "titulo": "Aquela pasta gorda de documentos? Ele nem abre.",
+      "sub": "Voce e autonomo e junta papel achando que salva. Calma.",
+      "destaques": [
+        "abre."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "A entrevista e curta",
+      "corpo": "Dura menos de um minuto na maioria dos casos. Nao da tempo de folhear extrato, contrato, imposto de renda.",
+      "destaques": [
+        "minuto"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que pesa e a sua fala",
+      "corpo": "O oficial decide pela coerencia do que voce responde, nao pela espessura da pasta. Autonomo forte fala claro.",
+      "destaques": [
+        "coerencia"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Voce acha que sem carteira assinada precisa provar mais. Precisa e explicar melhor. Sao coisas diferentes.",
+      "destaques": [
+        "explicar"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Como o autonomo comprova vinculo",
+      "corpo": "Faturamento, clientes, familia, bens, uma vida que te traz de volta. Isso se diz em uma frase segura, nao numa pilha de folha.",
+      "destaques": [
+        "volta."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Leve o basico, saiba a historia",
+      "corpo": "Tenha os documentos, sim, mas organizados e na cabeca. O que ganha e voce sabendo contar quem voce e.",
+      "destaques": [
+        "historia"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Deixa eu te ensinar a contar a sua historia em uma frase.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Aquela pasta gorda de documentos que voce, autonomo, junta com tanto medo? O oficial nem abre.\n\nA entrevista dura menos de um minuto. Nao da tempo de folhear extrato e contrato. O que pesa e a coerencia do que voce fala, nao a espessura da pasta.\n\nSem carteira assinada voce nao precisa provar mais. Precisa explicar melhor: faturamento, clientes, familia, uma vida que te traz de volta. Isso se diz em uma frase segura.\n\nDeixa eu te ensinar a contar a sua historia. Chama no WhatsApp.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #entrevistavisto #consuladoamericano"
+}

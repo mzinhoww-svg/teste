@@ -1,0 +1,75 @@
+{
+  "combo": "A01xP2",
+  "data": "2026-07-15",
+  "conta": "@leticia",
+  "pilar": "denuncia",
+  "angulo_id": "A01",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Ninguem garante visto. Quem garante mente.",
+  "persona": "Casal primeira viagem",
+  "dor": "nao sabe por onde comecar",
+  "slides": [
+    {
+      "tipo": "capa",
+      "kicker": "a verdade incomoda",
+      "ghost": "01",
+      "titulo": "Se prometeram visto garantido pra voces, corram.",
+      "sub": "E a primeira viagem de voces. Comeca por aqui.",
+      "destaques": [
+        "corram."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Quem decide",
+      "corpo": "Nao e o site. Nao e a assessoria. E um oficial no consulado, na hora, olhando pra voces. Ninguem no Brasil manda nessa decisao.",
+      "destaques": [
+        "ninguem"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Por que prometem",
+      "corpo": "Porque voces estao inseguros e e a primeira vez. Promessa de garantia vende medo. E medo paga caro.",
+      "destaques": [
+        "medo."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "A pergunta certa nao e quem garante. E quem fica com voces quando da errado.",
+      "destaques": [
+        "fica"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O que da pra garantir",
+      "corpo": "Preparo. DS-160 coerente. Voces sabendo responder sem gaguejar. Isso muda o jogo. O carimbo, nao.",
+      "destaques": [
+        "Preparo."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O disclaimer e o teste",
+      "corpo": "Pergunta pra quem tao contratando: voces garantem? Se disser sim, ja sabe. Quem e honesto diz que nao pode garantir.",
+      "destaques": [
+        "nao"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "A gente nao garante seu visto. E por isso que da pra confiar.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Primeira viagem internacional de voces e ja apareceu alguem prometendo visto garantido?\n\nCorram. Ninguem garante visto. A decisao e de um oficial no consulado, na hora, olhando pra voces. Quem promete garantia ta vendendo o seu medo de nao saber por onde comecar.\n\nO que da pra garantir e preparo: DS-160 coerente, voces sabendo responder. Isso a gente faz. O carimbo e do consulo.\n\nA gente nao garante seu visto. Ninguem pode. Quem garante ta mentindo pra voce. Chama no WhatsApp e comeca do jeito certo.\n\n#vistoamericano #primeiraviagem #luademel #vistoeua #b1b2 #viagemacasal #eua"
+}

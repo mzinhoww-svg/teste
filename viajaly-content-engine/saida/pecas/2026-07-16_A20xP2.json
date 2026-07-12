@@ -1,0 +1,77 @@
+{
+  "combo": "A20xP2",
+  "data": "2026-07-16",
+  "conta": "@viajaly",
+  "pilar": "prova",
+  "angulo_id": "A20",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Aprovados de 2026",
+  "persona": "Casal primeira viagem",
+  "dor": "nao sabe por onde comecar",
+  "exige_dado_real": true,
+  "nota_producao": "PROVA: substituir [N] pelo numero REAL de aprovados de 2026 da base interna, e so publicar se o numero for verdadeiro e conferivel. Ao inserir o numero, preencher fonte_verificada_em. Sem numero real, esta peca fica retida.",
+  "slides": [
+    {
+      "tipo": "capa",
+      "kicker": "o numero que eu tenho",
+      "ghost": "01",
+      "titulo": "Os casais que passaram em 2026.",
+      "sub": "Sem promessa. So o que aconteceu de verdade.",
+      "destaques": [
+        "verdade."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O numero",
+      "corpo": "[N] pessoas preparadas por aqui foram aprovadas em 2026. E o dado que eu tenho pra te mostrar, nao uma projecao.",
+      "destaques": [
+        "dado"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que ele nao significa",
+      "corpo": "Nao significa que voce esta garantido. Cada caso e um caso e a decisao e do consulo. Significa que preparo muda a media.",
+      "destaques": [
+        "nao"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Numero sem contexto e propaganda. Numero com metodo por tras e prova. A diferenca e o preparo.",
+      "destaques": [
+        "prova."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Por que isso te ajuda",
+      "corpo": "Voce e casal de primeira viagem e nao sabe por onde comecar. Ver que gente como voces passou tira o medo do escuro.",
+      "destaques": [
+        "medo"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que esses casais fizeram",
+      "corpo": "Chegaram preparados, com historia coerente e sem pressa comprada. Foi isso, nao sorte, que arrumou a estatistica.",
+      "destaques": [
+        "preparados,"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Quer ser o proximo casal preparado de 2026? Fala comigo.",
+      "acao": "Chama no WhatsApp",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "[COMPLETAR COM O NUMERO REAL] Os casais que se prepararam por aqui e passaram em 2026.\n\n[N] pessoas aprovadas. E o dado que eu tenho pra mostrar, nao uma projecao. E ele nao significa que voce esta garantido: cada caso e um caso, a decisao e do consulo. Significa que preparo muda a media.\n\nSe voces sao casal de primeira viagem e nao sabem por onde comecar, ver gente como voces passar tira o medo do escuro.\n\nQuer ser o proximo casal preparado? Chama no WhatsApp.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagemacasal #luademel #eua"
+}
