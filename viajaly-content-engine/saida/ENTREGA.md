@@ -30,12 +30,21 @@ Mix: denuncia 21% (3, dentro do teto de 25%) | utilidade 29% | antidoto 29% | pr
 
 ## 2. Arquivos
 
+- `saida/pecas/*.html` - 14 editores **Carousel Studio** (skill carrossel-pro oficial,
+  v1.9.2) ja populados: editar, destacar palavra na cor de acento, imagem de fundo,
+  e **Exportar ZIP** (PNGs 1080x1350 @2x). Abrir no navegador.
 - `saida/pecas/*.json` - 14 pecas (entram no gate e no render)
-- `saida/pecas/*.html` - 14 `carrossel-editor.html` (abrir no browser, editaveis)
 - `saida/pecas/*.txt` - 14 legendas
-- `saida/render/<combo>/*.png` - PNGs 1080x1350 (98 slides)
+- `saida/render/<combo>/*.png` - PNGs 1080x1350 (98 slides) ja com o coral aplicado
 - `acervo/fontes/taxa-750.png` - card de fonte novo
 - `acervo/destinos/` + `acervo/familia/` - 14 fotos proprias otimizadas
+- `carrossel-pro/` - a skill oficial vendorizada no repo (plugin + Carousel Studio)
+
+> A skill `/carrossel-pro` foi integrada a partir de
+> github.com/NetoNetoArreche/carrossel-pro-marketplace. Os editores acima sao o
+> Carousel Studio oficial com o `slides.json` de cada peca injetado (Fase 8 da
+> SKILL.md). `scripts/gerar_studio.py` reproduz a injecao; `scripts/gerar_pecas.py`
+> + `render_slide.py` geram os PNGs de previa.
 
 ## 3. Relatorio do gate
 
