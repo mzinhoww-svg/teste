@@ -1,0 +1,81 @@
+{
+  "combo": "A07xP7",
+  "data": "2026-07-12",
+  "conta": "@viajaly",
+  "pilar": "utilidade",
+  "angulo_id": "A07",
+  "persona_id": "P7",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Dá pra antecipar de graça por emergência",
+  "persona": "Autônomo / MEI",
+  "dor": "acha que vai ser negado por não ter vínculo formal",
+  "fonte_url": "https://www.federalregister.gov/documents/2026/06/09/2026-11513/schedule-of-fees-for-consular-services-department-of-state-and-overseas-embassies-and",
+  "fonte_verificada_em": "2026-07-12",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "o que não te contam",
+      "titulo": "Dá pra antecipar a entrevista de graça. Sem pagar 750.",
+      "sub": "O consulado não faz questao de te contar isso.",
+      "destaques": [
+        "graça."
+      ],
+      "imagem": "acervo/destinos/universal-globo.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Existe o pedido de emergência",
+      "corpo": "O consulado tem um canal pra remarcar mais cedo quando ha motivo real: saúde, trabalho, família. Sem custo extra.",
+      "destaques": [
+        "real:"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Precisa de motivo e prova",
+      "corpo": "Não é pra qualquer um e não é pra furar fila por vontade. Você descreve a emergência e anexa o que comprova. Sem documento, não rola.",
+      "destaques": [
+        "comprova."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "A gente ganha te vendendo pressa. Mas se dá pra resolver de graça, eu prefiro te contar. E isso que muda a confiança.",
+      "destaques": [
+        "graça,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Por que isso importa pra você",
+      "corpo": "Autônomo costuma ter demanda que surge do nada. Uma feira, um cliente lá fora. Isso pode ser a sua emergência legítima.",
+      "destaques": [
+        "legítima."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O risco de fazer errado",
+      "corpo": "Pedido de emergência mal justificado e negado, e você perde a vez. Por isso vale escrever certo da primeira vez.",
+      "destaques": [
+        "negado,"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta GRATIS que eu te explico se o seu caso se encaixa. Ou link na bio.",
+      "acao": "Comenta GRATIS",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "GRATIS"
+      ]
+    }
+  ],
+  "legenda": "Dá pra antecipar a entrevista do visto DE GRAÇA, sem pagar os 750 dólares da fila premium.\n\nExiste o pedido de emergência: com motivo real (saúde, trabalho, família) você pede uma data mais cedo. Precisa de motivo e de prova. Se você e autônomo, uma feira ou um cliente lá fora pode ser a sua emergência legítima. Mas pedido mal justificado e negado, e você perde a vez.\n\nComenta GRATIS que eu te falo se o seu caso se encaixa. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #dicasdeviagem #consuladoamericano",
+  "imagem": "acervo/destinos/universal-globo.jpg"
+}

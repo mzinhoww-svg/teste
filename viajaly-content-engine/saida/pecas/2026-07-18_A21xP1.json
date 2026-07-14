@@ -1,0 +1,80 @@
+{
+  "combo": "A21xP1",
+  "data": "2026-07-18",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "angulo_id": "A21",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Orlando com crianças sem colapso no dia 4",
+  "persona": "Família Orlando",
+  "dor": "se um for negado, a viagem inteira desmonta",
+  "imagem": "acervo/destinos/disney-castelo-familia.jpg",
+  "nota_producao": "DESEJO: capa usa foto propria da familia (acervo autorizado, Disney/Orlando) com overlay navy. Peca de desejo, sem dado perecivel.",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "imagem": "acervo/destinos/disney-castelo-familia.jpg",
+      "kicker": "roteiro que segura",
+      "titulo": "Orlando com três filhos: o erro do dia 4 que arruina a viagem.",
+      "sub": "No quarto dia todo mundo quebra. Menos quem planeja.",
+      "destaques": [
+        "colapso"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O erro do dia 4",
+      "corpo": "Família empolgada faz parque pesado quatro dias seguidos. No quarto, as crianças colapsam e o passeio vira briga.",
+      "destaques": [
+        "colapsam"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Intercale o ritmo",
+      "corpo": "Parque, dia leve, parque, dia leve. Piscina, outlet, um dia sem alarme. E isso que salva o astral da viagem.",
+      "destaques": [
+        "Intercale"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "A viagem dos sonhos não morre de cansaco. Morre de agenda apertada. Respiro também e roteiro.",
+      "destaques": [
+        "Respiro"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Antes de sonhar com o roteiro",
+      "corpo": "Tudo isso só acontece se os vistos sairem. E numa família, um não derruba a viagem inteira. Comece por aí.",
+      "destaques": [
+        "um"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "A ordem certa",
+      "corpo": "Primeiro os vistos da família toda, bem preparados. Depois o roteiro que evita o colapso. Nessa ordem, sem susto.",
+      "destaques": [
+        "Primeiro"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta ORLANDO que eu te mando o roteiro que evita o colapso. Ou link na bio.",
+      "acao": "Comenta ORLANDO",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "ORLANDO"
+      ]
+    }
+  ],
+  "legenda": "Orlando com três filhos: o erro do dia 4 que arruina a viagem inteira.\n\nFamília empolgada faz parque pesado quatro dias seguidos, e no quarto as crianças quebram. O segredo e intercalar: parque, dia leve, parque, dia leve. Mas nada disso acontece se um visto da família for negado, e um não derruba a viagem toda. Entao a ordem e: família preparada primeiro, depois o roteiro.\n\nComenta ORLANDO que eu te mando o roteiro que testei, dia a dia. Ou toca no link da bio.\n\n#orlando #viagememfamilia #disney #vistoamericano #vistoeua #b1b2 #feriascomcriancas"
+}

@@ -1,0 +1,76 @@
+{
+  "combo": "A19xP3",
+  "data": "2026-07-17",
+  "conta": "@viajaly",
+  "pilar": "prova",
+  "angulo_id": "A19",
+  "persona_id": "P3",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Depoimento real de cliente aprovado",
+  "persona": "Negado antes",
+  "dor": "vergonha + medo de repetir o erro + já perdeu US$185",
+  "exige_dado_real": true,
+  "nota_producao": "PROVA: nao publicar sem depoimento REAL de cliente com autorizacao LGPD por escrito. Substituir os campos [DEPOIMENTO ...] pela fala verdadeira. Preferir print/video do cliente no acervo/clientes/ com dados borrados. Sem isso, esta peca fica retida.",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "quem já ouviu um não",
+      "titulo": "Ela foi negada. Voltou e passou. Sem sorte, com método.",
+      "sub": "História real de cliente, com autorização.",
+      "destaques": [
+        "negada."
+      ],
+      "imagem": "acervo/familia/mae-crianca-selfie.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O ponto de partida",
+      "corpo": "[DEPOIMENTO: como ela se sentia depois do primeiro não. Vergonha, medo de repetir, a taxa que já tinha perdido.]",
+      "destaques": []
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que a gente ajustou",
+      "corpo": "[DEPOIMENTO: o que estava errado da primeira vez e o que foi corrigido. DS-160, a fala, a coerência.]",
+      "destaques": []
+    },
+    {
+      "tipo": "insight",
+      "texto": "Ser negado não te marca pra sempre. Repetir os mesmos erros, sim.",
+      "destaques": [
+        "não"
+      ],
+      "fonte": "Cliente real, nome preservado, com autorização"
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O resultado",
+      "corpo": "[DEPOIMENTO: a segunda entrevista, a aprovação, o alívio. Na voz dela, sem exagero.]",
+      "destaques": []
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Por que eu mostro isso",
+      "corpo": "Não pra dizer que sempre dá certo. Dá pra dar errado. Mostro pra você ver que negado não é sentença.",
+      "destaques": [
+        "não"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta HISTORIA que eu te conto o que foi ajustado. Ou link na bio.",
+      "acao": "Comenta HISTORIA",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "HISTORIA"
+      ]
+    }
+  ],
+  "legenda": "[COMPLETAR COM DEPOIMENTO REAL] Ela tinha sido negada uma vez. Voltou, ajustou o que precisava, e passou. Sem sorte, com método.\n\n[Resumo real do caso, com autorização: o que estava errado, o que foi corrigido, como foi a segunda entrevista.] Eu não mostro isso pra dizer que sempre dá certo. Mostro pra você ver que negado não é sentença.\n\nComenta HISTORIA que eu te conto o que costuma mudar entre o não é o sim. Ou toca no link da bio.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #depoimento #consuladoamericano",
+  "imagem": "acervo/familia/mae-crianca-selfie.jpg"
+}

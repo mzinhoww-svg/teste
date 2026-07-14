@@ -1,0 +1,29 @@
+{
+  "name": "carrossel-pro-marketplace",
+  "owner": {
+    "name": "Helio Arreche",
+    "email": "helioarreche@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "carrossel-pro",
+      "source": "./plugins/carrossel-pro",
+      "description": "Cria carrosseis de Instagram prontos pra publicar e entrega um editor visual (Carousel Studio) ja populado: tipografia, destaque de palavra, imagem de fundo, sombra/overlay, cantos editaveis, logo e exportacao em ZIP.",
+      "version": "1.9.2",
+      "author": {
+        "name": "Helio Arreche"
+      },
+      "homepage": "https://github.com/NetoNetoArreche/carrossel-pro-marketplace",
+      "license": "MIT",
+      "keywords": [
+        "instagram",
+        "carrossel",
+        "carousel",
+        "design",
+        "marketing",
+        "social-media"
+      ],
+      "category": "productivity"
+    }
+  ]
+}

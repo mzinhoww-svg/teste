@@ -1,0 +1,13 @@
+{
+  "_doc": "8 novos angulos de DESEJO derivados do acervo de fotos (Disney/Orlando, Miami, neve, praia, familia). Cada um traz a ponte pro visto embutida: a foto e o DEPOIS, a Viajaly cuida do ANTES. Pronto pra mesclar em angulos.json (destrava o pilar desejo, que estava com so 2 angulos).",
+  "angulos": [
+    {"id": "A23", "pilar": "desejo", "tese": "Toda foto dos sonhos comeca num consulado", "gancho_base": "Essa foto so existe por causa de um carimbo que quase nao veio.", "prova": "o depois depende do antes", "objetivo": "lead", "persona_alvo": "P2"},
+    {"id": "A24", "pilar": "desejo", "tese": "Disney e Universal sem quebrar as criancas", "gancho_base": "Fazer os dois parques no mesmo dia e o erro classico.", "prova": "roteiro por idade", "objetivo": "salvamento", "persona_alvo": "P1"},
+    {"id": "A25", "pilar": "desejo", "tese": "Miami em 3 dias com o grupo, sem briga de agenda", "gancho_base": "Miami com crianca nao e a Miami do Instagram.", "prova": "roteiro por bloco", "objetivo": "salvamento", "persona_alvo": "P6"},
+    {"id": "A26", "pilar": "desejo", "tese": "A primeira vez dela na neve", "gancho_base": "Ver sua filha tocar neve pela primeira vez.", "prova": "janela de inverno + agenda do consulado", "objetivo": "alcance", "persona_alvo": "P1"},
+    {"id": "A27", "pilar": "desejo", "tese": "Praia americana com crianca tem 3 detalhes que pegam brasileiro", "gancho_base": "Praia nos EUA nao e igual a praia daqui.", "prova": "dicas praticas", "objetivo": "salvamento", "persona_alvo": "P1"},
+    {"id": "A28", "pilar": "desejo", "tese": "A entrevista dura um minuto, a viagem dura a vida toda", "gancho_base": "Um minuto de entrevista decide anos de viagem.", "prova": "peso do preparo", "objetivo": "seguidor", "persona_alvo": "P2"},
+    {"id": "A29", "pilar": "desejo", "tese": "A foto e a parte facil; o carimbo foi a dificil", "gancho_base": "A foto na praia e a parte facil. O visto foi a dificil.", "prova": "negado que virou aprovado", "objetivo": "lead", "persona_alvo": "P3"},
+    {"id": "A30", "pilar": "desejo", "tese": "O roteiro que sobra tempo pro que importa", "gancho_base": "Roteiro cheio demais faz voce esquecer a viagem enquanto ela acontece.", "prova": "menos e mais", "objetivo": "compartilhamento", "persona_alvo": "P1"}
+  ]
+}

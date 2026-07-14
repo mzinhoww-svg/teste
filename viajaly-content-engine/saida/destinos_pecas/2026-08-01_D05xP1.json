@@ -1,0 +1,80 @@
+{
+  "combo": "D05xP1",
+  "data": "2026-08-01",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D05",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Primeira neve da família nos EUA",
+  "persona": "Família Orlando",
+  "dor": "nunca levou a família pra neve e não sabe como",
+  "imagem": "acervo/destinos/montanha-neve.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "primeira neve",
+      "titulo": "Levar a família pra neve nos EUA: quando ir e o que ninguém avisa.",
+      "sub": "A cena que a sua filha nunca esquece.",
+      "destaques": [
+        "neve"
+      ],
+      "imagem": "acervo/destinos/montanha-neve.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Quando tem neve",
+      "corpo": "Dezembro a março na maioria das montanhas. Fora disso, você viaja e não ve neve nenhuma.",
+      "destaques": [
+        "março"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que levar",
+      "corpo": "Luva impermeável, segunda pele, bota. Roupa de frio de cidade não segura criança na neve.",
+      "destaques": [
+        "impermeável,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Onde estrear",
+      "corpo": "Estações perto de cidade grande facilitam com criança: aula, aluguel de equipamento, e hospital por perto.",
+      "destaques": [
+        "perto"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Ver seu filho tocar neve pela primeira vez paga a viagem inteira.",
+      "destaques": [
+        "primeira"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "A parte que tem prazo",
+      "corpo": "A neve tem época, e o visto tem o tempo dele pra sair. Por isso o visto vem primeiro, com folga.",
+      "destaques": [
+        "primeiro,"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta NEVE que eu te mando o guia da primeira viagem de inverno. Ou link na bio.",
+      "acao": "Comenta NEVE",
+      "destaques": [
+        "NEVE"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Levar a família pra neve nos EUA pela primeira vez: quando ir e o que ninguém avisa.\n\nNeve boa vai de dezembro a março na maioria das montanhas. Leve luva impermeável, segunda pele e bota, porque roupa de frio de cidade não segura criança na neve. E estreie numa estação perto de cidade grande: aula, aluguel e hospital por perto. Ver seu filho tocar neve pela primeira vez paga a viagem inteira.\n\nA neve tem época e o visto tem o tempo dele. Por isso o visto vem primeiro.\n\nComenta NEVE que eu te mando o guia. Ou toca no link da bio.\n\n#neve #inverno #viagememfamilia #eua #vistoamericano #vistoeua #ski"
+}

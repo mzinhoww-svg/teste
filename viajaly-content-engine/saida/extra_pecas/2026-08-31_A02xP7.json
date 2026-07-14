@@ -1,0 +1,79 @@
+{
+  "combo": "A02xP7",
+  "data": "2026-08-31",
+  "conta": "@leticia",
+  "pilar": "denúncia",
+  "angulo_id": "A02",
+  "persona_id": "P7",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Bot de antecipação bloqueia sua conta",
+  "persona": "Autônomo / MEI",
+  "dor": "tenta atalho porque tem pressa e pouco tempo",
+  "imagem": "acervo/destinos/universal-globo.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "o atalho que quebra",
+      "titulo": "Tem gente vendendo robo pra antecipar entrevista. Isso bloqueia a sua conta.",
+      "sub": "O atalho do apressado sai caro.",
+      "destaques": [
+        "bloqueia"
+      ],
+      "imagem": "acervo/destinos/universal-globo.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Como funciona o golpe",
+      "corpo": "Um robo fica tentando remarcar sua data automaticamente. O sistema do consulado detecta esse comportamento.",
+      "destaques": [
+        "detecta"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O preço de verdade",
+      "corpo": "Conta bloqueada, processo travado e você sem entrevista. O atalho custa a viagem inteira.",
+      "destaques": [
+        "bloqueada,"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Autônomo vive de resolver rápido. Mas no visto, atalho automatico e tiro no próprio pé.",
+      "destaques": [
+        "atalho"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O jeito legítimo",
+      "corpo": "Antecipar tem caminho oficial: o pedido de emergência, com motivo e prova. Sem robo, sem risco.",
+      "destaques": [
+        "oficial:"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Pressa não vale a conta",
+      "corpo": "Ganhar duas semanas não paga o risco de perder a conta e a viagem. Faça pelo caminho certo.",
+      "destaques": [
+        "certo."
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta ROBO que eu te mostro o jeito legítimo de antecipar. Ou link na bio.",
+      "acao": "Comenta ROBO",
+      "destaques": [
+        "ROBO"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Tem gente vendendo robo pra antecipar a entrevista do visto. Isso bloqueia a sua conta.\n\nO robo fica tentando remarcar sua data automaticamente, e o sistema do consulado detecta. O resultado: conta bloqueada, processo travado e você sem entrevista. O atalho do apressado custa a viagem inteira. Existe caminho legítimo: o pedido de emergência, com motivo e prova.\n\nComenta ROBO que eu te mostro o jeito legítimo. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #golpe #consuladoamericano"
+}

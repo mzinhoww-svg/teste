@@ -1,0 +1,79 @@
+{
+  "combo": "A29xP3",
+  "data": "2026-07-25",
+  "conta": "@leticia",
+  "pilar": "desejo",
+  "angulo_id": "A29",
+  "persona_id": "P3",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "A foto dos sonhos e a parte fácil; o carimbo foi a difícil",
+  "persona": "Negado antes",
+  "dor": "vergonha + medo de repetir o erro + já perdeu US$185",
+  "imagem": "acervo/familia/mae-crianca-selfie.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "pra quem já ouviu um não",
+      "titulo": "A foto dos sonhos e a parte fácil. O carimbo foi a difícil.",
+      "sub": "E sim, quando já veio um não, dá pra virar o jogo.",
+      "destaques": [
+        "fácil."
+      ],
+      "imagem": "acervo/familia/mae-crianca-selfie.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Onde você tá",
+      "corpo": "Você já ouviu um não. A vergonha, o medo de repetir tudo de novo. Eu sei como pesa.",
+      "destaques": [
+        "não."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que muda um segundo pedido",
+      "corpo": "Não é sorte. E entender o que te derrubou e corrigir com honestidade, sem inventar história.",
+      "destaques": [
+        "corrigir"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Ser negado não te marca pra sempre. Repetir o erro, sim.",
+      "destaques": [
+        "erro,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "A cena que vem depois",
+      "corpo": "Aquela foto que você sonha, no destino que escolher. Ela não é sonho distante. E consequência de preparo.",
+      "destaques": [
+        "preparo."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que eu não prometo",
+      "corpo": "Eu não garanto seu visto. Ninguém garante. Mas te preparo pra chegar sem repetir o erro que já te custou caro.",
+      "destaques": [
+        "Ninguém"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta RECOMECO que eu te falo o próximo passo. Ou link na bio.",
+      "acao": "Comenta RECOMECO",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "RECOMECO"
+      ]
+    }
+  ],
+  "legenda": "A foto dos sonhos com a família e a parte fácil. O carimbo no passaporte foi a difícil. E sim, quando já veio um não, dá pra virar o jogo.\n\nSe você já ouviu um não, conhece a vergonha e o medo de repetir. O que muda um segundo pedido não é sorte: e entender o que te derrubou e corrigir com honestidade. Eu não garanto seu visto. Ninguém garante. Mas te preparo pra não repetir o erro que já te custou caro.\n\nComenta RECOMECO que eu te falo o próximo passo. Ou toca no link da bio.\n\n#vistonegado #vistoamericano #segundatentativa #vistoeua #b1b2 #naodesista #eua"
+}

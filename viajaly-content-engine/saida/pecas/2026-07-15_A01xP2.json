@@ -1,0 +1,79 @@
+{
+  "combo": "A01xP2",
+  "data": "2026-07-15",
+  "conta": "@leticia",
+  "pilar": "denúncia",
+  "angulo_id": "A01",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Ninguém garante visto. Quem garante mente.",
+  "persona": "Casal primeira viagem",
+  "dor": "não sabe por onde começar",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "a verdade incomoda",
+      "titulo": "Te prometeram visto garantido? Salva esse post e corre.",
+      "sub": "E a primeira viagem de vocês. Não começem pelo golpe mais comum.",
+      "destaques": [
+        "corre."
+      ],
+      "imagem": "acervo/familia/familia-selfie.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Quem decide",
+      "corpo": "Não é o site. Não é a assessoria. E um oficial no consulado, na hora, olhando pra vocês. Ninguém no Brasil manda nessa decisão.",
+      "destaques": [
+        "ninguém"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Por que prometem",
+      "corpo": "Porque vocês estao inseguros e e a primeira vez. Promessa de garantia vende medo. E medo paga caro.",
+      "destaques": [
+        "medo."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "A pergunta certa não é quem garante. E quem fica com vocês quando dá errado.",
+      "destaques": [
+        "fica"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O que dá pra garantir",
+      "corpo": "Preparo. DS-160 coerente. Vocês sabendo responder sem gaguejar. Isso muda o jogo. O carimbo, não.",
+      "destaques": [
+        "Preparo."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O disclaimer e o teste",
+      "corpo": "Pergunta pra quem tão contratando: vocês garantem? Se disser sim, já sabe. Quem e honesto diz que não pode garantir.",
+      "destaques": [
+        "não"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta VERDADE e eu te explico como começar sem cair em promessa. Ou link na bio.",
+      "acao": "Comenta VERDADE",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "VERDADE"
+      ]
+    }
+  ],
+  "legenda": "Te prometeram visto garantido na sua primeira viagem? Salva esse post e corre.\n\nNinguém garante visto. A decisão e de um oficial no consulado, na hora, olhando pra vocês. Quem promete garantia tá vendendo o seu medo de não saber por onde começar. O que dá pra garantir e preparo: DS-160 coerente e vocês sabendo responder.\n\nComenta VERDADE que eu te mando o primeiro passo do jeito certo. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #luademel #vistoeua #b1b2 #viagemacasal #eua",
+  "imagem": "acervo/familia/familia-selfie.jpg"
+}
