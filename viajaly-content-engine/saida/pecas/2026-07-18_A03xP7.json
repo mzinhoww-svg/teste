@@ -2,33 +2,33 @@
   "combo": "A03xP7",
   "data": "2026-07-18",
   "conta": "@leticia",
-  "pilar": "denuncia",
+  "pilar": "denúncia",
   "angulo_id": "A03",
   "persona_id": "P7",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "O governo cobra US$750 pra furar fila; consultoria completa custa menos de um terco",
-  "persona": "Autonomo / MEI",
-  "dor": "acha que vai ser negado por nao ter vinculo formal",
-  "imagem": "acervo/destinos/ny-skyline-menina.jpg",
+  "tese": "O governo cobra US$750 pra furar fila; consultoria completa custa menos de um terço",
+  "persona": "Autônomo / MEI",
+  "dor": "acha que vai ser negado por não ter vínculo formal",
+  "imagem": "acervo/destinos/miami-menina.jpg",
   "fonte_url": "https://www.federalregister.gov/documents/2026/06/09/2026-11513/schedule-of-fees-for-consular-services-department-of-state-and-overseas-embassies-and",
   "fonte_verificada_em": "2026-07-12",
   "slides": [
     {
       "tipo": "capa_foto",
-      "kicker": "o preco da sua pressa",
-      "titulo": "750 dolares pra furar a fila. Leia antes de pagar.",
-      "sub": "O governo botou preco na sua pressa. E tem um detalhe que quase ninguem viu.",
+      "kicker": "o preço da sua pressa",
+      "titulo": "750 dólares pra furar a fila. Leia antes de pagar.",
+      "sub": "O governo botou preço na sua pressa. E tem um detalhe que quase ninguém viu.",
       "destaques": [
         "750"
       ],
-      "imagem": "acervo/destinos/ny-skyline-menina.jpg"
+      "imagem": "acervo/destinos/miami-menina.jpg"
     },
     {
       "tipo": "passo",
       "numero": "02",
       "titulo": "O que os 750 compram",
-      "corpo": "Uma data de entrevista em ate 10 dias uteis, num posto selecionado. So isso. Vale de julho a dezembro de 2026.",
+      "corpo": "Uma data de entrevista em até 10 dias úteis, num posto selecionado. Só isso. Vale de julho a dezembro de 2026.",
       "destaques": [
         "data"
       ]
@@ -36,15 +36,15 @@
     {
       "tipo": "passo",
       "numero": "03",
-      "titulo": "O que eles NAO compram",
-      "corpo": "A analise do seu caso continua igual. O oficial olha o mesmo que olharia. Voce paga pra esperar menos, nao pra passar.",
+      "titulo": "O que eles NÃO compram",
+      "corpo": "A análise do seu caso continua igual. O oficial olha o mesmo que olharia. Você paga pra esperar menos, não pra passar.",
       "destaques": [
         "igual."
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Voce nao tem holerite. Vao te vender pressa porque sabem que voce tem medo. Pressa nao e preparo.",
+      "texto": "Você não tem holerite. Vao te vender pressa porque sabem que você tem medo. Pressa não é preparo.",
       "destaques": [
         "medo.",
         "preparo."
@@ -53,17 +53,17 @@
     {
       "tipo": "passo",
       "numero": "05",
-      "titulo": "A conta que ninguem faz",
-      "corpo": "750 dolares so pra antecipar. Nao aprova nada. Uma consultoria completa, que te prepara de verdade, custa menos de um terco disso.",
+      "titulo": "A conta que ninguém faz",
+      "corpo": "750 dólares só pra antecipar. Não aprova nada. Uma consultoria completa, que te prepara de verdade, custa menos de um terço disso.",
       "destaques": [
-        "terco"
+        "terço"
       ]
     },
     {
       "tipo": "passo",
       "numero": "06",
-      "titulo": "Ser MEI nao te derruba",
-      "corpo": "Vinculo se comprova de varias formas. O que derruba e chegar despreparado e com pressa comprada. Nao a sua carteira.",
+      "titulo": "Ser MEI não te derruba",
+      "corpo": "Vínculo se comprova de várias formas. O que derruba e chegar despreparado e com pressa comprada. Não a sua carteira.",
       "destaques": [
         "despreparado"
       ]
@@ -78,5 +78,5 @@
       ]
     }
   ],
-  "legenda": "750 dolares pra furar a fila do visto. Antes de pagar, leia isto.\n\nEsta no Federal Register (doc 2026-11513), vale de julho a dezembro de 2026, e serve pra UMA coisa: data de entrevista em ate 10 dias uteis. Nao aprova o visto. A analise e a mesma. Se voce e autonomo e ja te ofereceram isso como solucao, cuidado: pressa nao e preparo.\n\nComenta FONTE que eu te mando o link do documento oficial pra voce ler com seus olhos. Ou toca no link da bio.\n\n#vistoamericano #vistoeua #b1b2 #autonomo #mei #consuladoamericano #federalregister"
+  "legenda": "750 dólares pra furar a fila do visto. Antes de pagar, leia isto.\n\nEstá no Federal Register (doc 2026-11513), vale de julho a dezembro de 2026, e serve pra UMA coisa: data de entrevista em até 10 dias úteis. Não aprova o visto. A análise e a mesma. Se você e autônomo e já te ofereceram isso como solução, cuidado: pressa não é preparo.\n\nComenta FONTE que eu te mando o link do documento oficial pra você ler com seus olhos. Ou toca no link da bio.\n\n#vistoamericano #vistoeua #b1b2 #autonomo #mei #consuladoamericano #federalregister"
 }

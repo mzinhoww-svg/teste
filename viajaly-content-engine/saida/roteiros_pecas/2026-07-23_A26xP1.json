@@ -8,13 +8,13 @@
   "formato": "carrossel",
   "kit": "corporate",
   "tese": "A primeira vez dela na neve",
-  "persona": "Familia Orlando",
+  "persona": "Família Orlando",
   "dor": "se um for negado, a viagem inteira desmonta",
   "imagem": "acervo/destinos/neve-familia.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
-      "kicker": "a cena que voce quer",
+      "kicker": "a cena que você quer",
       "titulo": "A primeira vez da sua filha na neve tem prazo. Dois, na verdade.",
       "sub": "A janela do inverno e a agenda do consulado, as duas contam.",
       "destaques": [
@@ -26,23 +26,23 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "A janela do inverno",
-      "corpo": "Neve boa nos EUA tem epoca certa. Voce nao remarca o inverno pra quando o visto sair.",
+      "corpo": "Neve boa nos EUA tem época certa. Você não remarca o inverno pra quando o visto sair.",
       "destaques": [
-        "epoca"
+        "época"
       ]
     },
     {
       "tipo": "passo",
       "numero": "03",
-      "titulo": "A agenda nao para por voce",
-      "corpo": "Se a viagem e no inverno, o visto tem que sair antes. E a agenda do consulado anda no tempo dela, nao no seu.",
+      "titulo": "A agenda não para por você",
+      "corpo": "Se a viagem e no inverno, o visto tem que sair antes. E a agenda do consulado anda no tempo dela, não no seu.",
       "destaques": [
         "antes."
       ]
     },
     {
       "tipo": "insight",
-      "texto": "O inverno tem data. Sua preparacao tambem devia ter.",
+      "texto": "O inverno tem data. Sua preparacao também devia ter.",
       "destaques": [
         "data."
       ]
@@ -50,17 +50,17 @@
     {
       "tipo": "passo",
       "numero": "05",
-      "titulo": "O que atrasa a familia",
-      "corpo": "Um DS-160 torto de um dos filhos trava o grupo inteiro. Precisa de coerencia entre todos.",
+      "titulo": "O que atrasa a família",
+      "corpo": "Um DS-160 torto de um dos filhos trava o grupo inteiro. Precisa de coerência entre todos.",
       "destaques": [
-        "coerencia"
+        "coerência"
       ]
     },
     {
       "tipo": "passo",
       "numero": "06",
       "titulo": "A ordem",
-      "corpo": "Vistos da familia primeiro, com folga na agenda. Depois a neve vira so alegria.",
+      "corpo": "Vistos da família primeiro, com folga na agenda. Depois a neve vira só alegria.",
       "destaques": [
         "folga"
       ]
@@ -75,5 +75,5 @@
       ]
     }
   ],
-  "legenda": "Ver sua filha tocar neve pela primeira vez tem prazo. Dois, na verdade: a janela do inverno e a agenda do consulado.\n\nNeve boa nos EUA tem epoca. Voce nao remarca o inverno pra quando o visto sair, entao ele tem que sair antes. E numa familia, um DS-160 torto de um filho trava o grupo todo. A ordem: vistos da familia primeiro, com folga.\n\nComenta NEVE que eu te mando como encaixar o visto na janela do inverno. Ou toca no link da bio.\n\n#neve #viagememfamilia #inverno #vistoamericano #vistoeua #b1b2 #eua"
+  "legenda": "Ver sua filha tocar neve pela primeira vez tem prazo. Dois, na verdade: a janela do inverno e a agenda do consulado.\n\nNeve boa nos EUA tem época. Você não remarca o inverno pra quando o visto sair, entao ele tem que sair antes. E numa família, um DS-160 torto de um filho trava o grupo todo. A ordem: vistos da família primeiro, com folga.\n\nComenta NEVE que eu te mando como encaixar o visto na janela do inverno. Ou toca no link da bio.\n\n#neve #viagememfamilia #inverno #vistoamericano #vistoeua #b1b2 #eua"
 }

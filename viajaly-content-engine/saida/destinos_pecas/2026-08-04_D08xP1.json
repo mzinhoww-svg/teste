@@ -8,15 +8,15 @@
   "persona_id": "P1",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Cafe com personagem vale a pena?",
-  "persona": "Familia Orlando",
-  "dor": "gastar caro em extra que a crianca nem aproveita",
+  "tese": "Café com personagem vale a pena?",
+  "persona": "Família Orlando",
+  "dor": "gastar caro em extra que a criança nem aproveita",
   "imagem": "acervo/destinos/disney-goofy.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "vale o extra?",
-      "titulo": "Cafe com personagem na Disney: vale a pena? A conta honesta.",
+      "titulo": "Café com personagem na Disney: vale a pena? A conta honesta.",
       "sub": "Nem sempre. Depende da idade e do seu bolso.",
       "destaques": [
         "honesta."
@@ -27,7 +27,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "Quando vale",
-      "corpo": "Crianca pequena que ama personagem: vale muito. Encontro garantido, sem disputar a foto no meio do calor.",
+      "corpo": "Criança pequena que ama personagem: vale muito. Encontro garantido, sem disputar a foto no meio do calor.",
       "destaques": [
         "garantido,"
       ]
@@ -35,8 +35,8 @@
     {
       "tipo": "passo",
       "numero": "03",
-      "titulo": "Quando nao vale",
-      "corpo": "Filho maior ou indiferente a personagem: e comida cara por um abraco que ele nem faz questao.",
+      "titulo": "Quando não vale",
+      "corpo": "Filho maior ou indiferente a personagem: e comida cara por um abraço que ele nem faz questao.",
       "destaques": [
         "cara"
       ]
@@ -44,15 +44,15 @@
     {
       "tipo": "passo",
       "numero": "04",
-      "titulo": "O truque de graca",
-      "corpo": "Personagem tem horario pra aparecer nos parques, sem pagar nada. As vezes o encontro sai de graca.",
+      "titulo": "O truque de graça",
+      "corpo": "Personagem tem horário pra aparecer nos parques, sem pagar nada. As vezes o encontro sai de graça.",
       "destaques": [
-        "graca."
+        "graça."
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Nem todo extra da Disney e pra voce. O caro esperto e saber o que pular.",
+      "texto": "Nem todo extra da Disney e pra você. O caro esperto e saber o que pular.",
       "destaques": [
         "pular."
       ]
@@ -61,7 +61,7 @@
       "tipo": "passo",
       "numero": "06",
       "titulo": "O gasto que vem antes",
-      "corpo": "Antes de decidir extra de parque, o gasto que abre tudo e o visto da familia, feito com preparo.",
+      "corpo": "Antes de decidir extra de parque, o gasto que abre tudo e o visto da família, feito com preparo.",
       "destaques": [
         "abre"
       ]
@@ -76,5 +76,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Cafe com personagem na Disney vale a pena? A conta honesta: nem sempre.\n\nVale muito pra crianca pequena que ama personagem, porque garante o encontro sem disputar a foto no calor. Nao vale pra filho maior ou indiferente, ai e comida cara por um abraco. E tem o truque de graca: personagem tem horario pra aparecer nos parques sem pagar nada. O caro esperto e saber o que pular.\n\nE o gasto que abre tudo, antes de qualquer extra, e o visto da familia.\n\nComenta DISNEY que eu te mando a lista do que vale e do que pular. Ou toca no link da bio.\n\n#disney #orlando #viagememfamilia #eua #vistoamericano #vistoeua #dicasdisney"
+  "legenda": "Café com personagem na Disney vale a pena? A conta honesta: nem sempre.\n\nVale muito pra criança pequena que ama personagem, porque garante o encontro sem disputar a foto no calor. Não vale pra filho maior ou indiferente, aí e comida cara por um abraço. E tem o truque de graça: personagem tem horário pra aparecer nos parques sem pagar nada. O caro esperto e saber o que pular.\n\nE o gasto que abre tudo, antes de qualquer extra, e o visto da família.\n\nComenta DISNEY que eu te mando a lista do que vale e do que pular. Ou toca no link da bio.\n\n#disney #orlando #viagememfamilia #eua #vistoamericano #vistoeua #dicasdisney"
 }

@@ -10,26 +10,26 @@
       "persona_id": "P2",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "Toda foto dos sonhos comeca num consulado",
+      "tese": "Toda foto dos sonhos começa num consulado",
       "persona": "Casal primeira viagem",
-      "dor": "nao sabe por onde comecar",
+      "dor": "não sabe por onde começar",
       "imagem": "acervo/familia/familia-selfie2.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
-          "kicker": "o antes que ninguem mostra",
-          "titulo": "Essa foto de familia comecou num formulario. Nao no aeroporto.",
-          "sub": "O feed mostra o depois. Ninguem mostra o antes.",
+          "kicker": "o antes que ninguém mostra",
+          "titulo": "Essa foto de família começou num formulário. Não no aeroporto.",
+          "sub": "O feed mostra o depois. Ninguém mostra o antes.",
           "destaques": [
-            "formulario."
+            "formulário."
           ],
           "imagem": "acervo/familia/familia-selfie2.jpg"
         },
         {
           "tipo": "passo",
           "numero": "02",
-          "titulo": "O que voce ve",
-          "corpo": "Uma familia viajando, feliz. O feed so mostra isso: o depois, bonito e pronto.",
+          "titulo": "O que você ve",
+          "corpo": "Uma família viajando, feliz. O feed só mostra isso: o depois, bonito e pronto.",
           "destaques": [
             "depois,"
           ]
@@ -37,24 +37,24 @@
         {
           "tipo": "passo",
           "numero": "03",
-          "titulo": "O que voce nao ve",
-          "corpo": "Semanas antes teve um DS-160, uma entrevista de um minuto e o medo de ouvir nao.",
+          "titulo": "O que você não ve",
+          "corpo": "Semanas antes teve um DS-160, uma entrevista de um minuto e o medo de ouvir não.",
           "destaques": [
             "medo"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "A viagem dos sonhos nao comeca no aeroporto. Comeca num formulario.",
+          "texto": "A viagem dos sonhos não começa no aeroporto. Começa num formulário.",
           "destaques": [
-            "formulario."
+            "formulário."
           ]
         },
         {
           "tipo": "passo",
           "numero": "05",
-          "titulo": "Por que isso e pra voce",
-          "corpo": "Voce ta na parte do medo agora, na primeira viagem. Todo mundo que ja viajou passou por aqui.",
+          "titulo": "Por que isso é pra você",
+          "corpo": "Você tá na parte do medo agora, na primeira viagem. Todo mundo que já viajou passou por aqui.",
           "destaques": [
             "medo"
           ]
@@ -72,13 +72,13 @@
           "tipo": "cta",
           "titulo": "Comenta COMECO que eu te mando o primeiro passo. Ou link na bio.",
           "acao": "Comenta COMECO",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares.",
           "destaques": [
             "COMECO"
           ]
         }
       ],
-      "legenda": "Essa foto de familia viajando comecou num formulario, nao no aeroporto.\n\nO feed mostra o depois: bonito, pronto. Ninguem mostra o antes, que e um DS-160, uma entrevista de um minuto e o medo de ouvir nao. Se voce ta nessa parte agora, na primeira viagem, todo mundo que ja viajou passou por aqui. A ordem que funciona: primeiro o visto, depois a foto acontece sozinha.\n\nComenta COMECO que eu te mando o primeiro passo do jeito certo. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagememfamilia #eua #luademel"
+      "legenda": "Essa foto de família viajando começou num formulário, não no aeroporto.\n\nO feed mostra o depois: bonito, pronto. Ninguém mostra o antes, que é um DS-160, uma entrevista de um minuto e o medo de ouvir não. Se você tá nessa parte agora, na primeira viagem, todo mundo que já viajou passou por aqui. A ordem que funciona: primeiro o visto, depois a foto acontece sozinha.\n\nComenta COMECO que eu te mando o primeiro passo do jeito certo. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagememfamilia #eua #luademel"
     },
     {
       "combo": "A24xP1",
@@ -89,16 +89,16 @@
       "persona_id": "P1",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "Disney e Universal sem quebrar as criancas",
-      "persona": "Familia Orlando",
+      "tese": "Disney e Universal sem quebrar as crianças",
+      "persona": "Família Orlando",
       "dor": "se um for negado, a viagem inteira desmonta",
       "imagem": "acervo/destinos/universal-globo.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
           "kicker": "roteiro que funciona",
-          "titulo": "Disney e Universal no mesmo dia e o erro que faz a crianca surtar.",
-          "sub": "A empolgacao custa caro la pelas duas da tarde.",
+          "titulo": "Disney e Universal no mesmo dia e o erro que faz a criança surtar.",
+          "sub": "A empolgação custa caro lá pelas duas da tarde.",
           "destaques": [
             "erro"
           ],
@@ -108,7 +108,7 @@
           "tipo": "passo",
           "numero": "02",
           "titulo": "O erro",
-          "corpo": "A empolgacao faz voce espremer dois parques num dia so. As pernas das criancas discordam la pelas duas da tarde.",
+          "corpo": "A empolgação faz você espremer dois parques num dia só. As pernas das crianças discordam lá pelas duas da tarde.",
           "destaques": [
             "pernas"
           ]
@@ -117,23 +117,23 @@
           "tipo": "passo",
           "numero": "03",
           "titulo": "A regra da idade",
-          "corpo": "Ate uns 7 anos, a Disney rende mais. A Universal brilha com os maiores. Escolha por filho, nao por hype.",
+          "corpo": "Até uns 7 anos, a Disney rende mais. A Universal brilha com os maiores. Escolha por filho, não por hype.",
           "destaques": [
             "idade"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Parque nao e maratona. Menos parque, mais memoria.",
+          "texto": "Parque não é maratona. Menos parque, mais memória.",
           "destaques": [
-            "memoria."
+            "memória."
           ]
         },
         {
           "tipo": "passo",
           "numero": "05",
           "titulo": "O ritmo que segura",
-          "corpo": "Um parque por dia, tarde livre, piscina. E o quarto dia sem alarme, pra ninguem quebrar.",
+          "corpo": "Um parque por dia, tarde livre, piscina. E o quarto dia sem alarme, pra ninguém quebrar.",
           "destaques": [
             "um"
           ]
@@ -142,7 +142,7 @@
           "tipo": "passo",
           "numero": "06",
           "titulo": "Antes de montar o roteiro",
-          "corpo": "Nada disso acontece se um visto da familia for negado. Numa familia, um nao derruba a viagem toda.",
+          "corpo": "Nada disso acontece se um visto da família for negado. Numa família, um não derruba a viagem toda.",
           "destaques": [
             "um"
           ]
@@ -151,13 +151,13 @@
           "tipo": "cta",
           "titulo": "Comenta PARQUES que eu te mando o roteiro por idade. Ou link na bio.",
           "acao": "Comenta PARQUES",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares.",
           "destaques": [
             "PARQUES"
           ]
         }
       ],
-      "legenda": "Disney e Universal no mesmo dia e o erro que faz a crianca surtar as duas da tarde. E voce paga caro pra ver.\n\nA regra da idade ajuda: ate uns 7 anos a Disney rende mais, a Universal brilha com os maiores. Um parque por dia, tarde livre, o quarto dia sem alarme. Mas antes do roteiro: numa familia, um visto negado derruba a viagem toda.\n\nComenta PARQUES que eu te mando o roteiro por idade dos seus filhos. Ou toca no link da bio.\n\n#orlando #disney #universal #viagememfamilia #vistoamericano #vistoeua #feriascomcriancas"
+      "legenda": "Disney e Universal no mesmo dia e o erro que faz a criança surtar as duas da tarde. E você paga caro pra ver.\n\nA regra da idade ajuda: até uns 7 anos a Disney rende mais, a Universal brilha com os maiores. Um parque por dia, tarde livre, o quarto dia sem alarme. Mas antes do roteiro: numa família, um visto negado derruba a viagem toda.\n\nComenta PARQUES que eu te mando o roteiro por idade dos seus filhos. Ou toca no link da bio.\n\n#orlando #disney #universal #viagememfamilia #vistoamericano #vistoeua #feriascomcriancas"
     },
     {
       "combo": "A26xP1",
@@ -169,13 +169,13 @@
       "formato": "carrossel",
       "kit": "corporate",
       "tese": "A primeira vez dela na neve",
-      "persona": "Familia Orlando",
+      "persona": "Família Orlando",
       "dor": "se um for negado, a viagem inteira desmonta",
       "imagem": "acervo/destinos/neve-familia.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
-          "kicker": "a cena que voce quer",
+          "kicker": "a cena que você quer",
           "titulo": "A primeira vez da sua filha na neve tem prazo. Dois, na verdade.",
           "sub": "A janela do inverno e a agenda do consulado, as duas contam.",
           "destaques": [
@@ -187,23 +187,23 @@
           "tipo": "passo",
           "numero": "02",
           "titulo": "A janela do inverno",
-          "corpo": "Neve boa nos EUA tem epoca certa. Voce nao remarca o inverno pra quando o visto sair.",
+          "corpo": "Neve boa nos EUA tem época certa. Você não remarca o inverno pra quando o visto sair.",
           "destaques": [
-            "epoca"
+            "época"
           ]
         },
         {
           "tipo": "passo",
           "numero": "03",
-          "titulo": "A agenda nao para por voce",
-          "corpo": "Se a viagem e no inverno, o visto tem que sair antes. E a agenda do consulado anda no tempo dela, nao no seu.",
+          "titulo": "A agenda não para por você",
+          "corpo": "Se a viagem e no inverno, o visto tem que sair antes. E a agenda do consulado anda no tempo dela, não no seu.",
           "destaques": [
             "antes."
           ]
         },
         {
           "tipo": "insight",
-          "texto": "O inverno tem data. Sua preparacao tambem devia ter.",
+          "texto": "O inverno tem data. Sua preparacao também devia ter.",
           "destaques": [
             "data."
           ]
@@ -211,17 +211,17 @@
         {
           "tipo": "passo",
           "numero": "05",
-          "titulo": "O que atrasa a familia",
-          "corpo": "Um DS-160 torto de um dos filhos trava o grupo inteiro. Precisa de coerencia entre todos.",
+          "titulo": "O que atrasa a família",
+          "corpo": "Um DS-160 torto de um dos filhos trava o grupo inteiro. Precisa de coerência entre todos.",
           "destaques": [
-            "coerencia"
+            "coerência"
           ]
         },
         {
           "tipo": "passo",
           "numero": "06",
           "titulo": "A ordem",
-          "corpo": "Vistos da familia primeiro, com folga na agenda. Depois a neve vira so alegria.",
+          "corpo": "Vistos da família primeiro, com folga na agenda. Depois a neve vira só alegria.",
           "destaques": [
             "folga"
           ]
@@ -230,13 +230,13 @@
           "tipo": "cta",
           "titulo": "Comenta NEVE que eu te mando como encaixar visto e inverno. Ou link na bio.",
           "acao": "Comenta NEVE",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares.",
           "destaques": [
             "NEVE"
           ]
         }
       ],
-      "legenda": "Ver sua filha tocar neve pela primeira vez tem prazo. Dois, na verdade: a janela do inverno e a agenda do consulado.\n\nNeve boa nos EUA tem epoca. Voce nao remarca o inverno pra quando o visto sair, entao ele tem que sair antes. E numa familia, um DS-160 torto de um filho trava o grupo todo. A ordem: vistos da familia primeiro, com folga.\n\nComenta NEVE que eu te mando como encaixar o visto na janela do inverno. Ou toca no link da bio.\n\n#neve #viagememfamilia #inverno #vistoamericano #vistoeua #b1b2 #eua"
+      "legenda": "Ver sua filha tocar neve pela primeira vez tem prazo. Dois, na verdade: a janela do inverno e a agenda do consulado.\n\nNeve boa nos EUA tem época. Você não remarca o inverno pra quando o visto sair, entao ele tem que sair antes. E numa família, um DS-160 torto de um filho trava o grupo todo. A ordem: vistos da família primeiro, com folga.\n\nComenta NEVE que eu te mando como encaixar o visto na janela do inverno. Ou toca no link da bio.\n\n#neve #viagememfamilia #inverno #vistoamericano #vistoeua #b1b2 #eua"
     },
     {
       "combo": "A25xP6",
@@ -250,39 +250,39 @@
       "tese": "Miami em 3 dias com o grupo",
       "persona": "Grupo de amigos",
       "dor": "coordenar datas de todo mundo",
-      "imagem": "acervo/destinos/ny-skyline-menina.jpg",
+      "imagem": "acervo/destinos/miami-menina.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
           "kicker": "miami de verdade",
           "titulo": "Miami com o grupo vira briga de lobby sem uma coisa.",
-          "sub": "3 dias, varias pessoas, um plano que todo mundo aceita.",
+          "sub": "3 dias, várias pessoas, um plano que todo mundo aceita.",
           "destaques": [
             "briga"
           ],
-          "imagem": "acervo/destinos/ny-skyline-menina.jpg"
+          "imagem": "acervo/destinos/miami-menina.jpg"
         },
         {
           "tipo": "passo",
           "numero": "02",
           "titulo": "O erro do grupo",
-          "corpo": "Cada um quer uma coisa. Sem plano, o dia vira discussao no lobby do hotel.",
+          "corpo": "Cada um quer uma coisa. Sem plano, o dia vira discussão no lobby do hotel.",
           "destaques": [
-            "discussao"
+            "discussão"
           ]
         },
         {
           "tipo": "passo",
           "numero": "03",
           "titulo": "Divida por bloco",
-          "corpo": "Praia de manha, cidade a tarde, um dia de outlet. Todo mundo pega o que quer sem atropelar o outro.",
+          "corpo": "Praia de manhã, cidade a tarde, um dia de outlet. Todo mundo pega o que quer sem atropelar o outro.",
           "destaques": [
             "bloco"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Grupo nao briga por gosto. Briga por falta de plano.",
+          "texto": "Grupo não briga por gosto. Briga por falta de plano.",
           "destaques": [
             "plano."
           ]
@@ -291,7 +291,7 @@
           "tipo": "passo",
           "numero": "05",
           "titulo": "O que trava o grupo antes",
-          "corpo": "Varios vistos, varios DS-160 sem se contradizer, agendados juntos. E ai que a viagem empaca.",
+          "corpo": "Vários vistos, vários DS-160 sem se contradizer, agendados juntos. E aí que a viagem empaca.",
           "destaques": [
             "juntos."
           ]
@@ -309,13 +309,13 @@
           "tipo": "cta",
           "titulo": "Comenta MIAMI que eu te mando o roteiro de 3 dias. Ou link na bio.",
           "acao": "Comenta MIAMI",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares.",
           "destaques": [
             "MIAMI"
           ]
         }
       ],
-      "legenda": "Miami com o grupo vira briga no lobby do hotel sem uma coisa: plano.\n\nSem plano, cada um quer uma coisa e o dia trava. O truque e dividir por bloco: praia de manha, cidade a tarde, um dia de outlet. Mas o que trava o grupo e antes: varios vistos, varios DS-160 sem se contradizer, agendados juntos. Alinha os vistos primeiro e Miami roda sozinha.\n\nComenta MIAMI que eu te mando o roteiro de 3 dias pra grupo. Ou toca no link da bio.\n\n#miami #viagemcomamigos #grupodeamigos #vistoamericano #vistoeua #b1b2 #eua"
+      "legenda": "Miami com o grupo vira briga no lobby do hotel sem uma coisa: plano.\n\nSem plano, cada um quer uma coisa e o dia trava. O truque e dividir por bloco: praia de manhã, cidade a tarde, um dia de outlet. Mas o que trava o grupo e antes: vários vistos, vários DS-160 sem se contradizer, agendados juntos. Alinha os vistos primeiro e Miami roda sozinha.\n\nComenta MIAMI que eu te mando o roteiro de 3 dias pra grupo. Ou toca no link da bio.\n\n#miami #viagemcomamigos #grupodeamigos #vistoamericano #vistoeua #b1b2 #eua"
     },
     {
       "combo": "A29xP3",
@@ -326,42 +326,42 @@
       "persona_id": "P3",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "A foto e a parte facil; o carimbo foi a dificil",
+      "tese": "A foto dos sonhos e a parte fácil; o carimbo foi a difícil",
       "persona": "Negado antes",
-      "dor": "vergonha + medo de repetir o erro + ja perdeu US$185",
+      "dor": "vergonha + medo de repetir o erro + já perdeu US$185",
       "imagem": "acervo/familia/mae-crianca-selfie.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
-          "kicker": "pra quem ja ouviu um nao",
-          "titulo": "A foto na praia e a parte facil. O carimbo foi a dificil.",
-          "sub": "E sim, quando ja veio um nao, da pra virar o jogo.",
+          "kicker": "pra quem já ouviu um não",
+          "titulo": "A foto dos sonhos e a parte fácil. O carimbo foi a difícil.",
+          "sub": "E sim, quando já veio um não, dá pra virar o jogo.",
           "destaques": [
-            "facil."
+            "fácil."
           ],
           "imagem": "acervo/familia/mae-crianca-selfie.jpg"
         },
         {
           "tipo": "passo",
           "numero": "02",
-          "titulo": "Onde voce ta",
-          "corpo": "Voce ja ouviu um nao. A vergonha, o medo de repetir tudo de novo. Eu sei como pesa.",
+          "titulo": "Onde você tá",
+          "corpo": "Você já ouviu um não. A vergonha, o medo de repetir tudo de novo. Eu sei como pesa.",
           "destaques": [
-            "nao."
+            "não."
           ]
         },
         {
           "tipo": "passo",
           "numero": "03",
           "titulo": "O que muda um segundo pedido",
-          "corpo": "Nao e sorte. E entender o que te derrubou e corrigir com honestidade, sem inventar historia.",
+          "corpo": "Não é sorte. E entender o que te derrubou e corrigir com honestidade, sem inventar história.",
           "destaques": [
             "corrigir"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Ser negado nao te marca pra sempre. Repetir o erro, sim.",
+          "texto": "Ser negado não te marca pra sempre. Repetir o erro, sim.",
           "destaques": [
             "erro,"
           ]
@@ -370,7 +370,7 @@
           "tipo": "passo",
           "numero": "05",
           "titulo": "A cena que vem depois",
-          "corpo": "Essa foto na praia, na neve, no parque. Ela nao e sonho distante. E consequencia de preparo.",
+          "corpo": "Aquela foto que você sonha, no destino que escolher. Ela não é sonho distante. E consequência de preparo.",
           "destaques": [
             "preparo."
           ]
@@ -378,23 +378,23 @@
         {
           "tipo": "passo",
           "numero": "06",
-          "titulo": "O que eu nao prometo",
-          "corpo": "Eu nao garanto seu visto. Ninguem garante. Mas te preparo pra chegar sem repetir o erro que ja te custou caro.",
+          "titulo": "O que eu não prometo",
+          "corpo": "Eu não garanto seu visto. Ninguém garante. Mas te preparo pra chegar sem repetir o erro que já te custou caro.",
           "destaques": [
-            "Ninguem"
+            "Ninguém"
           ]
         },
         {
           "tipo": "cta",
-          "titulo": "Comenta RECOMECO que eu te falo o proximo passo. Ou link na bio.",
+          "titulo": "Comenta RECOMECO que eu te falo o próximo passo. Ou link na bio.",
           "acao": "Comenta RECOMECO",
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares.",
           "destaques": [
             "RECOMECO"
           ]
         }
       ],
-      "legenda": "A foto na praia com a familia e a parte facil. O carimbo no passaporte foi a dificil. E sim, quando ja veio um nao, da pra virar o jogo.\n\nSe voce ja ouviu um nao, conhece a vergonha e o medo de repetir. O que muda um segundo pedido nao e sorte: e entender o que te derrubou e corrigir com honestidade. Eu nao garanto seu visto. Ninguem garante. Mas te preparo pra nao repetir o erro que ja te custou caro.\n\nComenta RECOMECO que eu te falo o proximo passo. Ou toca no link da bio.\n\n#vistonegado #vistoamericano #segundatentativa #vistoeua #b1b2 #naodesista #eua"
+      "legenda": "A foto dos sonhos com a família e a parte fácil. O carimbo no passaporte foi a difícil. E sim, quando já veio um não, dá pra virar o jogo.\n\nSe você já ouviu um não, conhece a vergonha e o medo de repetir. O que muda um segundo pedido não é sorte: e entender o que te derrubou e corrigir com honestidade. Eu não garanto seu visto. Ninguém garante. Mas te preparo pra não repetir o erro que já te custou caro.\n\nComenta RECOMECO que eu te falo o próximo passo. Ou toca no link da bio.\n\n#vistonegado #vistoamericano #segundatentativa #vistoeua #b1b2 #naodesista #eua"
     }
   ]
 }

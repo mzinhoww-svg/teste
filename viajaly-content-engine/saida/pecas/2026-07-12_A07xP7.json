@@ -7,27 +7,27 @@
   "persona_id": "P7",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Da pra antecipar de graca por emergencia",
-  "persona": "Autonomo / MEI",
-  "dor": "acha que vai ser negado por nao ter vinculo formal",
+  "tese": "Dá pra antecipar de graça por emergência",
+  "persona": "Autônomo / MEI",
+  "dor": "acha que vai ser negado por não ter vínculo formal",
   "fonte_url": "https://www.federalregister.gov/documents/2026/06/09/2026-11513/schedule-of-fees-for-consular-services-department-of-state-and-overseas-embassies-and",
   "fonte_verificada_em": "2026-07-12",
   "slides": [
     {
       "tipo": "capa_foto",
-      "kicker": "o que nao te contam",
-      "titulo": "Da pra antecipar a entrevista de graca. Sem pagar 750.",
-      "sub": "O consulado nao faz questao de te contar isso.",
+      "kicker": "o que não te contam",
+      "titulo": "Dá pra antecipar a entrevista de graça. Sem pagar 750.",
+      "sub": "O consulado não faz questao de te contar isso.",
       "destaques": [
-        "graca."
+        "graça."
       ],
       "imagem": "acervo/destinos/universal-globo.jpg"
     },
     {
       "tipo": "passo",
       "numero": "02",
-      "titulo": "Existe o pedido de emergencia",
-      "corpo": "O consulado tem um canal pra remarcar mais cedo quando ha motivo real: saude, trabalho, familia. Sem custo extra.",
+      "titulo": "Existe o pedido de emergência",
+      "corpo": "O consulado tem um canal pra remarcar mais cedo quando ha motivo real: saúde, trabalho, família. Sem custo extra.",
       "destaques": [
         "real:"
       ]
@@ -36,32 +36,32 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "Precisa de motivo e prova",
-      "corpo": "Nao e pra qualquer um e nao e pra furar fila por vontade. Voce descreve a emergencia e anexa o que comprova. Sem documento, nao rola.",
+      "corpo": "Não é pra qualquer um e não é pra furar fila por vontade. Você descreve a emergência e anexa o que comprova. Sem documento, não rola.",
       "destaques": [
         "comprova."
       ]
     },
     {
       "tipo": "insight",
-      "texto": "A gente ganha te vendendo pressa. Mas se da pra resolver de graca, eu prefiro te contar. E isso que muda a confianca.",
+      "texto": "A gente ganha te vendendo pressa. Mas se dá pra resolver de graça, eu prefiro te contar. E isso que muda a confiança.",
       "destaques": [
-        "graca,"
+        "graça,"
       ]
     },
     {
       "tipo": "passo",
       "numero": "05",
-      "titulo": "Por que isso importa pra voce",
-      "corpo": "Autonomo costuma ter demanda que surge do nada. Uma feira, um cliente la fora. Isso pode ser a sua emergencia legitima.",
+      "titulo": "Por que isso importa pra você",
+      "corpo": "Autônomo costuma ter demanda que surge do nada. Uma feira, um cliente lá fora. Isso pode ser a sua emergência legítima.",
       "destaques": [
-        "legitima."
+        "legítima."
       ]
     },
     {
       "tipo": "passo",
       "numero": "06",
       "titulo": "O risco de fazer errado",
-      "corpo": "Pedido de emergencia mal justificado e negado, e voce perde a vez. Por isso vale escrever certo da primeira vez.",
+      "corpo": "Pedido de emergência mal justificado e negado, e você perde a vez. Por isso vale escrever certo da primeira vez.",
       "destaques": [
         "negado,"
       ]
@@ -76,6 +76,6 @@
       ]
     }
   ],
-  "legenda": "Da pra antecipar a entrevista do visto DE GRACA, sem pagar os 750 dolares da fila premium.\n\nExiste o pedido de emergencia: com motivo real (saude, trabalho, familia) voce pede uma data mais cedo. Precisa de motivo e de prova. Se voce e autonomo, uma feira ou um cliente la fora pode ser a sua emergencia legitima. Mas pedido mal justificado e negado, e voce perde a vez.\n\nComenta GRATIS que eu te falo se o seu caso se encaixa. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #dicasdeviagem #consuladoamericano",
+  "legenda": "Dá pra antecipar a entrevista do visto DE GRAÇA, sem pagar os 750 dólares da fila premium.\n\nExiste o pedido de emergência: com motivo real (saúde, trabalho, família) você pede uma data mais cedo. Precisa de motivo e de prova. Se você e autônomo, uma feira ou um cliente lá fora pode ser a sua emergência legítima. Mas pedido mal justificado e negado, e você perde a vez.\n\nComenta GRATIS que eu te falo se o seu caso se encaixa. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #dicasdeviagem #consuladoamericano",
   "imagem": "acervo/destinos/universal-globo.jpg"
 }

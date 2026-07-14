@@ -2,7 +2,7 @@
   "combo": "A13xP2",
   "data": "2026-08-28",
   "conta": "@leticia",
-  "pilar": "antidoto",
+  "pilar": "antídoto",
   "angulo_id": "A13",
   "persona_id": "P2",
   "formato": "carrossel",
@@ -15,7 +15,7 @@
     {
       "tipo": "capa_foto",
       "kicker": "mito de documento",
-      "titulo": "A pasta gorda de documentos que voces prepararam? Ele nem abre.",
+      "titulo": "A pasta gorda de documentos que vocês prepararam? Ele nem abre.",
       "sub": "Primeira viagem junta papel demais por medo.",
       "destaques": [
         "abre."
@@ -26,7 +26,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "A entrevista e curta",
-      "corpo": "Menos de um minuto. Nao da tempo de folhear extrato, reserva e imposto de renda.",
+      "corpo": "Menos de um minuto. Não dá tempo de folhear extrato, reserva e imposto de renda.",
       "destaques": [
         "minuto."
       ]
@@ -35,14 +35,14 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "O que pesa e a fala",
-      "corpo": "A coerencia do que voces respondem decide, nao a espessura da pasta.",
+      "corpo": "A coerência do que vocês respondem decide, não a espessura da pasta.",
       "destaques": [
-        "coerencia"
+        "coerência"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Documento e apoio, nao argumento. Quem ganha e o casal que sabe se explicar.",
+      "texto": "Documento e apoio, não argumento. Quem ganha e o casal que sabe se explicar.",
       "destaques": [
         "explicar."
       ]
@@ -50,8 +50,8 @@
     {
       "tipo": "passo",
       "numero": "05",
-      "titulo": "Leve o basico organizado",
-      "corpo": "Tenham os documentos, sim, mas na cabeca e na ordem. O que conta e saber contar quem voces sao.",
+      "titulo": "Leve o básico organizado",
+      "corpo": "Tenham os documentos, sim, mas na cabeça e na ordem. O que conta e saber contar quem vocês são.",
       "destaques": [
         "ordem."
       ]
@@ -59,8 +59,8 @@
     {
       "tipo": "passo",
       "numero": "06",
-      "titulo": "Ensaiem a historia",
-      "corpo": "Por que vao, quanto tempo, quem paga, quando voltam. Uma versao so, os dois afinados.",
+      "titulo": "Ensaiem a história",
+      "corpo": "Por que vao, quanto tempo, quem paga, quando voltam. Uma versão só, os dois afinados.",
       "destaques": [
         "afinados."
       ]
@@ -75,5 +75,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "A pasta gorda de documentos que voces prepararam pra primeira viagem? O oficial nem abre.\n\nA entrevista dura menos de um minuto. O que pesa e a coerencia do que voces falam, nao a espessura da pasta. Documento e apoio, nao argumento. Levem o basico organizado e, principalmente, ensaiem a historia: por que vao, quanto tempo, quem paga, quando voltam. Uma versao so, os dois afinados.\n\nComenta PASTADOIS que eu te ensino o que levar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #entrevistavisto #vistoeua #b1b2 #viagemacasal #ds160"
+  "legenda": "A pasta gorda de documentos que vocês prepararam pra primeira viagem? O oficial nem abre.\n\nA entrevista dura menos de um minuto. O que pesa e a coerência do que vocês falam, não a espessura da pasta. Documento e apoio, não argumento. Levem o básico organizado e, principalmente, ensaiem a história: por que vao, quanto tempo, quem paga, quando voltam. Uma versão só, os dois afinados.\n\nComenta PASTADOIS que eu te ensino o que levar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #entrevistavisto #vistoeua #b1b2 #viagemacasal #ds160"
 }

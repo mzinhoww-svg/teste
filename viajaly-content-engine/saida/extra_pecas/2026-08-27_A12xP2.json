@@ -2,21 +2,21 @@
   "combo": "A12xP2",
   "data": "2026-08-27",
   "conta": "@leticia",
-  "pilar": "antidoto",
+  "pilar": "antídoto",
   "angulo_id": "A12",
   "persona_id": "P2",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "O consulo decide nos primeiros 10 segundos (casal)",
+  "tese": "O cônsul decide nos primeiros 10 segundos (casal)",
   "persona": "Casal primeira viagem",
-  "dor": "acha que a entrevista e longa e tecnica",
+  "dor": "acha que a entrevista e longa e técnica",
   "imagem": "acervo/destinos/praia-por-do-sol.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "os primeiros segundos",
       "titulo": "A entrevista dura 1 minuto. Ele decide nos primeiros 10 segundos.",
-      "sub": "Voces se preparam pra prova errada.",
+      "sub": "Vocês se preparam pra prova errada.",
       "destaques": [
         "10"
       ],
@@ -25,24 +25,24 @@
     {
       "tipo": "passo",
       "numero": "02",
-      "titulo": "Nao e prova de conhecimento",
-      "corpo": "Ninguem vai testar ingles ou geografia. E impressao: como voces chegam e respondem o obvio.",
+      "titulo": "Não é prova de conhecimento",
+      "corpo": "Ninguém vai testar inglês ou geografia. E impressão: como vocês chegam e respondem o óbvio.",
       "destaques": [
-        "impressao"
+        "impressão"
       ]
     },
     {
       "tipo": "passo",
       "numero": "03",
       "titulo": "O que pesa a dois",
-      "corpo": "Coerencia entre voces e seguranca na primeira resposta. Gaguejar no facil abre suspeita.",
+      "corpo": "Coerência entre vocês e segurança na primeira resposta. Gaguejar no fácil abre suspeita.",
       "destaques": [
-        "Coerencia"
+        "Coerência"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Nao e decorar. E chegar tao preparado que a verdade sai sem tremer.",
+      "texto": "Não é decorar. E chegar tão preparado que a verdade sai sem tremer.",
       "destaques": [
         "preparado"
       ]
@@ -51,7 +51,7 @@
       "tipo": "passo",
       "numero": "05",
       "titulo": "O erro do casal ansioso",
-      "corpo": "Falar demais, justificar demais. O oficial nao perguntou a historia de voces. Respondam o que foi perguntado.",
+      "corpo": "Falar demais, justificar demais. O oficial não perguntou a história de vocês. Respondam o que foi perguntado.",
       "destaques": [
         "demais."
       ]
@@ -75,5 +75,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "A entrevista do visto dura 1 minuto, e o consulo decide nos primeiros 10 segundos. Voces se preparam pra prova errada.\n\nNinguem testa ingles ou geografia. E impressao: como voces chegam e respondem o obvio, com coerencia entre voces. Nao e decorar, e chegar tao preparado que a verdade sai sem tremer. O erro do casal ansioso e falar demais. Respondam o que foi perguntado.\n\nComenta SEGUNDOS que eu te mando o roteiro dos 10 primeiros. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #entrevistavisto #vistoeua #b1b2 #viagemacasal #eua"
+  "legenda": "A entrevista do visto dura 1 minuto, e o cônsul decide nos primeiros 10 segundos. Vocês se preparam pra prova errada.\n\nNinguém testa inglês ou geografia. E impressão: como vocês chegam e respondem o óbvio, com coerência entre vocês. Não é decorar, e chegar tão preparado que a verdade sai sem tremer. O erro do casal ansioso e falar demais. Respondam o que foi perguntado.\n\nComenta SEGUNDOS que eu te mando o roteiro dos 10 primeiros. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #entrevistavisto #vistoeua #b1b2 #viagemacasal #eua"
 }

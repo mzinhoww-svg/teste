@@ -2,19 +2,19 @@
   "combo": "A14xP5",
   "data": "2026-07-16",
   "conta": "@viajaly",
-  "pilar": "antidoto",
+  "pilar": "antídoto",
   "angulo_id": "A14",
   "persona_id": "P5",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "A unica pergunta real e: voce volta?",
-  "persona": "Renovacao vencida",
-  "dor": "achava que era automatico e nao e",
+  "tese": "A única pergunta real e: você volta?",
+  "persona": "Renovação vencida",
+  "dor": "achava que era automatico e não é",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "o que ele quer saber",
-      "titulo": "Existe UMA pergunta na cabeca do consulo. E nao e sobre dinheiro.",
+      "titulo": "Existe UMA pergunta na cabeça do cônsul. E não é sobre dinheiro.",
       "sub": "Errar a resposta dela reprova mais que qualquer documento.",
       "destaques": [
         "UMA"
@@ -24,8 +24,8 @@
     {
       "tipo": "passo",
       "numero": "02",
-      "titulo": "A pergunta e: voce volta?",
-      "corpo": "Todo o resto gira em torno disso. A lei presume que voce quer imigrar. Seu papel e mostrar que nao.",
+      "titulo": "A pergunta e: você volta?",
+      "corpo": "Todo o resto gira em torno disso. A lei presume que você quer imigrar. Seu papel e mostrar que não.",
       "destaques": [
         "volta?"
       ]
@@ -33,15 +33,15 @@
     {
       "tipo": "passo",
       "numero": "03",
-      "titulo": "Por que renovacao cai nisso",
-      "corpo": "Seu visto venceu ha mais de um ano e voce achou que renovava automatico. Nao renova. Voce prova de novo que volta.",
+      "titulo": "Por que renovação cai nisso",
+      "corpo": "Seu visto venceu ha mais de um ano e você achou que renovava automatico. Não renova. Você prova de novo que volta.",
       "destaques": [
-        "nao"
+        "não"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Vinculo com o Brasil nao e um documento. E uma vida que continua aqui, te aguardando. E isso que voce mostra.",
+      "texto": "Vínculo com o Brasil não é um documento. E uma vida que continua aqui, te aguardando. E isso que você mostra.",
       "destaques": [
         "vida"
       ]
@@ -50,7 +50,7 @@
       "tipo": "passo",
       "numero": "05",
       "titulo": "O que responde a pergunta",
-      "corpo": "Trabalho, familia, casa, rotina. Coisas que so fazem sentido se voce voltar. Diga elas com naturalidade.",
+      "corpo": "Trabalho, família, casa, rotina. Coisas que só fazem sentido se você voltar. Diga elas com naturalidade.",
       "destaques": [
         "voltar."
       ]
@@ -58,8 +58,8 @@
     {
       "tipo": "passo",
       "numero": "06",
-      "titulo": "O erro comum na renovacao",
-      "corpo": "Achar que ja tem visto entao e formalidade. Relaxa, gagueja no obvio, e transforma um sim facil num nao evitavel.",
+      "titulo": "O erro comum na renovação",
+      "corpo": "Achar que já tem visto entao e formalidade. Relaxa, gagueja no óbvio, e transforma um sim fácil num não evitavel.",
       "destaques": [
         "evitavel."
       ]
@@ -74,6 +74,6 @@
       ]
     }
   ],
-  "legenda": "Existe UMA pergunta na cabeca do consulo, e nao e sobre quanto voce ganha. E: voce volta?\n\nA lei presume que voce quer imigrar. Seu papel e mostrar que nao. Se o seu visto venceu ha mais de um ano, esquece renovacao automatica: voce prova de novo que volta. Vinculo nao e um papel, e uma vida que fica aqui te aguardando: trabalho, familia, casa, rotina.\n\nComenta VOLTA que eu te mando como treinar essa resposta. Ou toca no link da bio.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #entrevistavisto #dicasdevisto",
+  "legenda": "Existe UMA pergunta na cabeça do cônsul, e não é sobre quanto você ganha. E: você volta?\n\nA lei presume que você quer imigrar. Seu papel e mostrar que não. Se o seu visto venceu ha mais de um ano, esquece renovação automatica: você prova de novo que volta. Vínculo não é um papel, e uma vida que fica aqui te aguardando: trabalho, família, casa, rotina.\n\nComenta VOLTA que eu te mando como treinar essa resposta. Ou toca no link da bio.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #entrevistavisto #dicasdevisto",
   "imagem": "acervo/destinos/neve-familia.jpg"
 }

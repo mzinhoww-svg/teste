@@ -7,15 +7,15 @@
   "persona_id": "P7",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "CASV e consulado sao dois dias diferentes",
-  "persona": "Autonomo / MEI",
-  "dor": "acha que vai ser negado por nao ter vinculo formal",
+  "tese": "CASV e consulado são dois dias diferentes",
+  "persona": "Autônomo / MEI",
+  "dor": "acha que vai ser negado por não ter vínculo formal",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "planeje os dois dias",
-      "titulo": "Ninguem te conta: sao DUAS visitas, em dias diferentes.",
-      "sub": "E autonomo perde dois dias de trabalho, nao um.",
+      "titulo": "Ninguém te conta: são DUAS visitas, em dias diferentes.",
+      "sub": "E autônomo perde dois dias de trabalho, não um.",
       "destaques": [
         "DUAS"
       ],
@@ -25,7 +25,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "Dia 1: o CASV",
-      "corpo": "E onde tiram sua foto e coletam digitais. Rapido, mas e um deslocamento inteiro. Nao e a entrevista.",
+      "corpo": "E onde tiram sua foto e coletam digitais. Rápido, mas e um deslocamento inteiro. Não é a entrevista.",
       "destaques": [
         "digitais."
       ]
@@ -34,14 +34,14 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "Dia 2: o consulado",
-      "corpo": "Aqui e a entrevista de verdade, com o oficial. Pode ser noutra data e ate noutra cidade. Planeje.",
+      "corpo": "Aqui e a entrevista de verdade, com o oficial. Pode ser noutra data e até noutra cidade. Planeje.",
       "destaques": [
         "entrevista"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Autonomo perde dois dias de trabalho, nao um. Saber disso antes e o que separa quem se planeja de quem se atrapalha.",
+      "texto": "Autônomo perde dois dias de trabalho, não um. Saber disso antes e o que separa quem se planeja de quem se atrapalha.",
       "destaques": [
         "dois"
       ]
@@ -49,8 +49,8 @@
     {
       "tipo": "passo",
       "numero": "05",
-      "titulo": "Por que isso pega o autonomo",
-      "corpo": "Sem carteira assinada, cada dia parado e dinheiro que voce mesmo banca. Agendar os dois juntos, na mesma viagem, economiza.",
+      "titulo": "Por que isso pega o autônomo",
+      "corpo": "Sem carteira assinada, cada dia parado e dinheiro que você mesmo banca. Agendar os dois juntos, na mesma viagem, economiza.",
       "destaques": [
         "juntos,"
       ]
@@ -58,10 +58,10 @@
     {
       "tipo": "passo",
       "numero": "06",
-      "titulo": "Da pra otimizar",
-      "corpo": "Em varios postos da pra marcar CASV e entrevista em dias proximos. A gente organiza pra voce nao ir e voltar duas vezes.",
+      "titulo": "Dá pra otimizar",
+      "corpo": "Em vários postos dá pra marcar CASV e entrevista em dias próximos. A gente organiza pra você não ir e voltar duas vezes.",
       "destaques": [
-        "proximos."
+        "próximos."
       ]
     },
     {
@@ -74,6 +74,6 @@
       ]
     }
   ],
-  "legenda": "Ninguem te conta, mas tirar o visto americano sao DUAS visitas, em dias diferentes.\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista com o oficial, que pode ser noutra data e ate noutra cidade. Pra quem e autonomo, isso e dois dias de trabalho parado, nao um. Em muitos postos da pra marcar os dois proximos, numa viagem so.\n\nComenta CASV que eu te mando o passo a passo pra otimizar. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #casv #vistoeua #b1b2 #dicasdevisto",
+  "legenda": "Ninguém te conta, mas tirar o visto americano são DUAS visitas, em dias diferentes.\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista com o oficial, que pode ser noutra data e até noutra cidade. Pra quem e autônomo, isso é dois dias de trabalho parado, não um. Em muitos postos dá pra marcar os dois próximos, numa viagem só.\n\nComenta CASV que eu te mando o passo a passo pra otimizar. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #casv #vistoeua #b1b2 #dicasdevisto",
   "imagem": "acervo/destinos/praia-por-do-sol.jpg"
 }

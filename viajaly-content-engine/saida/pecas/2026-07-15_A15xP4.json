@@ -2,7 +2,7 @@
   "combo": "A15xP4",
   "data": "2026-07-15",
   "conta": "@viajaly",
-  "pilar": "antidoto",
+  "pilar": "antídoto",
   "angulo_id": "A15",
   "persona_id": "P4",
   "formato": "carrossel",
@@ -13,9 +13,9 @@
   "slides": [
     {
       "tipo": "capa_foto",
-      "kicker": "o formulario decide",
+      "kicker": "o formulário decide",
       "titulo": "7 campos do DS-160 derrubam mais que perfil ruim.",
-      "sub": "Voce tem ingresso da Copa. Nao perca o jogo por um dado torto.",
+      "sub": "Você tem ingresso da Copa. Não perca o jogo por um dado torto.",
       "destaques": [
         "7"
       ],
@@ -25,7 +25,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "O DS-160 e sua primeira entrevista",
-      "corpo": "O oficial le ele antes de te ver. Se o formulario ja te contradiz, voce entra em desvantagem.",
+      "corpo": "O oficial le ele antes de te ver. Se o formulário já te contradiz, você entra em desvantagem.",
       "destaques": [
         "contradiz,"
       ]
@@ -34,16 +34,16 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "Onde mais se erra",
-      "corpo": "Profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil. Sete campos.",
+      "corpo": "Profissão, endereço, viagens anteriores, redes sociais, quem paga, tempo de estadia e vínculo com o Brasil. Sete campos.",
       "destaques": [
         "Sete"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Nao e o seu perfil que reprova na maioria dos casos. E a incoerencia entre o que voce escreveu e o que voce fala.",
+      "texto": "Não é o seu perfil que reprova na maioria dos casos. E a incoerência entre o que você escreveu e o que você fala.",
       "destaques": [
-        "incoerencia"
+        "incoerência"
       ]
     },
     {
@@ -59,7 +59,7 @@
       "tipo": "passo",
       "numero": "06",
       "titulo": "Revisar leva pouco",
-      "corpo": "Uma revisao dos sete campos criticos leva menos tempo que voce imagina. E evita voce perder o jogo por um dado torto.",
+      "corpo": "Uma revisão dos sete campos críticos leva menos tempo que você imagina. E evita você perder o jogo por um dado torto.",
       "destaques": [
         "sete"
       ]
@@ -74,6 +74,6 @@
       ]
     }
   ],
-  "legenda": "Sete campos do DS-160 derrubam mais gente que perfil ruim. E voce, com ingresso da Copa, nao pode perder o jogo por um dado torto.\n\nO oficial le o seu formulario antes de te ver. Se ele ja te contradiz, voce entra em desvantagem. Os que mais pegam: profissao, endereco, viagens anteriores, redes sociais, quem paga, tempo de estadia e vinculo com o Brasil.\n\nComenta DS160 que eu te mando a lista dos 7 campos pra revisar hoje. Ou toca no link da bio.\n\n#vistoamericano #ds160 #copadomundo #vistoeua #b1b2 #futebol #dicasdevisto",
+  "legenda": "Sete campos do DS-160 derrubam mais gente que perfil ruim. E você, com ingresso da Copa, não pode perder o jogo por um dado torto.\n\nO oficial le o seu formulário antes de te ver. Se ele já te contradiz, você entra em desvantagem. Os que mais pegam: profissão, endereço, viagens anteriores, redes sociais, quem paga, tempo de estadia e vínculo com o Brasil.\n\nComenta DS160 que eu te mando a lista dos 7 campos pra revisar hoje. Ou toca no link da bio.\n\n#vistoamericano #ds160 #copadomundo #vistoeua #b1b2 #futebol #dicasdevisto",
   "imagem": "acervo/destinos/praia-crianca.jpg"
 }

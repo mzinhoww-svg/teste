@@ -8,16 +8,16 @@
   "persona_id": "P1",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Orlando em 7 dias que nao cansa",
-  "persona": "Familia Orlando",
-  "dor": "medo de a viagem virar maratona e cansar as criancas",
+  "tese": "Orlando em 7 dias que não cansa",
+  "persona": "Família Orlando",
+  "dor": "medo de a viagem virar maratona e cansar as crianças",
   "imagem": "acervo/destinos/disney-main-street.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "orlando sem maratona",
-      "titulo": "Orlando em 7 dias que nao cansa a familia.",
-      "sub": "O segredo nao e ver mais. E ver melhor.",
+      "titulo": "Orlando em 7 dias que não cansa a família.",
+      "sub": "O segredo não é ver mais. E ver melhor.",
       "destaques": [
         "cansa"
       ],
@@ -27,7 +27,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "A regra do 3 por 1",
-      "corpo": "Tres dias de parque, um dia de folga. Piscina, outlet ou so descanso. A crianca recarrega e a viagem rende.",
+      "corpo": "Três dias de parque, um dia de folga. Piscina, outlet ou só descanso. A criança recarrega e a viagem rende.",
       "destaques": [
         "folga."
       ]
@@ -36,7 +36,7 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "Comece leve",
-      "corpo": "Nao abra a viagem no parque mais pesado. O corpo ainda ta no fuso. Dia 1 tranquilo evita colapso no dia 4.",
+      "corpo": "Não abra a viagem no parque mais pesado. O corpo ainda tá no fuso. Dia 1 tranquilo evita colapso no dia 4.",
       "destaques": [
         "leve"
       ]
@@ -45,14 +45,14 @@
       "tipo": "passo",
       "numero": "04",
       "titulo": "Reserve o que da",
-      "corpo": "Restaurante e atracao popular esgotam. O que da pra marcar antes, marque. Improviso com crianca cansa.",
+      "corpo": "Restaurante e atracao popular esgotam. O que dá pra marcar antes, marque. Improviso com criança cansa.",
       "destaques": [
         "antes,"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Ninguem lembra do sexto parque. Todo mundo lembra do dia que sobrou tempo.",
+      "texto": "Ninguém lembra do sexto parque. Todo mundo lembra do dia que sobrou tempo.",
       "destaques": [
         "tempo."
       ]
@@ -61,7 +61,7 @@
       "tipo": "passo",
       "numero": "06",
       "titulo": "O primeiro item do roteiro",
-      "corpo": "Antes de reservar hotel e parque, o item zero e o visto da familia aprovado e no prazo.",
+      "corpo": "Antes de reservar hotel e parque, o item zero e o visto da família aprovado e no prazo.",
       "destaques": [
         "zero"
       ]
@@ -76,5 +76,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Orlando em 7 dias que nao cansa a familia: o segredo nao e ver mais, e ver melhor.\n\nUse a regra do 3 por 1: tres dias de parque, um de folga. Comece leve, porque o corpo ainda ta no fuso, e o dia 1 pesado vira colapso no dia 4. Reserve com antecedencia o que da, porque improviso com crianca cansa. Ninguem lembra do sexto parque, todo mundo lembra do dia que sobrou tempo.\n\nE o item zero do roteiro, antes de hotel e parque, e o visto da familia no prazo.\n\nComenta ORLANDO7 que eu te mando o roteiro. Ou toca no link da bio.\n\n#orlando #disney #viagememfamilia #eua #vistoamericano #vistoeua #feriascomcriancas"
+  "legenda": "Orlando em 7 dias que não cansa a família: o segredo não é ver mais, e ver melhor.\n\nUse a regra do 3 por 1: três dias de parque, um de folga. Comece leve, porque o corpo ainda tá no fuso, e o dia 1 pesado vira colapso no dia 4. Reserve com antecedencia o que da, porque improviso com criança cansa. Ninguém lembra do sexto parque, todo mundo lembra do dia que sobrou tempo.\n\nE o item zero do roteiro, antes de hotel e parque, e o visto da família no prazo.\n\nComenta ORLANDO7 que eu te mando o roteiro. Ou toca no link da bio.\n\n#orlando #disney #viagememfamilia #eua #vistoamericano #vistoeua #feriascomcriancas"
 }

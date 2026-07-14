@@ -8,26 +8,26 @@
   "formato": "carrossel",
   "kit": "corporate",
   "tese": "Quanto custa DE VERDADE (taxa + consultoria + passaporte)",
-  "persona": "Renovacao vencida",
-  "dor": "achava que era automatico e nao e",
+  "persona": "Renovação vencida",
+  "dor": "achava que era automatico e não é",
   "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
   "fonte_verificada_em": "2026-07-12",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "a conta real",
-      "titulo": "Quanto custa o visto de verdade em 2026? Nao e o que voce lembra.",
+      "titulo": "Quanto custa o visto de verdade em 2026? Não é o que você lembra.",
       "sub": "Tem uma taxa nova que a maioria descobre tarde.",
       "destaques": [
         "verdade"
       ],
-      "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
+      "imagem": "acervo/destinos/miami-crianca.jpg"
     },
     {
       "tipo": "passo",
       "numero": "02",
       "titulo": "A taxa base",
-      "corpo": "MRV de 185 dolares por pessoa. Essa e a que todo mundo conhece. E ela nao volta se for negado.",
+      "corpo": "MRV de 185 dólares por pessoa. Essa e a que todo mundo conhece. E ela não volta se for negado.",
       "destaques": [
         "185"
       ]
@@ -36,7 +36,7 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "A taxa nova de 2026",
-      "corpo": "Entrou uma taxa de integridade de 250 dolares, cobrada quando o visto e emitido. Confere no travel.state.gov antes de fechar conta.",
+      "corpo": "Entrou uma taxa de integridade de 250 dólares, cobrada quando o visto e emitido. Confere no travel.state.gov antes de fechar conta.",
       "destaques": [
         "250"
       ]
@@ -45,23 +45,23 @@
       "tipo": "passo",
       "numero": "04",
       "titulo": "A pressa e opcional",
-      "corpo": "Aquele valor de 750 dolares pra antecipar e opcional, so em postos selecionados. Voce nao precisa dele pra renovar.",
+      "corpo": "Aquele valor de 750 dólares pra antecipar e opcional, só em postos selecionados. Você não precisa dele pra renovar.",
       "destaques": [
         "opcional,"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Renovacao nao e automatica quando o visto venceu ha mais de 12 meses. Voce cai na fila de entrevista como todo mundo.",
+      "texto": "Renovação não é automatica quando o visto venceu ha mais de 12 meses. Você cai na fila de entrevista como todo mundo.",
       "destaques": [
-        "nao"
+        "não"
       ]
     },
     {
       "tipo": "passo",
       "numero": "06",
       "titulo": "A conta honesta",
-      "corpo": "Taxa base, taxa nova, passaporte se preciso, e a consultoria se voce quer preparo. Somado e transparente, sem surpresa no fim.",
+      "corpo": "Taxa base, taxa nova, passaporte se preciso, e a consultoria se você quer preparo. Somado e transparente, sem surpresa no fim.",
       "destaques": [
         "transparente,"
       ]
@@ -76,6 +76,6 @@
       ]
     }
   ],
-  "legenda": "Quanto custa renovar o visto americano DE VERDADE em 2026? Nao e so a taxa que voce lembra.\n\nAlem da MRV de 185 dolares, entrou uma taxa de integridade de 250 dolares cobrada na emissao (confere no travel.state.gov). E tem os 750 opcionais de quem quer furar fila, que voce nao precisa. Atencao: se o visto venceu ha mais de 12 meses, a renovacao nao e automatica.\n\nComenta CONTA que eu te mando o custo real fechado pro seu caso. Ou toca no link da bio.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #taxavisto #consuladoamericano",
-  "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
+  "legenda": "Quanto custa renovar o visto americano DE VERDADE em 2026? Não é só a taxa que você lembra.\n\nAlém da MRV de 185 dólares, entrou uma taxa de integridade de 250 dólares cobrada na emissão (confere no travel.state.gov). E tem os 750 opcionais de quem quer furar fila, que você não precisa. Atenção: se o visto venceu ha mais de 12 meses, a renovação não é automatica.\n\nComenta CONTA que eu te mando o custo real fechado pro seu caso. Ou toca no link da bio.\n\n#vistoamericano #renovacaovisto #vistoeua #b1b2 #taxavisto #consuladoamericano",
+  "imagem": "acervo/destinos/miami-crianca.jpg"
 }

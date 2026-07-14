@@ -10,14 +10,14 @@
   "kit": "corporate",
   "tese": "Orlando a dois, antes dos filhos",
   "persona": "Casal primeira viagem",
-  "dor": "acha que Orlando so vale com filhos",
+  "dor": "acha que Orlando só vale com filhos",
   "imagem": "acervo/destinos/disney-main-street.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "orlando sem filhos",
-      "titulo": "Orlando a dois, antes dos filhos, e uma viagem que ninguem te vende.",
-      "sub": "A Disney adulta existe e e romantica.",
+      "titulo": "Orlando a dois, antes dos filhos, e uma viagem que ninguém te vende.",
+      "sub": "A Disney adulta existe e e romântica.",
       "destaques": [
         "adulta"
       ],
@@ -27,7 +27,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "Parque tem lado adulto",
-      "corpo": "Gastronomia, bares tematicos, shows noturnos. A dois, da pra viver a Disney de outro jeito.",
+      "corpo": "Gastronomia, bares tematicos, shows noturnos. A dois, dá pra viver a Disney de outro jeito.",
       "destaques": [
         "adulto"
       ]
@@ -36,7 +36,7 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "Ritmo de casal",
-      "corpo": "Sem correr atras de personagem, voces escolhem o que querem. Menos correria, mais experiencia.",
+      "corpo": "Sem correr atrás de personagem, vocês escolhem o que querem. Menos correria, mais experiência.",
       "destaques": [
         "escolhem"
       ]
@@ -44,15 +44,15 @@
     {
       "tipo": "passo",
       "numero": "04",
-      "titulo": "Alem dos parques",
-      "corpo": "Outlets, jantar bom e um dia em Miami ou na costa. Orlando a dois abre espaco pra isso.",
+      "titulo": "Além dos parques",
+      "corpo": "Outlets, jantar bom e um dia em Miami ou na costa. Orlando a dois abre espaço pra isso.",
       "destaques": [
-        "espaco"
+        "espaço"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Orlando nao e so das criancas. A dois, ela vira uma viagem completamente diferente.",
+      "texto": "Orlando não é só das crianças. A dois, ela vira uma viagem completamente diferente.",
       "destaques": [
         "diferente."
       ]
@@ -61,7 +61,7 @@
       "tipo": "passo",
       "numero": "06",
       "titulo": "O que vem antes",
-      "corpo": "A viagem dos dois comeca no visto do casal aprovado e no prazo.",
+      "corpo": "A viagem dos dois começa no visto do casal aprovado e no prazo.",
       "destaques": [
         "antes"
       ]
@@ -76,5 +76,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Orlando a dois, antes dos filhos, e uma viagem que ninguem te vende. A Disney adulta existe e e romantica.\n\nParque tem lado adulto: gastronomia, bares tematicos, shows noturnos. Sem correr atras de personagem, voces escolhem o que querem, menos correria e mais experiencia. E da pra emendar outlets, jantar bom e um dia na costa. Orlando a dois vira uma viagem completamente diferente.\n\nE comeca no visto do casal no prazo.\n\nComenta ORLANDODOIS que eu te mando o roteiro. Ou toca no link da bio.\n\n#orlando #disney #viagemacasal #luademel #eua #vistoamericano #vistoeua"
+  "legenda": "Orlando a dois, antes dos filhos, e uma viagem que ninguém te vende. A Disney adulta existe e e romântica.\n\nParque tem lado adulto: gastronomia, bares tematicos, shows noturnos. Sem correr atrás de personagem, vocês escolhem o que querem, menos correria e mais experiência. E dá pra emendar outlets, jantar bom e um dia na costa. Orlando a dois vira uma viagem completamente diferente.\n\nE começa no visto do casal no prazo.\n\nComenta ORLANDODOIS que eu te mando o roteiro. Ou toca no link da bio.\n\n#orlando #disney #viagemacasal #luademel #eua #vistoamericano #vistoeua"
 }

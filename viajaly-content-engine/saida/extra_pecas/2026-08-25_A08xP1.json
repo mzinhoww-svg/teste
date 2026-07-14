@@ -7,28 +7,28 @@
   "persona_id": "P1",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Quanto custa o visto da familia de verdade",
-  "persona": "Familia Orlando",
-  "dor": "so calcula a taxa e leva susto no total",
-  "imagem": "acervo/destinos/ny-skyline-crianca.jpg",
+  "tese": "Quanto custa o visto da família de verdade",
+  "persona": "Família Orlando",
+  "dor": "só calcula a taxa e leva susto no total",
+  "imagem": "acervo/destinos/miami-crianca.jpg",
   "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
   "fonte_verificada_em": "2026-07-12",
   "slides": [
     {
       "tipo": "capa_foto",
-      "kicker": "a conta da familia",
-      "titulo": "Quanto custa o visto de uma familia de quatro de verdade.",
-      "sub": "Nao e so a taxa que voce multiplicou de cabeca.",
+      "kicker": "a conta da família",
+      "titulo": "Quanto custa o visto de uma família de quatro de verdade.",
+      "sub": "Não é só a taxa que você multiplicou de cabeça.",
       "destaques": [
         "verdade."
       ],
-      "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
+      "imagem": "acervo/destinos/miami-crianca.jpg"
     },
     {
       "tipo": "passo",
       "numero": "02",
       "titulo": "A taxa base",
-      "corpo": "MRV de 185 dolares por pessoa. Numa familia de quatro, ja sao quatro taxas que nao voltam.",
+      "corpo": "MRV de 185 dólares por pessoa. Numa família de quatro, já são quatro taxas que não voltam.",
       "destaques": [
         "quatro"
       ]
@@ -37,7 +37,7 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "A taxa nova de 2026",
-      "corpo": "Entrou uma taxa de integridade de 250 dolares cobrada na emissao. Confere no travel.state.gov.",
+      "corpo": "Entrou uma taxa de integridade de 250 dólares cobrada na emissão. Confere no travel.state.gov.",
       "destaques": [
         "250"
       ]
@@ -45,15 +45,15 @@
     {
       "tipo": "passo",
       "numero": "04",
-      "titulo": "O que e opcional",
-      "corpo": "Os 750 pra antecipar sao opcionais. Familia planejada com tempo nao precisa disso.",
+      "titulo": "O que é opcional",
+      "corpo": "Os 750 pra antecipar são opcionais. Família planejada com tempo não precisa disso.",
       "destaques": [
         "opcionais."
       ]
     },
     {
       "tipo": "insight",
-      "texto": "A conta da familia assusta menos quando voce ve ela inteira antes, nao no fim.",
+      "texto": "A conta da família assusta menos quando você ve ela inteira antes, não no fim.",
       "destaques": [
         "antes,"
       ]
@@ -69,7 +69,7 @@
     },
     {
       "tipo": "cta",
-      "titulo": "Comenta CONTAFAMILIA que eu te mando o custo fechado pra sua familia. Ou link na bio.",
+      "titulo": "Comenta CONTAFAMILIA que eu te mando o custo fechado pra sua família. Ou link na bio.",
       "acao": "Comenta CONTAFAMILIA",
       "destaques": [
         "CONTAFAMILIA"
@@ -77,5 +77,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Quanto custa o visto de uma familia de quatro de verdade? Nao e so a taxa que voce multiplicou de cabeca.\n\nA MRV e 185 dolares por pessoa, quatro taxas que nao voltam. Entrou a taxa de integridade de 250 dolares na emissao (confere no travel.state.gov). E os 750 pra antecipar sao opcionais, familia com tempo nao precisa. A conta assusta menos quando voce ve ela inteira antes.\n\nComenta CONTAFAMILIA que eu te mando o custo fechado. Ou toca no link da bio.\n\n#vistoamericano #viagememfamilia #vistoeua #b1b2 #taxavisto #orlando #consuladoamericano"
+  "legenda": "Quanto custa o visto de uma família de quatro de verdade? Não é só a taxa que você multiplicou de cabeça.\n\nA MRV e 185 dólares por pessoa, quatro taxas que não voltam. Entrou a taxa de integridade de 250 dólares na emissão (confere no travel.state.gov). E os 750 pra antecipar são opcionais, família com tempo não precisa. A conta assusta menos quando você ve ela inteira antes.\n\nComenta CONTAFAMILIA que eu te mando o custo fechado. Ou toca no link da bio.\n\n#vistoamericano #viagememfamilia #vistoeua #b1b2 #taxavisto #orlando #consuladoamericano"
 }

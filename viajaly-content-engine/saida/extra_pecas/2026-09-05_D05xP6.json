@@ -10,14 +10,14 @@
   "kit": "corporate",
   "tese": "Neve em grupo de amigos",
   "persona": "Grupo de amigos",
-  "dor": "uns esquiam, outros nao, e o grupo se divide",
+  "dor": "uns esquiam, outros não, e o grupo se divide",
   "imagem": "acervo/destinos/montanha-neve.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "neve em grupo",
       "titulo": "Viagem de neve com amigos: nem todo mundo precisa esquiar.",
-      "sub": "O erro e achar que a montanha so serve pra pista.",
+      "sub": "O erro e achar que a montanha só serve pra pista.",
       "destaques": [
         "nem"
       ],
@@ -27,7 +27,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "Tem o que fazer sem esqui",
-      "corpo": "Tubing, trenó, snowbike e a vila. Quem nao esquia curte o dia inteiro do mesmo jeito.",
+      "corpo": "Tubing, trenó, snowbike e a vila. Quem não esquia curte o dia inteiro do mesmo jeito.",
       "destaques": [
         "sem"
       ]
@@ -35,8 +35,8 @@
     {
       "tipo": "passo",
       "numero": "03",
-      "titulo": "Aluguem tudo la",
-      "corpo": "Roupa e equipamento se alugam na estacao. Ninguem precisa comprar casaco caro pra uma viagem.",
+      "titulo": "Aluguem tudo lá",
+      "corpo": "Roupa e equipamento se alugam na estação. Ninguém precisa comprar casaco caro pra uma viagem.",
       "destaques": [
         "alugam"
       ]
@@ -52,7 +52,7 @@
     },
     {
       "tipo": "insight",
-      "texto": "Neve em grupo nao e sobre esquiar bem. E sobre estar junto no frio.",
+      "texto": "Neve em grupo não é sobre esquiar bem. E sobre estar junto no frio.",
       "destaques": [
         "junto"
       ]
@@ -61,7 +61,7 @@
       "tipo": "passo",
       "numero": "06",
       "titulo": "A parte que tem prazo",
-      "corpo": "A neve tem epoca e o visto tem o tempo dele. Os vistos do grupo vem primeiro.",
+      "corpo": "A neve tem época e o visto tem o tempo dele. Os vistos do grupo vem primeiro.",
       "destaques": [
         "primeiro."
       ]
@@ -76,5 +76,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Viagem de neve com amigos: nem todo mundo precisa esquiar. O erro e achar que a montanha so serve pra pista.\n\nTem tubing, trenó, snowbike e a vila pra quem nao esquia. Aluguem roupa e equipamento na estacao, ninguem precisa comprar casaco caro. E o fim de dia e do grupo: chale, fondue, lareira. Neve em grupo nao e sobre esquiar bem, e sobre estar junto no frio.\n\nA neve tem epoca e o visto tem o tempo dele. Os vistos vem primeiro.\n\nComenta NEVEGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#neve #viagemcomamigos #grupodeamigos #inverno #eua #vistoamericano #vistoeua"
+  "legenda": "Viagem de neve com amigos: nem todo mundo precisa esquiar. O erro e achar que a montanha só serve pra pista.\n\nTem tubing, trenó, snowbike e a vila pra quem não esquia. Aluguem roupa e equipamento na estação, ninguém precisa comprar casaco caro. E o fim de dia e do grupo: chale, fondue, lareira. Neve em grupo não é sobre esquiar bem, e sobre estar junto no frio.\n\nA neve tem época e o visto tem o tempo dele. Os vistos vem primeiro.\n\nComenta NEVEGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#neve #viagemcomamigos #grupodeamigos #inverno #eua #vistoamericano #vistoeua"
 }

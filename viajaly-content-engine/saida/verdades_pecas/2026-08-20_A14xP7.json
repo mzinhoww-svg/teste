@@ -2,21 +2,21 @@
   "combo": "A14xP7",
   "data": "2026-08-20",
   "conta": "@viajaly",
-  "pilar": "antidoto",
+  "pilar": "antídoto",
   "angulo_id": "A14",
   "persona_id": "P7",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "A unica pergunta e: voce volta? (autonomo)",
-  "persona": "Autonomo / MEI",
-  "dor": "acha que a pergunta e sobre renda e vinculo formal",
+  "tese": "A única pergunta e: você volta? (autônomo)",
+  "persona": "Autônomo / MEI",
+  "dor": "acha que a pergunta e sobre renda e vínculo formal",
   "imagem": "acervo/familia/familia-selfie2.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "o que ele quer saber",
-      "titulo": "O consulo nao quer saber quanto o autonomo ganha. Quer saber se voce volta.",
-      "sub": "Voce ta se preparando pra pergunta errada.",
+      "titulo": "O cônsul não quer saber quanto o autônomo ganha. Quer saber se você volta.",
+      "sub": "Você tá se preparando pra pergunta errada.",
       "destaques": [
         "volta."
       ],
@@ -26,7 +26,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "A pergunta real",
-      "corpo": "A lei presume que voce quer ficar. Seu papel e mostrar que a sua vida te traz de volta pro Brasil.",
+      "corpo": "A lei presume que você quer ficar. Seu papel e mostrar que a sua vida te traz de volta pro Brasil.",
       "destaques": [
         "volta"
       ]
@@ -34,15 +34,15 @@
     {
       "tipo": "passo",
       "numero": "03",
-      "titulo": "Por que o autonomo trava",
-      "corpo": "Voce foca em provar renda e esquece o essencial: mostrar os lacos que te fazem voltar.",
+      "titulo": "Por que o autônomo trava",
+      "corpo": "Você foca em provar renda e esquece o essencial: mostrar os lacos que te fazem voltar.",
       "destaques": [
         "lacos"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Vinculo nao e carteira assinada. E uma vida que continua aqui te aguardando.",
+      "texto": "Vínculo não é carteira assinada. E uma vida que continua aqui te aguardando.",
       "destaques": [
         "vida"
       ]
@@ -51,7 +51,7 @@
       "tipo": "passo",
       "numero": "05",
       "titulo": "O que responde a pergunta",
-      "corpo": "Clientes, familia, casa, projetos em andamento. Coisas que so fazem sentido se voce voltar.",
+      "corpo": "Clientes, família, casa, projetos em andamento. Coisas que só fazem sentido se você voltar.",
       "destaques": [
         "voltar."
       ]
@@ -60,7 +60,7 @@
       "tipo": "passo",
       "numero": "06",
       "titulo": "Como dizer isso",
-      "corpo": "Com naturalidade, em poucas frases. Autonomo preparado responde melhor que assalariado despreparado.",
+      "corpo": "Com naturalidade, em poucas frases. Autônomo preparado responde melhor que assalariado despreparado.",
       "destaques": [
         "preparado"
       ]
@@ -75,5 +75,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "O consulo nao quer saber quanto o autonomo ganha. Quer saber uma coisa so: voce volta?\n\nA lei presume que voce quer ficar, e seu papel e mostrar que a sua vida te traz de volta. O autonomo trava porque foca em provar renda e esquece os lacos: clientes, familia, casa, projetos. Vinculo nao e carteira assinada, e uma vida que continua aqui te aguardando. Autonomo preparado responde melhor que assalariado despreparado.\n\nComenta VOLTAMEI que eu te ajudo a montar a sua resposta. Ou toca no link da bio.\n\n#autonomo #mei #vistoamericano #vistoeua #b1b2 #entrevistavisto #empreendedor"
+  "legenda": "O cônsul não quer saber quanto o autônomo ganha. Quer saber uma coisa só: você volta?\n\nA lei presume que você quer ficar, e seu papel e mostrar que a sua vida te traz de volta. O autônomo trava porque foca em provar renda e esquece os lacos: clientes, família, casa, projetos. Vínculo não é carteira assinada, e uma vida que continua aqui te aguardando. Autônomo preparado responde melhor que assalariado despreparado.\n\nComenta VOLTAMEI que eu te ajudo a montar a sua resposta. Ou toca no link da bio.\n\n#autonomo #mei #vistoamericano #vistoeua #b1b2 #entrevistavisto #empreendedor"
 }

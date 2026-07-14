@@ -7,42 +7,42 @@
   "persona_id": "P3",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "A foto e a parte facil; o carimbo foi a dificil",
+  "tese": "A foto dos sonhos e a parte fácil; o carimbo foi a difícil",
   "persona": "Negado antes",
-  "dor": "vergonha + medo de repetir o erro + ja perdeu US$185",
+  "dor": "vergonha + medo de repetir o erro + já perdeu US$185",
   "imagem": "acervo/familia/mae-crianca-selfie.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
-      "kicker": "pra quem ja ouviu um nao",
-      "titulo": "A foto na praia e a parte facil. O carimbo foi a dificil.",
-      "sub": "E sim, quando ja veio um nao, da pra virar o jogo.",
+      "kicker": "pra quem já ouviu um não",
+      "titulo": "A foto dos sonhos e a parte fácil. O carimbo foi a difícil.",
+      "sub": "E sim, quando já veio um não, dá pra virar o jogo.",
       "destaques": [
-        "facil."
+        "fácil."
       ],
       "imagem": "acervo/familia/mae-crianca-selfie.jpg"
     },
     {
       "tipo": "passo",
       "numero": "02",
-      "titulo": "Onde voce ta",
-      "corpo": "Voce ja ouviu um nao. A vergonha, o medo de repetir tudo de novo. Eu sei como pesa.",
+      "titulo": "Onde você tá",
+      "corpo": "Você já ouviu um não. A vergonha, o medo de repetir tudo de novo. Eu sei como pesa.",
       "destaques": [
-        "nao."
+        "não."
       ]
     },
     {
       "tipo": "passo",
       "numero": "03",
       "titulo": "O que muda um segundo pedido",
-      "corpo": "Nao e sorte. E entender o que te derrubou e corrigir com honestidade, sem inventar historia.",
+      "corpo": "Não é sorte. E entender o que te derrubou e corrigir com honestidade, sem inventar história.",
       "destaques": [
         "corrigir"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Ser negado nao te marca pra sempre. Repetir o erro, sim.",
+      "texto": "Ser negado não te marca pra sempre. Repetir o erro, sim.",
       "destaques": [
         "erro,"
       ]
@@ -51,7 +51,7 @@
       "tipo": "passo",
       "numero": "05",
       "titulo": "A cena que vem depois",
-      "corpo": "Essa foto na praia, na neve, no parque. Ela nao e sonho distante. E consequencia de preparo.",
+      "corpo": "Aquela foto que você sonha, no destino que escolher. Ela não é sonho distante. E consequência de preparo.",
       "destaques": [
         "preparo."
       ]
@@ -59,15 +59,15 @@
     {
       "tipo": "passo",
       "numero": "06",
-      "titulo": "O que eu nao prometo",
-      "corpo": "Eu nao garanto seu visto. Ninguem garante. Mas te preparo pra chegar sem repetir o erro que ja te custou caro.",
+      "titulo": "O que eu não prometo",
+      "corpo": "Eu não garanto seu visto. Ninguém garante. Mas te preparo pra chegar sem repetir o erro que já te custou caro.",
       "destaques": [
-        "Ninguem"
+        "Ninguém"
       ]
     },
     {
       "tipo": "cta",
-      "titulo": "Comenta RECOMECO que eu te falo o proximo passo. Ou link na bio.",
+      "titulo": "Comenta RECOMECO que eu te falo o próximo passo. Ou link na bio.",
       "acao": "Comenta RECOMECO",
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
       "destaques": [
@@ -75,5 +75,5 @@
       ]
     }
   ],
-  "legenda": "A foto na praia com a familia e a parte facil. O carimbo no passaporte foi a dificil. E sim, quando ja veio um nao, da pra virar o jogo.\n\nSe voce ja ouviu um nao, conhece a vergonha e o medo de repetir. O que muda um segundo pedido nao e sorte: e entender o que te derrubou e corrigir com honestidade. Eu nao garanto seu visto. Ninguem garante. Mas te preparo pra nao repetir o erro que ja te custou caro.\n\nComenta RECOMECO que eu te falo o proximo passo. Ou toca no link da bio.\n\n#vistonegado #vistoamericano #segundatentativa #vistoeua #b1b2 #naodesista #eua"
+  "legenda": "A foto dos sonhos com a família e a parte fácil. O carimbo no passaporte foi a difícil. E sim, quando já veio um não, dá pra virar o jogo.\n\nSe você já ouviu um não, conhece a vergonha e o medo de repetir. O que muda um segundo pedido não é sorte: e entender o que te derrubou e corrigir com honestidade. Eu não garanto seu visto. Ninguém garante. Mas te preparo pra não repetir o erro que já te custou caro.\n\nComenta RECOMECO que eu te falo o próximo passo. Ou toca no link da bio.\n\n#vistonegado #vistoamericano #segundatentativa #vistoeua #b1b2 #naodesista #eua"
 }

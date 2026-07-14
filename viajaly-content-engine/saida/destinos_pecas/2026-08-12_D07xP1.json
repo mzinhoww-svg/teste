@@ -8,15 +8,15 @@
   "persona_id": "P1",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Praia em familia nos EUA",
-  "persona": "Familia Orlando",
+  "tese": "Praia em família nos EUA",
+  "persona": "Família Orlando",
   "dor": "quer intercalar parque com praia sem perder o dia",
   "imagem": "acervo/destinos/praia-crianca-areia.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "praia depois do parque",
-      "titulo": "Um dia de praia salva a semana de parque com criancas.",
+      "titulo": "Um dia de praia salva a semana de parque com crianças.",
       "sub": "O respiro que evita o colapso do quarto dia.",
       "destaques": [
         "salva"
@@ -27,7 +27,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "Encaixe no meio",
-      "corpo": "Dois ou tres dias de parque, um de praia. A crianca recarrega e a semana toda rende melhor.",
+      "corpo": "Dois ou três dias de parque, um de praia. A criança recarrega e a semana toda rende melhor.",
       "destaques": [
         "recarrega"
       ]
@@ -35,8 +35,8 @@
     {
       "tipo": "passo",
       "numero": "03",
-      "titulo": "Praia calma com crianca",
-      "corpo": "Prefira agua mansa e salva-vidas. Onda forte com crianca pequena vira estresse, nao descanso.",
+      "titulo": "Praia calma com criança",
+      "corpo": "Prefira água mansa e salva-vidas. Onda forte com criança pequena vira estresse, não descanso.",
       "destaques": [
         "mansa"
       ]
@@ -44,15 +44,15 @@
     {
       "tipo": "passo",
       "numero": "04",
-      "titulo": "Leve o basico",
-      "corpo": "Guarda-sol, agua e lanche. Na praia americana nao tem o vendedor que passa oferecendo.",
+      "titulo": "Leve o básico",
+      "corpo": "Guarda-sol, água e lanche. Na praia americana não tem o vendedor que passa oferecendo.",
       "destaques": [
-        "basico"
+        "básico"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "A viagem em familia nao morre de tedio. Morre de cansaco. Praia e remedio.",
+      "texto": "A viagem em família não morre de tedio. Morre de cansaco. Praia e remedio.",
       "destaques": [
         "remedio."
       ]
@@ -61,7 +61,7 @@
       "tipo": "passo",
       "numero": "06",
       "titulo": "Antes do roteiro todo",
-      "corpo": "Parque, praia, tudo depende de uma coisa: o visto da familia aprovado e no prazo.",
+      "corpo": "Parque, praia, tudo depende de uma coisa: o visto da família aprovado e no prazo.",
       "destaques": [
         "tudo"
       ]
@@ -76,5 +76,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Um dia de praia salva a semana de parque com criancas. E o respiro que evita o colapso do quarto dia.\n\nEncaixe dois ou tres dias de parque e um de praia, que a crianca recarrega. Prefira agua mansa com salva-vidas, porque onda forte com crianca pequena vira estresse. E leve guarda-sol, agua e lanche, porque nao tem o vendedor de sempre. Viagem em familia nao morre de tedio, morre de cansaco.\n\nE parque e praia dependem do visto da familia no prazo.\n\nComenta PRAIAFAMILIA que eu te mando o roteiro. Ou toca no link da bio.\n\n#praia #orlando #viagememfamilia #eua #vistoamericano #vistoeua #feriascomcriancas"
+  "legenda": "Um dia de praia salva a semana de parque com crianças. E o respiro que evita o colapso do quarto dia.\n\nEncaixe dois ou três dias de parque e um de praia, que a criança recarrega. Prefira água mansa com salva-vidas, porque onda forte com criança pequena vira estresse. E leve guarda-sol, água e lanche, porque não tem o vendedor de sempre. Viagem em família não morre de tedio, morre de cansaco.\n\nE parque e praia dependem do visto da família no prazo.\n\nComenta PRAIAFAMILIA que eu te mando o roteiro. Ou toca no link da bio.\n\n#praia #orlando #viagememfamilia #eua #vistoamericano #vistoeua #feriascomcriancas"
 }

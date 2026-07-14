@@ -2,13 +2,13 @@
   "combo": "A02xP7",
   "data": "2026-08-31",
   "conta": "@leticia",
-  "pilar": "denuncia",
+  "pilar": "denúncia",
   "angulo_id": "A02",
   "persona_id": "P7",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Bot de antecipacao bloqueia sua conta",
-  "persona": "Autonomo / MEI",
+  "tese": "Bot de antecipação bloqueia sua conta",
+  "persona": "Autônomo / MEI",
   "dor": "tenta atalho porque tem pressa e pouco tempo",
   "imagem": "acervo/destinos/universal-globo.jpg",
   "slides": [
@@ -34,15 +34,15 @@
     {
       "tipo": "passo",
       "numero": "03",
-      "titulo": "O preco de verdade",
-      "corpo": "Conta bloqueada, processo travado e voce sem entrevista. O atalho custa a viagem inteira.",
+      "titulo": "O preço de verdade",
+      "corpo": "Conta bloqueada, processo travado e você sem entrevista. O atalho custa a viagem inteira.",
       "destaques": [
         "bloqueada,"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Autonomo vive de resolver rapido. Mas no visto, atalho automatico e tiro no proprio pe.",
+      "texto": "Autônomo vive de resolver rápido. Mas no visto, atalho automatico e tiro no próprio pé.",
       "destaques": [
         "atalho"
       ]
@@ -50,8 +50,8 @@
     {
       "tipo": "passo",
       "numero": "05",
-      "titulo": "O jeito legitimo",
-      "corpo": "Antecipar tem caminho oficial: o pedido de emergencia, com motivo e prova. Sem robo, sem risco.",
+      "titulo": "O jeito legítimo",
+      "corpo": "Antecipar tem caminho oficial: o pedido de emergência, com motivo e prova. Sem robo, sem risco.",
       "destaques": [
         "oficial:"
       ]
@@ -59,15 +59,15 @@
     {
       "tipo": "passo",
       "numero": "06",
-      "titulo": "Pressa nao vale a conta",
-      "corpo": "Ganhar duas semanas nao paga o risco de perder a conta e a viagem. Faca pelo caminho certo.",
+      "titulo": "Pressa não vale a conta",
+      "corpo": "Ganhar duas semanas não paga o risco de perder a conta e a viagem. Faça pelo caminho certo.",
       "destaques": [
         "certo."
       ]
     },
     {
       "tipo": "cta",
-      "titulo": "Comenta ROBO que eu te mostro o jeito legitimo de antecipar. Ou link na bio.",
+      "titulo": "Comenta ROBO que eu te mostro o jeito legítimo de antecipar. Ou link na bio.",
       "acao": "Comenta ROBO",
       "destaques": [
         "ROBO"
@@ -75,5 +75,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Tem gente vendendo robo pra antecipar a entrevista do visto. Isso bloqueia a sua conta.\n\nO robo fica tentando remarcar sua data automaticamente, e o sistema do consulado detecta. O resultado: conta bloqueada, processo travado e voce sem entrevista. O atalho do apressado custa a viagem inteira. Existe caminho legitimo: o pedido de emergencia, com motivo e prova.\n\nComenta ROBO que eu te mostro o jeito legitimo. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #golpe #consuladoamericano"
+  "legenda": "Tem gente vendendo robo pra antecipar a entrevista do visto. Isso bloqueia a sua conta.\n\nO robo fica tentando remarcar sua data automaticamente, e o sistema do consulado detecta. O resultado: conta bloqueada, processo travado e você sem entrevista. O atalho do apressado custa a viagem inteira. Existe caminho legítimo: o pedido de emergência, com motivo e prova.\n\nComenta ROBO que eu te mostro o jeito legítimo. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #golpe #consuladoamericano"
 }

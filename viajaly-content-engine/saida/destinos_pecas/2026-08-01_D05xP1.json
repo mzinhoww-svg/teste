@@ -8,15 +8,15 @@
   "persona_id": "P1",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Primeira neve da familia nos EUA",
-  "persona": "Familia Orlando",
-  "dor": "nunca levou a familia pra neve e nao sabe como",
+  "tese": "Primeira neve da família nos EUA",
+  "persona": "Família Orlando",
+  "dor": "nunca levou a família pra neve e não sabe como",
   "imagem": "acervo/destinos/montanha-neve.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "primeira neve",
-      "titulo": "Levar a familia pra neve nos EUA: quando ir e o que ninguem avisa.",
+      "titulo": "Levar a família pra neve nos EUA: quando ir e o que ninguém avisa.",
       "sub": "A cena que a sua filha nunca esquece.",
       "destaques": [
         "neve"
@@ -27,25 +27,25 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "Quando tem neve",
-      "corpo": "Dezembro a marco na maioria das montanhas. Fora disso, voce viaja e nao ve neve nenhuma.",
+      "corpo": "Dezembro a março na maioria das montanhas. Fora disso, você viaja e não ve neve nenhuma.",
       "destaques": [
-        "marco"
+        "março"
       ]
     },
     {
       "tipo": "passo",
       "numero": "03",
       "titulo": "O que levar",
-      "corpo": "Luva impermeavel, segunda pele, bota. Roupa de frio de cidade nao segura crianca na neve.",
+      "corpo": "Luva impermeável, segunda pele, bota. Roupa de frio de cidade não segura criança na neve.",
       "destaques": [
-        "impermeavel,"
+        "impermeável,"
       ]
     },
     {
       "tipo": "passo",
       "numero": "04",
       "titulo": "Onde estrear",
-      "corpo": "Estacoes perto de cidade grande facilitam com crianca: aula, aluguel de equipamento, e hospital por perto.",
+      "corpo": "Estações perto de cidade grande facilitam com criança: aula, aluguel de equipamento, e hospital por perto.",
       "destaques": [
         "perto"
       ]
@@ -61,7 +61,7 @@
       "tipo": "passo",
       "numero": "06",
       "titulo": "A parte que tem prazo",
-      "corpo": "A neve tem epoca, e o visto tem o tempo dele pra sair. Por isso o visto vem primeiro, com folga.",
+      "corpo": "A neve tem época, e o visto tem o tempo dele pra sair. Por isso o visto vem primeiro, com folga.",
       "destaques": [
         "primeiro,"
       ]
@@ -76,5 +76,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Levar a familia pra neve nos EUA pela primeira vez: quando ir e o que ninguem avisa.\n\nNeve boa vai de dezembro a marco na maioria das montanhas. Leve luva impermeavel, segunda pele e bota, porque roupa de frio de cidade nao segura crianca na neve. E estreie numa estacao perto de cidade grande: aula, aluguel e hospital por perto. Ver seu filho tocar neve pela primeira vez paga a viagem inteira.\n\nA neve tem epoca e o visto tem o tempo dele. Por isso o visto vem primeiro.\n\nComenta NEVE que eu te mando o guia. Ou toca no link da bio.\n\n#neve #inverno #viagememfamilia #eua #vistoamericano #vistoeua #ski"
+  "legenda": "Levar a família pra neve nos EUA pela primeira vez: quando ir e o que ninguém avisa.\n\nNeve boa vai de dezembro a março na maioria das montanhas. Leve luva impermeável, segunda pele e bota, porque roupa de frio de cidade não segura criança na neve. E estreie numa estação perto de cidade grande: aula, aluguel e hospital por perto. Ver seu filho tocar neve pela primeira vez paga a viagem inteira.\n\nA neve tem época e o visto tem o tempo dele. Por isso o visto vem primeiro.\n\nComenta NEVE que eu te mando o guia. Ou toca no link da bio.\n\n#neve #inverno #viagememfamilia #eua #vistoamericano #vistoeua #ski"
 }

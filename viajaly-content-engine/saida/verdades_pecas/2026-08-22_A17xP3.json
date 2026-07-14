@@ -2,30 +2,30 @@
   "combo": "A17xP3",
   "data": "2026-08-22",
   "conta": "@leticia",
-  "pilar": "antidoto",
+  "pilar": "antídoto",
   "angulo_id": "A17",
   "persona_id": "P3",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Negado nao e o fim, mas tem uma coisa que voce NAO pode fazer",
+  "tese": "Negado não é o fim, mas tem uma coisa que você NÃO pode fazer",
   "persona": "Negado antes",
-  "dor": "vontade de reaplicar rapido do mesmo jeito",
+  "dor": "vontade de reaplicar rápido do mesmo jeito",
   "imagem": "acervo/familia/neve-mae-crianca.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
-      "kicker": "depois do nao",
-      "titulo": "Foi negado? Tem uma coisa que voce nao pode fazer de jeito nenhum agora.",
-      "sub": "E quase todo mundo faz, e leva outro nao.",
+      "kicker": "depois do não",
+      "titulo": "Foi negado? Tem uma coisa que você não pode fazer de jeito nenhum agora.",
+      "sub": "E quase todo mundo faz, e leva outro não.",
       "destaques": [
-        "nao"
+        "não"
       ],
       "imagem": "acervo/familia/neve-mae-crianca.jpg"
     },
     {
       "tipo": "passo",
       "numero": "02",
-      "titulo": "O erro que repete o nao",
+      "titulo": "O erro que repete o não",
       "corpo": "Reaplicar correndo, do mesmo jeito, sem mudar nada. Mesmo pedido, mesmo resultado, taxa perdida de novo.",
       "destaques": [
         "nada."
@@ -35,14 +35,14 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "O que fazer primeiro",
-      "corpo": "Entender o motivo provavel do nao antes de marcar de novo. Sem diagnostico, e so repetir o erro.",
+      "corpo": "Entender o motivo provavel do não antes de marcar de novo. Sem diagnóstico, é só repetir o erro.",
       "destaques": [
         "motivo"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Ser negado nao te marca pra sempre. Reaplicar identico, sim.",
+      "texto": "Ser negado não te marca pra sempre. Reaplicar identico, sim.",
       "destaques": [
         "identico,"
       ]
@@ -51,7 +51,7 @@
       "tipo": "passo",
       "numero": "05",
       "titulo": "O que muda de verdade",
-      "corpo": "Ajustar o DS-160, alinhar a historia, treinar a entrevista. Ai a segunda tentativa faz sentido.",
+      "corpo": "Ajustar o DS-160, alinhar a história, treinar a entrevista. Aí a segunda tentativa faz sentido.",
       "destaques": [
         "Ajustar"
       ]
@@ -60,9 +60,9 @@
       "tipo": "passo",
       "numero": "06",
       "titulo": "Sem pressa e sem promessa",
-      "corpo": "Ninguem garante a virada. Mas dar o segundo passo sem entender o primeiro e desperdicio na certa.",
+      "corpo": "Ninguém garante a virada. Mas dar o segundo passo sem entender o primeiro e desperdício na certa.",
       "destaques": [
-        "Ninguem"
+        "Ninguém"
       ]
     },
     {
@@ -75,5 +75,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Foi negado? Tem uma coisa que voce nao pode fazer de jeito nenhum agora, e quase todo mundo faz: reaplicar correndo, do mesmo jeito.\n\nMesmo pedido, mesmo resultado, e a taxa perdida de novo. O certo e entender o motivo provavel do nao antes de marcar. Ser negado nao te marca pra sempre, reaplicar identico, sim. Ajuste o DS-160, alinhe a historia, treine a entrevista. Ai a segunda tentativa faz sentido.\n\nComenta SEGUNDAVEZ que eu te falo o que checar antes de reaplicar. Ou toca no link da bio.\n\n#vistonegado #vistoamericano #segundatentativa #vistoeua #b1b2 #naodesista #consuladoamericano"
+  "legenda": "Foi negado? Tem uma coisa que você não pode fazer de jeito nenhum agora, e quase todo mundo faz: reaplicar correndo, do mesmo jeito.\n\nMesmo pedido, mesmo resultado, e a taxa perdida de novo. O certo e entender o motivo provavel do não antes de marcar. Ser negado não te marca pra sempre, reaplicar identico, sim. Ajuste o DS-160, alinhe a história, treine a entrevista. Aí a segunda tentativa faz sentido.\n\nComenta SEGUNDAVEZ que eu te falo o que checar antes de reaplicar. Ou toca no link da bio.\n\n#vistonegado #vistoamericano #segundatentativa #vistoeua #b1b2 #naodesista #consuladoamericano"
 }

@@ -8,18 +8,18 @@
   "persona_id": "P2",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "California a dois",
+  "tese": "Califórnia a dois",
   "persona": "Casal primeira viagem",
-  "dor": "acha que California so vale com filho na Disney",
+  "dor": "acha que Califórnia só vale com filho na Disney",
   "imagem": "acervo/destinos/disney-castelo-familia.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "costa oeste a dois",
-      "titulo": "California a dois: estrada, praia e vinho, nao so parque.",
+      "titulo": "Califórnia a dois: estrada, praia e vinho, não só parque.",
       "sub": "A viagem de casal que o Brasil ainda subestima.",
       "destaques": [
-        "nao"
+        "não"
       ],
       "imagem": "acervo/destinos/disney-castelo-familia.jpg"
     },
@@ -27,7 +27,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "A estrada e o passeio",
-      "corpo": "De Los Angeles a costa, a estrada ja e o programa. Parem onde quiserem, sem roteiro apertado.",
+      "corpo": "De Los Angeles a costa, a estrada já é o programa. Parem onde quiserem, sem roteiro apertado.",
       "destaques": [
         "estrada"
       ]
@@ -36,23 +36,23 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "Cidade e natureza",
-      "corpo": "LA num dia, praia no outro, um parque nacional no terceiro. A Costa Oeste muda de cenario rapido.",
+      "corpo": "LÁ num dia, praia no outro, um parque nacional no terceiro. A Costa Oeste muda de cenário rápido.",
       "destaques": [
-        "cenario"
+        "cenário"
       ]
     },
     {
       "tipo": "passo",
       "numero": "04",
       "titulo": "O toque a dois",
-      "corpo": "Uma vinicola, um por do sol no pier. Da pra fazer barato e ainda parecer lua de mel de revista.",
+      "corpo": "Uma vinicola, um por do sol no pier. Dá pra fazer barato e ainda parecer lua de mel de revista.",
       "destaques": [
         "barato"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Nem todo casal quer parque. Alguns querem estrada, e a California entende isso.",
+      "texto": "Nem todo casal quer parque. Alguns querem estrada, e a Califórnia entende isso.",
       "destaques": [
         "estrada,"
       ]
@@ -76,5 +76,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "California a dois e estrada, praia e vinho, nao so parque. E a viagem de casal que o Brasil ainda subestima.\n\nDe LA a costa, a estrada ja e o programa: parem onde quiserem. Cidade num dia, praia no outro, um parque nacional no terceiro. Uma vinicola, um por do sol no pier, e vira lua de mel de revista sem gastar como uma. Nem todo casal quer parque, alguns querem estrada.\n\nE o que abre a estrada e o visto dos dois no prazo.\n\nComenta CALIDOIS que eu te mando o roteiro. Ou toca no link da bio.\n\n#california #losangeles #viagemacasal #roadtrip #eua #vistoamericano #vistoeua"
+  "legenda": "Califórnia a dois e estrada, praia e vinho, não só parque. E a viagem de casal que o Brasil ainda subestima.\n\nDe LÁ a costa, a estrada já é o programa: parem onde quiserem. Cidade num dia, praia no outro, um parque nacional no terceiro. Uma vinicola, um por do sol no pier, e vira lua de mel de revista sem gastar como uma. Nem todo casal quer parque, alguns querem estrada.\n\nE o que abre a estrada e o visto dos dois no prazo.\n\nComenta CALIDOIS que eu te mando o roteiro. Ou toca no link da bio.\n\n#california #losangeles #viagemacasal #roadtrip #eua #vistoamericano #vistoeua"
 }

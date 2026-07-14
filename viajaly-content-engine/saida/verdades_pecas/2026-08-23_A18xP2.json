@@ -2,31 +2,31 @@
   "combo": "A18xP2",
   "data": "2026-08-23",
   "conta": "@viajaly",
-  "pilar": "antidoto",
+  "pilar": "antídoto",
   "angulo_id": "A18",
   "persona_id": "P2",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Incoerencia entre DS-160 e entrevista e a causa n1 de negativa",
+  "tese": "Incoerência entre DS-160 e entrevista e a causa n1 de negativa",
   "persona": "Casal primeira viagem",
   "dor": "acha que basta ter bom perfil pra passar",
-  "imagem": "acervo/destinos/ny-skyline-menina.jpg",
+  "imagem": "acervo/destinos/miami-menina.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
-      "kicker": "a causa numero 1",
-      "titulo": "Nao e o perfil de voces que reprova. E a incoerencia.",
+      "kicker": "a causa número 1",
+      "titulo": "Não é o perfil de vocês que reprova. E a incoerência.",
       "sub": "Casal bem preparado erra aqui sem perceber.",
       "destaques": [
-        "incoerencia."
+        "incoerência."
       ],
-      "imagem": "acervo/destinos/ny-skyline-menina.jpg"
+      "imagem": "acervo/destinos/miami-menina.jpg"
     },
     {
       "tipo": "passo",
       "numero": "02",
-      "titulo": "O que e incoerencia",
-      "corpo": "O que voces escrevem no DS-160 dizer uma coisa e a fala na entrevista dizer outra. O oficial nota na hora.",
+      "titulo": "O que é incoerência",
+      "corpo": "O que vocês escrevem no DS-160 dizer uma coisa e a fala na entrevista dizer outra. O oficial nota na hora.",
       "destaques": [
         "outra."
       ]
@@ -35,23 +35,23 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "Onde o casal se enrola",
-      "corpo": "Quem paga a viagem, o que cada um faz, quanto tempo ficam. Se as versoes de voces batem, ponto a favor.",
+      "corpo": "Quem paga a viagem, o que cada um faz, quanto tempo ficam. Se as versões de vocês batem, ponto a favor.",
       "destaques": [
         "batem,"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "O oficial nao busca mentira. Busca a linha que nao fecha. Coerencia e o jogo.",
+      "texto": "O oficial não busca mentira. Busca a linha que não fecha. Coerência e o jogo.",
       "destaques": [
-        "Coerencia"
+        "Coerência"
       ]
     },
     {
       "tipo": "passo",
       "numero": "05",
       "titulo": "Como alinhar a dois",
-      "corpo": "Preencham o DS-160 juntos e combinem as respostas antes. Nao pra decorar, pra nao se contradizer.",
+      "corpo": "Preencham o DS-160 juntos e combinem as respostas antes. Não pra decorar, pra não se contradizer.",
       "destaques": [
         "juntos"
       ]
@@ -60,9 +60,9 @@
       "tipo": "passo",
       "numero": "06",
       "titulo": "O detalhe que salva",
-      "corpo": "Uma revisao dos campos e um ensaio curto elimina a maior causa de nao. E rapido.",
+      "corpo": "Uma revisão dos campos e um ensaio curto elimina a maior causa de não. E rápido.",
       "destaques": [
-        "revisao"
+        "revisão"
       ]
     },
     {
@@ -75,5 +75,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Nao e o perfil de voces que reprova. E a incoerencia, e casal bem preparado erra aqui sem perceber.\n\nIncoerencia e o DS-160 dizer uma coisa e a fala na entrevista dizer outra. O oficial nota na hora. Onde o casal se enrola: quem paga, o que cada um faz, quanto tempo fica. Se as versoes batem, ponto a favor. O oficial nao busca mentira, busca a linha que nao fecha.\n\nPreencham o DS-160 juntos e combinem antes, nao pra decorar, pra nao se contradizer.\n\nComenta COERENCIA que eu te mando o checklist do casal. Ou toca no link da bio.\n\n#vistoamericano #ds160 #primeiraviagem #vistoeua #b1b2 #viagemacasal #entrevistavisto"
+  "legenda": "Não é o perfil de vocês que reprova. E a incoerência, e casal bem preparado erra aqui sem perceber.\n\nIncoerência e o DS-160 dizer uma coisa e a fala na entrevista dizer outra. O oficial nota na hora. Onde o casal se enrola: quem paga, o que cada um faz, quanto tempo fica. Se as versões batem, ponto a favor. O oficial não busca mentira, busca a linha que não fecha.\n\nPreencham o DS-160 juntos e combinem antes, não pra decorar, pra não se contradizer.\n\nComenta COERENCIA que eu te mando o checklist do casal. Ou toca no link da bio.\n\n#vistoamericano #ds160 #primeiraviagem #vistoeua #b1b2 #viagemacasal #entrevistavisto"
 }

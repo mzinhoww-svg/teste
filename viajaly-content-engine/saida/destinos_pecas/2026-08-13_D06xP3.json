@@ -8,26 +8,26 @@
   "persona_id": "P3",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Orlando pra quem ja foi negado",
+  "tese": "Orlando pra quem já foi negado",
   "persona": "Negado antes",
-  "dor": "vergonha do nao e medo de sonhar de novo",
+  "dor": "vergonha do não é medo de sonhar de novo",
   "imagem": "acervo/destinos/disney-main-street.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
-      "kicker": "o sonho continua de pe",
-      "titulo": "Voce foi negado. O sonho de levar seus filhos pra Orlando nao acabou.",
-      "sub": "Um nao nao e o fim da historia.",
+      "kicker": "o sonho continua de pé",
+      "titulo": "Você foi negado. O sonho de levar seus filhos pra Orlando não acabou.",
+      "sub": "Um não não é o fim da história.",
       "destaques": [
-        "nao"
+        "não"
       ],
       "imagem": "acervo/destinos/disney-main-street.jpg"
     },
     {
       "tipo": "passo",
       "numero": "02",
-      "titulo": "O que o nao significa",
-      "corpo": "Significa que algo naquele pedido nao convenceu. Nao que voce nao merece a viagem.",
+      "titulo": "O que o não significa",
+      "corpo": "Significa que algo naquele pedido não convenceu. Não que você não merece a viagem.",
       "destaques": [
         "algo"
       ]
@@ -36,14 +36,14 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "O que muda na volta",
-      "corpo": "Entender o motivo e corrigir com honestidade. Repetir igual e o unico caminho pro mesmo resultado.",
+      "corpo": "Entender o motivo e corrigir com honestidade. Repetir igual e o único caminho pro mesmo resultado.",
       "destaques": [
         "corrigir"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "A foto no parque com seus filhos nao e sonho distante. E consequencia de preparo.",
+      "texto": "A foto no parque com seus filhos não é sonho distante. E consequência de preparo.",
       "destaques": [
         "preparo."
       ]
@@ -52,7 +52,7 @@
       "tipo": "passo",
       "numero": "05",
       "titulo": "O roteiro que te aguarda",
-      "corpo": "Castelo, parada, o abraco do personagem. Tudo isso continua ali, pronto pra quando voce voltar preparado.",
+      "corpo": "Castelo, parada, o abraço do personagem. Tudo isso continua ali, pronto pra quando você voltar preparado.",
       "destaques": [
         "preparado."
       ]
@@ -60,15 +60,15 @@
     {
       "tipo": "passo",
       "numero": "06",
-      "titulo": "O que eu nao prometo",
-      "corpo": "Eu nao garanto seu visto. Ninguem garante. Mas te ajudo a nao repetir o erro que ja doeu.",
+      "titulo": "O que eu não prometo",
+      "corpo": "Eu não garanto seu visto. Ninguém garante. Mas te ajudo a não repetir o erro que já doeu.",
       "destaques": [
-        "Ninguem"
+        "Ninguém"
       ]
     },
     {
       "tipo": "cta",
-      "titulo": "Comenta RECOMECAR que eu te falo o proximo passo. Ou link na bio.",
+      "titulo": "Comenta RECOMECAR que eu te falo o próximo passo. Ou link na bio.",
       "acao": "Comenta RECOMECAR",
       "destaques": [
         "RECOMECAR"
@@ -76,5 +76,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Voce foi negado, e mesmo assim o sonho de levar seus filhos pra Orlando nao acabou. Um nao nao e o fim da historia.\n\nO nao significa que algo no pedido nao convenceu, nao que voce nao merece a viagem. O que muda na volta e entender o motivo e corrigir com honestidade. A foto no parque com seus filhos nao e sonho distante, e consequencia de preparo.\n\nEu nao garanto seu visto. Ninguem garante. Mas te ajudo a nao repetir o erro que ja doeu.\n\nComenta RECOMECAR que eu te falo o proximo passo. Ou toca no link da bio.\n\n#vistonegado #orlando #naodesista #segundatentativa #eua #vistoamericano #vistoeua"
+  "legenda": "Você foi negado, e mesmo assim o sonho de levar seus filhos pra Orlando não acabou. Um não não é o fim da história.\n\nO não significa que algo no pedido não convenceu, não que você não merece a viagem. O que muda na volta e entender o motivo e corrigir com honestidade. A foto no parque com seus filhos não é sonho distante, e consequência de preparo.\n\nEu não garanto seu visto. Ninguém garante. Mas te ajudo a não repetir o erro que já doeu.\n\nComenta RECOMECAR que eu te falo o próximo passo. Ou toca no link da bio.\n\n#vistonegado #orlando #naodesista #segundatentativa #eua #vistoamericano #vistoeua"
 }

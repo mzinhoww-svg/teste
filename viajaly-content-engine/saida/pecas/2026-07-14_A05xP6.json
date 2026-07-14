@@ -2,12 +2,12 @@
   "combo": "A05xP6",
   "data": "2026-07-14",
   "conta": "@leticia",
-  "pilar": "denuncia",
+  "pilar": "denúncia",
   "angulo_id": "A05",
   "persona_id": "P6",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Assessoria barata demais e cara demais sao os dois sinais de alerta",
+  "tese": "Assessoria barata demais e cara demais são os dois sinais de alerta",
   "persona": "Grupo de amigos",
   "dor": "coordenar datas de todo mundo",
   "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
@@ -17,7 +17,7 @@
       "tipo": "capa_foto",
       "kicker": "os dois extremos",
       "titulo": "99 reais ou 3 mil? Os dois deviam te assustar.",
-      "sub": "Voces sao um grupo. Errar aqui multiplica por seis.",
+      "sub": "Vocês são um grupo. Errar aqui multiplica por seis.",
       "destaques": [
         "assustar."
       ],
@@ -27,7 +27,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "Barato demais",
-      "corpo": "99 reais nao paga o trabalho de preparar seis pessoas. Ou e so preenchimento de formulario, ou some no meio do caminho.",
+      "corpo": "99 reais não paga o trabalho de preparar seis pessoas. Ou é só preenchimento de formulário, ou some no meio do caminho.",
       "destaques": [
         "some"
       ]
@@ -36,16 +36,16 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "Caro demais",
-      "corpo": "3 mil por pessoa vende status, nao resultado. O consulo nao cobra mais caro de quem pagou assessoria cara.",
+      "corpo": "3 mil por pessoa vende status, não resultado. O cônsul não cobra mais caro de quem pagou assessoria cara.",
       "destaques": [
         "status,"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Preco de menos esconde ausencia. Preco de mais esconde promessa. O justo fica no meio, e explica cada centavo.",
+      "texto": "Preço de menos esconde ausência. Preço de mais esconde promessa. O justo fica no meio, e explica cada centavo.",
       "destaques": [
-        "ausencia.",
+        "ausência.",
         "promessa."
       ]
     },
@@ -53,16 +53,16 @@
       "tipo": "passo",
       "numero": "05",
       "titulo": "O que importa pro grupo",
-      "corpo": "Coordenar seis DS-160 sem contradicao entre eles, agendar junto, e cada um saber a propria historia. E isso que trava um grupo, nao o preco.",
+      "corpo": "Coordenar seis DS-160 sem contradição entre eles, agendar junto, e cada um saber a própria história. E isso que trava um grupo, não o preço.",
       "destaques": [
-        "contradicao"
+        "contradição"
       ]
     },
     {
       "tipo": "passo",
       "numero": "06",
-      "titulo": "Pergunta o que ta incluso",
-      "corpo": "Taxa consular de 185 dolares por pessoa entra a parte, sempre. Quem junta tudo num preco redondo ta escondendo alguma coisa.",
+      "titulo": "Pergunta o que tá incluso",
+      "corpo": "Taxa consular de 185 dólares por pessoa entra a parte, sempre. Quem junta tudo num preço redondo tá escondendo alguma coisa.",
       "destaques": [
         "185"
       ]
@@ -77,6 +77,6 @@
       ]
     }
   ],
-  "legenda": "Cobraram 99 reais pra fazer o visto do grupo? Ou 3 mil por cabeca? Os dois deviam te assustar.\n\nBarato demais quase sempre e so preenchimento, ou some no meio. Caro demais vende status. O consulo nao cobra mais caro de quem pagou assessoria cara. E a taxa consular de 185 dolares por pessoa entra sempre a parte.\n\nComenta PRECO que eu te mando a faixa justa, item por item. Ou toca no link da bio.\n\n#vistoamericano #grupodeamigos #viagemcomamigos #vistoeua #b1b2 #miami #novayork",
+  "legenda": "Cobraram 99 reais pra fazer o visto do grupo? Ou 3 mil por cabeça? Os dois deviam te assustar.\n\nBarato demais quase sempre é só preenchimento, ou some no meio. Caro demais vende status. O cônsul não cobra mais caro de quem pagou assessoria cara. E a taxa consular de 185 dólares por pessoa entra sempre a parte.\n\nComenta PRECO que eu te mando a faixa justa, item por item. Ou toca no link da bio.\n\n#vistoamericano #grupodeamigos #viagemcomamigos #vistoeua #b1b2 #miami #novayork",
   "imagem": "acervo/destinos/disney-main-street.jpg"
 }

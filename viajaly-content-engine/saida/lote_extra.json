@@ -10,28 +10,28 @@
       "persona_id": "P1",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "Quanto custa o visto da familia de verdade",
-      "persona": "Familia Orlando",
-      "dor": "so calcula a taxa e leva susto no total",
-      "imagem": "acervo/destinos/ny-skyline-crianca.jpg",
+      "tese": "Quanto custa o visto da família de verdade",
+      "persona": "Família Orlando",
+      "dor": "só calcula a taxa e leva susto no total",
+      "imagem": "acervo/destinos/miami-crianca.jpg",
       "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
       "fonte_verificada_em": "2026-07-12",
       "slides": [
         {
           "tipo": "capa_foto",
-          "kicker": "a conta da familia",
-          "titulo": "Quanto custa o visto de uma familia de quatro de verdade.",
-          "sub": "Nao e so a taxa que voce multiplicou de cabeca.",
+          "kicker": "a conta da família",
+          "titulo": "Quanto custa o visto de uma família de quatro de verdade.",
+          "sub": "Não é só a taxa que você multiplicou de cabeça.",
           "destaques": [
             "verdade."
           ],
-          "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
+          "imagem": "acervo/destinos/miami-crianca.jpg"
         },
         {
           "tipo": "passo",
           "numero": "02",
           "titulo": "A taxa base",
-          "corpo": "MRV de 185 dolares por pessoa. Numa familia de quatro, ja sao quatro taxas que nao voltam.",
+          "corpo": "MRV de 185 dólares por pessoa. Numa família de quatro, já são quatro taxas que não voltam.",
           "destaques": [
             "quatro"
           ]
@@ -40,7 +40,7 @@
           "tipo": "passo",
           "numero": "03",
           "titulo": "A taxa nova de 2026",
-          "corpo": "Entrou uma taxa de integridade de 250 dolares cobrada na emissao. Confere no travel.state.gov.",
+          "corpo": "Entrou uma taxa de integridade de 250 dólares cobrada na emissão. Confere no travel.state.gov.",
           "destaques": [
             "250"
           ]
@@ -48,15 +48,15 @@
         {
           "tipo": "passo",
           "numero": "04",
-          "titulo": "O que e opcional",
-          "corpo": "Os 750 pra antecipar sao opcionais. Familia planejada com tempo nao precisa disso.",
+          "titulo": "O que é opcional",
+          "corpo": "Os 750 pra antecipar são opcionais. Família planejada com tempo não precisa disso.",
           "destaques": [
             "opcionais."
           ]
         },
         {
           "tipo": "insight",
-          "texto": "A conta da familia assusta menos quando voce ve ela inteira antes, nao no fim.",
+          "texto": "A conta da família assusta menos quando você ve ela inteira antes, não no fim.",
           "destaques": [
             "antes,"
           ]
@@ -72,15 +72,15 @@
         },
         {
           "tipo": "cta",
-          "titulo": "Comenta CONTAFAMILIA que eu te mando o custo fechado pra sua familia. Ou link na bio.",
+          "titulo": "Comenta CONTAFAMILIA que eu te mando o custo fechado pra sua família. Ou link na bio.",
           "acao": "Comenta CONTAFAMILIA",
           "destaques": [
             "CONTAFAMILIA"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Quanto custa o visto de uma familia de quatro de verdade? Nao e so a taxa que voce multiplicou de cabeca.\n\nA MRV e 185 dolares por pessoa, quatro taxas que nao voltam. Entrou a taxa de integridade de 250 dolares na emissao (confere no travel.state.gov). E os 750 pra antecipar sao opcionais, familia com tempo nao precisa. A conta assusta menos quando voce ve ela inteira antes.\n\nComenta CONTAFAMILIA que eu te mando o custo fechado. Ou toca no link da bio.\n\n#vistoamericano #viagememfamilia #vistoeua #b1b2 #taxavisto #orlando #consuladoamericano"
+      "legenda": "Quanto custa o visto de uma família de quatro de verdade? Não é só a taxa que você multiplicou de cabeça.\n\nA MRV e 185 dólares por pessoa, quatro taxas que não voltam. Entrou a taxa de integridade de 250 dólares na emissão (confere no travel.state.gov). E os 750 pra antecipar são opcionais, família com tempo não precisa. A conta assusta menos quando você ve ela inteira antes.\n\nComenta CONTAFAMILIA que eu te mando o custo fechado. Ou toca no link da bio.\n\n#vistoamericano #viagememfamilia #vistoeua #b1b2 #taxavisto #orlando #consuladoamericano"
     },
     {
       "combo": "A09xP2",
@@ -91,16 +91,16 @@
       "persona_id": "P2",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "CASV e consulado sao dois dias (casal)",
+      "tese": "CASV e consulado são dois dias (casal)",
       "persona": "Casal primeira viagem",
-      "dor": "acha que resolve o visto num dia so",
+      "dor": "acha que resolve o visto num dia só",
       "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
           "kicker": "planejem os dois dias",
-          "titulo": "Tirar o visto sao DUAS visitas, em dias diferentes.",
-          "sub": "Casal que planeja um dia so se atrapalha.",
+          "titulo": "Tirar o visto são DUAS visitas, em dias diferentes.",
+          "sub": "Casal que planeja um dia só se atrapalha.",
           "destaques": [
             "DUAS"
           ],
@@ -110,7 +110,7 @@
           "tipo": "passo",
           "numero": "02",
           "titulo": "Dia 1: o CASV",
-          "corpo": "Foto e digitais. Rapido, mas e um deslocamento inteiro. Nao e a entrevista.",
+          "corpo": "Foto e digitais. Rápido, mas e um deslocamento inteiro. Não é a entrevista.",
           "destaques": [
             "digitais."
           ]
@@ -119,14 +119,14 @@
           "tipo": "passo",
           "numero": "03",
           "titulo": "Dia 2: o consulado",
-          "corpo": "A entrevista com o oficial. Pode ser noutra data e ate noutra cidade. Planejem os dois.",
+          "corpo": "A entrevista com o oficial. Pode ser noutra data e até noutra cidade. Planejem os dois.",
           "destaques": [
             "entrevista"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Primeira viagem ja da frio na barriga. Descobrir que sao dois dias na ultima hora piora.",
+          "texto": "Primeira viagem já da frio na barriga. Descobrir que são dois dias na última hora piora.",
           "destaques": [
             "dois"
           ]
@@ -134,10 +134,10 @@
         {
           "tipo": "passo",
           "numero": "05",
-          "titulo": "Da pra otimizar",
-          "corpo": "Em varios postos marca-se os dois em dias proximos, numa viagem so. Menos custo pro casal.",
+          "titulo": "Dá pra otimizar",
+          "corpo": "Em vários postos marca-se os dois em dias próximos, numa viagem só. Menos custo pro casal.",
           "destaques": [
-            "proximos"
+            "próximos"
           ]
         },
         {
@@ -156,30 +156,30 @@
           "destaques": [
             "DOISDIAS"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Tirar o visto americano sao DUAS visitas, em dias diferentes. Casal que planeja um dia so se atrapalha.\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista, que pode ser noutra data e ate noutra cidade. Da pra otimizar, em varios postos marca-se os dois proximos numa viagem so. Alinhem folga dos dois pras duas datas, porque um imprevisto derruba um dia inteiro.\n\nComenta DOISDIAS que eu te mando como marcar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #casv #vistoeua #b1b2 #viagemacasal #dicasdevisto"
+      "legenda": "Tirar o visto americano são DUAS visitas, em dias diferentes. Casal que planeja um dia só se atrapalha.\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista, que pode ser noutra data e até noutra cidade. Dá pra otimizar, em vários postos marca-se os dois próximos numa viagem só. Alinhem folga dos dois pras duas datas, porque um imprevisto derruba um dia inteiro.\n\nComenta DOISDIAS que eu te mando como marcar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #casv #vistoeua #b1b2 #viagemacasal #dicasdevisto"
     },
     {
       "combo": "A12xP2",
       "data": "2026-08-27",
       "conta": "@leticia",
-      "pilar": "antidoto",
+      "pilar": "antídoto",
       "angulo_id": "A12",
       "persona_id": "P2",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "O consulo decide nos primeiros 10 segundos (casal)",
+      "tese": "O cônsul decide nos primeiros 10 segundos (casal)",
       "persona": "Casal primeira viagem",
-      "dor": "acha que a entrevista e longa e tecnica",
+      "dor": "acha que a entrevista e longa e técnica",
       "imagem": "acervo/destinos/praia-por-do-sol.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
           "kicker": "os primeiros segundos",
           "titulo": "A entrevista dura 1 minuto. Ele decide nos primeiros 10 segundos.",
-          "sub": "Voces se preparam pra prova errada.",
+          "sub": "Vocês se preparam pra prova errada.",
           "destaques": [
             "10"
           ],
@@ -188,24 +188,24 @@
         {
           "tipo": "passo",
           "numero": "02",
-          "titulo": "Nao e prova de conhecimento",
-          "corpo": "Ninguem vai testar ingles ou geografia. E impressao: como voces chegam e respondem o obvio.",
+          "titulo": "Não é prova de conhecimento",
+          "corpo": "Ninguém vai testar inglês ou geografia. E impressão: como vocês chegam e respondem o óbvio.",
           "destaques": [
-            "impressao"
+            "impressão"
           ]
         },
         {
           "tipo": "passo",
           "numero": "03",
           "titulo": "O que pesa a dois",
-          "corpo": "Coerencia entre voces e seguranca na primeira resposta. Gaguejar no facil abre suspeita.",
+          "corpo": "Coerência entre vocês e segurança na primeira resposta. Gaguejar no fácil abre suspeita.",
           "destaques": [
-            "Coerencia"
+            "Coerência"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Nao e decorar. E chegar tao preparado que a verdade sai sem tremer.",
+          "texto": "Não é decorar. E chegar tão preparado que a verdade sai sem tremer.",
           "destaques": [
             "preparado"
           ]
@@ -214,7 +214,7 @@
           "tipo": "passo",
           "numero": "05",
           "titulo": "O erro do casal ansioso",
-          "corpo": "Falar demais, justificar demais. O oficial nao perguntou a historia de voces. Respondam o que foi perguntado.",
+          "corpo": "Falar demais, justificar demais. O oficial não perguntou a história de vocês. Respondam o que foi perguntado.",
           "destaques": [
             "demais."
           ]
@@ -235,16 +235,16 @@
           "destaques": [
             "SEGUNDOS"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "A entrevista do visto dura 1 minuto, e o consulo decide nos primeiros 10 segundos. Voces se preparam pra prova errada.\n\nNinguem testa ingles ou geografia. E impressao: como voces chegam e respondem o obvio, com coerencia entre voces. Nao e decorar, e chegar tao preparado que a verdade sai sem tremer. O erro do casal ansioso e falar demais. Respondam o que foi perguntado.\n\nComenta SEGUNDOS que eu te mando o roteiro dos 10 primeiros. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #entrevistavisto #vistoeua #b1b2 #viagemacasal #eua"
+      "legenda": "A entrevista do visto dura 1 minuto, e o cônsul decide nos primeiros 10 segundos. Vocês se preparam pra prova errada.\n\nNinguém testa inglês ou geografia. E impressão: como vocês chegam e respondem o óbvio, com coerência entre vocês. Não é decorar, e chegar tão preparado que a verdade sai sem tremer. O erro do casal ansioso e falar demais. Respondam o que foi perguntado.\n\nComenta SEGUNDOS que eu te mando o roteiro dos 10 primeiros. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #entrevistavisto #vistoeua #b1b2 #viagemacasal #eua"
     },
     {
       "combo": "A13xP2",
       "data": "2026-08-28",
       "conta": "@leticia",
-      "pilar": "antidoto",
+      "pilar": "antídoto",
       "angulo_id": "A13",
       "persona_id": "P2",
       "formato": "carrossel",
@@ -257,7 +257,7 @@
         {
           "tipo": "capa_foto",
           "kicker": "mito de documento",
-          "titulo": "A pasta gorda de documentos que voces prepararam? Ele nem abre.",
+          "titulo": "A pasta gorda de documentos que vocês prepararam? Ele nem abre.",
           "sub": "Primeira viagem junta papel demais por medo.",
           "destaques": [
             "abre."
@@ -268,7 +268,7 @@
           "tipo": "passo",
           "numero": "02",
           "titulo": "A entrevista e curta",
-          "corpo": "Menos de um minuto. Nao da tempo de folhear extrato, reserva e imposto de renda.",
+          "corpo": "Menos de um minuto. Não dá tempo de folhear extrato, reserva e imposto de renda.",
           "destaques": [
             "minuto."
           ]
@@ -277,14 +277,14 @@
           "tipo": "passo",
           "numero": "03",
           "titulo": "O que pesa e a fala",
-          "corpo": "A coerencia do que voces respondem decide, nao a espessura da pasta.",
+          "corpo": "A coerência do que vocês respondem decide, não a espessura da pasta.",
           "destaques": [
-            "coerencia"
+            "coerência"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Documento e apoio, nao argumento. Quem ganha e o casal que sabe se explicar.",
+          "texto": "Documento e apoio, não argumento. Quem ganha e o casal que sabe se explicar.",
           "destaques": [
             "explicar."
           ]
@@ -292,8 +292,8 @@
         {
           "tipo": "passo",
           "numero": "05",
-          "titulo": "Leve o basico organizado",
-          "corpo": "Tenham os documentos, sim, mas na cabeca e na ordem. O que conta e saber contar quem voces sao.",
+          "titulo": "Leve o básico organizado",
+          "corpo": "Tenham os documentos, sim, mas na cabeça e na ordem. O que conta e saber contar quem vocês são.",
           "destaques": [
             "ordem."
           ]
@@ -301,8 +301,8 @@
         {
           "tipo": "passo",
           "numero": "06",
-          "titulo": "Ensaiem a historia",
-          "corpo": "Por que vao, quanto tempo, quem paga, quando voltam. Uma versao so, os dois afinados.",
+          "titulo": "Ensaiem a história",
+          "corpo": "Por que vao, quanto tempo, quem paga, quando voltam. Uma versão só, os dois afinados.",
           "destaques": [
             "afinados."
           ]
@@ -314,30 +314,30 @@
           "destaques": [
             "PASTADOIS"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "A pasta gorda de documentos que voces prepararam pra primeira viagem? O oficial nem abre.\n\nA entrevista dura menos de um minuto. O que pesa e a coerencia do que voces falam, nao a espessura da pasta. Documento e apoio, nao argumento. Levem o basico organizado e, principalmente, ensaiem a historia: por que vao, quanto tempo, quem paga, quando voltam. Uma versao so, os dois afinados.\n\nComenta PASTADOIS que eu te ensino o que levar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #entrevistavisto #vistoeua #b1b2 #viagemacasal #ds160"
+      "legenda": "A pasta gorda de documentos que vocês prepararam pra primeira viagem? O oficial nem abre.\n\nA entrevista dura menos de um minuto. O que pesa e a coerência do que vocês falam, não a espessura da pasta. Documento e apoio, não argumento. Levem o básico organizado e, principalmente, ensaiem a história: por que vao, quanto tempo, quem paga, quando voltam. Uma versão só, os dois afinados.\n\nComenta PASTADOIS que eu te ensino o que levar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #entrevistavisto #vistoeua #b1b2 #viagemacasal #ds160"
     },
     {
       "combo": "A15xP7",
       "data": "2026-08-29",
       "conta": "@viajaly",
-      "pilar": "antidoto",
+      "pilar": "antídoto",
       "angulo_id": "A15",
       "persona_id": "P7",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "7 campos do DS-160 derrubam mais que perfil (autonomo)",
-      "persona": "Autonomo / MEI",
-      "dor": "medo do formulario por nao ter emprego formal",
+      "tese": "7 campos do DS-160 derrubam mais que perfil (autônomo)",
+      "persona": "Autônomo / MEI",
+      "dor": "medo do formulário por não ter emprego formal",
       "imagem": "acervo/familia/familia-selfie2.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
-          "kicker": "o formulario decide",
-          "titulo": "7 campos do DS-160 derrubam mais que nao ter carteira assinada.",
-          "sub": "Autonomo trava no formulario, nao na entrevista.",
+          "kicker": "o formulário decide",
+          "titulo": "7 campos do DS-160 derrubam mais que não ter carteira assinada.",
+          "sub": "Autônomo trava no formulário, não na entrevista.",
           "destaques": [
             "7"
           ],
@@ -346,8 +346,8 @@
         {
           "tipo": "passo",
           "numero": "02",
-          "titulo": "Profissao e o mais delicado",
-          "corpo": "Descrever mal o que voce faz como autonomo gera duvida. Clareza aqui vale ouro.",
+          "titulo": "Profissão e o mais delicado",
+          "corpo": "Descrever mal o que você faz como autônomo gera dúvida. Clareza aqui vale ouro.",
           "destaques": [
             "Clareza"
           ]
@@ -356,14 +356,14 @@
           "tipo": "passo",
           "numero": "03",
           "titulo": "Os campos que mais pegam",
-          "corpo": "Profissao, renda, viagens, redes sociais, quem paga, tempo de estadia e vinculo. Sete pontos.",
+          "corpo": "Profissão, renda, viagens, redes sociais, quem paga, tempo de estadia e vínculo. Sete pontos.",
           "destaques": [
             "Sete"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Nao e o CNPJ que reprova. E o formulario que se contradiz com a sua fala.",
+          "texto": "Não é o CNPJ que reprova. E o formulário que se contradiz com a sua fala.",
           "destaques": [
             "contradiz"
           ]
@@ -371,8 +371,8 @@
         {
           "tipo": "passo",
           "numero": "05",
-          "titulo": "Coerencia acima de tudo",
-          "corpo": "O que voce escreve tem que bater com o que voce fala e com o que voce vive. So isso.",
+          "titulo": "Coerência acima de tudo",
+          "corpo": "O que você escreve tem que bater com o que você fala e com o que você vive. Só isso.",
           "destaques": [
             "bater"
           ]
@@ -381,33 +381,33 @@
           "tipo": "passo",
           "numero": "06",
           "titulo": "Revisar leva pouco",
-          "corpo": "Uma revisao dos sete campos criticos evita o erro que trava o autonomo na hora.",
+          "corpo": "Uma revisão dos sete campos críticos evita o erro que trava o autônomo na hora.",
           "destaques": [
             "sete"
           ]
         },
         {
           "tipo": "cta",
-          "titulo": "Comenta DS160MEI que eu te mando os 7 campos do autonomo. Ou link na bio.",
+          "titulo": "Comenta DS160MEI que eu te mando os 7 campos do autônomo. Ou link na bio.",
           "acao": "Comenta DS160MEI",
           "destaques": [
             "DS160MEI"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Sete campos do DS-160 derrubam o autonomo mais que nao ter carteira assinada. O problema mora no formulario, nao na entrevista.\n\nProfissao e o mais delicado: descrever mal o que voce faz gera duvida. Os que mais pegam: profissao, renda, viagens, redes sociais, quem paga, tempo de estadia e vinculo. Nao e o CNPJ que reprova, e o formulario que se contradiz com a sua fala. O que voce escreve tem que bater com o que voce vive.\n\nComenta DS160MEI que eu te mando os 7 campos do autonomo. Ou toca no link da bio.\n\n#autonomo #mei #ds160 #vistoamericano #vistoeua #b1b2 #empreendedor"
+      "legenda": "Sete campos do DS-160 derrubam o autônomo mais que não ter carteira assinada. O problema mora no formulário, não na entrevista.\n\nProfissão e o mais delicado: descrever mal o que você faz gera dúvida. Os que mais pegam: profissão, renda, viagens, redes sociais, quem paga, tempo de estadia e vínculo. Não é o CNPJ que reprova, e o formulário que se contradiz com a sua fala. O que você escreve tem que bater com o que você vive.\n\nComenta DS160MEI que eu te mando os 7 campos do autônomo. Ou toca no link da bio.\n\n#autonomo #mei #ds160 #vistoamericano #vistoeua #b1b2 #empreendedor"
     },
     {
       "combo": "A14xP2",
       "data": "2026-08-30",
       "conta": "@viajaly",
-      "pilar": "antidoto",
+      "pilar": "antídoto",
       "angulo_id": "A14",
       "persona_id": "P2",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "A unica pergunta e: voces voltam? (casal)",
+      "tese": "A única pergunta e: vocês voltam? (casal)",
       "persona": "Casal primeira viagem",
       "dor": "acha que precisa provar dinheiro",
       "imagem": "acervo/destinos/praia-crianca-areia.jpg",
@@ -415,7 +415,7 @@
         {
           "tipo": "capa_foto",
           "kicker": "o que ele quer saber",
-          "titulo": "Existe UMA pergunta na cabeca do consulo. E nao e quanto voces tem.",
+          "titulo": "Existe UMA pergunta na cabeça do cônsul. E não é quanto vocês tem.",
           "sub": "Casal na lua de mel precisa saber responder isso.",
           "destaques": [
             "UMA"
@@ -425,8 +425,8 @@
         {
           "tipo": "passo",
           "numero": "02",
-          "titulo": "A pergunta e: voces voltam?",
-          "corpo": "A lei presume que voces querem ficar. O papel de voces e mostrar que a vida esta no Brasil.",
+          "titulo": "A pergunta e: vocês voltam?",
+          "corpo": "A lei presume que vocês querem ficar. O papel de vocês e mostrar que a vida está no Brasil.",
           "destaques": [
             "voltam?"
           ]
@@ -434,15 +434,15 @@
         {
           "tipo": "passo",
           "numero": "03",
-          "titulo": "Casal chama atencao",
-          "corpo": "Dois jovens juntos as vezes acende o alerta de imigracao. Coerencia e vinculo desarmam isso.",
+          "titulo": "Casal chama atenção",
+          "corpo": "Dois jovens juntos as vezes acende o alerta de imigração. Coerência e vínculo desarmam isso.",
           "destaques": [
-            "vinculo"
+            "vínculo"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Vinculo nao e saldo no banco. E uma vida que continua aqui aguardando voces.",
+          "texto": "Vínculo não é saldo no banco. E uma vida que continua aqui aguardando vocês.",
           "destaques": [
             "vida"
           ]
@@ -451,7 +451,7 @@
           "tipo": "passo",
           "numero": "05",
           "titulo": "O que responde a pergunta",
-          "corpo": "Trabalho, familia, planos no Brasil. Coisas que so fazem sentido se voces voltarem.",
+          "corpo": "Trabalho, família, planos no Brasil. Coisas que só fazem sentido se vocês voltarem.",
           "destaques": [
             "voltarem."
           ]
@@ -460,7 +460,7 @@
           "tipo": "passo",
           "numero": "06",
           "titulo": "Treinem a dois",
-          "corpo": "Combinem como cada um responde sobre a volta. Sem decorar, so alinhados.",
+          "corpo": "Combinem como cada um responde sobre a volta. Sem decorar, só alinhados.",
           "destaques": [
             "alinhados."
           ]
@@ -472,22 +472,22 @@
           "destaques": [
             "VOCEVOLTA"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Existe UMA pergunta na cabeca do consulo, e nao e quanto voces tem. E: voces voltam?\n\nA lei presume que querem ficar, e o papel de voces e mostrar que a vida esta no Brasil. Casal jovem junto as vezes acende o alerta de imigracao, e coerencia e vinculo desarmam isso. Vinculo nao e saldo no banco, e uma vida que continua aqui aguardando voces: trabalho, familia, planos.\n\nComenta VOCEVOLTA que eu te ajudo a montar a resposta. Ou toca no link da bio.\n\n#vistoamericano #luademel #primeiraviagem #vistoeua #b1b2 #entrevistavisto #viagemacasal"
+      "legenda": "Existe UMA pergunta na cabeça do cônsul, e não é quanto vocês tem. E: vocês voltam?\n\nA lei presume que querem ficar, e o papel de vocês e mostrar que a vida está no Brasil. Casal jovem junto as vezes acende o alerta de imigração, e coerência e vínculo desarmam isso. Vínculo não é saldo no banco, e uma vida que continua aqui aguardando vocês: trabalho, família, planos.\n\nComenta VOCEVOLTA que eu te ajudo a montar a resposta. Ou toca no link da bio.\n\n#vistoamericano #luademel #primeiraviagem #vistoeua #b1b2 #entrevistavisto #viagemacasal"
     },
     {
       "combo": "A02xP7",
       "data": "2026-08-31",
       "conta": "@leticia",
-      "pilar": "denuncia",
+      "pilar": "denúncia",
       "angulo_id": "A02",
       "persona_id": "P7",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "Bot de antecipacao bloqueia sua conta",
-      "persona": "Autonomo / MEI",
+      "tese": "Bot de antecipação bloqueia sua conta",
+      "persona": "Autônomo / MEI",
       "dor": "tenta atalho porque tem pressa e pouco tempo",
       "imagem": "acervo/destinos/universal-globo.jpg",
       "slides": [
@@ -513,15 +513,15 @@
         {
           "tipo": "passo",
           "numero": "03",
-          "titulo": "O preco de verdade",
-          "corpo": "Conta bloqueada, processo travado e voce sem entrevista. O atalho custa a viagem inteira.",
+          "titulo": "O preço de verdade",
+          "corpo": "Conta bloqueada, processo travado e você sem entrevista. O atalho custa a viagem inteira.",
           "destaques": [
             "bloqueada,"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Autonomo vive de resolver rapido. Mas no visto, atalho automatico e tiro no proprio pe.",
+          "texto": "Autônomo vive de resolver rápido. Mas no visto, atalho automatico e tiro no próprio pé.",
           "destaques": [
             "atalho"
           ]
@@ -529,8 +529,8 @@
         {
           "tipo": "passo",
           "numero": "05",
-          "titulo": "O jeito legitimo",
-          "corpo": "Antecipar tem caminho oficial: o pedido de emergencia, com motivo e prova. Sem robo, sem risco.",
+          "titulo": "O jeito legítimo",
+          "corpo": "Antecipar tem caminho oficial: o pedido de emergência, com motivo e prova. Sem robo, sem risco.",
           "destaques": [
             "oficial:"
           ]
@@ -538,53 +538,53 @@
         {
           "tipo": "passo",
           "numero": "06",
-          "titulo": "Pressa nao vale a conta",
-          "corpo": "Ganhar duas semanas nao paga o risco de perder a conta e a viagem. Faca pelo caminho certo.",
+          "titulo": "Pressa não vale a conta",
+          "corpo": "Ganhar duas semanas não paga o risco de perder a conta e a viagem. Faça pelo caminho certo.",
           "destaques": [
             "certo."
           ]
         },
         {
           "tipo": "cta",
-          "titulo": "Comenta ROBO que eu te mostro o jeito legitimo de antecipar. Ou link na bio.",
+          "titulo": "Comenta ROBO que eu te mostro o jeito legítimo de antecipar. Ou link na bio.",
           "acao": "Comenta ROBO",
           "destaques": [
             "ROBO"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Tem gente vendendo robo pra antecipar a entrevista do visto. Isso bloqueia a sua conta.\n\nO robo fica tentando remarcar sua data automaticamente, e o sistema do consulado detecta. O resultado: conta bloqueada, processo travado e voce sem entrevista. O atalho do apressado custa a viagem inteira. Existe caminho legitimo: o pedido de emergencia, com motivo e prova.\n\nComenta ROBO que eu te mostro o jeito legitimo. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #golpe #consuladoamericano"
+      "legenda": "Tem gente vendendo robo pra antecipar a entrevista do visto. Isso bloqueia a sua conta.\n\nO robo fica tentando remarcar sua data automaticamente, e o sistema do consulado detecta. O resultado: conta bloqueada, processo travado e você sem entrevista. O atalho do apressado custa a viagem inteira. Existe caminho legítimo: o pedido de emergência, com motivo e prova.\n\nComenta ROBO que eu te mostro o jeito legítimo. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #golpe #consuladoamericano"
     },
     {
       "combo": "A18xP4",
       "data": "2026-09-01",
       "conta": "@viajaly",
-      "pilar": "antidoto",
+      "pilar": "antídoto",
       "angulo_id": "A18",
       "persona_id": "P4",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "Incoerencia derruba mais que perfil (torcedor Copa)",
+      "tese": "Incoerência derruba mais que perfil (torcedor Copa)",
       "persona": "Torcedor Copa",
       "dor": "prazo curto, preenche correndo e se contradiz",
-      "imagem": "acervo/destinos/ny-skyline-menina.jpg",
+      "imagem": "acervo/destinos/miami-menina.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
-          "kicker": "a causa numero 1",
-          "titulo": "Nao e o seu perfil que reprova. E a pressa que te faz se contradizer.",
+          "kicker": "a causa número 1",
+          "titulo": "Não é o seu perfil que reprova. E a pressa que te faz se contradizer.",
           "sub": "Com prazo de Copa, todo mundo preenche correndo.",
           "destaques": [
             "contradizer."
           ],
-          "imagem": "acervo/destinos/ny-skyline-menina.jpg"
+          "imagem": "acervo/destinos/miami-menina.jpg"
         },
         {
           "tipo": "passo",
           "numero": "02",
-          "titulo": "O que e incoerencia",
-          "corpo": "O DS-160 dizer uma coisa e voce falar outra na entrevista. O oficial percebe na hora.",
+          "titulo": "O que é incoerência",
+          "corpo": "O DS-160 dizer uma coisa e você falar outra na entrevista. O oficial percebe na hora.",
           "destaques": [
             "outra."
           ]
@@ -600,16 +600,16 @@
         },
         {
           "tipo": "insight",
-          "texto": "O oficial nao caca mentira. Caca a linha que nao fecha. Coerencia e o jogo.",
+          "texto": "O oficial não caça mentira. Caça a linha que não fecha. Coerência e o jogo.",
           "destaques": [
-            "Coerencia"
+            "Coerência"
           ]
         },
         {
           "tipo": "passo",
           "numero": "05",
           "titulo": "Antes de enviar",
-          "corpo": "Releia o formulario inteiro pensando: isso bate com o que vou dizer? Se nao bate, corrige.",
+          "corpo": "Releia o formulário inteiro pensando: isso bate com o que vou dizer? Se não bate, corrige.",
           "destaques": [
             "bate"
           ]
@@ -617,8 +617,8 @@
         {
           "tipo": "passo",
           "numero": "06",
-          "titulo": "Revisao rapida salva o jogo",
-          "corpo": "Uma conferida nos campos criticos evita perder a viagem por um detalhe torto.",
+          "titulo": "Revisão rápida salva o jogo",
+          "corpo": "Uma conferida nos campos críticos evita perder a viagem por um detalhe torto.",
           "destaques": [
             "conferida"
           ]
@@ -630,10 +630,10 @@
           "destaques": [
             "COERENCIACOPA"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Nao e o seu perfil que reprova. E a pressa da Copa que te faz se contradizer.\n\nIncoerencia e o DS-160 dizer uma coisa e voce falar outra na entrevista, e o oficial percebe na hora. Prazo curto faz preencher no automatico, e e ai que nascem os dados tortos. O oficial nao caca mentira, caca a linha que nao fecha. Antes de enviar, releia tudo pensando: isso bate com o que vou dizer?\n\nComenta COERENCIACOPA que eu reviso os pontos que mais pegam. Ou toca no link da bio.\n\n#vistoamericano #copadomundo #ds160 #vistoeua #b1b2 #futebol #entrevistavisto"
+      "legenda": "Não é o seu perfil que reprova. E a pressa da Copa que te faz se contradizer.\n\nIncoerência e o DS-160 dizer uma coisa e você falar outra na entrevista, e o oficial percebe na hora. Prazo curto faz preencher no automatico, e e aí que nascem os dados tortos. O oficial não caça mentira, caça a linha que não fecha. Antes de enviar, releia tudo pensando: isso bate com o que vou dizer?\n\nComenta COERENCIACOPA que eu reviso os pontos que mais pegam. Ou toca no link da bio.\n\n#vistoamericano #copadomundo #ds160 #vistoeua #b1b2 #futebol #entrevistavisto"
     },
     {
       "combo": "D01xP6",
@@ -647,13 +647,13 @@
       "kit": "corporate",
       "tese": "Nova York em grupo",
       "persona": "Grupo de amigos",
-      "dor": "gosto e orcamento diferentes no grupo",
+      "dor": "gosto e orçamento diferentes no grupo",
       "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
           "kicker": "ny em grupo",
-          "titulo": "Nova York em grupo funciona se voces pararem de andar colados.",
+          "titulo": "Nova York em grupo funciona se vocês pararem de andar colados.",
           "sub": "Gente demais junta o dia todo vira briga.",
           "destaques": [
             "colados."
@@ -664,7 +664,7 @@
           "tipo": "passo",
           "numero": "02",
           "titulo": "Base perto do metro",
-          "corpo": "Grupo grande so se move bem no metro. Hospedagem central economiza tempo e discussao.",
+          "corpo": "Grupo grande só se move bem no metro. Hospedagem central economiza tempo e discussão.",
           "destaques": [
             "metro."
           ]
@@ -682,14 +682,14 @@
           "tipo": "passo",
           "numero": "04",
           "titulo": "Rateie na hora",
-          "corpo": "App de divisao de conta evita a treta do fim de viagem. Combinem antes quem paga o que.",
+          "corpo": "App de divisão de conta evita a treta do fim de viagem. Combinem antes quem paga o que.",
           "destaques": [
             "antes"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Grupo em NY nao precisa fazer tudo junto. Precisa combinar onde se encontra.",
+          "texto": "Grupo em NY não precisa fazer tudo junto. Precisa combinar onde se encontra.",
           "destaques": [
             "combinar"
           ]
@@ -698,7 +698,7 @@
           "tipo": "passo",
           "numero": "06",
           "titulo": "O que trava o grupo antes",
-          "corpo": "NY em grupo so acontece com os vistos de todo mundo prontos e no prazo.",
+          "corpo": "NY em grupo só acontece com os vistos de todo mundo prontos e no prazo.",
           "destaques": [
             "todo"
           ]
@@ -710,10 +710,10 @@
           "destaques": [
             "NYGRUPO"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Nova York em grupo funciona se voces pararem de andar colados o dia todo.\n\nFiquem perto do metro, porque grupo grande so se move bem no trilho. Combinem um ponto de encontro por dia e no meio cada um faz o que quer. E rateiem na hora com app de conta, pra evitar treta no fim. Grupo em NY nao precisa fazer tudo junto, precisa combinar onde se encontra.\n\nE so acontece com os vistos de todo mundo prontos.\n\nComenta NYGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#novayork #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua #nyc"
+      "legenda": "Nova York em grupo funciona se vocês pararem de andar colados o dia todo.\n\nFiquem perto do metro, porque grupo grande só se move bem no trilho. Combinem um ponto de encontro por dia e no meio cada um faz o que quer. E rateiem na hora com app de conta, pra evitar treta no fim. Grupo em NY não precisa fazer tudo junto, precisa combinar onde se encontra.\n\nÉ só acontece com os vistos de todo mundo prontos.\n\nComenta NYGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#novayork #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua #nyc"
     },
     {
       "combo": "D02xP1",
@@ -725,26 +725,26 @@
       "persona_id": "P1",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "Miami com a familia",
-      "persona": "Familia Orlando",
+      "tese": "Miami com a família",
+      "persona": "Família Orlando",
       "dor": "quer emendar Orlando com Miami sem cansar",
-      "imagem": "acervo/destinos/ny-skyline-menina.jpg",
+      "imagem": "acervo/destinos/miami-menina.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
           "kicker": "orlando + miami",
-          "titulo": "Emendar Orlando com Miami e otimo, se voce nao empilhar tudo.",
+          "titulo": "Emendar Orlando com Miami e ótimo, se você não empilhar tudo.",
           "sub": "Parque e cidade cansam de formas diferentes.",
           "destaques": [
             "empilhar"
           ],
-          "imagem": "acervo/destinos/ny-skyline-menina.jpg"
+          "imagem": "acervo/destinos/miami-menina.jpg"
         },
         {
           "tipo": "passo",
           "numero": "02",
           "titulo": "Miami e o respiro",
-          "corpo": "Depois dos parques, Miami pede ritmo lento: praia calma de manha, cidade no fim de tarde.",
+          "corpo": "Depois dos parques, Miami pede ritmo lento: praia calma de manhã, cidade no fim de tarde.",
           "destaques": [
             "lento:"
           ]
@@ -752,8 +752,8 @@
         {
           "tipo": "passo",
           "numero": "03",
-          "titulo": "Com crianca, escolha praia mansa",
-          "corpo": "Key Biscayne ganha de South Beach pra familia. Agua calma e menos agito.",
+          "titulo": "Com criança, escolha praia mansa",
+          "corpo": "Key Biscayne ganha de South Beach pra família. Água calma e menos agito.",
           "destaques": [
             "mansa"
           ]
@@ -762,14 +762,14 @@
           "tipo": "passo",
           "numero": "04",
           "titulo": "Um dia de bicho",
-          "corpo": "Zoo, aquario ou Everglades quebram a rotina de praia e viram o melhor dia da crianca.",
+          "corpo": "Zoo, aquario ou Everglades quebram a rotina de praia e viram o melhor dia da criança.",
           "destaques": [
             "bicho"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Duas cidades numa viagem so rende quando cada uma tem o seu ritmo.",
+          "texto": "Duas cidades numa viagem só rende quando cada uma tem o seu ritmo.",
           "destaques": [
             "ritmo."
           ]
@@ -778,7 +778,7 @@
           "tipo": "passo",
           "numero": "06",
           "titulo": "Antes do combo",
-          "corpo": "Orlando mais Miami depende de uma coisa: o visto da familia aprovado e no prazo.",
+          "corpo": "Orlando mais Miami depende de uma coisa: o visto da família aprovado e no prazo.",
           "destaques": [
             "visto"
           ]
@@ -790,10 +790,10 @@
           "destaques": [
             "MIAMIFAM"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Emendar Orlando com Miami e otimo, se voce nao empilhar tudo. Parque e cidade cansam de formas diferentes.\n\nDepois dos parques, Miami pede ritmo lento: praia calma de manha, cidade no fim de tarde. Com crianca, Key Biscayne ganha de South Beach. E um dia de zoo, aquario ou Everglades vira o melhor dia. Duas cidades numa viagem so rende quando cada uma tem o seu ritmo.\n\nE o combo depende do visto da familia no prazo.\n\nComenta MIAMIFAM que eu te mando o combo. Ou toca no link da bio.\n\n#miami #orlando #viagememfamilia #eua #vistoamericano #vistoeua #feriascomcriancas"
+      "legenda": "Emendar Orlando com Miami e ótimo, se você não empilhar tudo. Parque e cidade cansam de formas diferentes.\n\nDepois dos parques, Miami pede ritmo lento: praia calma de manhã, cidade no fim de tarde. Com criança, Key Biscayne ganha de South Beach. E um dia de zoo, aquario ou Everglades vira o melhor dia. Duas cidades numa viagem só rende quando cada uma tem o seu ritmo.\n\nE o combo depende do visto da família no prazo.\n\nComenta MIAMIFAM que eu te mando o combo. Ou toca no link da bio.\n\n#miami #orlando #viagememfamilia #eua #vistoamericano #vistoeua #feriascomcriancas"
     },
     {
       "combo": "D03xP6",
@@ -805,16 +805,16 @@
       "persona_id": "P6",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "California em grupo de amigos",
+      "tese": "Califórnia em grupo de amigos",
       "persona": "Grupo de amigos",
-      "dor": "quer roadtrip mas teme a logistica em grupo",
+      "dor": "quer roadtrip mas teme a logística em grupo",
       "imagem": "acervo/destinos/disney-castelo-familia.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
           "kicker": "roadtrip em grupo",
-          "titulo": "California em grupo e a melhor road trip, se a logistica nao te derrubar.",
-          "sub": "Estrada, praia e parque, com varios amigos no carro.",
+          "titulo": "Califórnia em grupo e a melhor road trip, se a logística não te derrubar.",
+          "sub": "Estrada, praia e parque, com vários amigos no carro.",
           "destaques": [
             "road"
           ],
@@ -824,7 +824,7 @@
           "tipo": "passo",
           "numero": "02",
           "titulo": "Um carro grande ganha",
-          "corpo": "Dividir em dois carros separa o grupo. Uma van rende mais e barateia por cabeca.",
+          "corpo": "Dividir em dois carros separa o grupo. Uma van rende mais e barateia por cabeça.",
           "destaques": [
             "van"
           ]
@@ -832,24 +832,24 @@
         {
           "tipo": "passo",
           "numero": "03",
-          "titulo": "LA, praia e parque",
-          "corpo": "Los Angeles num dia, a costa no outro, Disneyland pra fechar. Cenario novo todo dia.",
+          "titulo": "LÁ, praia e parque",
+          "corpo": "Los Angeles num dia, a costa no outro, Disneyland pra fechar. Cenário novo todo dia.",
           "destaques": [
-            "cenario"
+            "cenário"
           ]
         },
         {
           "tipo": "passo",
           "numero": "04",
           "titulo": "Combinem paradas",
-          "corpo": "Cada um quer parar num lugar. Definam as paradas antes pra estrada nao virar discussao.",
+          "corpo": "Cada um quer parar num lugar. Definam as paradas antes pra estrada não virar discussão.",
           "destaques": [
             "antes"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Road trip em grupo une ou racha. A diferenca esta no combinado, nao na estrada.",
+          "texto": "Road trip em grupo une ou racha. A diferenca está no combinado, não na estrada.",
           "destaques": [
             "combinado,"
           ]
@@ -858,7 +858,7 @@
           "tipo": "passo",
           "numero": "06",
           "titulo": "O que abre a estrada",
-          "corpo": "A road trip so comeca com os vistos de todo mundo prontos e no prazo.",
+          "corpo": "A road trip só começa com os vistos de todo mundo prontos e no prazo.",
           "destaques": [
             "todo"
           ]
@@ -870,10 +870,10 @@
           "destaques": [
             "CALIGRUPO"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "California em grupo e a melhor road trip, se a logistica nao te derrubar.\n\nUm carro grande ganha: dividir em dois separa o grupo, uma van rende mais e barateia. LA num dia, a costa no outro, Disneyland pra fechar. E definam as paradas antes, pra estrada nao virar discussao. Road trip em grupo une ou racha, e a diferenca esta no combinado.\n\nE so comeca com os vistos de todo mundo prontos.\n\nComenta CALIGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#california #roadtrip #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua"
+      "legenda": "Califórnia em grupo e a melhor road trip, se a logística não te derrubar.\n\nUm carro grande ganha: dividir em dois separa o grupo, uma van rende mais e barateia. LÁ num dia, a costa no outro, Disneyland pra fechar. E definam as paradas antes, pra estrada não virar discussão. Road trip em grupo une ou racha, e a diferenca está no combinado.\n\nÉ só começa com os vistos de todo mundo prontos.\n\nComenta CALIGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#california #roadtrip #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua"
     },
     {
       "combo": "D05xP6",
@@ -887,14 +887,14 @@
       "kit": "corporate",
       "tese": "Neve em grupo de amigos",
       "persona": "Grupo de amigos",
-      "dor": "uns esquiam, outros nao, e o grupo se divide",
+      "dor": "uns esquiam, outros não, e o grupo se divide",
       "imagem": "acervo/destinos/montanha-neve.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
           "kicker": "neve em grupo",
           "titulo": "Viagem de neve com amigos: nem todo mundo precisa esquiar.",
-          "sub": "O erro e achar que a montanha so serve pra pista.",
+          "sub": "O erro e achar que a montanha só serve pra pista.",
           "destaques": [
             "nem"
           ],
@@ -904,7 +904,7 @@
           "tipo": "passo",
           "numero": "02",
           "titulo": "Tem o que fazer sem esqui",
-          "corpo": "Tubing, trenó, snowbike e a vila. Quem nao esquia curte o dia inteiro do mesmo jeito.",
+          "corpo": "Tubing, trenó, snowbike e a vila. Quem não esquia curte o dia inteiro do mesmo jeito.",
           "destaques": [
             "sem"
           ]
@@ -912,8 +912,8 @@
         {
           "tipo": "passo",
           "numero": "03",
-          "titulo": "Aluguem tudo la",
-          "corpo": "Roupa e equipamento se alugam na estacao. Ninguem precisa comprar casaco caro pra uma viagem.",
+          "titulo": "Aluguem tudo lá",
+          "corpo": "Roupa e equipamento se alugam na estação. Ninguém precisa comprar casaco caro pra uma viagem.",
           "destaques": [
             "alugam"
           ]
@@ -929,7 +929,7 @@
         },
         {
           "tipo": "insight",
-          "texto": "Neve em grupo nao e sobre esquiar bem. E sobre estar junto no frio.",
+          "texto": "Neve em grupo não é sobre esquiar bem. E sobre estar junto no frio.",
           "destaques": [
             "junto"
           ]
@@ -938,7 +938,7 @@
           "tipo": "passo",
           "numero": "06",
           "titulo": "A parte que tem prazo",
-          "corpo": "A neve tem epoca e o visto tem o tempo dele. Os vistos do grupo vem primeiro.",
+          "corpo": "A neve tem época e o visto tem o tempo dele. Os vistos do grupo vem primeiro.",
           "destaques": [
             "primeiro."
           ]
@@ -950,10 +950,10 @@
           "destaques": [
             "NEVEGRUPO"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Viagem de neve com amigos: nem todo mundo precisa esquiar. O erro e achar que a montanha so serve pra pista.\n\nTem tubing, trenó, snowbike e a vila pra quem nao esquia. Aluguem roupa e equipamento na estacao, ninguem precisa comprar casaco caro. E o fim de dia e do grupo: chale, fondue, lareira. Neve em grupo nao e sobre esquiar bem, e sobre estar junto no frio.\n\nA neve tem epoca e o visto tem o tempo dele. Os vistos vem primeiro.\n\nComenta NEVEGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#neve #viagemcomamigos #grupodeamigos #inverno #eua #vistoamericano #vistoeua"
+      "legenda": "Viagem de neve com amigos: nem todo mundo precisa esquiar. O erro e achar que a montanha só serve pra pista.\n\nTem tubing, trenó, snowbike e a vila pra quem não esquia. Aluguem roupa e equipamento na estação, ninguém precisa comprar casaco caro. E o fim de dia e do grupo: chale, fondue, lareira. Neve em grupo não é sobre esquiar bem, e sobre estar junto no frio.\n\nA neve tem época e o visto tem o tempo dele. Os vistos vem primeiro.\n\nComenta NEVEGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#neve #viagemcomamigos #grupodeamigos #inverno #eua #vistoamericano #vistoeua"
     },
     {
       "combo": "D06xP2",
@@ -967,14 +967,14 @@
       "kit": "corporate",
       "tese": "Orlando a dois, antes dos filhos",
       "persona": "Casal primeira viagem",
-      "dor": "acha que Orlando so vale com filhos",
+      "dor": "acha que Orlando só vale com filhos",
       "imagem": "acervo/destinos/disney-main-street.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
           "kicker": "orlando sem filhos",
-          "titulo": "Orlando a dois, antes dos filhos, e uma viagem que ninguem te vende.",
-          "sub": "A Disney adulta existe e e romantica.",
+          "titulo": "Orlando a dois, antes dos filhos, e uma viagem que ninguém te vende.",
+          "sub": "A Disney adulta existe e e romântica.",
           "destaques": [
             "adulta"
           ],
@@ -984,7 +984,7 @@
           "tipo": "passo",
           "numero": "02",
           "titulo": "Parque tem lado adulto",
-          "corpo": "Gastronomia, bares tematicos, shows noturnos. A dois, da pra viver a Disney de outro jeito.",
+          "corpo": "Gastronomia, bares tematicos, shows noturnos. A dois, dá pra viver a Disney de outro jeito.",
           "destaques": [
             "adulto"
           ]
@@ -993,7 +993,7 @@
           "tipo": "passo",
           "numero": "03",
           "titulo": "Ritmo de casal",
-          "corpo": "Sem correr atras de personagem, voces escolhem o que querem. Menos correria, mais experiencia.",
+          "corpo": "Sem correr atrás de personagem, vocês escolhem o que querem. Menos correria, mais experiência.",
           "destaques": [
             "escolhem"
           ]
@@ -1001,15 +1001,15 @@
         {
           "tipo": "passo",
           "numero": "04",
-          "titulo": "Alem dos parques",
-          "corpo": "Outlets, jantar bom e um dia em Miami ou na costa. Orlando a dois abre espaco pra isso.",
+          "titulo": "Além dos parques",
+          "corpo": "Outlets, jantar bom e um dia em Miami ou na costa. Orlando a dois abre espaço pra isso.",
           "destaques": [
-            "espaco"
+            "espaço"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Orlando nao e so das criancas. A dois, ela vira uma viagem completamente diferente.",
+          "texto": "Orlando não é só das crianças. A dois, ela vira uma viagem completamente diferente.",
           "destaques": [
             "diferente."
           ]
@@ -1018,7 +1018,7 @@
           "tipo": "passo",
           "numero": "06",
           "titulo": "O que vem antes",
-          "corpo": "A viagem dos dois comeca no visto do casal aprovado e no prazo.",
+          "corpo": "A viagem dos dois começa no visto do casal aprovado e no prazo.",
           "destaques": [
             "antes"
           ]
@@ -1030,10 +1030,10 @@
           "destaques": [
             "ORLANDODOIS"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Orlando a dois, antes dos filhos, e uma viagem que ninguem te vende. A Disney adulta existe e e romantica.\n\nParque tem lado adulto: gastronomia, bares tematicos, shows noturnos. Sem correr atras de personagem, voces escolhem o que querem, menos correria e mais experiencia. E da pra emendar outlets, jantar bom e um dia na costa. Orlando a dois vira uma viagem completamente diferente.\n\nE comeca no visto do casal no prazo.\n\nComenta ORLANDODOIS que eu te mando o roteiro. Ou toca no link da bio.\n\n#orlando #disney #viagemacasal #luademel #eua #vistoamericano #vistoeua"
+      "legenda": "Orlando a dois, antes dos filhos, e uma viagem que ninguém te vende. A Disney adulta existe e e romântica.\n\nParque tem lado adulto: gastronomia, bares tematicos, shows noturnos. Sem correr atrás de personagem, vocês escolhem o que querem, menos correria e mais experiência. E dá pra emendar outlets, jantar bom e um dia na costa. Orlando a dois vira uma viagem completamente diferente.\n\nE começa no visto do casal no prazo.\n\nComenta ORLANDODOIS que eu te mando o roteiro. Ou toca no link da bio.\n\n#orlando #disney #viagemacasal #luademel #eua #vistoamericano #vistoeua"
     },
     {
       "combo": "D07xP6",
@@ -1053,7 +1053,7 @@
         {
           "tipo": "capa_foto",
           "kicker": "praia em grupo",
-          "titulo": "Praia em grupo nos EUA tem 3 regras que o brasileiro nao sabe.",
+          "titulo": "Praia em grupo nos EUA tem 3 regras que o brasileiro não sabe.",
           "sub": "Errar uma estraga o dia de todo mundo.",
           "destaques": [
             "3"
@@ -1064,7 +1064,7 @@
           "tipo": "passo",
           "numero": "02",
           "titulo": "1. Sem barraquinha",
-          "corpo": "Nao tem quiosque servindo na areia. Combinem levar cooler, agua e comida, ou comprar antes.",
+          "corpo": "Não tem quiosque servindo na areia. Combinem levar cooler, água e comida, ou comprar antes.",
           "destaques": [
             "antes."
           ]
@@ -1072,7 +1072,7 @@
         {
           "tipo": "passo",
           "numero": "03",
-          "titulo": "2. Alcool rende multa",
+          "titulo": "2. Álcool rende multa",
           "corpo": "Na maioria das praias, bebida na areia e proibida. O grupo todo paga o vacilo de um.",
           "destaques": [
             "multa."
@@ -1089,7 +1089,7 @@
         },
         {
           "tipo": "insight",
-          "texto": "Praia americana nao e a do Brasil. Grupo que sabe as regras aproveita, o resto leva susto.",
+          "texto": "Praia americana não é a do Brasil. Grupo que sabe as regras aproveita, o resto leva susto.",
           "destaques": [
             "regras"
           ]
@@ -1098,7 +1098,7 @@
           "tipo": "passo",
           "numero": "06",
           "titulo": "O que vem antes do mar",
-          "corpo": "Praia em grupo so acontece com os vistos de todo mundo prontos e no prazo.",
+          "corpo": "Praia em grupo só acontece com os vistos de todo mundo prontos e no prazo.",
           "destaques": [
             "todo"
           ]
@@ -1110,10 +1110,10 @@
           "destaques": [
             "PRAIAGRUPO"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Praia em grupo nos EUA tem 3 regras que o brasileiro nao sabe, e errar uma estraga o dia de todo mundo.\n\n1. Sem barraquinha: levem cooler, agua e comida. 2. Alcool na areia rende multa na maioria das praias, e o grupo todo paga o vacilo de um. 3. Bandeira e lei: vermelha e mar fechado. Praia americana nao e a do Brasil, quem sabe as regras aproveita.\n\nE so acontece com os vistos de todo mundo prontos.\n\nComenta PRAIAGRUPO que eu te mando o guia. Ou toca no link da bio.\n\n#praia #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua #florida"
+      "legenda": "Praia em grupo nos EUA tem 3 regras que o brasileiro não sabe, e errar uma estraga o dia de todo mundo.\n\n1. Sem barraquinha: levem cooler, água e comida. 2. Álcool na areia rende multa na maioria das praias, e o grupo todo paga o vacilo de um. 3. Bandeira e lei: vermelha e mar fechado. Praia americana não é a do Brasil, quem sabe as regras aproveita.\n\nÉ só acontece com os vistos de todo mundo prontos.\n\nComenta PRAIAGRUPO que eu te mando o guia. Ou toca no link da bio.\n\n#praia #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua #florida"
     },
     {
       "combo": "D10xP2",
@@ -1125,26 +1125,26 @@
       "persona_id": "P2",
       "formato": "carrossel",
       "kit": "corporate",
-      "tese": "Miami a dois alem da praia",
+      "tese": "Miami a dois além da praia",
       "persona": "Casal primeira viagem",
       "dor": "quer Miami diferente do feed de balada",
-      "imagem": "acervo/destinos/ny-skyline-crianca.jpg",
+      "imagem": "acervo/destinos/miami-crianca.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
           "kicker": "miami diferente",
-          "titulo": "Miami a dois pode ser natureza e arte, nao so balada.",
-          "sub": "O casal que so faz orla volta achando que Miami e cara e vazia.",
+          "titulo": "Miami a dois pode ser natureza e arte, não só balada.",
+          "sub": "O casal que só faz orla volta achando que Miami e cara e vazia.",
           "destaques": [
-            "nao"
+            "não"
           ],
-          "imagem": "acervo/destinos/ny-skyline-crianca.jpg"
+          "imagem": "acervo/destinos/miami-crianca.jpg"
         },
         {
           "tipo": "passo",
           "numero": "02",
           "titulo": "Arte e cor",
-          "corpo": "Wynwood a pe rende um dia inteiro de mural, cafe e galeria. Romantico e barato.",
+          "corpo": "Wynwood a pé rende um dia inteiro de mural, café e galeria. Romântico e barato.",
           "destaques": [
             "barato."
           ]
@@ -1162,14 +1162,14 @@
           "tipo": "passo",
           "numero": "04",
           "titulo": "Comer como gente local",
-          "corpo": "Little Havana e os mercados alimentam bem sem o preco da avenida turistica.",
+          "corpo": "Little Havana e os mercados alimentam bem sem o preço da avenida turística.",
           "destaques": [
             "local"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Miami cara e a que fica so na avenida. A dois, o barato e sair dela.",
+          "texto": "Miami cara e a que fica só na avenida. A dois, o barato e sair dela.",
           "destaques": [
             "sair"
           ]
@@ -1178,22 +1178,22 @@
           "tipo": "passo",
           "numero": "06",
           "titulo": "O que vem antes do voo",
-          "corpo": "Miami a dois comeca meses antes, no visto do casal aprovado e no prazo.",
+          "corpo": "Miami a dois começa meses antes, no visto do casal aprovado e no prazo.",
           "destaques": [
             "antes,"
           ]
         },
         {
           "tipo": "cta",
-          "titulo": "Comenta MIAMICASAL que eu te mando o roteiro alem da orla. Ou link na bio.",
+          "titulo": "Comenta MIAMICASAL que eu te mando o roteiro além da orla. Ou link na bio.",
           "acao": "Comenta MIAMICASAL",
           "destaques": [
             "MIAMICASAL"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Miami a dois pode ser natureza e arte, nao so balada. O casal que so faz orla volta achando que Miami e cara e vazia.\n\nWynwood a pe rende um dia de mural, cafe e galeria, romantico e barato. Um dia nos Keys ou Everglades muda a viagem. E Little Havana alimenta bem sem o preco da avenida turistica. Miami cara e a que fica so na avenida, o barato e sair dela.\n\nE comeca meses antes, no visto do casal no prazo.\n\nComenta MIAMICASAL que eu te mando o roteiro. Ou toca no link da bio.\n\n#miami #viagemacasal #wynwood #eua #vistoamericano #vistoeua #keys"
+      "legenda": "Miami a dois pode ser natureza e arte, não só balada. O casal que só faz orla volta achando que Miami e cara e vazia.\n\nWynwood a pé rende um dia de mural, café e galeria, romântico e barato. Um dia nos Keys ou Everglades muda a viagem. E Little Havana alimenta bem sem o preço da avenida turística. Miami cara e a que fica só na avenida, o barato e sair dela.\n\nE começa meses antes, no visto do casal no prazo.\n\nComenta MIAMICASAL que eu te mando o roteiro. Ou toca no link da bio.\n\n#miami #viagemacasal #wynwood #eua #vistoamericano #vistoeua #keys"
     },
     {
       "combo": "D06xP6",
@@ -1207,14 +1207,14 @@
       "kit": "corporate",
       "tese": "Orlando em grupo de amigos",
       "persona": "Grupo de amigos",
-      "dor": "grupo grande em Orlando vira bagunca cara",
+      "dor": "grupo grande em Orlando vira bagunça cara",
       "imagem": "acervo/destinos/disney-main-street.jpg",
       "slides": [
         {
           "tipo": "capa_foto",
           "kicker": "orlando em grupo",
-          "titulo": "Orlando com a turma toda: divertido ou um caos caro. Voce decide.",
-          "sub": "Grupo grande em parque precisa de combinado, nao de sorte.",
+          "titulo": "Orlando com a turma toda: divertido ou um caos caro. Você decide.",
+          "sub": "Grupo grande em parque precisa de combinado, não de sorte.",
           "destaques": [
             "caos"
           ],
@@ -1224,7 +1224,7 @@
           "tipo": "passo",
           "numero": "02",
           "titulo": "Casa grande ganha de hotel",
-          "corpo": "Alugar uma casa com cozinha barateia muito pro grupo. Cafe e janta em casa sobra pro parque.",
+          "corpo": "Alugar uma casa com cozinha barateia muito pro grupo. Café e janta em casa sobra pro parque.",
           "destaques": [
             "casa"
           ]
@@ -1233,7 +1233,7 @@
           "tipo": "passo",
           "numero": "03",
           "titulo": "Nem todo mundo colado",
-          "corpo": "Definam encontro e horario. Quem quer radical vai pra Universal, quem quer calmo fica na Disney.",
+          "corpo": "Definam encontro e horário. Quem quer radical vai pra Universal, quem quer calmo fica na Disney.",
           "destaques": [
             "encontro"
           ]
@@ -1242,14 +1242,14 @@
           "tipo": "passo",
           "numero": "04",
           "titulo": "Rateio combinado antes",
-          "corpo": "Ingresso, mercado, transporte. Combinem quem paga o que no comeco, nao no fim.",
+          "corpo": "Ingresso, mercado, transporte. Combinem quem paga o que no começo, não no fim.",
           "destaques": [
             "antes"
           ]
         },
         {
           "tipo": "insight",
-          "texto": "Grupo em Orlando nao briga por parque. Briga por dinheiro mal combinado.",
+          "texto": "Grupo em Orlando não briga por parque. Briga por dinheiro mal combinado.",
           "destaques": [
             "combinado."
           ]
@@ -1258,7 +1258,7 @@
           "tipo": "passo",
           "numero": "06",
           "titulo": "O que trava o grupo antes",
-          "corpo": "Orlando em grupo so acontece com os vistos de todo mundo prontos e no prazo.",
+          "corpo": "Orlando em grupo só acontece com os vistos de todo mundo prontos e no prazo.",
           "destaques": [
             "todo"
           ]
@@ -1270,10 +1270,10 @@
           "destaques": [
             "ORLANDOGRUPO"
           ],
-          "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
         }
       ],
-      "legenda": "Orlando com a turma toda pode ser divertido ou um caos caro. Voce decide no planejamento.\n\nAlugar uma casa com cozinha barateia muito, cafe e janta em casa sobra pro parque. Nao andem todos colados: definam encontro e horario, quem quer radical vai pra Universal, quem quer calmo fica na Disney. E combinem o rateio no comeco, nao no fim. Grupo em Orlando nao briga por parque, briga por dinheiro mal combinado.\n\nE so acontece com os vistos de todo mundo prontos.\n\nComenta ORLANDOGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#orlando #disney #universal #viagemcomamigos #grupodeamigos #eua #vistoamericano"
+      "legenda": "Orlando com a turma toda pode ser divertido ou um caos caro. Você decide no planejamento.\n\nAlugar uma casa com cozinha barateia muito, café e janta em casa sobra pro parque. Não andem todos colados: definam encontro e horário, quem quer radical vai pra Universal, quem quer calmo fica na Disney. E combinem o rateio no começo, não no fim. Grupo em Orlando não briga por parque, briga por dinheiro mal combinado.\n\nÉ só acontece com os vistos de todo mundo prontos.\n\nComenta ORLANDOGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#orlando #disney #universal #viagemcomamigos #grupodeamigos #eua #vistoamericano"
     }
   ]
 }

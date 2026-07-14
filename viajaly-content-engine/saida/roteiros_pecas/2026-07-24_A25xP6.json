@@ -10,39 +10,39 @@
   "tese": "Miami em 3 dias com o grupo",
   "persona": "Grupo de amigos",
   "dor": "coordenar datas de todo mundo",
-  "imagem": "acervo/destinos/ny-skyline-menina.jpg",
+  "imagem": "acervo/destinos/miami-menina.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "miami de verdade",
       "titulo": "Miami com o grupo vira briga de lobby sem uma coisa.",
-      "sub": "3 dias, varias pessoas, um plano que todo mundo aceita.",
+      "sub": "3 dias, várias pessoas, um plano que todo mundo aceita.",
       "destaques": [
         "briga"
       ],
-      "imagem": "acervo/destinos/ny-skyline-menina.jpg"
+      "imagem": "acervo/destinos/miami-menina.jpg"
     },
     {
       "tipo": "passo",
       "numero": "02",
       "titulo": "O erro do grupo",
-      "corpo": "Cada um quer uma coisa. Sem plano, o dia vira discussao no lobby do hotel.",
+      "corpo": "Cada um quer uma coisa. Sem plano, o dia vira discussão no lobby do hotel.",
       "destaques": [
-        "discussao"
+        "discussão"
       ]
     },
     {
       "tipo": "passo",
       "numero": "03",
       "titulo": "Divida por bloco",
-      "corpo": "Praia de manha, cidade a tarde, um dia de outlet. Todo mundo pega o que quer sem atropelar o outro.",
+      "corpo": "Praia de manhã, cidade a tarde, um dia de outlet. Todo mundo pega o que quer sem atropelar o outro.",
       "destaques": [
         "bloco"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Grupo nao briga por gosto. Briga por falta de plano.",
+      "texto": "Grupo não briga por gosto. Briga por falta de plano.",
       "destaques": [
         "plano."
       ]
@@ -51,7 +51,7 @@
       "tipo": "passo",
       "numero": "05",
       "titulo": "O que trava o grupo antes",
-      "corpo": "Varios vistos, varios DS-160 sem se contradizer, agendados juntos. E ai que a viagem empaca.",
+      "corpo": "Vários vistos, vários DS-160 sem se contradizer, agendados juntos. E aí que a viagem empaca.",
       "destaques": [
         "juntos."
       ]
@@ -75,5 +75,5 @@
       ]
     }
   ],
-  "legenda": "Miami com o grupo vira briga no lobby do hotel sem uma coisa: plano.\n\nSem plano, cada um quer uma coisa e o dia trava. O truque e dividir por bloco: praia de manha, cidade a tarde, um dia de outlet. Mas o que trava o grupo e antes: varios vistos, varios DS-160 sem se contradizer, agendados juntos. Alinha os vistos primeiro e Miami roda sozinha.\n\nComenta MIAMI que eu te mando o roteiro de 3 dias pra grupo. Ou toca no link da bio.\n\n#miami #viagemcomamigos #grupodeamigos #vistoamericano #vistoeua #b1b2 #eua"
+  "legenda": "Miami com o grupo vira briga no lobby do hotel sem uma coisa: plano.\n\nSem plano, cada um quer uma coisa e o dia trava. O truque e dividir por bloco: praia de manhã, cidade a tarde, um dia de outlet. Mas o que trava o grupo e antes: vários vistos, vários DS-160 sem se contradizer, agendados juntos. Alinha os vistos primeiro e Miami roda sozinha.\n\nComenta MIAMI que eu te mando o roteiro de 3 dias pra grupo. Ou toca no link da bio.\n\n#miami #viagemcomamigos #grupodeamigos #vistoamericano #vistoeua #b1b2 #eua"
 }

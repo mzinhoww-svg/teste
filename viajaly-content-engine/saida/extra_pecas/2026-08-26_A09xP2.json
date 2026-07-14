@@ -7,16 +7,16 @@
   "persona_id": "P2",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "CASV e consulado sao dois dias (casal)",
+  "tese": "CASV e consulado são dois dias (casal)",
   "persona": "Casal primeira viagem",
-  "dor": "acha que resolve o visto num dia so",
+  "dor": "acha que resolve o visto num dia só",
   "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "planejem os dois dias",
-      "titulo": "Tirar o visto sao DUAS visitas, em dias diferentes.",
-      "sub": "Casal que planeja um dia so se atrapalha.",
+      "titulo": "Tirar o visto são DUAS visitas, em dias diferentes.",
+      "sub": "Casal que planeja um dia só se atrapalha.",
       "destaques": [
         "DUAS"
       ],
@@ -26,7 +26,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "Dia 1: o CASV",
-      "corpo": "Foto e digitais. Rapido, mas e um deslocamento inteiro. Nao e a entrevista.",
+      "corpo": "Foto e digitais. Rápido, mas e um deslocamento inteiro. Não é a entrevista.",
       "destaques": [
         "digitais."
       ]
@@ -35,14 +35,14 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "Dia 2: o consulado",
-      "corpo": "A entrevista com o oficial. Pode ser noutra data e ate noutra cidade. Planejem os dois.",
+      "corpo": "A entrevista com o oficial. Pode ser noutra data e até noutra cidade. Planejem os dois.",
       "destaques": [
         "entrevista"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Primeira viagem ja da frio na barriga. Descobrir que sao dois dias na ultima hora piora.",
+      "texto": "Primeira viagem já da frio na barriga. Descobrir que são dois dias na última hora piora.",
       "destaques": [
         "dois"
       ]
@@ -50,10 +50,10 @@
     {
       "tipo": "passo",
       "numero": "05",
-      "titulo": "Da pra otimizar",
-      "corpo": "Em varios postos marca-se os dois em dias proximos, numa viagem so. Menos custo pro casal.",
+      "titulo": "Dá pra otimizar",
+      "corpo": "Em vários postos marca-se os dois em dias próximos, numa viagem só. Menos custo pro casal.",
       "destaques": [
-        "proximos"
+        "próximos"
       ]
     },
     {
@@ -75,5 +75,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Tirar o visto americano sao DUAS visitas, em dias diferentes. Casal que planeja um dia so se atrapalha.\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista, que pode ser noutra data e ate noutra cidade. Da pra otimizar, em varios postos marca-se os dois proximos numa viagem so. Alinhem folga dos dois pras duas datas, porque um imprevisto derruba um dia inteiro.\n\nComenta DOISDIAS que eu te mando como marcar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #casv #vistoeua #b1b2 #viagemacasal #dicasdevisto"
+  "legenda": "Tirar o visto americano são DUAS visitas, em dias diferentes. Casal que planeja um dia só se atrapalha.\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista, que pode ser noutra data e até noutra cidade. Dá pra otimizar, em vários postos marca-se os dois próximos numa viagem só. Alinhem folga dos dois pras duas datas, porque um imprevisto derruba um dia inteiro.\n\nComenta DOISDIAS que eu te mando como marcar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #casv #vistoeua #b1b2 #viagemacasal #dicasdevisto"
 }

@@ -2,23 +2,23 @@
   "combo": "A16xP7",
   "data": "2026-08-21",
   "conta": "@viajaly",
-  "pilar": "antidoto",
+  "pilar": "antídoto",
   "angulo_id": "A16",
   "persona_id": "P7",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "Nao ter carteira assinada nao te reprova",
-  "persona": "Autonomo / MEI",
-  "dor": "medo de ser reprovado so por ser autonomo",
+  "tese": "Não ter carteira assinada não te reprova",
+  "persona": "Autônomo / MEI",
+  "dor": "medo de ser reprovado só por ser autônomo",
   "imagem": "acervo/destinos/praia-crianca-areia.jpg",
   "slides": [
     {
       "tipo": "capa_foto",
-      "kicker": "mito do autonomo",
-      "titulo": "Nao ter carteira assinada nao reprova o seu visto. Calma.",
-      "sub": "O mito que faz autonomo desistir antes de tentar.",
+      "kicker": "mito do autônomo",
+      "titulo": "Não ter carteira assinada não reprova o seu visto. Calma.",
+      "sub": "O mito que faz autônomo desistir antes de tentar.",
       "destaques": [
-        "nao"
+        "não"
       ],
       "imagem": "acervo/destinos/praia-crianca-areia.jpg"
     },
@@ -26,7 +26,7 @@
       "tipo": "passo",
       "numero": "02",
       "titulo": "De onde vem o medo",
-      "corpo": "A cabeca acha que sem holerite nao ha prova de vinculo. Falso. Vinculo se comprova de muitas formas.",
+      "corpo": "A cabeça acha que sem holerite não ha prova de vínculo. Falso. Vínculo se comprova de muitas formas.",
       "destaques": [
         "Falso."
       ]
@@ -34,15 +34,15 @@
     {
       "tipo": "passo",
       "numero": "03",
-      "titulo": "Como o autonomo comprova",
-      "corpo": "Faturamento, contrato de clientes, imovel, familia, movimentacao. A sua vida inteira e a prova.",
+      "titulo": "Como o autônomo comprova",
+      "corpo": "Faturamento, contrato de clientes, imóvel, família, movimentação. A sua vida inteira e a prova.",
       "destaques": [
         "vida"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "O consulo nao reprova quem e autonomo. Reprova quem chega sem saber se explicar.",
+      "texto": "O cônsul não reprova quem e autônomo. Reprova quem chega sem saber se explicar.",
       "destaques": [
         "explicar."
       ]
@@ -51,23 +51,23 @@
       "tipo": "passo",
       "numero": "05",
       "titulo": "O que realmente conta",
-      "corpo": "Coerencia entre o que voce declara e o que voce fala. Autonomo coerente passa mais que voce imagina.",
+      "corpo": "Coerência entre o que você declara e o que você fala. Autônomo coerente passa mais que você imagina.",
       "destaques": [
-        "Coerencia"
+        "Coerência"
       ]
     },
     {
       "tipo": "passo",
       "numero": "06",
       "titulo": "O ajuste que muda tudo",
-      "corpo": "Parar de esconder que e autonomo e aprender a apresentar isso como forca, nao fraqueza.",
+      "corpo": "Parar de esconder que é autônomo e aprender a apresentar isso como força, não fraqueza.",
       "destaques": [
-        "forca,"
+        "força,"
       ]
     },
     {
       "tipo": "cta",
-      "titulo": "Comenta AUTONOMO que eu te mando como comprovar vinculo sem holerite. Ou link na bio.",
+      "titulo": "Comenta AUTONOMO que eu te mando como comprovar vínculo sem holerite. Ou link na bio.",
       "acao": "Comenta AUTONOMO",
       "destaques": [
         "AUTONOMO"
@@ -75,5 +75,5 @@
       "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
     }
   ],
-  "legenda": "Nao ter carteira assinada nao reprova o seu visto. Esse mito faz autonomo desistir antes de tentar.\n\nO medo vem de achar que sem holerite nao ha prova de vinculo. Falso: faturamento, contrato de clientes, imovel, familia, movimentacao. A sua vida inteira e a prova. O consulo nao reprova quem e autonomo, reprova quem chega sem saber se explicar. Autonomo coerente passa mais que voce imagina.\n\nComenta AUTONOMO que eu te mando como comprovar vinculo sem holerite. Ou toca no link da bio.\n\n#autonomo #mei #vistoamericano #vistoeua #b1b2 #empreendedor #entrevistavisto"
+  "legenda": "Não ter carteira assinada não reprova o seu visto. Esse mito faz autônomo desistir antes de tentar.\n\nO medo vem de achar que sem holerite não ha prova de vínculo. Falso: faturamento, contrato de clientes, imóvel, família, movimentação. A sua vida inteira e a prova. O cônsul não reprova quem e autônomo, reprova quem chega sem saber se explicar. Autônomo coerente passa mais que você imagina.\n\nComenta AUTONOMO que eu te mando como comprovar vínculo sem holerite. Ou toca no link da bio.\n\n#autonomo #mei #vistoamericano #vistoeua #b1b2 #empreendedor #entrevistavisto"
 }

@@ -2,19 +2,19 @@
   "combo": "A12xP4",
   "data": "2026-07-17",
   "conta": "@leticia",
-  "pilar": "antidoto",
+  "pilar": "antídoto",
   "angulo_id": "A12",
   "persona_id": "P4",
   "formato": "carrossel",
   "kit": "corporate",
-  "tese": "O consul decide nos primeiros 10 segundos",
+  "tese": "O cônsul decide nos primeiros 10 segundos",
   "persona": "Torcedor Copa",
   "dor": "prazo. janela fecha",
   "slides": [
     {
       "tipo": "capa_foto",
       "kicker": "os primeiros segundos",
-      "titulo": "Ele decide nos primeiros 10 segundos. Voce tem 1 minuto no total.",
+      "titulo": "Ele decide nos primeiros 10 segundos. Você tem 1 minuto no total.",
       "sub": "Torcedor ansioso perde o visto falando demais.",
       "destaques": [
         "10"
@@ -24,8 +24,8 @@
     {
       "tipo": "passo",
       "numero": "02",
-      "titulo": "A janela e minuscula",
-      "corpo": "A entrevista inteira dura menos de um minuto. A impressao dos primeiros segundos carrega o resto.",
+      "titulo": "A janela e minúscula",
+      "corpo": "A entrevista inteira dura menos de um minuto. A impressão dos primeiros segundos carrega o resto.",
       "destaques": [
         "minuto."
       ]
@@ -34,14 +34,14 @@
       "tipo": "passo",
       "numero": "03",
       "titulo": "O que conta nesses segundos",
-      "corpo": "Como voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta.",
+      "corpo": "Como você chega, como responde a primeira pergunta, se você hesita. Segurança no óbvio abre a porta.",
       "destaques": [
-        "Seguranca"
+        "Segurança"
       ]
     },
     {
       "tipo": "insight",
-      "texto": "Nao e representar um personagem. E chegar tao preparado que a verdade sai sem gaguejo.",
+      "texto": "Não é representar um personagem. E chegar tão preparado que a verdade sai sem gaguejo.",
       "destaques": [
         "preparado"
       ]
@@ -50,7 +50,7 @@
       "tipo": "passo",
       "numero": "05",
       "titulo": "O torcedor tende a errar aqui",
-      "corpo": "Ansioso com o prazo do jogo, fala demais, justifica demais. O oficial nao perguntou sua vida. Responda o que foi perguntado.",
+      "corpo": "Ansioso com o prazo do jogo, fala demais, justifica demais. O oficial não perguntou sua vida. Responda o que foi perguntado.",
       "destaques": [
         "demais."
       ]
@@ -74,6 +74,6 @@
       ]
     }
   ],
-  "legenda": "A entrevista do visto dura menos de um minuto, e o consulo decide nos primeiros 10 segundos.\n\nComo voce chega, como responde a primeira pergunta, se voce hesita. Seguranca no obvio abre a porta. Nao e representar um personagem, e chegar tao preparado que a verdade sai sem gaguejo. O torcedor com prazo de Copa erra falando demais. Responda o que foi perguntado.\n\nComenta ENTREVISTA que eu te mando o roteiro dos primeiros 10 segundos. Ou toca no link da bio.\n\n#vistoamericano #copadomundo #vistoeua #b1b2 #entrevistavisto #futebol #eua",
+  "legenda": "A entrevista do visto dura menos de um minuto, e o cônsul decide nos primeiros 10 segundos.\n\nComo você chega, como responde a primeira pergunta, se você hesita. Segurança no óbvio abre a porta. Não é representar um personagem, e chegar tão preparado que a verdade sai sem gaguejo. O torcedor com prazo de Copa erra falando demais. Responda o que foi perguntado.\n\nComenta ENTREVISTA que eu te mando o roteiro dos primeiros 10 segundos. Ou toca no link da bio.\n\n#vistoamericano #copadomundo #vistoeua #b1b2 #entrevistavisto #futebol #eua",
   "imagem": "acervo/destinos/praia-crianca-areia.jpg"
 }
