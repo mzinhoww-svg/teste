@@ -1,0 +1,75 @@
+{
+  "id": "TCK-018",
+  "title": "Implementar CRUD de Programas no painel admin",
+  "summary": "Criar formulários de criação/edição de podcasts no admin, upload de imagem, preview visualStyle, toggle featured, drag-and-drop.",
+  "status": "BACKLOG",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-010",
+  "wave": 4,
+  "parallel_group": "W4-G1",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 85,
+  "estimated_size": "L",
+  "risk_level": "MEDIUM",
+  "objective": "Admin permite criar, editar e ordenar programas",
+  "business_value": "Gestão completa do portfólio",
+  "requirements": [
+    "FR-013",
+    "FR-007",
+    "BR-005"
+  ],
+  "scope": {
+    "included": [
+      "src/app/admin/programas/",
+      "src/components/admin/podcast-form.tsx"
+    ],
+    "excluded": [
+      "CRUD episódios (TCK-019)",
+      "Analytics (TCK-020)"
+    ]
+  },
+  "dependencies": [
+    "TCK-005",
+    "TCK-017"
+  ],
+  "read_paths": [
+    "src/app/admin/layout.tsx",
+    "src/components/ui/"
+  ],
+  "write_paths": [
+    "src/app/admin/programas/",
+    "src/components/admin/podcast-form.tsx"
+  ],
+  "forbidden_paths": [
+    "src/app/(public)/"
+  ],
+  "deliverables": [
+    "Listagem programas",
+    "Form criação",
+    "Form edição",
+    "Preview visualStyle"
+  ],
+  "acceptance_criteria": [
+    "Criar persiste",
+    "Editar atualiza",
+    "Upload funciona",
+    "Preview ao vivo",
+    "Reorder funciona"
+  ],
+  "test_plan": {
+    "unit": [
+      "podcast-form.test.tsx"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "admin-podcast.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit podcast-form",
+    "pnpm lint"
+  ]
+}

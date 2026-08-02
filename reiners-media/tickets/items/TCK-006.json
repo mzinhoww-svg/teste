@@ -1,0 +1,80 @@
+{
+  "id": "TCK-006",
+  "title": "Implementar API CRUD de Episódios com parser de URLs",
+  "summary": "Endpoints REST para CRUD de episódios, parser automático de YouTube (video ID) e Spotify (URI), associação com podcasts.",
+  "status": "BACKLOG",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-005",
+  "wave": 1,
+  "parallel_group": "W1-G1",
+  "recommended_agent": "backend-engineer",
+  "independence_score": 95,
+  "estimated_size": "L",
+  "risk_level": "MEDIUM",
+  "objective": "API de episódios com parser automático de embeds",
+  "business_value": "Exibe episódios no portfólio com players",
+  "requirements": [
+    "FR-004",
+    "FR-007",
+    "BR-004",
+    "BR-007",
+    "BR-008"
+  ],
+  "scope": {
+    "included": [
+      "src/app/api/episodes/",
+      "src/lib/url-parser.ts"
+    ],
+    "excluded": [
+      "Frontend admin",
+      "Player embed UI"
+    ]
+  },
+  "dependencies": [
+    "TCK-002",
+    "TCK-003"
+  ],
+  "read_paths": [
+    "prisma/schema.prisma",
+    "src/lib/schemas.ts"
+  ],
+  "write_paths": [
+    "src/app/api/episodes/",
+    "src/lib/url-parser.ts"
+  ],
+  "forbidden_paths": [
+    "src/app/admin/",
+    "src/components/"
+  ],
+  "deliverables": [
+    "Endpoints episodes",
+    "Parser YouTube",
+    "Parser Spotify",
+    "Validação URLs"
+  ],
+  "acceptance_criteria": [
+    "GET por podcastId",
+    "POST com parser",
+    "Parser extrai ID/URI",
+    "Rejeita sem URL"
+  ],
+  "test_plan": {
+    "unit": [
+      "url-parser.test.ts"
+    ],
+    "integration": [
+      "episodes.integration.test.ts"
+    ],
+    "contract": [
+      "episodes.contract.test.ts"
+    ],
+    "e2e": [],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit url-parser",
+    "pnpm test:integration episodes",
+    "pnpm lint"
+  ]
+}

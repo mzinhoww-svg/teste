@@ -1,0 +1,80 @@
+{
+  "id": "TCK-013",
+  "title": "Implementar grid de portfolio e sistema de posters",
+  "summary": "Criar página /portfolio com grid responsivo, 5 estilos visuais de poster, carrossel de destaques, integração com API.",
+  "status": "BACKLOG",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-009",
+  "wave": 3,
+  "parallel_group": "W3-G2",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 85,
+  "estimated_size": "L",
+  "risk_level": "MEDIUM",
+  "objective": "Portfolio page com grid Netflix-style",
+  "business_value": "Vitrine principal do estúdio",
+  "requirements": [
+    "FR-009",
+    "FR-010",
+    "NFR-002",
+    "NFR-003"
+  ],
+  "scope": {
+    "included": [
+      "src/app/(public)/portfolio/page.tsx",
+      "src/components/portfolio/poster.tsx",
+      "src/components/portfolio/grid.tsx",
+      "src/components/portfolio/featured-carousel.tsx"
+    ],
+    "excluded": [
+      "Card expansível (TCK-014)",
+      "Player modal (TCK-015)"
+    ]
+  },
+  "dependencies": [
+    "TCK-001",
+    "TCK-005",
+    "TCK-008",
+    "TCK-009"
+  ],
+  "read_paths": [
+    "src/components/ui/",
+    "src/lib/tokens.ts"
+  ],
+  "write_paths": [
+    "src/app/(public)/portfolio/page.tsx",
+    "src/components/portfolio/"
+  ],
+  "forbidden_paths": [
+    "src/app/admin/"
+  ],
+  "deliverables": [
+    "Portfolio page",
+    "Poster 5 estilos",
+    "Featured carousel",
+    "Grid responsivo"
+  ],
+  "acceptance_criteria": [
+    "Grid 5/3/2 colunas",
+    "5 estilos distintos",
+    "Carrossel scroll-snap",
+    "Dados da API"
+  ],
+  "test_plan": {
+    "unit": [
+      "poster.test.tsx",
+      "grid.test.tsx"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "portfolio.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit portfolio",
+    "pnpm lint"
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "id": "TCK-023",
+  "title": "Implementar testes E2E, acessibilidade e performance",
+  "summary": "Criar testes E2E com Playwright para fluxos críticos, validar acessibilidade WCAG 2.2 AA, otimizar performance (Lighthouse >= 90).",
+  "status": "BACKLOG",
+  "priority": "P1",
+  "type": "test",
+  "epic": "EPIC-012",
+  "wave": 5,
+  "parallel_group": "W5-G2",
+  "recommended_agent": "qa-engineer",
+  "independence_score": 80,
+  "estimated_size": "L",
+  "risk_level": "MEDIUM",
+  "objective": "Qualidade garantida via testes automatizados",
+  "business_value": "Confiança no deploy e experiência do usuário",
+  "requirements": [
+    "NFR-001",
+    "NFR-002",
+    "NFR-003",
+    "NFR-007"
+  ],
+  "scope": {
+    "included": [
+      "tests/e2e/",
+      "tests/a11y/",
+      "tests/performance/",
+      "lighthouserc.js"
+    ],
+    "excluded": [
+      "Testes unitários"
+    ]
+  },
+  "dependencies": [
+    "TCK-011",
+    "TCK-012",
+    "TCK-013",
+    "TCK-014",
+    "TCK-015",
+    "TCK-016",
+    "TCK-017",
+    "TCK-018",
+    "TCK-019"
+  ],
+  "read_paths": [
+    "src/app/",
+    "src/components/"
+  ],
+  "write_paths": [
+    "tests/e2e/",
+    "tests/a11y/",
+    "tests/performance/",
+    "lighthouserc.js"
+  ],
+  "forbidden_paths": [
+    "src/app/api/",
+    "src/lib/"
+  ],
+  "deliverables": [
+    "Testes E2E (5 fluxos)",
+    "Relatório a11y",
+    "Relatório Lighthouse"
+  ],
+  "acceptance_criteria": [
+    "5 fluxos E2E passam",
+    "axe-core sem violações",
+    "Lighthouse >= 90"
+  ],
+  "test_plan": {
+    "unit": [],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "landing.e2e.ts",
+      "portfolio.e2e.ts",
+      "player.e2e.ts",
+      "admin.e2e.ts",
+      "programa.e2e.ts"
+    ],
+    "regression": [
+      "visual-regression.test.ts"
+    ]
+  },
+  "validation_commands": [
+    "pnpm test:e2e",
+    "pnpm test:a11y",
+    "pnpm lighthouse"
+  ]
+}

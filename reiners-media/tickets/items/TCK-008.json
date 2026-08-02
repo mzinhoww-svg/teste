@@ -1,0 +1,73 @@
+{
+  "id": "TCK-008",
+  "title": "Criar componentes UI compartilhados base",
+  "summary": "Implementar Button, Card, Input, Modal, Badge, Skeleton com 7 estados cada e acessibilidade WCAG 2.2 AA.",
+  "status": "BACKLOG",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-007",
+  "wave": 2,
+  "parallel_group": "W2-G1",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 100,
+  "estimated_size": "L",
+  "risk_level": "LOW",
+  "objective": "Biblioteca de componentes base pronta",
+  "business_value": "Acelera desenvolvimento de todas as páginas",
+  "requirements": [
+    "FR-001",
+    "NFR-002",
+    "NFR-003"
+  ],
+  "scope": {
+    "included": [
+      "src/components/ui/button.tsx",
+      "src/components/ui/card.tsx",
+      "src/components/ui/input.tsx",
+      "src/components/ui/modal.tsx",
+      "src/components/ui/badge.tsx",
+      "src/components/ui/skeleton.tsx"
+    ],
+    "excluded": [
+      "Componentes de página"
+    ]
+  },
+  "dependencies": [
+    "TCK-001"
+  ],
+  "read_paths": [
+    "src/lib/tokens.ts"
+  ],
+  "write_paths": [
+    "src/components/ui/"
+  ],
+  "forbidden_paths": [
+    "src/app/"
+  ],
+  "deliverables": [
+    "Button, Card, Input, Modal, Badge, Skeleton tipados e acessíveis"
+  ],
+  "acceptance_criteria": [
+    "7 estados visuais",
+    "Focus-visible funcional",
+    "Testes passam",
+    "Sem erros axe-core"
+  ],
+  "test_plan": {
+    "unit": [
+      "button.test.tsx",
+      "input.test.tsx",
+      "modal.test.tsx",
+      "card.test.tsx"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit ui",
+    "pnpm lint",
+    "pnpm typecheck"
+  ]
+}

@@ -1,0 +1,15 @@
+# Reiners Media Delivery
+.claude/worktrees/
+tickets/state/locks/
+tickets/state/history/
+reports/*.tmp
+.env
+.env.local
+node_modules/
+.next/
+.vercel
+next-env.d.ts
+tsconfig.tsbuildinfo
+test-results/
+playwright-report/
+coverage/

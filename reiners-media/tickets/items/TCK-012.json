@@ -1,0 +1,80 @@
+{
+  "id": "TCK-012",
+  "title": "Implementar seções Planos, Depoimentos, Sobre, CTA e Footer",
+  "summary": "Criar seções restantes da landing: grid de planos, carrossel depoimentos, seção Sobre, CTA final, Footer multi-coluna.",
+  "status": "BACKLOG",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-008",
+  "wave": 3,
+  "parallel_group": "W3-G1",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 90,
+  "estimated_size": "L",
+  "risk_level": "LOW",
+  "objective": "Landing page completa com 8 seções",
+  "business_value": "Página de conversão funcional",
+  "requirements": [
+    "FR-008",
+    "NFR-002",
+    "NFR-003"
+  ],
+  "scope": {
+    "included": [
+      "src/components/sections/plans.tsx",
+      "src/components/sections/testimonials.tsx",
+      "src/components/sections/about.tsx",
+      "src/components/sections/cta.tsx"
+    ],
+    "excluded": [
+      "Hero (TCK-011)",
+      "Portfolio"
+    ]
+  },
+  "dependencies": [
+    "TCK-001",
+    "TCK-008",
+    "TCK-009",
+    "TCK-011"
+  ],
+  "read_paths": [
+    "src/components/ui/",
+    "src/components/layout/"
+  ],
+  "write_paths": [
+    "src/components/sections/plans.tsx",
+    "src/components/sections/testimonials.tsx",
+    "src/components/sections/about.tsx",
+    "src/components/sections/cta.tsx",
+    "src/app/(public)/page.tsx"
+  ],
+  "forbidden_paths": [
+    "src/app/admin/"
+  ],
+  "deliverables": [
+    "Seções Planos, Depoimentos, Sobre, CTA",
+    "Landing page completa"
+  ],
+  "acceptance_criteria": [
+    "Todas seções renderizam",
+    "Responsivo",
+    "Carrossel funciona",
+    "CTA rastreável"
+  ],
+  "test_plan": {
+    "unit": [
+      "plans.test.tsx",
+      "testimonials.test.tsx"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "landing.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit sections",
+    "pnpm lint"
+  ]
+}

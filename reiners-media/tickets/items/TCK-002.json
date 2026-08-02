@@ -1,0 +1,79 @@
+{
+  "id": "TCK-002",
+  "title": "Criar schema Prisma, migrations e seed data",
+  "summary": "Definir schema Prisma completo com Podcast, Episode, SiteConfig, AdminUser, EventLog, Testimonial, Plan. Criar migrations e seed com 5 programas, 25 episódios e 1 admin.",
+  "status": "READY",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-002",
+  "wave": 0,
+  "parallel_group": "W0-G1",
+  "recommended_agent": "backend-engineer",
+  "independence_score": 95,
+  "estimated_size": "M",
+  "risk_level": "LOW",
+  "objective": "Banco funcional com schema validado e dados de demonstração",
+  "business_value": "Fundamento para todo o backend",
+  "requirements": [
+    "FR-002",
+    "FR-020",
+    "DATA-001",
+    "DATA-002"
+  ],
+  "scope": {
+    "included": [
+      "prisma/schema.prisma",
+      "prisma/migrations/",
+      "prisma/seed.ts",
+      "src/lib/prisma.ts"
+    ],
+    "excluded": [
+      "APIs",
+      "Frontend"
+    ]
+  },
+  "dependencies": [],
+  "read_paths": [
+    "docs/DATA_MODEL.md"
+  ],
+  "write_paths": [
+    "prisma/schema.prisma",
+    "prisma/migrations/",
+    "prisma/seed.ts",
+    "src/lib/prisma.ts"
+  ],
+  "forbidden_paths": [
+    "src/app/",
+    "src/components/"
+  ],
+  "deliverables": [
+    "Schema Prisma",
+    "Migration inicial",
+    "Seed script",
+    "Prisma client singleton"
+  ],
+  "acceptance_criteria": [
+    "Schema gera migration",
+    "Migration aplica em banco limpo",
+    "Seed cria dados",
+    "Down migration funciona"
+  ],
+  "test_plan": {
+    "unit": [
+      "schema-validation.test.ts"
+    ],
+    "integration": [
+      "migration.test.ts",
+      "seed.test.ts"
+    ],
+    "contract": [],
+    "e2e": [],
+    "regression": []
+  },
+  "validation_commands": [
+    "npx prisma generate",
+    "npx prisma migrate dev",
+    "npx prisma db seed",
+    "pnpm test:integration migration"
+  ]
+}

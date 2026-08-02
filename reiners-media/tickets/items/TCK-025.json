@@ -1,0 +1,72 @@
+{
+  "id": "TCK-025",
+  "title": "Configurar deploy na Vercel, CI/CD e monitoramento",
+  "summary": "Configurar projeto Vercel, GitHub Actions para CI/CD, variáveis de ambiente, preview deploys, monitoramento básico.",
+  "status": "CANCELLED",
+  "priority": "P0",
+  "type": "chore",
+  "epic": "EPIC-012",
+  "wave": 5,
+  "parallel_group": "W5-G2",
+  "recommended_agent": "devops-engineer",
+  "independence_score": 85,
+  "estimated_size": "M",
+  "risk_level": "MEDIUM",
+  "objective": "Deploy automatizado e monitoramento em produção",
+  "business_value": "Entrega contínua e visibilidade de saúde",
+  "requirements": [
+    "NFR-008",
+    "NFR-009"
+  ],
+  "scope": {
+    "included": [
+      ".github/workflows/ci.yml",
+      "vercel.json",
+      "src/app/api/health/route.ts"
+    ],
+    "excluded": [
+      "Código de negócio"
+    ]
+  },
+  "dependencies": [
+    "TCK-023"
+  ],
+  "read_paths": [
+    "package.json"
+  ],
+  "write_paths": [
+    ".github/workflows/ci.yml",
+    "vercel.json",
+    "src/app/api/health/route.ts"
+  ],
+  "forbidden_paths": [
+    "src/app/(public)/",
+    "src/app/admin/"
+  ],
+  "deliverables": [
+    "Pipeline CI/CD",
+    "Health check",
+    "Config Vercel"
+  ],
+  "acceptance_criteria": [
+    "Push main -> deploy produção",
+    "PR -> preview",
+    "CI falha se testes quebrarem",
+    "Health check 200",
+    "Rollback < 2min"
+  ],
+  "test_plan": {
+    "unit": [],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "deploy.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm build",
+    "vercel --prod --prebuilt"
+  ],
+  "cancellation_reason": "Duplicata exata de TCK-024 (mesmo título, escopo, write_paths e dependências). Registrado em docs/DECISIONS.md (DEC-004)."
+}

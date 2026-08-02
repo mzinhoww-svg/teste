@@ -1,0 +1,79 @@
+{
+  "id": "TCK-007",
+  "title": "Implementar APIs de SiteConfig e EventLog",
+  "summary": "Endpoints para gerenciar configurações do site e ingestão de eventos de analytics.",
+  "status": "BACKLOG",
+  "priority": "P1",
+  "type": "feature",
+  "epic": "EPIC-006",
+  "wave": 1,
+  "parallel_group": "W1-G2",
+  "recommended_agent": "backend-engineer",
+  "independence_score": 100,
+  "estimated_size": "M",
+  "risk_level": "LOW",
+  "objective": "APIs de configuração e analytics funcionais",
+  "business_value": "Personalização e métricas de negócio",
+  "requirements": [
+    "FR-015",
+    "FR-016",
+    "FR-017",
+    "ANA-001",
+    "ANA-002",
+    "ANA-003"
+  ],
+  "scope": {
+    "included": [
+      "src/app/api/site-config/",
+      "src/app/api/events/",
+      "src/lib/analytics.ts"
+    ],
+    "excluded": [
+      "Dashboard UI",
+      "GA4 frontend"
+    ]
+  },
+  "dependencies": [
+    "TCK-002",
+    "TCK-003"
+  ],
+  "read_paths": [
+    "prisma/schema.prisma"
+  ],
+  "write_paths": [
+    "src/app/api/site-config/",
+    "src/app/api/events/",
+    "src/lib/analytics.ts"
+  ],
+  "forbidden_paths": [
+    "src/app/admin/",
+    "src/components/"
+  ],
+  "deliverables": [
+    "API SiteConfig CRUD",
+    "API EventLog",
+    "Helper analytics"
+  ],
+  "acceptance_criteria": [
+    "POST events persiste",
+    "GET site-config",
+    "PATCH protegido",
+    "Rate limiting"
+  ],
+  "test_plan": {
+    "unit": [
+      "analytics.test.ts"
+    ],
+    "integration": [
+      "events.integration.test.ts",
+      "site-config.integration.test.ts"
+    ],
+    "contract": [],
+    "e2e": [],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:integration events",
+    "pnpm lint"
+  ]
+}

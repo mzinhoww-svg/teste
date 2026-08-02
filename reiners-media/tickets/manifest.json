@@ -1,0 +1,108 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-08-02T13:30:00Z",
+  "total_tickets": 25,
+  "waves": {
+    "0": {
+      "name": "Fundação",
+      "tickets": [
+        "TCK-001",
+        "TCK-002",
+        "TCK-003",
+        "TCK-004"
+      ]
+    },
+    "1": {
+      "name": "Backend Core",
+      "tickets": [
+        "TCK-005",
+        "TCK-006",
+        "TCK-007"
+      ]
+    },
+    "2": {
+      "name": "Frontend Shared",
+      "tickets": [
+        "TCK-008",
+        "TCK-009",
+        "TCK-010"
+      ]
+    },
+    "3": {
+      "name": "Frontend Pages",
+      "tickets": [
+        "TCK-011",
+        "TCK-012",
+        "TCK-013",
+        "TCK-014",
+        "TCK-015",
+        "TCK-016",
+        "TCK-017"
+      ]
+    },
+    "4": {
+      "name": "Admin CRUD",
+      "tickets": [
+        "TCK-018",
+        "TCK-019",
+        "TCK-020"
+      ]
+    },
+    "5": {
+      "name": "Integração & Polish",
+      "tickets": [
+        "TCK-021",
+        "TCK-022",
+        "TCK-023",
+        "TCK-024",
+        "TCK-025"
+      ]
+    }
+  },
+  "epics": {
+    "EPIC-001": "Design System",
+    "EPIC-002": "Database",
+    "EPIC-003": "Contracts",
+    "EPIC-004": "Auth",
+    "EPIC-005": "Backend APIs",
+    "EPIC-006": "Config & Analytics",
+    "EPIC-007": "Shared Components",
+    "EPIC-008": "Landing Page",
+    "EPIC-009": "Portfolio",
+    "EPIC-010": "Admin Panel",
+    "EPIC-011": "SEO & Analytics",
+    "EPIC-012": "Quality & Deploy"
+  },
+  "status_counts": {
+    "BACKLOG": 20,
+    "READY": 4,
+    "CANCELLED": 1
+  },
+  "tickets": [
+    "TCK-001",
+    "TCK-002",
+    "TCK-003",
+    "TCK-004",
+    "TCK-005",
+    "TCK-006",
+    "TCK-007",
+    "TCK-008",
+    "TCK-009",
+    "TCK-010",
+    "TCK-011",
+    "TCK-012",
+    "TCK-013",
+    "TCK-014",
+    "TCK-015",
+    "TCK-016",
+    "TCK-017",
+    "TCK-018",
+    "TCK-019",
+    "TCK-020",
+    "TCK-021",
+    "TCK-022",
+    "TCK-023",
+    "TCK-024",
+    "TCK-025"
+  ]
+}

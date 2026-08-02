@@ -1,0 +1,75 @@
+{
+  "id": "TCK-011",
+  "title": "Implementar Hero e integração da Landing Page",
+  "summary": "Criar seção Hero com vídeo/imagem background, overlay gradient, headline, subheadline, CTAs, integrar com Navbar.",
+  "status": "BACKLOG",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-008",
+  "wave": 3,
+  "parallel_group": "W3-G1",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 90,
+  "estimated_size": "M",
+  "risk_level": "LOW",
+  "objective": "Hero da landing page renderizando com design premium",
+  "business_value": "Primeira impressão; converte leads",
+  "requirements": [
+    "FR-008",
+    "NFR-001",
+    "NFR-002",
+    "NFR-003"
+  ],
+  "scope": {
+    "included": [
+      "src/app/(public)/page.tsx (hero)",
+      "src/components/sections/hero.tsx"
+    ],
+    "excluded": [
+      "Outras seções",
+      "Portfolio"
+    ]
+  },
+  "dependencies": [
+    "TCK-001",
+    "TCK-008",
+    "TCK-009"
+  ],
+  "read_paths": [
+    "src/components/ui/",
+    "src/components/layout/"
+  ],
+  "write_paths": [
+    "src/components/sections/hero.tsx",
+    "src/app/(public)/page.tsx"
+  ],
+  "forbidden_paths": [
+    "src/app/admin/",
+    "src/app/api/"
+  ],
+  "deliverables": [
+    "Hero section",
+    "CTAs",
+    "Background video/image"
+  ],
+  "acceptance_criteria": [
+    "Hero renderiza em todos breakpoints",
+    "Vídeo pausa fora viewport",
+    "CTAs acessíveis"
+  ],
+  "test_plan": {
+    "unit": [
+      "hero.test.tsx"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "landing.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit hero",
+    "pnpm lint"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "id": "TCK-010",
+  "title": "Implementar sistema de animações e motion",
+  "summary": "Criar hooks e utilitários de animação: fade-in, stagger, shimmer, modal transitions, respeitando prefers-reduced-motion.",
+  "status": "BACKLOG",
+  "priority": "P1",
+  "type": "feature",
+  "epic": "EPIC-007",
+  "wave": 2,
+  "parallel_group": "W2-G2",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 100,
+  "estimated_size": "S",
+  "risk_level": "LOW",
+  "objective": "Sistema de motion consistente e acessível",
+  "business_value": "Experiência premium sem prejudicar acessibilidade",
+  "requirements": [
+    "FR-001",
+    "NFR-002"
+  ],
+  "scope": {
+    "included": [
+      "src/lib/animations.ts",
+      "src/hooks/useReducedMotion.ts"
+    ],
+    "excluded": [
+      "Animações de página específicas"
+    ]
+  },
+  "dependencies": [
+    "TCK-001"
+  ],
+  "read_paths": [
+    "src/lib/tokens.ts"
+  ],
+  "write_paths": [
+    "src/lib/animations.ts",
+    "src/hooks/useReducedMotion.ts"
+  ],
+  "forbidden_paths": [
+    "src/app/"
+  ],
+  "deliverables": [
+    "Hooks de animação",
+    "Utilitários de transition",
+    "Suporte reduced-motion"
+  ],
+  "acceptance_criteria": [
+    "prefers-reduced-motion respeitado",
+    "Shimmer funciona",
+    "Stagger funciona"
+  ],
+  "test_plan": {
+    "unit": [
+      "animations.test.ts",
+      "useReducedMotion.test.ts"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit animations",
+    "pnpm lint"
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "id": "TCK-017",
+  "title": "Implementar layout e navegação do painel admin",
+  "summary": "Criar layout admin com sidebar fixa, header, navegação entre seções, proteção de rotas.",
+  "status": "BACKLOG",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-010",
+  "wave": 3,
+  "parallel_group": "W3-G3",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 85,
+  "estimated_size": "M",
+  "risk_level": "LOW",
+  "objective": "Layout admin funcional com navegação protegida",
+  "business_value": "Base para funcionalidades administrativas",
+  "requirements": [
+    "FR-013",
+    "NFR-002",
+    "NFR-003"
+  ],
+  "scope": {
+    "included": [
+      "src/app/admin/layout.tsx",
+      "src/app/admin/page.tsx",
+      "src/components/admin/admin-header.tsx"
+    ],
+    "excluded": [
+      "CRUDs (TCK-018,019)",
+      "Analytics (TCK-020)"
+    ]
+  },
+  "dependencies": [
+    "TCK-004",
+    "TCK-008",
+    "TCK-009"
+  ],
+  "read_paths": [
+    "src/middleware.ts",
+    "src/components/layout/admin-sidebar.tsx"
+  ],
+  "write_paths": [
+    "src/app/admin/layout.tsx",
+    "src/app/admin/page.tsx",
+    "src/components/admin/admin-header.tsx"
+  ],
+  "forbidden_paths": [
+    "src/app/(public)/"
+  ],
+  "deliverables": [
+    "Admin layout",
+    "Dashboard placeholder",
+    "Header admin"
+  ],
+  "acceptance_criteria": [
+    "Rotas /admin/* protegidas",
+    "Sidebar navegável",
+    "Layout responsivo"
+  ],
+  "test_plan": {
+    "unit": [
+      "admin-layout.test.tsx"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "admin.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit admin-layout",
+    "pnpm lint"
+  ]
+}

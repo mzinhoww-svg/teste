@@ -1,0 +1,77 @@
+{
+  "id": "TCK-020",
+  "title": "Implementar dashboard de analytics no admin",
+  "summary": "Criar dashboard com KPIs, gráfico de linha Recharts, tabela EventLog com filtros, export CSV.",
+  "status": "BACKLOG",
+  "priority": "P1",
+  "type": "feature",
+  "epic": "EPIC-010",
+  "wave": 4,
+  "parallel_group": "W4-G2",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 80,
+  "estimated_size": "L",
+  "risk_level": "LOW",
+  "objective": "Dashboard de métricas de negócio funcional",
+  "business_value": "Acompanhar performance do portfólio",
+  "requirements": [
+    "FR-015",
+    "ANA-004",
+    "ANA-005"
+  ],
+  "scope": {
+    "included": [
+      "src/app/admin/analytics/",
+      "src/components/admin/analytics-dashboard.tsx",
+      "src/components/admin/events-table.tsx",
+      "src/lib/export-csv.ts"
+    ],
+    "excluded": [
+      "Ingestão eventos (TCK-021)"
+    ]
+  },
+  "dependencies": [
+    "TCK-007",
+    "TCK-017"
+  ],
+  "read_paths": [
+    "src/app/admin/layout.tsx",
+    "src/lib/analytics.ts"
+  ],
+  "write_paths": [
+    "src/app/admin/analytics/",
+    "src/components/admin/analytics-dashboard.tsx",
+    "src/components/admin/events-table.tsx",
+    "src/lib/export-csv.ts"
+  ],
+  "forbidden_paths": [
+    "src/app/(public)/"
+  ],
+  "deliverables": [
+    "Dashboard KPIs",
+    "Gráfico linha",
+    "Tabela EventLog",
+    "Export CSV"
+  ],
+  "acceptance_criteria": [
+    "KPIs renderizam",
+    "Gráfico funciona",
+    "Filtros funcionam",
+    "Export CSV válido"
+  ],
+  "test_plan": {
+    "unit": [
+      "export-csv.test.ts"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "admin-analytics.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit export-csv",
+    "pnpm lint"
+  ]
+}

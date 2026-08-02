@@ -1,0 +1,129 @@
+{
+  "files": {
+    "src/lib/tokens.ts": [
+      "TCK-001"
+    ],
+    "tailwind.config.ts": [
+      "TCK-001"
+    ],
+    "src/styles/globals.css": [
+      "TCK-001"
+    ],
+    "prisma/schema.prisma": [
+      "TCK-002"
+    ],
+    "prisma/seed.ts": [
+      "TCK-002"
+    ],
+    "src/lib/prisma.ts": [
+      "TCK-002",
+      "TCK-005",
+      "TCK-006",
+      "TCK-007"
+    ],
+    "contracts/api/": [
+      "TCK-003"
+    ],
+    "src/types/api.ts": [
+      "TCK-003"
+    ],
+    "src/lib/schemas.ts": [
+      "TCK-003"
+    ],
+    "src/lib/supabase.ts": [
+      "TCK-004"
+    ],
+    "src/middleware.ts": [
+      "TCK-004"
+    ],
+    "src/app/api/auth/": [
+      "TCK-004"
+    ],
+    "src/app/api/podcasts/": [
+      "TCK-005"
+    ],
+    "src/app/api/upload/": [
+      "TCK-005"
+    ],
+    "src/app/api/episodes/": [
+      "TCK-006"
+    ],
+    "src/lib/url-parser.ts": [
+      "TCK-006"
+    ],
+    "src/app/api/events/": [
+      "TCK-007",
+      "TCK-021"
+    ],
+    "src/app/api/site-config/": [
+      "TCK-007"
+    ],
+    "src/components/ui/": [
+      "TCK-008"
+    ],
+    "src/components/layout/": [
+      "TCK-009"
+    ],
+    "src/lib/animations.ts": [
+      "TCK-010"
+    ],
+    "src/hooks/useReducedMotion.ts": [
+      "TCK-010"
+    ],
+    "src/app/(public)/page.tsx": [
+      "TCK-011",
+      "TCK-012"
+    ],
+    "src/components/sections/": [
+      "TCK-011",
+      "TCK-012"
+    ],
+    "src/app/(public)/portfolio/page.tsx": [
+      "TCK-013"
+    ],
+    "src/components/portfolio/": [
+      "TCK-013",
+      "TCK-014",
+      "TCK-015"
+    ],
+    "src/app/(public)/portfolio/[slug]/page.tsx": [
+      "TCK-016"
+    ],
+    "src/app/admin/layout.tsx": [
+      "TCK-017"
+    ],
+    "src/app/admin/page.tsx": [
+      "TCK-017"
+    ],
+    "src/app/admin/programas/": [
+      "TCK-018"
+    ],
+    "src/app/admin/episodios/": [
+      "TCK-019"
+    ],
+    "src/app/admin/analytics/": [
+      "TCK-020"
+    ],
+    "src/components/analytics/": [
+      "TCK-021"
+    ],
+    "src/lib/analytics-client.ts": [
+      "TCK-021"
+    ],
+    "src/app/sitemap.ts": [
+      "TCK-022"
+    ],
+    "src/app/robots.ts": [
+      "TCK-022"
+    ],
+    "tests/": [
+      "TCK-023"
+    ],
+    ".github/workflows/ci.yml": [
+      "TCK-024"
+    ],
+    "vercel.json": [
+      "TCK-024"
+    ]
+  }
+}

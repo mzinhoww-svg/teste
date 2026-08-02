@@ -1,0 +1,72 @@
+{
+  "id": "TCK-009",
+  "title": "Implementar layout system: Navbar, Footer, AdminSidebar",
+  "summary": "Criar componentes de layout reutilizáveis: Navbar sticky com blur, Footer multi-coluna, AdminSidebar, mobile drawer.",
+  "status": "BACKLOG",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-007",
+  "wave": 2,
+  "parallel_group": "W2-G1",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 95,
+  "estimated_size": "M",
+  "risk_level": "LOW",
+  "objective": "Sistema de layout consistente",
+  "business_value": "Navegação fluida e identidade visual",
+  "requirements": [
+    "FR-008",
+    "NFR-002",
+    "NFR-003"
+  ],
+  "scope": {
+    "included": [
+      "src/components/layout/navbar.tsx",
+      "src/components/layout/footer.tsx",
+      "src/components/layout/admin-sidebar.tsx",
+      "src/components/layout/mobile-drawer.tsx",
+      "src/components/layout/admin-layout.tsx"
+    ],
+    "excluded": [
+      "Conteúdo das páginas"
+    ]
+  },
+  "dependencies": [
+    "TCK-001",
+    "TCK-008"
+  ],
+  "read_paths": [
+    "src/lib/tokens.ts",
+    "src/components/ui/"
+  ],
+  "write_paths": [
+    "src/components/layout/"
+  ],
+  "forbidden_paths": [
+    "src/app/"
+  ],
+  "deliverables": [
+    "Navbar, Footer, AdminSidebar, MobileDrawer, AdminLayout"
+  ],
+  "acceptance_criteria": [
+    "Navbar fixa",
+    "Footer responsivo",
+    "AdminSidebar em /admin/*",
+    "Drawer acessível"
+  ],
+  "test_plan": {
+    "unit": [
+      "navbar.test.tsx",
+      "footer.test.tsx",
+      "admin-sidebar.test.tsx"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit layout",
+    "pnpm lint"
+  ]
+}

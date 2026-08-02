@@ -1,0 +1,78 @@
+{
+  "id": "TCK-014",
+  "title": "Implementar card expansível e listagem de episódios",
+  "summary": "Criar painel expansível inline ao clicar em poster, com detalhes do programa, hosts, redes sociais, lista dos últimos 5 episódios com trilhas.",
+  "status": "BACKLOG",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-009",
+  "wave": 3,
+  "parallel_group": "W3-G2",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 85,
+  "estimated_size": "L",
+  "risk_level": "MEDIUM",
+  "objective": "Card expansível funcional com episódios",
+  "business_value": "Core da experiência Netflix-style",
+  "requirements": [
+    "FR-010",
+    "FR-012",
+    "NFR-002",
+    "NFR-003"
+  ],
+  "scope": {
+    "included": [
+      "src/components/portfolio/expandable-card.tsx",
+      "src/components/portfolio/episode-row.tsx",
+      "src/components/portfolio/track-button.tsx"
+    ],
+    "excluded": [
+      "Player modal (TCK-015)",
+      "Página individual (TCK-016)"
+    ]
+  },
+  "dependencies": [
+    "TCK-013",
+    "TCK-006"
+  ],
+  "read_paths": [
+    "src/components/portfolio/",
+    "src/components/ui/"
+  ],
+  "write_paths": [
+    "src/components/portfolio/expandable-card.tsx",
+    "src/components/portfolio/episode-row.tsx",
+    "src/components/portfolio/track-button.tsx"
+  ],
+  "forbidden_paths": [
+    "src/app/admin/"
+  ],
+  "deliverables": [
+    "ExpandableCard",
+    "EpisodeRow",
+    "TrackButton"
+  ],
+  "acceptance_criteria": [
+    "Clique expande inline",
+    "Apenas um painel aberto",
+    "ESC fecha",
+    "Episódios listados",
+    "Acessível"
+  ],
+  "test_plan": {
+    "unit": [
+      "expandable-card.test.tsx",
+      "episode-row.test.tsx"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "portfolio.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit expandable",
+    "pnpm lint"
+  ]
+}
