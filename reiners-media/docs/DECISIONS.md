@@ -100,3 +100,11 @@
 **Consequências:** Quem ler apenas o ROADMAP verá um mapa ticket→escopo defasado a partir de TCK-008. As fases ("Fase 0..5") e os gates do ROADMAP continuam válidos.
 **Status:** Aprovado.
 **Tickets:** TCK-008 a TCK-025.
+
+## DEC-013: Exclusão de `reiners-media/` do projeto TypeScript e do lint da raiz
+**Contexto:** Após o commit inicial, o job "Lint & build" do CI da raiz falhou com `Type error: Cannot find module '@vitejs/plugin-react'` em `./reiners-media/vitest.config.ts`, e o deploy da Vercel do projeto da raiz errou junto. Causa: o `tsconfig.json` da raiz declara `include: ["**/*.ts", "**/*.tsx"]` com `exclude: ["node_modules"]`, então o `next build` do `crm-ai-studio` passou a typechecar os fontes do subprojeto — que dependem de pacotes instalados apenas em `reiners-media/node_modules`.
+**Decisão:** Adicionar `reiners-media` (e `viajaly-content-engine`, que tem o mesmo risco latente) ao `exclude` do `tsconfig.json` da raiz e ao `ignorePatterns` do `.eslintrc.json` da raiz. Os dois subprojetos mantêm seus próprios `tsconfig.json`/`.eslintrc.json` e são validados pelos seus próprios comandos.
+**Alternativas:** (a) Instalar as dependências do subprojeto na raiz — rejeitado: polui o `package.json` do CRM com Prisma, Zod e framer-motion que ele não usa; (b) transformar o repositório num monorepo com workspaces — rejeitado: mudança estrutural muito além do escopo do ticket, afetando o build de produção do CRM.
+**Consequências:** São as duas únicas alterações desta entrega fora de `reiners-media/`, e existem só para que o subprojeto não quebre o build do projeto pré-existente. O CI da raiz não valida `reiners-media/`; essa validação é responsabilidade do workflow próprio, entregue por TCK-024.
+**Status:** Aprovado.
+**Tickets:** Infra (TCK-000), TCK-024.
