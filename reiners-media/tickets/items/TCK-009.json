@@ -2,7 +2,7 @@
   "id": "TCK-009",
   "title": "Implementar layout system: Navbar, Footer, AdminSidebar",
   "summary": "Criar componentes de layout reutilizáveis: Navbar sticky com blur, Footer multi-coluna, AdminSidebar, mobile drawer.",
-  "status": "BACKLOG",
+  "status": "IN_PROGRESS",
   "priority": "P0",
   "type": "feature",
   "epic": "EPIC-007",
@@ -68,5 +68,11 @@
   "validation_commands": [
     "pnpm test:unit layout",
     "pnpm lint"
-  ]
+  ],
+  "claim": {
+    "agent": "auto",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
 }

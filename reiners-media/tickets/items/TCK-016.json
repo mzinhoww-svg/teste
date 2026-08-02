@@ -2,7 +2,7 @@
   "id": "TCK-016",
   "title": "Implementar página individual de programa /portfolio/[slug]",
   "summary": "Criar página dedicada para cada programa com hero 21:9, tabs (Sobre, Episódios, Redes), ISR.",
-  "status": "BACKLOG",
+  "status": "IN_PROGRESS",
   "priority": "P1",
   "type": "feature",
   "epic": "EPIC-009",
@@ -69,5 +69,11 @@
   "validation_commands": [
     "pnpm lint",
     "pnpm typecheck"
-  ]
+  ],
+  "claim": {
+    "agent": "auto",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
 }
