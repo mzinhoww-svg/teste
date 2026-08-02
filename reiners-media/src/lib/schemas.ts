@@ -588,7 +588,11 @@ export function validateEpisodeTracks(state: {
   return [
     {
       rule: 'BR-004',
-      code: 'VALIDATION_ERROR',
+      // CONFLICT (409), não VALIDATION_ERROR: esta checagem roda sobre o estado
+      // MESCLADO, então o payload em si é válido — o conflito é com o que está
+      // persistido. Alinhado com o handler de TCK-006 e com o 409 documentado
+      // em contracts/api/episodes.yaml.
+      code: 'CONFLICT',
       message: 'BR-004: episódio precisa de pelo menos uma trilha (youtubeUrl ou spotifyUrl)',
       path: ['youtubeUrl'],
     },

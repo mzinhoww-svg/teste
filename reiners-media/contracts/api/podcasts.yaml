@@ -130,7 +130,12 @@ paths:
           $ref: "#/components/responses/TooManyRequests"
         "500":
           $ref: "#/components/responses/InternalServerError"
-  /podcasts/{slug}:
+  # O App Router admite UM segmento dinamico por nivel, e o OpenAPI trata
+  # /podcasts/{slug} e /podcasts/{id} como o MESMO path (diferem so no nome da
+  # variavel, o que a spec proibe). Por isso os tres metodos vivem sob
+  # {idOrSlug}: GET aceita slug (ou UUID, atalho do painel), PATCH e DELETE
+  # exigem UUID. Cada metodo declara o x-zod-params que aplica de fato.
+  /podcasts/{idOrSlug}:
     get:
       operationId: getPodcastBySlug
       tags:
@@ -141,13 +146,12 @@ paths:
       x-zod-params: slugParamSchema
       x-zod-response: podcastDetailResponseSchema
       parameters:
-        - name: slug
+        - name: idOrSlug
           in: path
           required: true
-          description: Slug kebab-case do programa
+          description: Slug kebab-case do programa, ou o UUID (atalho usado pelo painel de TCK-018). Validado por slugParamSchema
           schema:
             type: string
-            pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
       responses:
         "200":
           description: Programa com episodios embutidos
@@ -165,7 +169,6 @@ paths:
           $ref: "#/components/responses/TooManyRequests"
         "500":
           $ref: "#/components/responses/InternalServerError"
-  /podcasts/{id}:
     patch:
       operationId: updatePodcast
       tags:
@@ -178,9 +181,10 @@ paths:
       x-zod-request: podcastUpdateSchema
       x-zod-response: podcastResponseSchema
       parameters:
-        - name: id
+        - name: idOrSlug
           in: path
           required: true
+          description: UUID do programa. Rotas administrativas nao aceitam slug. Validado por idParamSchema
           schema:
             type: string
             format: uuid
@@ -224,9 +228,10 @@ paths:
       x-zod-params: idParamSchema
       x-zod-response: podcastAdminResponseSchema
       parameters:
-        - name: id
+        - name: idOrSlug
           in: path
           required: true
+          description: UUID do programa. Rotas administrativas nao aceitam slug. Validado por idParamSchema
           schema:
             type: string
             format: uuid

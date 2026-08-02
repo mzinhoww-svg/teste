@@ -38,7 +38,7 @@ contracts/
 | `contracts/api/podcasts.yaml` | `/api/podcasts*` | TCK-005 |
 | `contracts/api/episodes.yaml` | `/api/episodes*` | TCK-006 |
 | `contracts/api/site-config.yaml` | `/api/site-config` | TCK-007 |
-| `contracts/api/events.yaml` | `/api/events` | TCK-007 |
+| `contracts/api/events.yaml` | `/api/events`, `/api/events/summary` | TCK-007 |
 | `contracts/api/upload.yaml` | `/api/upload` | TCK-005 |
 | `contracts/api/auth.yaml` | `/api/auth/*` | TCK-004 |
 
@@ -61,6 +61,11 @@ Cada componente em `components.schemas` declara `x-zod-schema: <export>` ou,
 quando é um enum, `x-zod-enum: <nome em ZOD_ENUMS>`.
 
 `tests/integration/contract-validation.test.ts` falha quando:
+- **uma rota existe em `src/app/api/**/route.ts` e não está publicada no YAML**
+  (as rotas são descobertas varrendo o sistema de arquivos e lendo os verbos
+  exportados, não comparadas contra uma lista fixa — foi assim que
+  `GET /api/events/summary` conseguiu viver fora do contrato);
+- uma operação está publicada e não tem rota implementada;
 - um endpoint de `docs/API_CONTRACTS.md` não está documentado em nenhum YAML;
 - um `x-zod-*` aponta para algo que não é exportado por `src/lib/schemas.ts`;
 - os valores de um `enum:` divergem do `z.enum` correspondente;
@@ -72,6 +77,30 @@ quando é um enum, `x-zod-enum: <nome em ZOD_ENUMS>`.
 - uma operação não declara 400/500, 401/403 quando protegida, 404 quando tem
   parâmetro de rota, 422 quando tem corpo, ou 429 quando é mutante;
 - uma resposta de erro não aponta para o envelope `ErrorResponse`.
+
+### Onde mora o contrato executável
+
+Por padrão, em `src/lib/schemas.ts`. A exceção é `GET /api/events/summary`: as
+agregações não cabem no envelope paginado de `eventListResponseSchema` e vivem
+em `src/lib/analytics.ts` (`eventSummaryQuerySchema`, `eventSummarySchema`,
+`eventSummaryResponseSchema`). A operação e os componentes declaram a origem com
+`x-zod-module: "@/lib/analytics"`, e o teste de contrato resolve os dois módulos.
+
+### `/api/podcasts/{idOrSlug}`: por que um segmento só
+
+O contrato original declarava `/api/podcasts/{slug}` (GET) e
+`/api/podcasts/{id}` (PATCH/DELETE) como paths distintos. Isso era
+**inimplementável e inválido** por dois motivos independentes:
+
+1. o App Router só admite um segmento dinâmico por nível — `[slug]` e `[id]`
+   lado a lado é erro do Next.js;
+2. o OpenAPI trata paths que diferem apenas no nome da variável como o **mesmo**
+   path, e a spec proíbe declará-los duas vezes.
+
+Por isso existe um único path `/api/podcasts/{idOrSlug}` com os três métodos.
+A distinção semântica não se perdeu: cada operação declara o `x-zod-params` que
+aplica de fato — `slugParamSchema` no GET público (que também aceita UUID, como
+atalho do painel) e `idParamSchema` no PATCH e no DELETE administrativos.
 
 ### Envelopes
 

@@ -122,6 +122,64 @@ paths:
           $ref: "#/components/responses/TooManyRequests"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /events/summary:
+    get:
+      operationId: getEventSummary
+      tags:
+        - events
+      summary: Agregacoes de analytics para o dashboard
+      description: Requer ADMIN, com rate limit administrativo. O envelope paginado de GET /api/events nao comporta agregacao, entao esta operacao tem schema proprio. Contrato executavel em src/lib/analytics.ts. byType vem com os 7 tipos preenchidos com zero e ordenado por contagem desc; timeSeries preenche baldes vazios dentro da janela. truncated indica que o teto de linhas lidas foi atingido.
+      security:
+        - cookieAuth: []
+      x-zod-module: "@/lib/analytics"
+      x-zod-query: eventSummaryQuerySchema
+      x-zod-response: eventSummaryResponseSchema
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Inicio da janela em ISO-8601. Padrao, 30 dias atras
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: false
+          description: Fim da janela em ISO-8601. Padrao, agora
+          schema:
+            type: string
+            format: date-time
+        - name: bucket
+          in: query
+          required: false
+          description: Granularidade da serie temporal. Janela maxima 31 dias para hour e 366 para day
+          schema:
+            $ref: "#/components/schemas/EventSummaryBucket"
+        - name: eventType
+          in: query
+          required: false
+          description: Restringe a agregacao a um unico tipo de evento
+          schema:
+            $ref: "#/components/schemas/EventType"
+      responses:
+        "200":
+          description: Agregacao da janela solicitada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventSummaryResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
   securitySchemes:
     cookieAuth:
@@ -317,3 +375,94 @@ components:
             $ref: "#/components/schemas/Event"
         meta:
           $ref: "#/components/schemas/PaginationMeta"
+    EventSummaryBucket:
+      type: string
+      x-zod-enum: EventSummaryBucket
+      enum:
+        - hour
+        - day
+    EventSummaryPoint:
+      type: object
+      x-zod-schema: eventSummaryPointSchema
+      x-zod-module: "@/lib/analytics"
+      required:
+        - bucket
+        - startsAt
+        - total
+        - byType
+      properties:
+        bucket:
+          type: string
+          description: Chave do balde, YYYY-MM-DD para day e YYYY-MM-DDTHH para hour, sempre UTC
+        startsAt:
+          type: string
+          format: date-time
+        total:
+          type: integer
+          minimum: 0
+        byType:
+          type: object
+          description: Contagem por tipo dentro do balde
+          additionalProperties:
+            type: integer
+            minimum: 0
+    EventSummary:
+      type: object
+      x-zod-schema: eventSummarySchema
+      x-zod-module: "@/lib/analytics"
+      required:
+        - range
+        - total
+        - truncated
+        - byType
+        - timeSeries
+      properties:
+        range:
+          type: object
+          required:
+            - from
+            - to
+            - bucket
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+            bucket:
+              $ref: "#/components/schemas/EventSummaryBucket"
+        total:
+          type: integer
+          minimum: 0
+        truncated:
+          type: boolean
+          description: true quando o teto de linhas lidas na agregacao foi atingido
+        byType:
+          type: array
+          description: Os 7 tipos de evento sempre presentes, preenchidos com zero, ordenados por count desc e, em caso de empate, por eventType alfabetico
+          items:
+            type: object
+            required:
+              - eventType
+              - count
+            properties:
+              eventType:
+                $ref: "#/components/schemas/EventType"
+              count:
+                type: integer
+                minimum: 0
+        timeSeries:
+          type: array
+          description: Serie temporal com os baldes vazios preenchidos
+          items:
+            $ref: "#/components/schemas/EventSummaryPoint"
+    EventSummaryResponse:
+      type: object
+      x-zod-schema: eventSummaryResponseSchema
+      x-zod-module: "@/lib/analytics"
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/EventSummary"

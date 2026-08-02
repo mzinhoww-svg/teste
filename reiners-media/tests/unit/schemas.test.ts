@@ -685,6 +685,39 @@ describe('validateEpisodeTracks (estado mesclado)', () => {
   });
 });
 
+describe('codigo de erro das violacoes de regra', () => {
+  /**
+   * Achado 12: `validateEpisodeTracks` declarava VALIDATION_ERROR (422) enquanto
+   * o handler de TCK-006 e `contracts/api/episodes.yaml` usam 409. A checagem
+   * roda sobre o estado MESCLADO — o payload e valido, o conflito e com o que
+   * esta persistido —, entao CONFLICT e o codigo correto.
+   */
+  it('toda violacao emitida usa CONFLICT, que mapeia para 409', () => {
+    const violations = [
+      ...validateEpisodeTracks({ youtubeUrl: null, spotifyUrl: null }),
+      ...validatePodcastRules({ status: 'ENDED', featured: true, otherFeaturedCount: 0 }),
+      ...validatePodcastRules({
+        status: 'ACTIVE',
+        featured: true,
+        otherFeaturedCount: MAX_FEATURED_PODCASTS,
+      }),
+    ];
+    expect(violations.length).toBe(3);
+    for (const violation of violations) {
+      expect(violation.code, violation.rule).toBe('CONFLICT');
+      expect(ERROR_STATUS_BY_CODE[violation.code], violation.rule).toBe(409);
+    }
+  });
+
+  it('o codigo declarado bate com o status documentado no YAML da rota', () => {
+    // Se alguem trocar o code por VALIDATION_ERROR, o status derivado deixa de
+    // ser 409 e este teste falha junto com a documentacao.
+    const [episodeViolation] = validateEpisodeTracks({ youtubeUrl: null, spotifyUrl: null });
+    expect(ERROR_STATUS_BY_CODE[episodeViolation.code]).toBe(409);
+    expect(episodeViolation.rule).toBe('BR-004');
+  });
+});
+
 /* -------------------------------------------------------------------------- */
 /* Episode                                                                    */
 /* -------------------------------------------------------------------------- */

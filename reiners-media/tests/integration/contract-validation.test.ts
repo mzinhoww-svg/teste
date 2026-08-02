@@ -13,12 +13,13 @@
  * estrutural minimo (subconjunto de YAML em bloco, que e o estilo usado nos
  * contratos deste repositorio).
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
+import * as analytics from '@/lib/analytics';
 import * as schemas from '@/lib/schemas';
 
 /* -------------------------------------------------------------------------- */
@@ -157,7 +158,95 @@ function asStringArray(value: YamlNode | undefined): string[] {
 
 const CONTRACT_DIR = path.resolve(__dirname, '../../contracts/api');
 const DOCS_API_CONTRACTS = path.resolve(__dirname, '../../docs/API_CONTRACTS.md');
+const APP_API_DIR = path.resolve(__dirname, '../../src/app/api');
 const HTTP_METHODS = ['get', 'post', 'patch', 'put', 'delete'] as const;
+
+/* -------------------------------------------------------------------------- */
+/* Descoberta das rotas REAIS no sistema de arquivos                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Comparar o YAML com uma lista fixa de endpoints nunca detecta uma rota
+ * implementada e não publicada — a rota real jamais entra na comparação. Foi
+ * assim que `GET /api/events/summary` viveu fora do contrato. Aqui as rotas
+ * são descobertas varrendo `src/app/api/**\/route.ts`, derivando o path da
+ * estrutura de diretórios e lendo quais verbos o módulo exporta.
+ */
+interface DiscoveredRoute {
+  file: string;
+  routePath: string;
+  method: string;
+  label: string;
+}
+
+/** Converte um segmento do App Router no equivalente OpenAPI. */
+function segmentToOpenApi(segment: string): string | null {
+  // Route group `(marketing)` e slot paralelo `@modal` não entram na URL.
+  if (segment.startsWith('(') && segment.endsWith(')')) return null;
+  if (segment.startsWith('@')) return null;
+  // `_lib`, `_components`: pastas privadas, nunca são rota.
+  if (segment.startsWith('_')) return null;
+  // `[[...slug]]` (catch-all opcional), `[...slug]` (catch-all), `[id]`.
+  const dynamic = /^\[{1,2}(?:\.{3})?([^\]]+?)\]{1,2}$/.exec(segment);
+  if (dynamic !== null) return `{${dynamic[1]}}`;
+  return segment;
+}
+
+function collectRouteFiles(dir: string, found: string[] = []): string[] {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      collectRouteFiles(full, found);
+    } else if (/^route\.(ts|tsx|js|mjs)$/.test(entry.name)) {
+      found.push(full);
+    }
+  }
+  return found;
+}
+
+/** Verbos HTTP exportados por um módulo de rota. */
+function exportedMethods(source: string): string[] {
+  const methods = new Set<string>();
+  const patterns = [
+    /export\s+(?:async\s+)?function\s+(GET|POST|PATCH|PUT|DELETE)\s*\(/g,
+    /export\s+const\s+(GET|POST|PATCH|PUT|DELETE)\s*[:=]/g,
+    /export\s*\{[^}]*\b(GET|POST|PATCH|PUT|DELETE)\b[^}]*\}/g,
+  ];
+  for (const pattern of patterns) {
+    let match = pattern.exec(source);
+    while (match !== null) {
+      methods.add(match[1].toLowerCase());
+      match = pattern.exec(source);
+    }
+  }
+  return [...methods];
+}
+
+function discoverRoutes(): DiscoveredRoute[] {
+  if (!existsSync(APP_API_DIR)) return [];
+  const routes: DiscoveredRoute[] = [];
+  for (const file of collectRouteFiles(APP_API_DIR)) {
+    const relativeDir = path.relative(path.resolve(APP_API_DIR, '..'), path.dirname(file));
+    const segments = relativeDir.split(path.sep);
+    // Pasta privada em qualquer nível invalida a rota inteira.
+    if (segments.some((segment) => segment.startsWith('_'))) continue;
+    const mapped = segments
+      .map(segmentToOpenApi)
+      .filter((segment): segment is string => segment !== null);
+    const routePath = `/${mapped.join('/')}`;
+    for (const method of exportedMethods(readFileSync(file, 'utf8'))) {
+      routes.push({
+        file: path.relative(path.resolve(APP_API_DIR, '../../..'), file),
+        routePath,
+        method,
+        label: `${method.toUpperCase()} ${routePath}`,
+      });
+    }
+  }
+  return routes.sort((a, b) => a.label.localeCompare(b.label));
+}
+
+const discoveredRoutes = discoverRoutes();
 
 const EXPECTED_FILES = [
   'auth.yaml',
@@ -170,16 +259,17 @@ const EXPECTED_FILES = [
 
 const EXPECTED_ENDPOINTS = [
   'DELETE /api/episodes/{id}',
-  'DELETE /api/podcasts/{id}',
+  'DELETE /api/podcasts/{idOrSlug}',
   'GET /api/auth/session',
   'GET /api/episodes',
   'GET /api/episodes/{id}',
   'GET /api/events',
+  'GET /api/events/summary',
   'GET /api/podcasts',
-  'GET /api/podcasts/{slug}',
+  'GET /api/podcasts/{idOrSlug}',
   'GET /api/site-config',
   'PATCH /api/episodes/{id}',
-  'PATCH /api/podcasts/{id}',
+  'PATCH /api/podcasts/{idOrSlug}',
   'PATCH /api/site-config',
   'POST /api/auth/login',
   'POST /api/auth/logout',
@@ -233,8 +323,32 @@ for (const { file, doc } of documents) {
 /** Nomes de schemas Zod referenciados por uma operacao. */
 const ZOD_REF_KEYS = ['x-zod-query', 'x-zod-request', 'x-zod-response', 'x-zod-params'] as const;
 
+/**
+ * Modulos que podem hospedar contrato executavel. `@/lib/schemas` e o padrao;
+ * `@/lib/analytics` guarda as agregacoes de GET /api/events/summary, que nao
+ * cabem no envelope paginado. A operacao/componente declara a origem com
+ * `x-zod-module`; a busca cobre os dois de qualquer forma.
+ */
+const ZOD_MODULES: Record<string, Record<string, unknown>> = {
+  '@/lib/schemas': schemas as unknown as Record<string, unknown>,
+  '@/lib/analytics': analytics as unknown as Record<string, unknown>,
+};
+
 function zodExport(name: string): unknown {
-  return (schemas as unknown as Record<string, unknown>)[name];
+  for (const moduleExports of Object.values(ZOD_MODULES)) {
+    if (name in moduleExports) return moduleExports[name];
+  }
+  return undefined;
+}
+
+/** Resolve o enum Zod de um `x-zod-enum`, em qualquer modulo de contrato. */
+function zodEnumByName(name: string): z.ZodEnum<[string, ...string[]]> | undefined {
+  const registered = (schemas.ZOD_ENUMS as Record<string, z.ZodEnum<[string, ...string[]]>>)[name];
+  if (registered !== undefined) return registered;
+  const conventional = zodExport(`${name.charAt(0).toLowerCase()}${name.slice(1)}Schema`);
+  return conventional instanceof z.ZodEnum
+    ? (conventional as z.ZodEnum<[string, ...string[]]>)
+    : undefined;
 }
 
 /** Desembrulha ZodEffects/ZodDefault/ZodOptional ate achar o ZodObject. */
@@ -363,15 +477,91 @@ describe('contracts/api — estrutura', () => {
     expect(operations.map((entry) => entry.label).sort()).toEqual(EXPECTED_ENDPOINTS);
   });
 
+  /**
+   * O parser estrutural deste teste e mais permissivo que YAML de verdade: ele
+   * corta a chave no primeiro `": "` e engole o resto. Um `description: Padrao:
+   * 30 dias` passaria aqui e quebraria qualquer parser real. Este teste fecha a
+   * diferenca, exigindo aspas quando o escalar contem `": "`.
+   */
+  it.each(EXPECTED_FILES)('%s nao tem escalar sem aspas com dois-pontos', (file) => {
+    const offenders: string[] = [];
+    const lines = readFileSync(path.join(CONTRACT_DIR, file), 'utf8').split('\n');
+    lines.forEach((raw, index) => {
+      const content = raw.trim();
+      if (content === '' || content.startsWith('#')) return;
+      const withoutDash = content.startsWith('- ') ? content.slice(2).trim() : content;
+      const pair = splitKey(withoutDash);
+      if (pair === null || pair.rest === '') return;
+      const value = pair.rest;
+      const quoted =
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"));
+      if (quoted) return;
+      if (/:\s/.test(value)) offenders.push(`${file}:${index + 1} -> ${content}`);
+    });
+    expect(offenders).toEqual([]);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Rotas implementadas x rotas publicadas                                     */
+/* -------------------------------------------------------------------------- */
+
+describe('contracts/api — cobertura das rotas reais', () => {
+  it('a varredura encontra as rotas do App Router', () => {
+    // Sanidade: se a varredura quebrar e devolver vazio, os testes abaixo
+    // passariam vacuamente — que e exatamente o defeito que estamos fechando.
+    expect(discoveredRoutes.length).toBeGreaterThanOrEqual(15);
+    expect(discoveredRoutes.map((route) => route.label)).toContain('GET /api/events/summary');
+  });
+
+  it('converte segmentos dinamicos e ignora pastas privadas e route groups', () => {
+    expect(segmentToOpenApi('[id]')).toBe('{id}');
+    expect(segmentToOpenApi('[idOrSlug]')).toBe('{idOrSlug}');
+    expect(segmentToOpenApi('[...path]')).toBe('{path}');
+    expect(segmentToOpenApi('[[...path]]')).toBe('{path}');
+    expect(segmentToOpenApi('_lib')).toBeNull();
+    expect(segmentToOpenApi('(marketing)')).toBeNull();
+    expect(segmentToOpenApi('@modal')).toBeNull();
+    expect(segmentToOpenApi('podcasts')).toBe('podcasts');
+    // Nenhum helper de `_lib` pode ter virado rota.
+    expect(discoveredRoutes.every((route) => !route.routePath.includes('_lib'))).toBe(true);
+  });
+
+  it('toda rota implementada esta publicada no contrato', () => {
+    const published = new Set(operations.map((entry) => entry.label));
+    const unpublished = discoveredRoutes
+      .filter((route) => !published.has(route.label))
+      .map((route) => `${route.label} (${route.file})`);
+    expect(unpublished).toEqual([]);
+  });
+
+  it('toda operacao publicada tem rota implementada', () => {
+    const implemented = new Set(discoveredRoutes.map((route) => route.label));
+    const unimplemented = operations
+      .filter((entry) => !implemented.has(entry.label))
+      .map((entry) => `${entry.label} (${entry.file})`);
+    expect(unimplemented).toEqual([]);
+  });
+});
+
+describe('contracts/api — consistencia documental', () => {
+
   it('cobre todos os endpoints de docs/API_CONTRACTS.md', () => {
     const markdown = readFileSync(DOCS_API_CONTRACTS, 'utf8');
     const pattern = /^####\s+(GET|POST|PATCH|PUT|DELETE)\s+(\/\S+)/gm;
-    const documented = new Set(operations.map((entry) => entry.label));
+    // O nome da variavel de rota e detalhe de implementacao: o PRD escreve
+    // `/api/podcasts/:slug` e `/api/podcasts/:id`, mas o App Router so admite um
+    // segmento dinamico por nivel (e o OpenAPI considera os dois o MESMO path).
+    // A comparacao e feita sobre a FORMA do path, com o nome da variavel
+    // apagado, para nao travar o contrato num detalhe que o framework decide.
+    const shapeOf = (label: string): string => label.replace(/\{[^}]*\}/g, '{}');
+    const documented = new Set(operations.map((entry) => shapeOf(entry.label)));
     const missing: string[] = [];
     let match = pattern.exec(markdown);
     while (match !== null) {
       const normalized = match[2].replace(/\/:([A-Za-z][A-Za-z0-9]*)/g, '/{$1}');
-      const label = `${match[1]} ${normalized}`;
+      const label = shapeOf(`${match[1]} ${normalized}`);
       if (!documented.has(label)) missing.push(label);
       match = pattern.exec(markdown);
     }
@@ -559,11 +749,9 @@ describe('contracts/api — enums', () => {
         const enumName = record['x-zod-enum'];
         if (typeof enumName !== 'string') continue;
         enumNames.add(enumName);
-        const zodEnum = (schemas.ZOD_ENUMS as Record<string, z.ZodEnum<[string, ...string[]]>>)[
-          enumName
-        ];
+        const zodEnum = zodEnumByName(enumName);
         expect(zodEnum, `${file} -> ${name}`).toBeDefined();
-        expect(asStringArray(record.enum), `${file} -> ${name}`).toEqual(zodEnum.options);
+        expect(asStringArray(record.enum), `${file} -> ${name}`).toEqual(zodEnum?.options);
       }
     }
     expect(enumNames.has('PodcastStatus')).toBe(true);
@@ -859,7 +1047,7 @@ describe('contracts/api — regras de negocio', () => {
   it('as rotas mutantes exigem cookieAuth e as publicas declaram security vazio', () => {
     const publicLabels = [
       'GET /api/podcasts',
-      'GET /api/podcasts/{slug}',
+      'GET /api/podcasts/{idOrSlug}',
       'GET /api/episodes',
       'GET /api/episodes/{id}',
       'GET /api/site-config',
