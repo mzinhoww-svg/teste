@@ -64,7 +64,7 @@ test.describe("Landing Reiners Media (/)", () => {
     const dialog = page.getByRole("dialog");
     await dialog.getByLabel("Nome").fill("Ana Furtado");
     await dialog.getByLabel("E-mail").fill("nao-e-email");
-    await dialog.getByRole("button", { name: /Enviar pedido de sessão/i }).click();
+    await dialog.getByRole("button", { name: /Enviar e continuar no WhatsApp/i }).click();
 
     await expect(dialog.getByText(/e-mail válido/i)).toBeVisible();
   });
@@ -75,6 +75,50 @@ test.describe("Landing Reiners Media (/)", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
     expect(errors).toEqual([]);
+  });
+});
+
+test.describe("WhatsApp como canal principal", () => {
+  const NUMBER = "5565999207108";
+
+  test("botão flutuante aponta para o wa.me do número configurado", async ({ page }) => {
+    await page.goto("/");
+    const fab = page.getByRole("link", { name: /Falar no WhatsApp/i });
+    await expect(fab).toBeVisible();
+    await expect(fab).toHaveAttribute("href", new RegExp(`^https://wa\\.me/${NUMBER}\\?text=`));
+    await expect(fab).toHaveAttribute("rel", /noopener/);
+  });
+
+  test("rodapé mostra o número formatado e linka o WhatsApp", async ({ page }) => {
+    await page.goto("/");
+    const link = page.getByRole("contentinfo").getByText("+55 65 99920-7108");
+    await expect(link).toBeVisible();
+  });
+
+  test("formulário enviado leva a conversa para o WhatsApp com os dados", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Agendar sessão gratuita" }).click();
+
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Nome").fill("Ana Furtado");
+    await dialog.getByLabel("E-mail").fill("ana@sicredi.com.br");
+    await dialog.getByLabel("Sobre o projeto").fill("serie institucional mensal");
+    await dialog.getByRole("button", { name: /Enviar e continuar no WhatsApp/i }).click();
+
+    const cta = dialog.getByRole("link", { name: /Continuar no WhatsApp/i });
+    await expect(cta).toBeVisible();
+
+    const href = await cta.getAttribute("href");
+    expect(href).toContain(`https://wa.me/${NUMBER}?text=`);
+    const message = decodeURIComponent(href!.split("?text=")[1]);
+    expect(message).toContain("Ana Furtado");
+    expect(message).toContain("serie institucional mensal");
+    expect(message).toContain("ana@sicredi.com.br");
+  });
+
+  test("o portfólio também tem o atalho de WhatsApp", async ({ page }) => {
+    await page.goto("/portfolio");
+    await expect(page.getByRole("link", { name: /Falar no WhatsApp/i })).toBeVisible();
   });
 });
 

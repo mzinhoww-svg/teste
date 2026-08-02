@@ -285,7 +285,7 @@ export async function runContract(
     { heading: "4. Nível de serviço (SLA)", body: "Disponibilidade de 99,5% e suporte com resposta em até 8 horas úteis, conforme política de sucesso do cliente." },
     { heading: "5. Proteção de dados (LGPD)", body: "As partes tratam dados pessoais conforme a Lei 13.709/2018, adotando medidas técnicas e organizacionais de segurança e sigilo." },
     { heading: "6. Confidencialidade", body: "Informações trocadas são confidenciais e não podem ser divulgadas a terceiros sem autorização por escrito." },
-    { heading: "7. Foro", body: `Fica eleito o foro da comarca de São Paulo/SP para dirimir controvérsias oriundas deste contrato.` },
+    { heading: "7. Foro", body: `Fica eleito o foro da comarca de Cuiabá/MT para dirimir controvérsias oriundas deste contrato.` },
   ];
 
   return {

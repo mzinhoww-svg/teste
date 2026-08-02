@@ -22,7 +22,7 @@ export function HeroSection({ config }: { config: SiteConfig }) {
       />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 py-24">
-        <SiteBadge>Estúdio de Podcast Premium · São Paulo</SiteBadge>
+        <SiteBadge>{config.tagline} · {config.location}</SiteBadge>
 
         <h1 className="mt-6 max-w-[640px] text-site-display font-medium text-site-text-primary">
           Seu podcast com produção de nível internacional

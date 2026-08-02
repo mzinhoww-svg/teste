@@ -7,6 +7,7 @@ import { SiteCard, SiteCardEmpty } from "@/components/site/card";
 import { SiteLink } from "@/components/site/link";
 import { FooterSection } from "@/components/site/sections/footer";
 import { FinalCtaSection } from "@/components/site/sections/final-cta";
+import { WhatsappFab } from "@/components/site/whatsapp-fab";
 
 // Portfólio completo (reiners.agency/portfolio). Mesmo design system da
 // landing; cada programa tem âncora própria (#slug) usada pelos posters.
@@ -26,7 +27,7 @@ export default async function PortfolioPage() {
         Pular para conteúdo principal
       </a>
 
-      <SiteNavbar siteName={config.siteName} />
+      <SiteNavbar siteName={config.siteName} whatsappNumber={config.whatsappNumber} />
 
       <main id="conteudo">
         <section className="bg-site-surface-base px-6 pb-16 pt-24" aria-labelledby="portfolio-title">
@@ -95,10 +96,14 @@ export default async function PortfolioPage() {
           </div>
         </section>
 
-        <FinalCtaSection />
+        <FinalCtaSection
+          whatsappNumber={config.whatsappNumber}
+          location={config.location}
+        />
       </main>
 
-      <FooterSection siteName={config.siteName} programs={programs} />
+      <FooterSection config={config} programs={programs} />
+      <WhatsappFab number={config.whatsappNumber} />
       <SitePageView />
     </div>
   );

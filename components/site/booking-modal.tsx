@@ -4,18 +4,33 @@ import * as React from "react";
 import { SiteModal } from "./modal";
 import { SiteButton } from "./button";
 import { SiteInput, SiteTextarea } from "./input";
+import { WhatsappGlyph } from "./whatsapp-icon";
 import { trackSiteEvent } from "@/lib/site/track";
+import { bookingWhatsappMessage, formatWhatsappNumber, whatsappUrl } from "@/lib/site/whatsapp";
 
 // Modal de agendamento. Estado do formulário: idle → loading → success | error.
 // Erros por campo vêm do servidor (fonte da verdade) e do check local.
+//
+// Depois de gravar o lead, o fluxo CONTINUA no WhatsApp (canal de ativação da
+// Reiners). O link é um botão que a pessoa clica — e não uma abertura
+// automática, que bloqueador de pop-up engoliria depois de um fetch assíncrono.
 
 type Errors = Partial<Record<"name" | "email", string>>;
 
-export function BookingModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function BookingModal({
+  open,
+  onClose,
+  whatsappNumber,
+}: {
+  open: boolean;
+  onClose: () => void;
+  whatsappNumber: string;
+}) {
   const [loading, setLoading] = React.useState(false);
   const [errors, setErrors] = React.useState<Errors>({});
   const [sent, setSent] = React.useState(false);
   const [failure, setFailure] = React.useState<string | null>(null);
+  const [waHref, setWaHref] = React.useState("");
 
   // Cada abertura recomeça limpa.
   React.useEffect(() => {
@@ -23,6 +38,7 @@ export function BookingModal({ open, onClose }: { open: boolean; onClose: () => 
       setErrors({});
       setSent(false);
       setFailure(null);
+      setWaHref("");
     }
   }, [open]);
 
@@ -54,6 +70,7 @@ export function BookingModal({ open, onClose }: { open: boolean; onClose: () => 
         return;
       }
       setErrors({});
+      setWaHref(whatsappUrl(whatsappNumber, bookingWhatsappMessage(payload)));
       setSent(true);
       trackSiteEvent("form_submit", "booking");
     } catch {
@@ -69,17 +86,37 @@ export function BookingModal({ open, onClose }: { open: boolean; onClose: () => 
       onClose={onClose}
       title={sent ? "Recebemos seu contato" : "Agendar sessão"}
       description={
-        sent
-          ? undefined
-          : "Conte o que você quer gravar. Respondemos no mesmo dia útil."
+        sent ? undefined : "Conte o que você quer gravar. Respondemos no mesmo dia útil."
       }
     >
       {sent ? (
         <div className="flex flex-col gap-6">
           <p className="text-site-base text-site-text-primary/85">
-            Obrigado. Nossa equipe entra em contato para combinar a visita ao estúdio.
+            {waHref
+              ? "Seu pedido está registrado. Continue a conversa no WhatsApp — é por lá que combinamos data, formato e visita ao estúdio."
+              : "Obrigado. Nossa equipe entra em contato para combinar a visita ao estúdio."}
           </p>
-          <SiteButton type="button" variant="secondary" onClick={onClose}>
+
+          {waHref && (
+            <a
+              href={waHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackSiteEvent("cta_click", "whatsapp_booking")}
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-site-md bg-site-text-inverse px-6 py-3 text-site-base font-medium text-site-surface-base transition-all duration-fast hover:brightness-110 hover:shadow-site-3 active:scale-[0.98]"
+            >
+              <WhatsappGlyph className="h-5 w-5" />
+              Continuar no WhatsApp
+            </a>
+          )}
+
+          {waHref && (
+            <p className="text-site-sm text-site-text-primary/55">
+              Ou chame direto em {formatWhatsappNumber(whatsappNumber)}.
+            </p>
+          )}
+
+          <SiteButton type="button" variant="ghost" onClick={onClose}>
             Fechar
           </SiteButton>
         </div>
@@ -127,7 +164,7 @@ export function BookingModal({ open, onClose }: { open: boolean; onClose: () => 
           )}
 
           <SiteButton type="submit" loading={loading} block>
-            Enviar pedido de sessão
+            Enviar e continuar no WhatsApp
           </SiteButton>
         </form>
       )}

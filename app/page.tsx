@@ -9,6 +9,7 @@ import { TestimonialsSection } from "@/components/site/sections/testimonials";
 import { AboutSection } from "@/components/site/sections/about";
 import { FinalCtaSection } from "@/components/site/sections/final-cta";
 import { FooterSection } from "@/components/site/sections/footer";
+import { WhatsappFab } from "@/components/site/whatsapp-fab";
 
 // Landing pública da Reiners Media (apex: reiners.agency).
 // A landing do CRM foi para /crm (também servida em crm.reiners.agency) —
@@ -45,18 +46,22 @@ export default async function LandingPage() {
         Pular para conteúdo principal
       </a>
 
-      <SiteNavbar siteName={config.siteName} />
+      <SiteNavbar siteName={config.siteName} whatsappNumber={config.whatsappNumber} />
 
       <main id="conteudo">
         <HeroSection config={config} />
-        <PlansSection plans={plans} />
+        <PlansSection plans={plans} whatsappNumber={config.whatsappNumber} />
         <PortfolioTeaserSection programs={programs} />
         <TestimonialsSection testimonials={testimonials} />
         <AboutSection />
-        <FinalCtaSection />
+        <FinalCtaSection
+          whatsappNumber={config.whatsappNumber}
+          location={config.location}
+        />
       </main>
 
-      <FooterSection siteName={config.siteName} programs={programs} />
+      <FooterSection config={config} programs={programs} />
+      <WhatsappFab number={config.whatsappNumber} />
       <SitePageView />
     </div>
   );

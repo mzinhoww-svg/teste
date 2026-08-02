@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireSiteEditor } from "@/lib/site/admin";
+import { sanitizeWhatsappNumber } from "@/lib/site/whatsapp";
 
 // CRUD do CMS do site. A autorização é feita no servidor (requireSiteEditor) e
 // a escrita usa o cliente COM sessão — então as policies de RLS validam de
@@ -177,6 +178,13 @@ export async function saveSiteConfig(formData: FormData) {
     cta_primary_url: String(formData.get("cta_primary_url") ?? "").trim(),
     cta_secondary_text: String(formData.get("cta_secondary_text") ?? "").trim(),
     cta_secondary_url: String(formData.get("cta_secondary_url") ?? "").trim(),
+    // Só dígitos: o CMS aceita "+55 (65) 99920-7108" e o wa.me exige limpo.
+    whatsapp_number: sanitizeWhatsappNumber(String(formData.get("whatsapp_number") ?? "")) || null,
+    location: String(formData.get("location") ?? "").trim() || null,
+    instagram_url: String(formData.get("instagram_url") ?? "").trim() || null,
+    linkedin_url: String(formData.get("linkedin_url") ?? "").trim() || null,
+    youtube_url: String(formData.get("youtube_url") ?? "").trim() || null,
+    spotify_url: String(formData.get("spotify_url") ?? "").trim() || null,
     seo_title: String(formData.get("seo_title") ?? "").trim() || null,
     seo_description: String(formData.get("seo_description") ?? "").trim() || null,
     analytics_id: String(formData.get("analytics_id") ?? "").trim() || null,

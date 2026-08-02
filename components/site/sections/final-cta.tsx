@@ -3,7 +3,13 @@ import { BookingTrigger } from "../booking-trigger";
 // Seção 6 — CTA final. Um único botão (pill, radius step7), gradiente
 // surface.base → surface.raised.
 
-export function FinalCtaSection() {
+export function FinalCtaSection({
+  whatsappNumber,
+  location,
+}: {
+  whatsappNumber: string;
+  location: string;
+}) {
   return (
     <section
       id="contato"
@@ -15,10 +21,10 @@ export function FinalCtaSection() {
           Pronto para começar seu podcast?
         </h2>
         <p className="mx-auto mt-4 max-w-md text-site-base text-site-text-primary/70">
-          Agende uma visita ao estúdio em São Paulo.
+          Agende uma visita ao estúdio em {location} — ou chame a equipe para gravar na sua sede.
         </p>
         <div className="mt-10 flex justify-center">
-          <BookingTrigger label="final_cta" variant="pill" size="lg">
+          <BookingTrigger label="final_cta" whatsappNumber={whatsappNumber} variant="pill" size="lg">
             Agendar sessão gratuita
           </BookingTrigger>
         </div>

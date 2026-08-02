@@ -20,7 +20,7 @@ const LINKS = [
   { href: "/#contato", label: "Contato" },
 ];
 
-export function SiteNavbar({ siteName }: { siteName: string }) {
+export function SiteNavbar({ siteName, whatsappNumber }: { siteName: string; whatsappNumber: string }) {
   const [scrolled, setScrolled] = React.useState(false);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [bookingOpen, setBookingOpen] = React.useState(false);
@@ -152,7 +152,7 @@ export function SiteNavbar({ siteName }: { siteName: string }) {
         </div>
       )}
 
-      <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
+      <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} whatsappNumber={whatsappNumber} />
     </>
   );
 }

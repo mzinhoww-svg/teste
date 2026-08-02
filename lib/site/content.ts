@@ -7,6 +7,8 @@
 //
 // Espelha as tabelas de supabase/migrations/0016_site_cms.sql.
 
+import { DEFAULT_WHATSAPP, sanitizeWhatsappNumber } from "./whatsapp";
+
 export type SiteConfig = {
   siteName: string;
   tagline: string;
@@ -16,6 +18,12 @@ export type SiteConfig = {
   ctaPrimaryUrl: string;
   ctaSecondaryText: string;
   ctaSecondaryUrl: string;
+  whatsappNumber: string;
+  location: string;
+  instagramUrl: string | null;
+  linkedinUrl: string | null;
+  youtubeUrl: string | null;
+  spotifyUrl: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
   analyticsId: string | null;
@@ -64,9 +72,16 @@ export const DEFAULT_CONFIG: SiteConfig = {
   ctaPrimaryUrl: "#planos",
   ctaSecondaryText: "Ouvir programas",
   ctaSecondaryUrl: "/portfolio",
+  whatsappNumber: DEFAULT_WHATSAPP,
+  location: "Cuiabá/MT",
+  // Sem URL real, o ícone não é renderizado (ver FooterSection).
+  instagramUrl: null,
+  linkedinUrl: null,
+  youtubeUrl: null,
+  spotifyUrl: null,
   seoTitle: "Reiners Media — Estúdio de podcast premium",
   seoDescription:
-    "Gravação, edição, mixagem, identidade visual e distribuição. Tudo em um só lugar.",
+    "Estúdio de podcast em Cuiabá/MT: gravação, edição, mixagem, identidade visual e distribuição. Também gravamos na sua sede.",
   analyticsId: null,
   customCss: null,
 };
@@ -276,6 +291,13 @@ export function toConfig(row: Record<string, unknown>): SiteConfig {
     ctaPrimaryUrl: str("cta_primary_url", DEFAULT_CONFIG.ctaPrimaryUrl),
     ctaSecondaryText: str("cta_secondary_text", DEFAULT_CONFIG.ctaSecondaryText),
     ctaSecondaryUrl: str("cta_secondary_url", DEFAULT_CONFIG.ctaSecondaryUrl),
+    // Guarda só dígitos: o CMS aceita "+55 (65) 99920-7108" e o link exige limpo.
+    whatsappNumber: sanitizeWhatsappNumber(str("whatsapp_number", DEFAULT_CONFIG.whatsappNumber)),
+    location: str("location", DEFAULT_CONFIG.location),
+    instagramUrl: nullable("instagram_url"),
+    linkedinUrl: nullable("linkedin_url"),
+    youtubeUrl: nullable("youtube_url"),
+    spotifyUrl: nullable("spotify_url"),
     seoTitle: nullable("seo_title") ?? DEFAULT_CONFIG.seoTitle,
     seoDescription: nullable("seo_description") ?? DEFAULT_CONFIG.seoDescription,
     analyticsId: nullable("analytics_id"),
