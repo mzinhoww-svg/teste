@@ -74,9 +74,8 @@
     "EPIC-012": "Quality & Deploy"
   },
   "status_counts": {
-    "BACKLOG": 20,
-    "READY": 1,
-    "DONE": 3,
+    "BACKLOG": 15,
+    "DONE": 9,
     "CANCELLED": 1
   },
   "tickets": [

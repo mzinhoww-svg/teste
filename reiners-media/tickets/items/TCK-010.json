@@ -2,7 +2,7 @@
   "id": "TCK-010",
   "title": "Implementar sistema de animações e motion",
   "summary": "Criar hooks e utilitários de animação: fade-in, stagger, shimmer, modal transitions, respeitando prefers-reduced-motion.",
-  "status": "IN_PROGRESS",
+  "status": "DONE",
   "priority": "P1",
   "type": "feature",
   "epic": "EPIC-007",

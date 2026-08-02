@@ -2,7 +2,7 @@
   "id": "TCK-005",
   "title": "Implementar API CRUD de Podcasts com upload de imagens",
   "summary": "Endpoints REST para CRUD de podcasts (GET, POST, PATCH, DELETE soft), upload de imagens para Supabase Storage, paginação e filtros.",
-  "status": "IN_PROGRESS",
+  "status": "DONE",
   "priority": "P0",
   "type": "feature",
   "epic": "EPIC-005",

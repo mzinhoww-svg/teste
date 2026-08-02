@@ -2,7 +2,7 @@
   "id": "TCK-006",
   "title": "Implementar API CRUD de Episódios com parser de URLs",
   "summary": "Endpoints REST para CRUD de episódios, parser automático de YouTube (video ID) e Spotify (URI), associação com podcasts.",
-  "status": "IN_PROGRESS",
+  "status": "DONE",
   "priority": "P0",
   "type": "feature",
   "epic": "EPIC-005",

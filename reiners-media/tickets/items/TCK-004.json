@@ -2,7 +2,7 @@
   "id": "TCK-004",
   "title": "Implementar autenticação Supabase e middleware de proteção",
   "summary": "Configurar Supabase Auth (email/password), middleware de sessão para /admin/*, RBAC (ADMIN/EDITOR), rate limiting.",
-  "status": "IN_PROGRESS",
+  "status": "DONE",
   "priority": "P0",
   "type": "feature",
   "epic": "EPIC-004",
