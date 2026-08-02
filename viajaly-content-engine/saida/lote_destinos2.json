@@ -1,0 +1,725 @@
+{
+  "_doc": "Parcela 1: Destinos x novas personas. Mesma verdade de viagem, dor diferente por persona. Travel-first, visto no fecho. Voz voce, sem emoji/travessao. Perene. Disclaimer no CTA.",
+  "pecas": [
+    {
+      "combo": "D01xP2",
+      "data": "2026-08-07",
+      "conta": "@viajaly",
+      "pilar": "desejo",
+      "tema": "destino",
+      "angulo_id": "D01",
+      "persona_id": "P2",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Nova York a dois na primeira viagem",
+      "persona": "Casal primeira viagem",
+      "dor": "não sabe por onde começar a primeira internacional",
+      "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "primeira vez a dois",
+          "titulo": "Nova York na primeira viagem do casal: por onde começar.",
+          "sub": "A cidade que assusta de tão grande, resolvida.",
+          "destaques": [
+            "começar."
+          ],
+          "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Escolha uma base",
+          "corpo": "Fiquem perto do metro. NY se resolve no trilho, e a pé vocês perdem o dia e o fôlego.",
+          "destaques": [
+            "metro."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Menos e mais",
+          "corpo": "Primeira vez rende com poucos pontos por dia e tempo pra só olhar a cidade. Não virem turistas exaustos.",
+          "destaques": [
+            "poucos"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "04",
+          "titulo": "O momento a dois",
+          "corpo": "Por do sol na ponte, um show, o parque no fim de tarde. NY entrega romance de graça pra quem desacelera.",
+          "destaques": [
+            "romance"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "A primeira viagem do casal não precisa ser perfeita. Precisa ser sem pressa.",
+          "destaques": [
+            "pressa."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O que vem antes",
+          "corpo": "Nada de Nova York sem o visto dos dois na mão. Ele leva tempo pra sair, entao vem primeiro.",
+          "destaques": [
+            "primeiro."
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta NYCASAL que eu te mando o roteiro de 4 dias a dois. Ou link na bio.",
+          "acao": "Comenta NYCASAL",
+          "destaques": [
+            "NYCASAL"
+          ],
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Nova York na primeira viagem do casal parece assustadora de tão grande. Não é.\n\nFiquem perto do metro, porque NY se resolve no trilho. Menos pontos por dia, mais tempo pra olhar a cidade. E aproveitem o romance de graça: por do sol na ponte, um show, o parque no fim de tarde. A primeira viagem não precisa ser perfeita, precisa ser sem pressa.\n\nE nada disso acontece sem o visto dos dois. Ele vem primeiro.\n\nComenta NYCASAL que eu te mando o roteiro. Ou toca no link da bio.\n\n#novayork #luademel #viagemacasal #primeiraviagem #eua #vistoamericano #vistoeua"
+    },
+    {
+      "combo": "D02xP2",
+      "data": "2026-08-08",
+      "conta": "@viajaly",
+      "pilar": "desejo",
+      "tema": "destino",
+      "angulo_id": "D02",
+      "persona_id": "P2",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Miami a dois",
+      "persona": "Casal primeira viagem",
+      "dor": "quer roteiro romântico e não só balada",
+      "imagem": "acervo/destinos/miami-menina.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "miami a dois",
+          "titulo": "Miami a dois não é só balada e piscina de hotel.",
+          "sub": "Tem um lado romântico que o Instagram esconde.",
+          "destaques": [
+            "só"
+          ],
+          "imagem": "acervo/destinos/miami-menina.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Por do sol certo",
+          "corpo": "Key Biscayne e o farol pro fim de tarde. Menos gente, mais vista, o momento que rende foto e memória.",
+          "destaques": [
+            "memória."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Jantar sem cilada",
+          "corpo": "Fuja da orla turística. Little Havana e os bairros comem melhor e cobram justo.",
+          "destaques": [
+            "justo."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "04",
+          "titulo": "Um dia fora",
+          "corpo": "Um bate e volta pros Everglades ou Keys quebra a rotina de praia e vira a melhor lembrança.",
+          "destaques": [
+            "fora"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Miami romântica existe. Ela só não mora na avenida principal.",
+          "destaques": [
+            "romântica"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O que vem antes do voo",
+          "corpo": "Miami a dois começa meses antes, com o visto do casal aprovado e no prazo.",
+          "destaques": [
+            "antes,"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta MIAMIDOIS que eu te mando o roteiro romântico. Ou link na bio.",
+          "acao": "Comenta MIAMIDOIS",
+          "destaques": [
+            "MIAMIDOIS"
+          ],
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Miami a dois não é só balada e piscina de hotel. Tem um lado romântico que o Instagram esconde.\n\nKey Biscayne e o farol pro por do sol, com menos gente e mais vista. Fuja da orla turística na hora de comer, os bairros cobram justo. E um bate e volta pros Everglades ou Keys vira a melhor lembrança. Miami romântica existe, só não mora na avenida principal.\n\nE ela começa meses antes, com o visto do casal no prazo.\n\nComenta MIAMIDOIS que eu te mando o roteiro. Ou toca no link da bio.\n\n#miami #viagemacasal #luademel #eua #vistoamericano #vistoeua #keybiscayne"
+    },
+    {
+      "combo": "D03xP2",
+      "data": "2026-08-09",
+      "conta": "@viajaly",
+      "pilar": "desejo",
+      "tema": "destino",
+      "angulo_id": "D03",
+      "persona_id": "P2",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Califórnia a dois",
+      "persona": "Casal primeira viagem",
+      "dor": "acha que Califórnia só vale com filho na Disney",
+      "imagem": "acervo/destinos/disney-castelo-familia.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "costa oeste a dois",
+          "titulo": "Califórnia a dois: estrada, praia e vinho, não só parque.",
+          "sub": "A viagem de casal que o Brasil ainda subestima.",
+          "destaques": [
+            "não"
+          ],
+          "imagem": "acervo/destinos/disney-castelo-familia.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "A estrada e o passeio",
+          "corpo": "De Los Angeles a costa, a estrada já é o programa. Parem onde quiserem, sem roteiro apertado.",
+          "destaques": [
+            "estrada"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Cidade e natureza",
+          "corpo": "LÁ num dia, praia no outro, um parque nacional no terceiro. A Costa Oeste muda de cenário rápido.",
+          "destaques": [
+            "cenário"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "04",
+          "titulo": "O toque a dois",
+          "corpo": "Uma vinicola, um por do sol no pier. Dá pra fazer barato e ainda parecer lua de mel de revista.",
+          "destaques": [
+            "barato"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Nem todo casal quer parque. Alguns querem estrada, e a Califórnia entende isso.",
+          "destaques": [
+            "estrada,"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O que abre a estrada",
+          "corpo": "Antes de alugar o carro dos sonhos, o que abre a viagem e o visto dos dois no prazo.",
+          "destaques": [
+            "abre"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta CALIDOIS que eu te mando o roteiro de estrada. Ou link na bio.",
+          "acao": "Comenta CALIDOIS",
+          "destaques": [
+            "CALIDOIS"
+          ],
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Califórnia a dois e estrada, praia e vinho, não só parque. E a viagem de casal que o Brasil ainda subestima.\n\nDe LÁ a costa, a estrada já é o programa: parem onde quiserem. Cidade num dia, praia no outro, um parque nacional no terceiro. Uma vinicola, um por do sol no pier, e vira lua de mel de revista sem gastar como uma. Nem todo casal quer parque, alguns querem estrada.\n\nE o que abre a estrada e o visto dos dois no prazo.\n\nComenta CALIDOIS que eu te mando o roteiro. Ou toca no link da bio.\n\n#california #losangeles #viagemacasal #roadtrip #eua #vistoamericano #vistoeua"
+    },
+    {
+      "combo": "D05xP2",
+      "data": "2026-08-10",
+      "conta": "@viajaly",
+      "pilar": "desejo",
+      "tema": "destino",
+      "angulo_id": "D05",
+      "persona_id": "P2",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Neve a dois",
+      "persona": "Casal primeira viagem",
+      "dor": "nunca viu neve e quer a experiência certa",
+      "imagem": "acervo/destinos/montanha-neve.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "primeira neve a dois",
+          "titulo": "A primeira neve do casal tem época certa. Não erre a data.",
+          "sub": "Viajar no mês errado e ver montanha sem neve.",
+          "destaques": [
+            "época"
+          ],
+          "imagem": "acervo/destinos/montanha-neve.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Quando ir",
+          "corpo": "Dezembro a março na maioria das montanhas. Fora disso, vocês sobem e não tem neve nenhuma.",
+          "destaques": [
+            "março"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Estreante não precisa de pista",
+          "corpo": "Sem saber esquiar? Tem trenó, tubing é só brincar. Aula de meio dia já da o gostinho.",
+          "destaques": [
+            "aula"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "04",
+          "titulo": "Roupa faz o dia",
+          "corpo": "Luva impermeável e segunda pele. Casaco de cidade bonito não segura o frio da montanha.",
+          "destaques": [
+            "impermeável"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Neve no mês errado é só montanha marrom. A data importa mais que o hotel.",
+          "destaques": [
+            "data"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "A parte que tem prazo",
+          "corpo": "A neve tem janela e o visto tem o tempo dele. Por isso o visto dos dois vem primeiro, com folga.",
+          "destaques": [
+            "primeiro,"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta NEVEDOIS que eu te mando o guia da primeira neve. Ou link na bio.",
+          "acao": "Comenta NEVEDOIS",
+          "destaques": [
+            "NEVEDOIS"
+          ],
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "A primeira neve do casal tem época certa. Viajar no mês errado e ver montanha sem neve.\n\nVa de dezembro a março. Não precisa saber esquiar: trenó, tubing e uma aula de meio dia já dao o gostinho. E roupa faz o dia, luva impermeável e segunda pele, porque casaco de cidade não segura o frio da montanha. A data importa mais que o hotel.\n\nA neve tem janela e o visto tem o tempo dele. O visto vem primeiro.\n\nComenta NEVEDOIS que eu te mando o guia. Ou toca no link da bio.\n\n#neve #viagemacasal #inverno #eua #vistoamericano #vistoeua #ski"
+    },
+    {
+      "combo": "D04xP6",
+      "data": "2026-08-11",
+      "conta": "@viajaly",
+      "pilar": "desejo",
+      "tema": "destino",
+      "angulo_id": "D04",
+      "persona_id": "P6",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Parques em grupo de amigos",
+      "persona": "Grupo de amigos",
+      "dor": "gosto e pique diferentes no mesmo grupo",
+      "imagem": "acervo/destinos/universal-globo.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "parque em grupo",
+          "titulo": "Grupo de amigos no parque: como não brigar no dia.",
+          "sub": "Pique diferente e o que estraga o dia, não o parque.",
+          "destaques": [
+            "brigar"
+          ],
+          "imagem": "acervo/destinos/universal-globo.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Combine o ponto de encontro",
+          "corpo": "Nem todo mundo anda junto o dia todo. Marquem horário e lugar, cada um faz o que quer no meio.",
+          "destaques": [
+            "encontro"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Radical x tranquilo",
+          "corpo": "A Universal serve o grupo que quer adrenalina. Quem foge de montanha-russa tem área calma também.",
+          "destaques": [
+            "adrenalina."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "04",
+          "titulo": "Divida o custo antes",
+          "corpo": "Ingresso, comida, transporte. Acertem quem paga o que antes, pra ninguém azedar no fim.",
+          "destaques": [
+            "antes,"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Grupo no parque não precisa fazer tudo junto. Precisa combinar o básico.",
+          "destaques": [
+            "combinar"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O que trava o grupo antes",
+          "corpo": "O parque só acontece com os vistos de todo mundo prontos. Um pendente segura a viagem inteira.",
+          "destaques": [
+            "todo"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta PARQUEGRUPO que eu te mando o guia pra grupo. Ou link na bio.",
+          "acao": "Comenta PARQUEGRUPO",
+          "destaques": [
+            "PARQUEGRUPO"
+          ],
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Grupo de amigos no parque: o que estraga o dia e o pique diferente, não o parque.\n\nCombinem ponto de encontro e horário, e no meio cada um faz o que quer. A Universal serve quem quer adrenalina e tem área calma pra quem foge de montanha-russa. E dividam o custo antes (ingresso, comida, transporte) pra ninguém azedar no fim.\n\nMas o parque só acontece com os vistos de todo mundo prontos. Um pendente segura a viagem inteira.\n\nComenta PARQUEGRUPO que eu te mando o guia. Ou toca no link da bio.\n\n#parquesorlando #universal #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua"
+    },
+    {
+      "combo": "D07xP1",
+      "data": "2026-08-12",
+      "conta": "@viajaly",
+      "pilar": "desejo",
+      "tema": "destino",
+      "angulo_id": "D07",
+      "persona_id": "P1",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Praia em família nos EUA",
+      "persona": "Família Orlando",
+      "dor": "quer intercalar parque com praia sem perder o dia",
+      "imagem": "acervo/destinos/praia-crianca-areia.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "praia depois do parque",
+          "titulo": "Um dia de praia salva a semana de parque com crianças.",
+          "sub": "O respiro que evita o colapso do quarto dia.",
+          "destaques": [
+            "salva"
+          ],
+          "imagem": "acervo/destinos/praia-crianca-areia.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Encaixe no meio",
+          "corpo": "Dois ou três dias de parque, um de praia. A criança recarrega e a semana toda rende melhor.",
+          "destaques": [
+            "recarrega"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Praia calma com criança",
+          "corpo": "Prefira água mansa e salva-vidas. Onda forte com criança pequena vira estresse, não descanso.",
+          "destaques": [
+            "mansa"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "04",
+          "titulo": "Leve o básico",
+          "corpo": "Guarda-sol, água e lanche. Na praia americana não tem o vendedor que passa oferecendo.",
+          "destaques": [
+            "básico"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "A viagem em família não morre de tedio. Morre de cansaco. Praia e remedio.",
+          "destaques": [
+            "remedio."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "Antes do roteiro todo",
+          "corpo": "Parque, praia, tudo depende de uma coisa: o visto da família aprovado e no prazo.",
+          "destaques": [
+            "tudo"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta PRAIAFAMILIA que eu te mando o roteiro parque + praia. Ou link na bio.",
+          "acao": "Comenta PRAIAFAMILIA",
+          "destaques": [
+            "PRAIAFAMILIA"
+          ],
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Um dia de praia salva a semana de parque com crianças. E o respiro que evita o colapso do quarto dia.\n\nEncaixe dois ou três dias de parque e um de praia, que a criança recarrega. Prefira água mansa com salva-vidas, porque onda forte com criança pequena vira estresse. E leve guarda-sol, água e lanche, porque não tem o vendedor de sempre. Viagem em família não morre de tedio, morre de cansaco.\n\nE parque e praia dependem do visto da família no prazo.\n\nComenta PRAIAFAMILIA que eu te mando o roteiro. Ou toca no link da bio.\n\n#praia #orlando #viagememfamilia #eua #vistoamericano #vistoeua #feriascomcriancas"
+    },
+    {
+      "combo": "D06xP3",
+      "data": "2026-08-13",
+      "conta": "@leticia",
+      "pilar": "desejo",
+      "tema": "destino",
+      "angulo_id": "D06",
+      "persona_id": "P3",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Orlando pra quem já foi negado",
+      "persona": "Negado antes",
+      "dor": "vergonha do não é medo de sonhar de novo",
+      "imagem": "acervo/destinos/disney-main-street.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "o sonho continua de pé",
+          "titulo": "Você foi negado. O sonho de levar seus filhos pra Orlando não acabou.",
+          "sub": "Um não não é o fim da história.",
+          "destaques": [
+            "não"
+          ],
+          "imagem": "acervo/destinos/disney-main-street.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "O que o não significa",
+          "corpo": "Significa que algo naquele pedido não convenceu. Não que você não merece a viagem.",
+          "destaques": [
+            "algo"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "O que muda na volta",
+          "corpo": "Entender o motivo e corrigir com honestidade. Repetir igual e o único caminho pro mesmo resultado.",
+          "destaques": [
+            "corrigir"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "A foto no parque com seus filhos não é sonho distante. E consequência de preparo.",
+          "destaques": [
+            "preparo."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "05",
+          "titulo": "O roteiro que te aguarda",
+          "corpo": "Castelo, parada, o abraço do personagem. Tudo isso continua ali, pronto pra quando você voltar preparado.",
+          "destaques": [
+            "preparado."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O que eu não prometo",
+          "corpo": "Eu não garanto seu visto. Ninguém garante. Mas te ajudo a não repetir o erro que já doeu.",
+          "destaques": [
+            "Ninguém"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta RECOMECAR que eu te falo o próximo passo. Ou link na bio.",
+          "acao": "Comenta RECOMECAR",
+          "destaques": [
+            "RECOMECAR"
+          ],
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Você foi negado, e mesmo assim o sonho de levar seus filhos pra Orlando não acabou. Um não não é o fim da história.\n\nO não significa que algo no pedido não convenceu, não que você não merece a viagem. O que muda na volta e entender o motivo e corrigir com honestidade. A foto no parque com seus filhos não é sonho distante, e consequência de preparo.\n\nEu não garanto seu visto. Ninguém garante. Mas te ajudo a não repetir o erro que já doeu.\n\nComenta RECOMECAR que eu te falo o próximo passo. Ou toca no link da bio.\n\n#vistonegado #orlando #naodesista #segundatentativa #eua #vistoamericano #vistoeua"
+    },
+    {
+      "combo": "D09xP2",
+      "data": "2026-08-14",
+      "conta": "@viajaly",
+      "pilar": "desejo",
+      "tema": "destino",
+      "angulo_id": "D09",
+      "persona_id": "P2",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Praia a dois nos EUA",
+      "persona": "Casal primeira viagem",
+      "dor": "quer praia tranquila e não festa",
+      "imagem": "acervo/destinos/praia-por-do-sol.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "praia a dois",
+          "titulo": "A praia mais bonita dos EUA quase nunca e a mais famosa.",
+          "sub": "Pro casal que quer paz, não festa.",
+          "destaques": [
+            "famosa."
+          ],
+          "imagem": "acervo/destinos/praia-por-do-sol.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Fuja do óbvio",
+          "corpo": "As praias de cartão postal vivem lotadas. Um pouco mais longe, a mesma água sem a multidao.",
+          "destaques": [
+            "multidao."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Fim de tarde e de vocês",
+          "corpo": "Cheguem pro por do sol, quando o dia esvazia. E a hora que a praia americana fica romântica.",
+          "destaques": [
+            "romântica."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "04",
+          "titulo": "Regras que pegam",
+          "corpo": "Bandeira e lei e álcool na areia rende multa. Curtir sem susto e saber isso antes.",
+          "destaques": [
+            "antes."
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "A dois, praia boa não é a badalada. E a que deixa vocês conversarem.",
+          "destaques": [
+            "conversarem."
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O que vem antes do mar",
+          "corpo": "Toda praia dos EUA começa longe dela, no visto do casal aprovado e no prazo.",
+          "destaques": [
+            "visto"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta PRAIADOIS que eu te mando as praias calmas por região. Ou link na bio.",
+          "acao": "Comenta PRAIADOIS",
+          "destaques": [
+            "PRAIADOIS"
+          ],
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "A praia mais bonita dos EUA quase nunca e a mais famosa. Pro casal que quer paz, isso é ouro.\n\nFuja do óbvio: as de cartão postal vivem lotadas, e um pouco mais longe tem a mesma água sem multidao. Cheguem pro por do sol, quando o dia esvazia e a praia fica romântica. E saibam as regras que pegam: bandeira e lei, álcool na areia rende multa.\n\nE toda praia começa longe dela, no visto do casal no prazo.\n\nComenta PRAIADOIS que eu te mando as praias calmas. Ou toca no link da bio.\n\n#praia #viagemacasal #luademel #eua #vistoamericano #vistoeua #florida"
+    },
+    {
+      "combo": "D10xP6",
+      "data": "2026-08-15",
+      "conta": "@viajaly",
+      "pilar": "desejo",
+      "tema": "destino",
+      "angulo_id": "D10",
+      "persona_id": "P6",
+      "formato": "carrossel",
+      "kit": "corporate",
+      "tese": "Miami em grupo além da praia",
+      "persona": "Grupo de amigos",
+      "dor": "grupo só pensa em praia e balada e enjoa",
+      "imagem": "acervo/destinos/miami-crianca.jpg",
+      "slides": [
+        {
+          "tipo": "capa_foto",
+          "kicker": "miami em grupo",
+          "titulo": "Grupo em Miami que só faz praia e balada volta cansado.",
+          "sub": "Faltou o que faz a viagem valer a pena.",
+          "destaques": [
+            "cansado."
+          ],
+          "imagem": "acervo/destinos/miami-crianca.jpg"
+        },
+        {
+          "tipo": "passo",
+          "numero": "02",
+          "titulo": "Um dia diferente",
+          "corpo": "Everglades de aerobarco, jacare de perto. O grupo lembra desse dia mais que da decima balada.",
+          "destaques": [
+            "lembra"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "03",
+          "titulo": "Comer bem e barato",
+          "corpo": "Little Havana e os food halls alimentam o grupo sem o preço da orla. Rende mais dia de viagem.",
+          "destaques": [
+            "barato"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "04",
+          "titulo": "Foto que rende",
+          "corpo": "Wynwood colorido, o farol de Key Biscayne. Conteudo bom pro grupo sem pagar por passeio caro.",
+          "destaques": [
+            "Wynwood"
+          ]
+        },
+        {
+          "tipo": "insight",
+          "texto": "Miami em grupo cansa quem repete. Rende pra quem mistura praia, cidade e natureza.",
+          "destaques": [
+            "mistura"
+          ]
+        },
+        {
+          "tipo": "passo",
+          "numero": "06",
+          "titulo": "O que trava o grupo antes",
+          "corpo": "Miami em grupo só acontece com os vistos de todo mundo prontos e no prazo.",
+          "destaques": [
+            "todo"
+          ]
+        },
+        {
+          "tipo": "cta",
+          "titulo": "Comenta MIAMIGRUPO que eu te mando o roteiro do grupo. Ou link na bio.",
+          "acao": "Comenta MIAMIGRUPO",
+          "destaques": [
+            "MIAMIGRUPO"
+          ],
+          "sub": "A Viajaly não garante aprovação de vistos. A decisão e exclusiva das autoridades consulares."
+        }
+      ],
+      "legenda": "Grupo em Miami que só faz praia e balada volta cansado. Faltou o que faz a viagem valer a pena.\n\nReserve um dia diferente: Everglades de aerobarco, jacare de perto, o grupo lembra disso mais que da decima balada. Coma bem e barato em Little Havana e nos food halls. E faça foto boa de graça em Wynwood e no farol de Key Biscayne. Miami cansa quem repete e rende pra quem mistura.\n\nÉ só acontece com os vistos de todo mundo prontos.\n\nComenta MIAMIGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#miami #viagemcomamigos #grupodeamigos #everglades #eua #vistoamericano #vistoeua"
+    }
+  ]
+}

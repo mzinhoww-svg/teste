@@ -1,0 +1,79 @@
+{
+  "combo": "A09xP2",
+  "data": "2026-08-26",
+  "conta": "@viajaly",
+  "pilar": "utilidade",
+  "angulo_id": "A09",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "CASV e consulado são dois dias (casal)",
+  "persona": "Casal primeira viagem",
+  "dor": "acha que resolve o visto num dia só",
+  "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "planejem os dois dias",
+      "titulo": "Tirar o visto são DUAS visitas, em dias diferentes.",
+      "sub": "Casal que planeja um dia só se atrapalha.",
+      "destaques": [
+        "DUAS"
+      ],
+      "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Dia 1: o CASV",
+      "corpo": "Foto e digitais. Rápido, mas e um deslocamento inteiro. Não é a entrevista.",
+      "destaques": [
+        "digitais."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Dia 2: o consulado",
+      "corpo": "A entrevista com o oficial. Pode ser noutra data e até noutra cidade. Planejem os dois.",
+      "destaques": [
+        "entrevista"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Primeira viagem já da frio na barriga. Descobrir que são dois dias na última hora piora.",
+      "destaques": [
+        "dois"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Dá pra otimizar",
+      "corpo": "Em vários postos marca-se os dois em dias próximos, numa viagem só. Menos custo pro casal.",
+      "destaques": [
+        "próximos"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Organizem juntos",
+      "corpo": "Alinhem folga no trabalho dos dois pras duas datas. Um imprevisto derruba um dia inteiro.",
+      "destaques": [
+        "juntos"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta DOISDIAS que eu te mando como marcar os dois numa viagem. Ou link na bio.",
+      "acao": "Comenta DOISDIAS",
+      "destaques": [
+        "DOISDIAS"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Tirar o visto americano são DUAS visitas, em dias diferentes. Casal que planeja um dia só se atrapalha.\n\nDia 1 e o CASV: foto e digitais. Dia 2 e o consulado: a entrevista, que pode ser noutra data e até noutra cidade. Dá pra otimizar, em vários postos marca-se os dois próximos numa viagem só. Alinhem folga dos dois pras duas datas, porque um imprevisto derruba um dia inteiro.\n\nComenta DOISDIAS que eu te mando como marcar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #casv #vistoeua #b1b2 #viagemacasal #dicasdevisto"
+}

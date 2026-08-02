@@ -1,0 +1,80 @@
+{
+  "combo": "D03xP1",
+  "data": "2026-07-30",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D03",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Califórnia: Disneyland e Los Angeles com filhos",
+  "persona": "Família Orlando",
+  "dor": "acha que Disney só existe em Orlando",
+  "imagem": "acervo/destinos/disney-castelo-familia.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "califórnia com filhos",
+      "titulo": "A Disneyland da Califórnia e diferente da Disney de Orlando.",
+      "sub": "Menor, mais tranquila, e ainda te da Los Angeles junto.",
+      "destaques": [
+        "diferente"
+      ],
+      "imagem": "acervo/destinos/disney-castelo-familia.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Por que a Califórnia",
+      "corpo": "A Disneyland original e compacta. Dá pra fazer com criança pequena sem a maratona de Orlando.",
+      "destaques": [
+        "compacta."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Junte LÁ na conta",
+      "corpo": "Santa Monica, o pier, uma tarde na praia. A Costa Oeste entrega parque e cidade no mesmo pacote.",
+      "destaques": [
+        "praia."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "O ritmo que segura",
+      "corpo": "Um dia de parque, um dia de cidade, um dia de praia. Família com criança precisa desse respiro.",
+      "destaques": [
+        "respiro."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Nem toda família precisa de Orlando. Precisa do destino certo pra idade dos filhos.",
+      "destaques": [
+        "certo"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que abre a porta",
+      "corpo": "Califórnia, Orlando ou as duas, tudo começa no mesmo lugar: o visto da família aprovado e no prazo.",
+      "destaques": [
+        "mesmo"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta CALIFORNIA que eu te mando o roteiro Disneyland + LÁ. Ou link na bio.",
+      "acao": "Comenta CALIFORNIA",
+      "destaques": [
+        "CALIFORNIA"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "A Disneyland da Califórnia e diferente da Disney de Orlando, e para muita família ela encaixa melhor.\n\nA original e compacta, dá pra fazer com criança pequena sem maratona. E o melhor: junta Los Angeles na conta, Santa Monica, o pier, a praia. Um dia de parque, um dia de cidade, um dia de praia, com respiro. Nem toda família precisa de Orlando, precisa do destino certo pra idade dos filhos.\n\nCalifórnia, Orlando ou as duas, tudo começa no mesmo lugar: o visto da família no prazo.\n\nComenta CALIFORNIA que eu te mando o roteiro. Ou toca no link da bio.\n\n#california #losangeles #disneyland #viagememfamilia #eua #vistoamericano #vistoeua"
+}

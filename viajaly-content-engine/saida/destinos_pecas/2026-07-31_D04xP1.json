@@ -1,0 +1,80 @@
+{
+  "combo": "D04xP1",
+  "data": "2026-07-31",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D04",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Universal ou Disney primeiro, pela idade",
+  "persona": "Família Orlando",
+  "dor": "gastar caro no parque errado pra idade do filho",
+  "imagem": "acervo/destinos/universal-globo.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "qual parque primeiro",
+      "titulo": "Universal ou Disney primeiro? A idade do seu filho decide.",
+      "sub": "Escolher errado e dinheiro e dia perdidos.",
+      "destaques": [
+        "idade"
+      ],
+      "imagem": "acervo/destinos/universal-globo.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Até uns 7 anos",
+      "corpo": "A Disney rende mais: personagem, ritmo lento, magia que criança pequena entende.",
+      "destaques": [
+        "Disney"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Dos 8 em diante",
+      "corpo": "A Universal brilha: montanha-russa, Harry Potter, adrenalina que os maiores querem.",
+      "destaques": [
+        "Universal"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Se der pra fazer os dois",
+      "corpo": "Alterne. Um dia pesado, um dia leve. Não emende dois parques grandes seguidos com criança.",
+      "destaques": [
+        "Alterne."
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Parque certo pra idade errada e o jeito mais caro de cansar a família.",
+      "destaques": [
+        "idade"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Antes da escolha",
+      "corpo": "Disney, Universal, tanto faz: nenhum acontece sem o visto da família pronto e no prazo.",
+      "destaques": [
+        "nenhum"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta PARQUES que eu te mando o guia por idade. Ou link na bio.",
+      "acao": "Comenta PARQUES",
+      "destaques": [
+        "PARQUES"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Universal ou Disney primeiro? A idade do seu filho decide, e escolher errado e dinheiro e dia perdidos.\n\nAté uns 7 anos a Disney rende mais: personagem, ritmo lento, magia. Dos 8 em diante a Universal brilha: montanha-russa, Harry Potter, adrenalina. Se for fazer os dois, alterne um dia pesado com um leve. Parque certo pra idade errada e o jeito mais caro de cansar a família.\n\nDisney ou Universal, nenhum acontece sem o visto da família pronto.\n\nComenta PARQUES que eu te mando o guia por idade. Ou toca no link da bio.\n\n#orlando #disney #universal #viagememfamilia #eua #vistoamericano #feriascomcriancas"
+}

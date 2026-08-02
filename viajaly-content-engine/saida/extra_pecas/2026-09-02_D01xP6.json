@@ -1,0 +1,80 @@
+{
+  "combo": "D01xP6",
+  "data": "2026-09-02",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D01",
+  "persona_id": "P6",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Nova York em grupo",
+  "persona": "Grupo de amigos",
+  "dor": "gosto e orçamento diferentes no grupo",
+  "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "ny em grupo",
+      "titulo": "Nova York em grupo funciona se vocês pararem de andar colados.",
+      "sub": "Gente demais junta o dia todo vira briga.",
+      "destaques": [
+        "colados."
+      ],
+      "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Base perto do metro",
+      "corpo": "Grupo grande só se move bem no metro. Hospedagem central economiza tempo e discussão.",
+      "destaques": [
+        "metro."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Combine e solte",
+      "corpo": "Um ponto de encontro por dia, e no meio cada um faz o que quer. Junta pra comer e pro show.",
+      "destaques": [
+        "encontro"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Rateie na hora",
+      "corpo": "App de divisão de conta evita a treta do fim de viagem. Combinem antes quem paga o que.",
+      "destaques": [
+        "antes"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Grupo em NY não precisa fazer tudo junto. Precisa combinar onde se encontra.",
+      "destaques": [
+        "combinar"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que trava o grupo antes",
+      "corpo": "NY em grupo só acontece com os vistos de todo mundo prontos e no prazo.",
+      "destaques": [
+        "todo"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta NYGRUPO que eu te mando o roteiro de grupo em NY. Ou link na bio.",
+      "acao": "Comenta NYGRUPO",
+      "destaques": [
+        "NYGRUPO"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Nova York em grupo funciona se vocês pararem de andar colados o dia todo.\n\nFiquem perto do metro, porque grupo grande só se move bem no trilho. Combinem um ponto de encontro por dia e no meio cada um faz o que quer. E rateiem na hora com app de conta, pra evitar treta no fim. Grupo em NY não precisa fazer tudo junto, precisa combinar onde se encontra.\n\nÉ só acontece com os vistos de todo mundo prontos.\n\nComenta NYGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#novayork #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua #nyc"
+}

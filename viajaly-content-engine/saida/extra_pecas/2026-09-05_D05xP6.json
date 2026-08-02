@@ -1,0 +1,80 @@
+{
+  "combo": "D05xP6",
+  "data": "2026-09-05",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D05",
+  "persona_id": "P6",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Neve em grupo de amigos",
+  "persona": "Grupo de amigos",
+  "dor": "uns esquiam, outros não, e o grupo se divide",
+  "imagem": "acervo/destinos/montanha-neve.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "neve em grupo",
+      "titulo": "Viagem de neve com amigos: nem todo mundo precisa esquiar.",
+      "sub": "O erro e achar que a montanha só serve pra pista.",
+      "destaques": [
+        "nem"
+      ],
+      "imagem": "acervo/destinos/montanha-neve.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Tem o que fazer sem esqui",
+      "corpo": "Tubing, trenó, snowbike e a vila. Quem não esquia curte o dia inteiro do mesmo jeito.",
+      "destaques": [
+        "sem"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Aluguem tudo lá",
+      "corpo": "Roupa e equipamento se alugam na estação. Ninguém precisa comprar casaco caro pra uma viagem.",
+      "destaques": [
+        "alugam"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Fim de dia e do grupo",
+      "corpo": "Chale, fondue, lareira. A parte social da neve e onde o grupo se junta de novo.",
+      "destaques": [
+        "junta"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Neve em grupo não é sobre esquiar bem. E sobre estar junto no frio.",
+      "destaques": [
+        "junto"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "A parte que tem prazo",
+      "corpo": "A neve tem época e o visto tem o tempo dele. Os vistos do grupo vem primeiro.",
+      "destaques": [
+        "primeiro."
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta NEVEGRUPO que eu te mando o roteiro de neve pra grupo. Ou link na bio.",
+      "acao": "Comenta NEVEGRUPO",
+      "destaques": [
+        "NEVEGRUPO"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Viagem de neve com amigos: nem todo mundo precisa esquiar. O erro e achar que a montanha só serve pra pista.\n\nTem tubing, trenó, snowbike e a vila pra quem não esquia. Aluguem roupa e equipamento na estação, ninguém precisa comprar casaco caro. E o fim de dia e do grupo: chale, fondue, lareira. Neve em grupo não é sobre esquiar bem, e sobre estar junto no frio.\n\nA neve tem época e o visto tem o tempo dele. Os vistos vem primeiro.\n\nComenta NEVEGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#neve #viagemcomamigos #grupodeamigos #inverno #eua #vistoamericano #vistoeua"
+}

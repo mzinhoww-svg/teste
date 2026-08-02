@@ -1,0 +1,80 @@
+{
+  "combo": "D02xP6",
+  "data": "2026-07-29",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D02",
+  "persona_id": "P6",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Miami em 4 dias sem enlouquecer",
+  "persona": "Grupo de amigos",
+  "dor": "coordenar o gosto de todo mundo",
+  "imagem": "acervo/destinos/miami-menina.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "miami de verdade",
+      "titulo": "Miami não é só praia. E o que quase todo grupo erra.",
+      "sub": "4 dias de praia, cidade e compras sem correria.",
+      "destaques": [
+        "erra."
+      ],
+      "imagem": "acervo/destinos/miami-menina.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Divida por bloco",
+      "corpo": "Praia de manhã, cidade a tarde, um dia de outlet. Assim cada um do grupo pega o que quer.",
+      "destaques": [
+        "bloco"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "A praia certa",
+      "corpo": "South Beach pra agito, Key Biscayne pra família com criança. Escolher errado e meio dia perdido.",
+      "destaques": [
+        "família"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Além da praia",
+      "corpo": "Wynwood pras fotos, Brickell pra comer, um bate e volta pros Everglades. Miami tem mais que orla.",
+      "destaques": [
+        "mais"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Grupo não briga por gosto. Briga por falta de plano.",
+      "destaques": [
+        "plano."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que vem antes",
+      "corpo": "Miami em grupo só acontece com os vistos de todo mundo prontos. Um pendente segura a viagem inteira.",
+      "destaques": [
+        "todo"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta MIAMI que eu te mando o roteiro de 4 dias pra grupo. Ou link na bio.",
+      "acao": "Comenta MIAMI",
+      "destaques": [
+        "MIAMI"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Miami não é só praia, e e aí que quase todo grupo erra.\n\nDivida por bloco: praia de manhã, cidade a tarde, um dia de outlet. Escolha a praia certa (South Beach pra agito, Key Biscayne pra família). E lembre que Miami tem Wynwood, Brickell e até os Everglades. Grupo não briga por gosto, briga por falta de plano.\n\nE Miami em grupo só acontece com os vistos de todo mundo prontos. Um pendente segura a viagem inteira.\n\nComenta MIAMI que eu te mando o roteiro. Ou toca no link da bio.\n\n#miami #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua #southbeach"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "carrossel-pro",
+  "version": "1.9.2",
+  "description": "Diretor de arte e redator senior que cria carrosseis de Instagram e ENTREGA um editor visual (Carousel Studio) ja populado com o carrossel gerado: tipografia, destaque de palavra, imagem de fundo, sombra/overlay, cor e padrao de fundo, cantos editaveis, bolinhas, icones, logo e exportacao em ZIP.",
+  "author": {
+    "name": "Helio Arreche"
+  },
+  "keywords": [
+    "instagram",
+    "carrossel",
+    "carousel",
+    "design",
+    "copywriting",
+    "marketing",
+    "social-media"
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "combo": "A13xP7",
+  "data": "2026-07-16",
+  "conta": "@leticia",
+  "pilar": "antídoto",
+  "angulo_id": "A13",
+  "persona_id": "P7",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Ele não olha sua pasta de documentos do jeito que você pensa",
+  "persona": "Autônomo / MEI",
+  "dor": "acha que vai ser negado por não ter vínculo formal",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "mito de documento",
+      "titulo": "Aquela pasta gorda de documentos? Ele nem abre.",
+      "sub": "Você e autônomo e junta papel achando que salva. Calma.",
+      "destaques": [
+        "abre."
+      ],
+      "imagem": "acervo/familia/familia-selfie2.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "A entrevista e curta",
+      "corpo": "Dura menos de um minuto na maioria dos casos. Não dá tempo de folhear extrato, contrato, imposto de renda.",
+      "destaques": [
+        "minuto"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que pesa e a sua fala",
+      "corpo": "O oficial decide pela coerência do que você responde, não pela espessura da pasta. Autônomo forte fala claro.",
+      "destaques": [
+        "coerência"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Você acha que sem carteira assinada precisa provar mais. Precisa e explicar melhor. São coisas diferentes.",
+      "destaques": [
+        "explicar"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Como o autônomo comprova vínculo",
+      "corpo": "Faturamento, clientes, família, bens, uma vida que te traz de volta. Isso se diz em uma frase segura, não numa pilha de folha.",
+      "destaques": [
+        "volta."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Leve o básico, saiba a história",
+      "corpo": "Tenha os documentos, sim, mas organizados e na cabeça. O que ganha e você sabendo contar quem você e.",
+      "destaques": [
+        "história"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta PASTA que eu te mando o que realmente pesa na entrevista. Ou link na bio.",
+      "acao": "Comenta PASTA",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "PASTA"
+      ]
+    }
+  ],
+  "legenda": "Aquela pasta gorda de documentos que você, autônomo, junta com tanto medo? O oficial nem abre.\n\nA entrevista dura menos de um minuto. Não dá tempo de folhear extrato e contrato. O que pesa e a coerência do que você fala. Sem carteira assinada você não precisa provar mais, precisa explicar melhor: faturamento, clientes, família, uma vida que te traz de volta.\n\nComenta PASTA que eu te ensino a contar a sua história em uma frase. Ou toca no link da bio.\n\n#vistoamericano #autonomo #mei #vistoeua #b1b2 #entrevistavisto #consuladoamericano",
+  "imagem": "acervo/familia/familia-selfie2.jpg"
+}

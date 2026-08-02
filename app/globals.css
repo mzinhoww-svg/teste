@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  height: 100%;
+}
+
+body {
+  @apply bg-slate-50 font-sans text-slate-800 antialiased;
+}
+
+/* ==========================================================================
+   Design tokens — PodFactory (site público: landing e portfólio)
+   ÚNICA fonte de valores crus do site. Componentes consomem os tokens
+   semânticos expostos no tailwind.config.ts (`site-*`) — nunca hex direto.
+   Ver docs/site-design-system.md.
+   ========================================================================== */
+:root {
+  /* Cores em canais RGB (habilita `bg-site-surface-base/70`) */
+  --site-surface-base: 0 0 0;         /* #000000 — fundo da página */
+  --site-surface-raised: 20 16 28;    /* #14101c — cards, painéis, modais */
+  --site-surface-strong: 34 34 34;    /* #222222 — inputs, botões secundários */
+  --site-text-primary: 252 252 252;   /* #fcfcfc — títulos e corpo */
+  --site-text-inverse: 216 125 255;   /* #d87dff — accent, CTA, glow */
+  --site-text-tertiary: 0 0 238;      /* #0000ee — links padrão, badges info */
+  --site-border-muted: 255 255 255;   /* #ffffff — bordas sutis (usar /10) */
+  --site-danger: 255 68 68;           /* #ff4444 — erro de formulário */
+
+  /* Sombras */
+  --site-shadow-1: rgba(0, 0, 0, 0.35) 0px 4px 24px 0px;
+  --site-shadow-2: rgba(0, 0, 0, 0.64) 0px 0px 87.5px 17.5px;
+  --site-shadow-3: rgba(216, 125, 255, 0.22) 0px 8px 32px 0px;
+  --site-shadow-4: rgba(0, 0, 0, 0.09) 0px 4px 9px 0px;
+
+  /* Tipografia: Borna é licenciada e não está no Google Fonts. Se os .woff2
+     forem colocados em /public/fonts e declarados via @font-face, esta família
+     assume; caso contrário o stack cai no Geist Sans (já instalado). */
+  --font-borna: "Borna";
+}
+
+/* O site público é sempre escuro, independente do tema do CRM: a raiz pinta o
+   documento inteiro para não vazar o `bg-slate-50` do body no overscroll. */
+html:has(.site-root),
+body:has(.site-root) {
+  background-color: rgb(var(--site-surface-base));
+}
+
+.site-root {
+  @apply bg-site-surface-base font-borna text-site-base text-site-text-primary;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Skip link: só visível no foco, sempre o primeiro elemento focável. */
+.site-skip-link {
+  @apply absolute left-4 top-4 z-[100] -translate-y-[200%] rounded-site-md bg-site-text-inverse px-4 py-3
+         text-site-base font-medium text-site-surface-base transition-transform duration-fast
+         focus-visible:translate-y-0;
+}
+
+/* Foco visível consistente para navegação por teclado */
+:focus-visible {
+  @apply outline-none ring-2 ring-brand-400 ring-offset-1;
+}
+
+/* No site público o anel do CRM não vale: o token de foco é outline 2px
+   text.inverse com offset 2px (critério de acessibilidade da landing). */
+.site-root :focus-visible {
+  outline: 2px solid rgb(var(--site-text-inverse));
+  outline-offset: 2px;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-ring-offset-shadow: 0 0 #0000;
+  box-shadow: none;
+}
+
+/* Respeita usuários que preferem menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+::-webkit-scrollbar { height: 8px; width: 8px; }
+::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+.animate-shake { animation: shake 0.25s ease-in-out 2; }
+
+/* ==========================================================================
+   Microinterações (transitions-dev) — R5
+   Durações 150–300ms, easing suave (sem bounce agressivo). Respeitam
+   prefers-reduced-motion pelo bloco global no topo deste arquivo.
+   ========================================================================== */
+
+/* Texts/panel reveal (ref. 18/07): conteúdo entra com leve subida + fade.
+   Aplicado ao trocar de aba no drawer e ao revelar painéis. */
+@keyframes t-reveal-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-reveal { animation: t-reveal-rise 220ms cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Notification badge (ref. 03): o contador surge com um pop contido. */
+@keyframes t-badge-pop {
+  0%   { transform: scale(0); }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.animate-badge-pop { animation: t-badge-pop 320ms cubic-bezier(0.34, 1.36, 0.64, 1); }
+
+/* ==========================================================================
+   Dark mode
+   O app usa a paleta neutra `slate` de forma consistente. Em vez de anotar
+   `dark:` em dezenas de arquivos, remapeamos aqui as superfícies e textos
+   neutros mais usados quando a classe `.dark` está no <html>. Cores com
+   significado (emerald/rose/amber/brand) permanecem — só o cinza vira escuro.
+   Componentes novos (Studio, onboarding) já trazem variantes `dark:` próprias.
+   ========================================================================== */
+.dark body { @apply bg-slate-950 text-slate-200; }
+
+/* superfícies */
+.dark .bg-white { background-color: #0f172a !important; }        /* slate-900 */
+.dark .bg-slate-50 { background-color: #020617 !important; }     /* slate-950 */
+.dark .bg-slate-100 { background-color: #1e293b !important; }    /* slate-800 */
+.dark .bg-slate-200 { background-color: #334155 !important; }    /* slate-700 */
+
+/* bordas */
+.dark .border-slate-100 { border-color: #1e293b !important; }
+.dark .border-slate-200 { border-color: #293548 !important; }
+.dark .border-slate-300 { border-color: #334155 !important; }
+
+/* textos neutros */
+.dark .text-slate-900 { color: #f1f5f9 !important; }
+.dark .text-slate-800 { color: #e2e8f0 !important; }
+.dark .text-slate-700 { color: #cbd5e1 !important; }
+.dark .text-slate-600 { color: #b4c0d0 !important; }
+.dark .text-slate-500 { color: #94a3b8 !important; }
+
+/* divisores e hovers */
+.dark .divide-slate-100 > * + * { border-color: #1e293b !important; }
+.dark .hover\:bg-slate-50:hover { background-color: #1e293b !important; }
+.dark .hover\:bg-slate-100:hover { background-color: #334155 !important; }
+
+.dark ::-webkit-scrollbar-thumb { @apply bg-slate-600; }
+
+/* ==========================================================================
+   Tema por tenant (refinado — R1)
+   A escala `brand-*` inteira agora é dirigida por variáveis CSS (ver
+   tailwind.config.ts + lib/brand-ramp.ts). TenantThemeVars injeta --brand-50…950
+   + --accent/--accent-foreground a partir da cor primária do tenant, então CADA
+   classe brand-* re-tinta sozinha, em claro e escuro — sem remap por classe.
+   Ver docs/tenant-design.md e docs/design-refinement-plan.md.
+   ========================================================================== */
+
+/* Superfícies com opacidade (ex.: colunas do Kanban `bg-slate-100/60`) não são
+   alcançadas pelo remap de `.bg-slate-100` acima — no escuro ficavam "leitosas".
+   Corrige as variantes de opacidade mais usadas. */
+.dark .bg-slate-100\/60 { background-color: rgb(30 41 59 / 0.5) !important; }   /* slate-800/50 */
+.dark .bg-slate-100\/50 { background-color: rgb(30 41 59 / 0.5) !important; }
+.dark .bg-slate-50\/40  { background-color: rgb(15 23 42 / 0.6) !important; }
+
+/* Offset do anel de foco acompanha a superfície (não some no escuro). */
+.dark { --tw-ring-offset-color: #020617; }

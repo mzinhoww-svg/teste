@@ -1,0 +1,15 @@
+{
+  "_doc": "Linha DESTINOS: topo de funil. Lidera pela VIAGEM (valor de roteiro que gera salvamento/compartilhamento) e posiciona o visto como o que destrava, so no penultimo slide + CTA. Resolve a incoerencia de por foto de ferias atras de peca de visto: aqui a foto E o tema. Pilar desejo, conta @viajaly. Combina com as fotos do acervo por destino.",
+  "angulos": [
+    {"id": "D01", "pilar": "desejo", "tema": "destino", "tese": "Nova York com crianca pequena", "gancho_base": "Nova York com crianca parece impossivel, mas so parece.", "foto": "ny-ponte-brooklyn", "persona_alvo": "P1", "objetivo": "salvamento"},
+    {"id": "D02", "pilar": "desejo", "tema": "destino", "tese": "Miami em 4 dias sem enlouquecer", "gancho_base": "Miami nao e so praia, e e ai que o grupo erra.", "foto": "ny-skyline-menina (Miami)", "persona_alvo": "P6", "objetivo": "salvamento"},
+    {"id": "D03", "pilar": "desejo", "tema": "destino", "tese": "California: Disneyland + Los Angeles com filhos", "gancho_base": "A Disneyland da California e diferente da Disney de Orlando.", "foto": "disney-castelo-familia (Anaheim)", "persona_alvo": "P1", "objetivo": "compartilhamento"},
+    {"id": "D04", "pilar": "desejo", "tema": "destino", "tese": "Universal ou Disney primeiro, pela idade", "gancho_base": "Universal ou Disney primeiro? A idade do seu filho decide.", "foto": "universal-globo", "persona_alvo": "P1", "objetivo": "salvamento"},
+    {"id": "D05", "pilar": "desejo", "tema": "destino", "tese": "Primeira neve da familia nos EUA", "gancho_base": "Levar a familia pra neve nos EUA: quando ir e o que ninguem avisa.", "foto": "montanha-neve", "persona_alvo": "P1", "objetivo": "alcance"},
+    {"id": "D06", "pilar": "desejo", "tema": "destino", "tese": "Orlando roteiro de 7 dias que nao cansa", "gancho_base": "Orlando com filhos rende com ritmo, nao com maratona.", "foto": "disney-main-street", "persona_alvo": "P1", "objetivo": "salvamento"},
+    {"id": "D07", "pilar": "desejo", "tema": "destino", "tese": "Praia nos EUA: o que muda pro brasileiro", "gancho_base": "Praia americana tem 3 detalhes que pegam o brasileiro.", "foto": "praia-por-do-sol", "persona_alvo": "P2", "objetivo": "salvamento"},
+    {"id": "D08", "pilar": "desejo", "tema": "destino", "tese": "Los Angeles alem da Disney", "gancho_base": "LA nao e so parque: praia, cinema e trilha no mesmo dia.", "foto": "disney-castelo-familia", "persona_alvo": "P2", "objetivo": "alcance"}
+  ],
+  "_ponte_visto": "Toda peca de destino fecha com UM slide de ponte ('o que vem antes: o visto') + CTA de comentar palavra ou link na bio + disclaimer. O visto e o gargalo que destrava a viagem, nunca o assunto principal do slide.",
+  "_cobertura_fotos": "Fortes: Orlando/Disney, California/Anaheim, Universal, Miami, NY (ponte), neve, praia. A capturar: LA especifico (Hollywood/Santa Monica), San Francisco, Las Vegas, app/bastidor."
+}
