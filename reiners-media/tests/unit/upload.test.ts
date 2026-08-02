@@ -18,6 +18,7 @@ import {
 import {
   DEFAULT_STORAGE_BUCKET,
   EXTENSION_BY_MIME_TYPE,
+  STORAGE_FAILURE_MESSAGE,
   UploadError,
   buildStoragePath,
   createStorageClient,
@@ -221,7 +222,11 @@ describe('createStorageClient', () => {
       try {
         createStorageClient();
       } catch (error) {
-        expect((error as UploadError).code).toBe('INTERNAL_ERROR');
+        const uploadError = error as UploadError;
+        expect(uploadError.code).toBe('INTERNAL_ERROR');
+        // Nome de variável de ambiente é detalhe de infraestrutura: fica no log.
+        expect(uploadError.message).toBe(STORAGE_FAILURE_MESSAGE);
+        expect(uploadError.internalMessage).toContain('SUPABASE_SERVICE_ROLE_KEY');
       }
     } finally {
       if (url !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = url;
@@ -282,6 +287,48 @@ describe('uploadImage', () => {
         client,
       ),
     ).rejects.toMatchObject({ code: 'INTERNAL_ERROR' });
+  });
+
+  it('nunca copia a mensagem do Storage para `message`; ela fica em `internalMessage`', async () => {
+    // Mensagem realista de falha do Storage: cita política, bucket, host interno
+    // e fragmento de credencial. Nada disso pode alcançar o cliente.
+    const leak =
+      'JWT expired for service_role key sb_secret_AbCdEf123456 on bucket reiners-media at postgres://user:hunter2@db.internal:5432';
+    const { client } = storageClientStub({
+      upload: vi.fn(async () => ({ data: null, error: { message: leak } })),
+    });
+
+    const error = await uploadImage(
+      { folder: 'podcasts', filename: 'c.jpg', contentType: 'image/jpeg', body: new Uint8Array(1) },
+      client,
+    ).catch((thrown: UploadError) => thrown);
+
+    expect(error).toBeInstanceOf(UploadError);
+    const uploadError = error as UploadError;
+    expect(uploadError.message).toBe(STORAGE_FAILURE_MESSAGE);
+    for (const secret of ['sb_secret_AbCdEf123456', 'hunter2', 'db.internal', 'JWT expired']) {
+      expect(uploadError.message).not.toContain(secret);
+      expect(JSON.stringify(uploadError.details ?? {})).not.toContain(secret);
+    }
+    // O diagnóstico continua disponível — só que para o log do servidor.
+    expect(uploadError.internalMessage).toContain(leak);
+  });
+
+  it('usa a mesma mensagem genérica para URL ausente e resultado fora do contrato', async () => {
+    const semUrl = storageClientStub({ getPublicUrl: vi.fn(() => ({ data: { publicUrl: '' } })) });
+    const invalida = storageClientStub({
+      getPublicUrl: vi.fn(() => ({ data: { publicUrl: 'nao-e-url' } })),
+    });
+
+    for (const { client } of [semUrl, invalida]) {
+      const error = (await uploadImage(
+        { folder: 'logos', filename: 'l.png', contentType: 'image/png', body: new Uint8Array(1) },
+        client,
+      ).catch((thrown: UploadError) => thrown)) as UploadError;
+
+      expect(error.message).toBe(STORAGE_FAILURE_MESSAGE);
+      expect(error.internalMessage).toBeTruthy();
+    }
   });
 
   it('falha quando o Storage não devolve URL pública', async () => {

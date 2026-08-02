@@ -52,20 +52,44 @@ export type UploadErrorCode =
   | 'INTERNAL_ERROR';
 
 /**
- * Erro de upload já classificado para o envelope de erro da API. O route
- * handler só precisa repassar `code`/`message`/`details`.
+ * Erro de upload já classificado para o envelope de erro da API.
+ *
+ * SEPARAÇÃO OBRIGATÓRIA entre o que o cliente vê e o que fica no servidor:
+ * - `message` e `details` VÃO para o corpo da resposta. Só podem conter texto
+ *   escrito por nós e dados que o próprio cliente enviou.
+ * - `internalMessage` NUNCA é serializado. É onde entra a mensagem crua do
+ *   Supabase Storage, que costuma carregar nome de bucket, política de RLS,
+ *   host interno e fragmento de credencial. O handler só a manda para o log.
+ *
+ * docs/SECURITY.md ("Logging Seguro"; "Service role key apenas no servidor") e
+ * a mesma postura que TCK-004 adota no login, onde a mensagem do Supabase não
+ * é repassada de propósito.
  */
 export class UploadError extends Error {
   readonly code: UploadErrorCode;
   readonly details?: Record<string, unknown>;
+  /** Diagnóstico técnico para o log do servidor. Fora do corpo da resposta. */
+  readonly internalMessage?: string;
 
-  constructor(code: UploadErrorCode, message: string, details?: Record<string, unknown>) {
+  constructor(
+    code: UploadErrorCode,
+    message: string,
+    details?: Record<string, unknown>,
+    internalMessage?: string,
+  ) {
     super(message);
     this.name = 'UploadError';
     this.code = code;
     this.details = details;
+    this.internalMessage = internalMessage;
   }
 }
+
+/**
+ * Mensagem única de falha de Storage devolvida ao cliente. Genérica de
+ * propósito: qualquer variação por causa-raiz vira canal de vazamento.
+ */
+export const STORAGE_FAILURE_MESSAGE = 'Não foi possível armazenar o arquivo';
 
 export type UploadValidation =
   | { ok: true; metadata: UploadMetadata }
@@ -188,7 +212,9 @@ export function createStorageClient(): SupabaseClient {
   if (!url || !serviceRoleKey) {
     throw new UploadError(
       'INTERNAL_ERROR',
-      'Storage não configurado: defina NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY',
+      'Não foi possível armazenar o arquivo',
+      undefined,
+      'Storage não configurado: NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são obrigatórios',
     );
   }
 
@@ -234,23 +260,36 @@ export async function uploadImage(
     if (isDuplicateObjectError(failure)) {
       throw new UploadError('CONFLICT', 'Já existe um objeto com esse path no bucket', { path });
     }
-    throw new UploadError('INTERNAL_ERROR', `Falha ao gravar no Storage: ${error.message}`, {
-      path,
-    });
+    // A mensagem do Storage vai para `internalMessage`, JAMAIS para `message`:
+    // ela costuma citar bucket, política de RLS, host interno e credencial.
+    throw new UploadError(
+      'INTERNAL_ERROR',
+      STORAGE_FAILURE_MESSAGE,
+      { path },
+      `upload falhou em "${path}": ${error.message}`,
+    );
   }
 
   const publicUrl = bucket.getPublicUrl(path)?.data?.publicUrl;
   if (!publicUrl) {
-    throw new UploadError('INTERNAL_ERROR', 'Storage não devolveu URL pública para o objeto', {
-      path,
-    });
+    throw new UploadError(
+      'INTERNAL_ERROR',
+      STORAGE_FAILURE_MESSAGE,
+      { path },
+      `Storage não devolveu URL pública para "${path}"`,
+    );
   }
 
   const result = uploadResultSchema.safeParse({ url: publicUrl, path });
   if (!result.success) {
-    throw new UploadError('INTERNAL_ERROR', 'Storage devolveu um resultado fora do contrato', {
-      issues: result.error.flatten().fieldErrors,
-    });
+    throw new UploadError(
+      'INTERNAL_ERROR',
+      STORAGE_FAILURE_MESSAGE,
+      { path },
+      `Storage devolveu resultado fora do contrato: ${JSON.stringify(
+        result.error.flatten().fieldErrors,
+      )}`,
+    );
   }
 
   return result.data;

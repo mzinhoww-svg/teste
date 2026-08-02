@@ -99,15 +99,17 @@ export async function GET(request: NextRequest, context: RouteContext): Promise<
 
 export async function PATCH(request: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
-    const session = await requireEditor(request);
-    if (!session.ok) return session.response;
-
+    // Rate limit ANTES da autorização: flood anônimo tem que consumir o
+    // contador em vez de sair barato no 401.
     const limited = enforceRateLimit(
       request,
       'PATCH /api/podcasts/:id',
       RATE_LIMIT_POLICIES.adminApi,
     );
     if (limited) return limited;
+
+    const session = await requireEditor(request);
+    if (!session.ok) return session.response;
 
     const params = parseWith(
       idParamSchema,
@@ -173,16 +175,18 @@ export async function PATCH(request: NextRequest, context: RouteContext): Promis
 
 export async function DELETE(request: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
-    // BR-002 — apenas ADMIN deleta. EDITOR autenticado recebe 403.
-    const session = await requireAdmin(request);
-    if (!session.ok) return session.response;
-
+    // Rate limit ANTES da autorização: flood anônimo tem que consumir o
+    // contador em vez de sair barato no 401.
     const limited = enforceRateLimit(
       request,
       'DELETE /api/podcasts/:id',
       RATE_LIMIT_POLICIES.adminApi,
     );
     if (limited) return limited;
+
+    // BR-002 — apenas ADMIN deleta. EDITOR autenticado recebe 403.
+    const session = await requireAdmin(request);
+    if (!session.ok) return session.response;
 
     const params = parseWith(
       idParamSchema,

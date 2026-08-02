@@ -306,9 +306,93 @@ describe('POST /api/upload — gravação no Storage', () => {
     expect(response.status).toBe(500);
     expect(errorResponseSchema.parse(body).error.code).toBe('INTERNAL_ERROR');
   });
+
+  it('REGRESSÃO: a mensagem do Storage nunca aparece no corpo do 500', async () => {
+    // Mensagem de falha realista do Supabase Storage. Em produção esse texto
+    // carrega política de RLS, nome de bucket, host interno e fragmento de
+    // credencial — e o destinatário é um EDITOR autenticado, não um operador.
+    const leak =
+      'JWT expired for service_role key sb_secret_AbCdEf123456 on bucket reiners-media at postgres://user:hunter2@db.internal:5432';
+    storageState.uploadResult = { data: null, error: { message: leak } };
+
+    const response = await POST(uploadRequest({ token: 'token-editor' }));
+    const body = await readJson(response);
+    const serialized = JSON.stringify(body);
+
+    expect(response.status).toBe(500);
+    for (const secret of [
+      'sb_secret_AbCdEf123456',
+      'hunter2',
+      'db.internal',
+      'postgres://',
+      'service_role',
+      'JWT expired',
+    ]) {
+      expect(serialized).not.toContain(secret);
+    }
+    expect(errorResponseSchema.parse(body).error.message).toBe(
+      'Não foi possível armazenar o arquivo',
+    );
+  });
+
+  it('o diagnóstico não some: vai para o log do servidor, fora do corpo', async () => {
+    const leak = 'JWT expired for service_role key sb_secret_AbCdEf123456 on bucket reiners-media';
+    storageState.uploadResult = { data: null, error: { message: leak } };
+
+    // `logServerError` é silencioso sob teste para não poluir a suíte; aqui
+    // trocamos o ambiente justamente para provar que o log acontece.
+    vi.stubEnv('NODE_ENV', 'production');
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    try {
+      const response = await POST(uploadRequest({ token: 'token-admin' }));
+      const body = await readJson(response);
+
+      expect(response.status).toBe(500);
+      expect(JSON.stringify(body)).not.toContain('sb_secret_AbCdEf123456');
+      expect(consoleError).toHaveBeenCalledWith(
+        '[POST /api/upload]',
+        expect.stringContaining(leak),
+      );
+    } finally {
+      consoleError.mockRestore();
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('REGRESSÃO: ambiente de Storage ausente não vaza nome de variável nem chave', async () => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    try {
+      const response = await POST(uploadRequest({ token: 'token-admin' }));
+      const body = await readJson(response);
+
+      expect(response.status).toBe(500);
+      expect(JSON.stringify(body)).not.toContain('SUPABASE_SERVICE_ROLE_KEY');
+    } finally {
+      if (url !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = url;
+      if (key !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = key;
+    }
+  });
 });
 
 describe('POST /api/upload — rate limiting', () => {
+  it('conta a requisição ANÔNIMA: flood sem sessão chega a 429, não fica em 401', async () => {
+    // Se o limite fosse aplicado depois da autorização, cada requisição anônima
+    // sairia no 401 sem tocar o contador — e custaria uma verificação de sessão
+    // no Supabase, indefinidamente.
+    let last: Response | undefined;
+    for (let i = 0; i < 11; i += 1) {
+      last = await POST(uploadRequest({ ip: '203.0.113.99' }));
+    }
+
+    expect(last?.status).toBe(429);
+    expect(storageState.bucketApi.upload).not.toHaveBeenCalled();
+  });
+
   it('devolve 429 depois de 10 uploads por minuto do mesmo IP', async () => {
     let last: Response | undefined;
     for (let i = 0; i < 11; i += 1) {

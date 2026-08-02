@@ -82,11 +82,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const session = await requireEditor(request);
-    if (!session.ok) return session.response;
-
+    // Rate limit ANTES da autorização (mesma ordem de TCK-007): sem isso, um
+    // flood anônimo devolve 401 e sai antes de consumir o contador, gastando
+    // uma verificação de sessão no Supabase por requisição, sem teto.
     const limited = enforceRateLimit(request, 'POST /api/podcasts', RATE_LIMIT_POLICIES.adminApi);
     if (limited) return limited;
+
+    const session = await requireEditor(request);
+    if (!session.ok) return session.response;
 
     const body = await readJsonBody(request);
     if (!body.ok) return body.response;

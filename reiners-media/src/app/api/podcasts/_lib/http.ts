@@ -139,9 +139,45 @@ export function searchParamsToObject(searchParams: URLSearchParams): Record<stri
   return result;
 }
 
+/**
+ * Registra diagnóstico técnico no log do servidor.
+ *
+ * Existe para que mensagem de origem externa (Supabase Storage, Prisma) tenha
+ * para onde ir SEM entrar no corpo da resposta: essas mensagens citam bucket,
+ * política de RLS, host interno e às vezes fragmento de credencial. Silencioso
+ * sob teste, para não poluir a saída da suíte.
+ */
+export function logServerError(scope: string, detail: unknown): void {
+  if (process.env.NODE_ENV === 'test') return;
+  // eslint-disable-next-line no-console
+  console.error(`[${scope}]`, detail);
+}
+
 interface PrismaLikeError {
   code: string;
   meta?: { target?: unknown };
+}
+
+/**
+ * Coluna do banco -> campo do contrato, para o 409 de unicidade.
+ *
+ * O `meta.target` do Prisma traz identificador de SCHEMA (`Podcast_slug_key`,
+ * nome de coluna). Ecoar isso entrega topologia do banco a quem só deveria
+ * conhecer o contrato. Coluna fora deste mapa vira mensagem genérica.
+ */
+const CONFLICT_FIELD_BY_COLUMN: Record<string, string> = {
+  slug: 'slug',
+  Podcast_slug_key: 'slug',
+};
+
+/** Nome de campo do contrato correspondente ao `meta.target`, se conhecido. */
+function conflictFieldFromTarget(target: unknown): string | undefined {
+  const columns = Array.isArray(target) ? target : typeof target === 'string' ? [target] : [];
+  const fields = columns
+    .map((column) => (typeof column === 'string' ? CONFLICT_FIELD_BY_COLUMN[column] : undefined))
+    .filter((field): field is string => Boolean(field));
+
+  return fields.length === columns.length && fields.length > 0 ? fields.join(', ') : undefined;
 }
 
 function isPrismaError(error: unknown): error is PrismaLikeError {
@@ -176,10 +212,10 @@ export function handleRouteError(error: unknown): NextResponse {
 
   if (isPrismaError(error)) {
     if (error.code === 'P2002') {
-      const target = Array.isArray(error.meta?.target) ? error.meta?.target.join(', ') : undefined;
+      const field = conflictFieldFromTarget(error.meta?.target);
       return apiError(
         'CONFLICT',
-        target ? `Já existe um registro com esse ${target}` : 'Registro duplicado',
+        field ? `Já existe um registro com esse ${field}` : 'Registro duplicado',
       );
     }
     if (error.code === 'P2025') {
@@ -187,5 +223,6 @@ export function handleRouteError(error: unknown): NextResponse {
     }
   }
 
+  logServerError('handleRouteError', error);
   return apiError('INTERNAL_ERROR', 'Erro inesperado ao processar a requisição');
 }

@@ -6,6 +6,7 @@
  *
  * | Situação                          | Código                 | Status |
  * |-----------------------------------|------------------------|--------|
+ * | janela de 10/min estourada        | RATE_LIMITED           | 429    |
  * | sem sessão                        | UNAUTHORIZED           | 401    |
  * | papel sem permissão               | FORBIDDEN              | 403    |
  * | form inválido / `file` ausente    | BAD_REQUEST            | 400    |
@@ -17,6 +18,10 @@
  *
  * O binário só chega ao bucket depois de tamanho, MIME e pasta validados
  * (`validateUploadMetadata` em `src/lib/upload.ts`).
+ *
+ * Falha do Storage responde SEMPRE com a mesma mensagem genérica: o texto do
+ * Supabase cita bucket, política de RLS, host interno e às vezes credencial, e
+ * vai só para o log (`UploadError.internalMessage`).
  */
 import type { NextRequest } from 'next/server';
 import type { NextResponse } from 'next/server';
@@ -24,7 +29,12 @@ import type { NextResponse } from 'next/server';
 import { requireEditor } from '@/app/api/podcasts/_lib/guard';
 // `_lib/http` mora sob `podcasts/` porque ambas as rotas são de TCK-005 e um
 // `src/lib/http.ts` ficaria fora dos write_paths deste ticket.
-import { apiError, handleRouteError, validatedJson } from '@/app/api/podcasts/_lib/http';
+import {
+  apiError,
+  handleRouteError,
+  logServerError,
+  validatedJson,
+} from '@/app/api/podcasts/_lib/http';
 import { RATE_LIMIT_POLICIES, enforceRateLimit } from '@/lib/auth-helpers';
 import { UPLOAD_MAX_BYTES, uploadResponseSchema } from '@/lib/schemas';
 import { UploadError, uploadImage, validateUploadMetadata } from '@/lib/upload';
@@ -52,11 +62,14 @@ function isFileLike(value: unknown): value is UploadedFileLike {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const session = await requireEditor(request);
-    if (!session.ok) return session.response;
-
+    // Rate limit ANTES da autorização: um flood anônimo precisa consumir o
+    // contador, senão cada requisição não autenticada custa uma verificação de
+    // sessão no Supabase indefinidamente, sem nunca tocar o limitador.
     const limited = enforceRateLimit(request, 'POST /api/upload', RATE_LIMIT_POLICIES.upload);
     if (limited) return limited;
+
+    const session = await requireEditor(request);
+    if (!session.ok) return session.response;
 
     const contentType = request.headers.get('content-type') ?? '';
     if (!contentType.toLowerCase().includes('multipart/form-data')) {
@@ -119,6 +132,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return validatedJson(uploadResponseSchema, { data: result });
   } catch (error) {
     if (error instanceof UploadError) {
+      // `internalMessage` (mensagem crua do Storage) fica no log; o cliente
+      // recebe apenas a mensagem genérica de `error.message`.
+      if (error.internalMessage) logServerError('POST /api/upload', error.internalMessage);
       return apiError(error.code, error.message, error.details);
     }
     return handleRouteError(error);

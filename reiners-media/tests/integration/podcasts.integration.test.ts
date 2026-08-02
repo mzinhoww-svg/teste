@@ -575,6 +575,31 @@ describe('POST /api/podcasts', () => {
     expect(errorResponseSchema.parse(body).error.code).toBe('CONFLICT');
   });
 
+  it('não ecoa o nome da coluna do banco num P2002 de coluna desconhecida', async () => {
+    prismaMock.podcast.count.mockResolvedValue(0);
+    prismaMock.podcast.findFirst.mockResolvedValue(null);
+    prismaMock.podcast.create.mockRejectedValue(
+      Object.assign(new Error('unique'), {
+        code: 'P2002',
+        meta: { target: ['podcast_internal_legacy_col'] },
+      }),
+    );
+
+    const response = await POST(
+      apiRequest('http://localhost/api/podcasts', {
+        method: 'POST',
+        token: 'token-admin',
+        body: createPayload(),
+      }),
+    );
+    const body = await readJson(response);
+
+    expect(response.status).toBe(409);
+    // Topologia do banco não é contrato: coluna fora do mapa vira genérico.
+    expect(JSON.stringify(body)).not.toContain('podcast_internal_legacy_col');
+    expect(errorResponseSchema.parse(body).error.message).toBe('Registro duplicado');
+  });
+
   it('traduz violação de unicidade do Prisma (P2002) em 409', async () => {
     prismaMock.podcast.count.mockResolvedValue(0);
     prismaMock.podcast.findFirst.mockResolvedValue(null);
@@ -968,6 +993,41 @@ describe('DELETE /api/podcasts/:id', () => {
 /* -------------------------------------------------------------------------- */
 
 describe('rate limiting', () => {
+  it('conta a requisição ANÔNIMA no POST: flood sem sessão chega a 429, não fica em 401', async () => {
+    // Ordem correta é limite -> autorização. Ao contrário, um flood anônimo
+    // sairia sempre no 401 sem consumir o contador, gastando uma verificação de
+    // sessão no Supabase por requisição.
+    let last: Response | undefined;
+    for (let i = 0; i < 61; i += 1) {
+      last = await POST(
+        apiRequest('http://localhost/api/podcasts', {
+          method: 'POST',
+          body: createPayload(),
+          headers: { 'x-forwarded-for': '203.0.113.13' },
+        }),
+      );
+    }
+
+    expect(last?.status).toBe(429);
+    expect(prismaMock.podcast.create).not.toHaveBeenCalled();
+  });
+
+  it('conta a requisição ANÔNIMA no DELETE, antes de decidir BR-002', async () => {
+    let last: Response | undefined;
+    for (let i = 0; i < 61; i += 1) {
+      last = await DELETE(
+        apiRequest(`http://localhost/api/podcasts/${PODCAST_ID}`, {
+          method: 'DELETE',
+          headers: { 'x-forwarded-for': '203.0.113.14' },
+        }),
+        { params: { idOrSlug: PODCAST_ID } },
+      );
+    }
+
+    expect(last?.status).toBe(429);
+    expect(prismaMock.podcast.update).not.toHaveBeenCalled();
+  });
+
   it('devolve 429 com Retry-After depois de estourar a janela pública', async () => {
     prismaMock.podcast.findMany.mockResolvedValue([]);
     prismaMock.podcast.count.mockResolvedValue(0);
