@@ -22,9 +22,16 @@ import type { z } from 'zod';
 
 import * as schemas from '@/lib/schemas';
 
-/** RBAC pertence a TCK-004; aqui só a costura importa (ver testes de integração). */
+/**
+ * Mock PARCIAL de TCK-004: só `requireRole` é substituído. `enforceRateLimit`,
+ * as políticas e `errorResponse` continuam reais, então o 429 verificado aqui é
+ * o de produção.
+ */
 const authMock = vi.hoisted(() => ({ requireRole: vi.fn() }));
-vi.mock('@/lib/auth-helpers', () => ({ requireRole: authMock.requireRole }));
+vi.mock('@/lib/auth-helpers', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/auth-helpers')>();
+  return { ...actual, requireRole: authMock.requireRole };
+});
 
 const prismaMock = vi.hoisted(() => ({
   podcast: { findFirst: vi.fn() },
@@ -41,6 +48,7 @@ const prismaMock = vi.hoisted(() => ({
 
 vi.mock('@/lib/prisma', () => ({ prisma: prismaMock, default: prismaMock }));
 
+const { clearRateLimit } = await import('@/lib/auth-helpers');
 const collectionRoute = await import('@/app/api/episodes/route');
 const itemRoute = await import('@/app/api/episodes/[id]/route');
 
@@ -252,6 +260,7 @@ function expectContract(
 
 beforeEach(() => {
   vi.resetAllMocks();
+  clearRateLimit();
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
   authMock.requireRole.mockResolvedValue({
     ok: true,
@@ -366,6 +375,26 @@ describe('CONTRACT-007 — GET /episodes', () => {
         ),
       ),
     );
+  });
+
+  it('429 documentado é realmente alcançável e sai no envelope ErrorResponse', async () => {
+    expect(operation.statuses).toContain(429);
+    prismaMock.episode.count.mockResolvedValue(0);
+    prismaMock.episode.findMany.mockResolvedValue([]);
+
+    let result = { status: 0, body: {} as Record<string, unknown> };
+    for (let attempt = 0; attempt < 101; attempt += 1) {
+      result = await callHandler(() =>
+        collectionRoute.GET(
+          new NextRequest(`http://localhost:3000/api/episodes?podcastId=${PODCAST_ID}`, {
+            headers: { 'x-forwarded-for': '203.0.113.99' },
+          }),
+        ),
+      );
+    }
+
+    expectContract(operation, result);
+    expect(result.status).toBe(429);
   });
 
   it('a query obedece ao schema declarado em x-zod-query', () => {

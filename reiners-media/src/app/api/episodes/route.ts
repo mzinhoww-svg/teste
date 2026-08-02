@@ -5,9 +5,15 @@
  * `createEpisode`). Validação executável: `src/lib/schemas.ts`.
  *
  * Divisão de responsabilidades registrada no contrato:
+ * - Rate limit (429, NFR-005 / docs/SECURITY.md) é aplicado AQUI, com
+ *   `enforceRateLimit` de TCK-004. O middleware NÃO faz rate limit — ele cuida
+ *   de cabeçalhos de segurança e sessão —, então deixar a rota sem teto
+ *   significaria rota pública sem teto. É a PRIMEIRA checagem de cada handler:
+ *   antes da autorização, para que uma sonda anônima não consiga martelar o
+ *   caminho de verificação de sessão, e antes do banco, para que nenhuma
+ *   requisição barrada custe query.
  * - RBAC (BR-001/BR-002, 401/403) é decidido por `requireRole` de TCK-004; o
  *   handler só chama o guard (`./_lib/guard`) e devolve a resposta pronta.
- *   Rate limit (429) fica no middleware/handler de TCK-004/TCK-021.
  * - BR-004 no create é fechado pelo `.refine` de `episodeCreateSchema` -> 422.
  * - BR-007/BR-008 são derivados aqui, no servidor, por `src/lib/url-parser.ts`:
  *   `youtubeEmbed`/`spotifyEmbed` não existem no body (`.strict()`), então
@@ -16,6 +22,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+import { RATE_LIMIT_POLICIES, enforceRateLimit } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 import {
   episodeCreateSchema,
@@ -47,6 +54,9 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const limited = enforceRateLimit(request, 'GET /api/episodes', RATE_LIMIT_POLICIES.publicApi);
+    if (limited) return limited;
+
     const query = episodeQuerySchema.safeParse(
       Object.fromEntries(new URL(request.url).searchParams),
     );
@@ -85,12 +95,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 /**
  * Cria um episódio com os embeds derivados das URLs (BR-007/BR-008).
  *
- * Ordem das checagens: sessão (401/403) -> schema (422) -> programa existe
- * (404) -> número livre (409) -> gravação. Autorização vem primeiro para que um
- * anônimo não consiga sondar quais programas existem pela diferença de status.
+ * Ordem das checagens: rate limit (429) -> sessão (401/403) -> schema (422) ->
+ * programa existe (404) -> número livre (409) -> gravação. Autorização vem
+ * antes do schema para que um anônimo não consiga sondar quais programas
+ * existem pela diferença de status.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const limited = enforceRateLimit(request, 'POST /api/episodes', RATE_LIMIT_POLICIES.adminApi);
+    if (limited) return limited;
+
     const auth = await requireEditor(request);
     if (!auth.ok) return auth.response;
 

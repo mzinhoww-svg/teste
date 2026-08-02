@@ -21,13 +21,17 @@ import {
 } from '@/lib/schemas';
 
 /**
- * RBAC é de TCK-004: `requireRole` é a única fonte de decisão e aqui aparece
- * mockada, porque verificar sessão exigiria Supabase. O que estes testes
- * cobrem é a COSTURA — que o handler chama o guard, devolve a resposta dele
- * intacta e não toca no banco quando o acesso é negado.
+ * Mock PARCIAL de TCK-004: só `requireRole` é substituído (verificar sessão
+ * exigiria Supabase). `enforceRateLimit`, as políticas e `errorResponse`
+ * continuam sendo os reais — os 429 e os cabeçalhos exercitados aqui saem do
+ * código de produção. Dos 401/403 o que se testa é a COSTURA: que o handler
+ * chama o guard, devolve a resposta dele intacta e não toca no banco.
  */
 const authMock = vi.hoisted(() => ({ requireRole: vi.fn() }));
-vi.mock('@/lib/auth-helpers', () => ({ requireRole: authMock.requireRole }));
+vi.mock('@/lib/auth-helpers', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/auth-helpers')>();
+  return { ...actual, requireRole: authMock.requireRole };
+});
 
 const prismaMock = vi.hoisted(() => ({
   podcast: { findFirst: vi.fn() },
@@ -43,6 +47,8 @@ const prismaMock = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/prisma', () => ({ prisma: prismaMock, default: prismaMock }));
+
+const { clearRateLimit } = await import('@/lib/auth-helpers');
 
 const { GET: listEpisodes, POST: createEpisode } = await import('@/app/api/episodes/route');
 const {
@@ -117,6 +123,27 @@ function context(id: string): { params: { id: string } } {
   return { params: { id } };
 }
 
+/** Requisição de leitura vinda de um IP específico (balde de rate limit por IP). */
+function listRequestFrom(ip: string): NextRequest {
+  const url = new URL('http://localhost:3000/api/episodes');
+  url.searchParams.set('podcastId', PODCAST_ID);
+  return new NextRequest(url, { headers: { 'x-forwarded-for': ip } });
+}
+
+/** Requisição de mutação vinda de um IP específico. */
+function mutationRequest(
+  method: string,
+  body: unknown,
+  ip: string,
+  path = '/api/episodes',
+): NextRequest {
+  return new NextRequest(`http://localhost:3000${path}`, {
+    method,
+    headers: { 'content-type': 'application/json', 'x-forwarded-for': ip },
+    body: JSON.stringify(body),
+  });
+}
+
 async function bodyOf(response: Response): Promise<Record<string, unknown>> {
   return (await response.json()) as Record<string, unknown>;
 }
@@ -144,6 +171,7 @@ function denyWith(status: number, code: string): { ok: false; response: NextResp
 
 beforeEach(() => {
   vi.resetAllMocks();
+  clearRateLimit();
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
   authMock.requireRole.mockResolvedValue(ADMIN_SESSION);
   prismaMock.podcast.findFirst.mockResolvedValue({ id: PODCAST_ID });
@@ -395,6 +423,101 @@ describe('POST /api/episodes', () => {
 });
 
 /* -------------------------------------------------------------------------- */
+/* Rate limiting — NFR-005 / docs/SECURITY.md                                 */
+/* -------------------------------------------------------------------------- */
+
+describe('rate limiting', () => {
+  it('GET /api/episodes: 100 req/min por IP, a 101ª vira 429', async () => {
+    prismaMock.episode.count.mockResolvedValue(0);
+    prismaMock.episode.findMany.mockResolvedValue([]);
+
+    const statuses = new Set<number>();
+    let last: Response | undefined;
+    for (let attempt = 0; attempt < 101; attempt += 1) {
+      last = await listEpisodes(listRequestFrom('203.0.113.10'));
+      statuses.add(last.status);
+    }
+
+    expect(statuses).toEqual(new Set([200, 429]));
+    expect(last?.status).toBe(429);
+    expect(last?.headers.get('X-RateLimit-Limit')).toBe('100');
+    expect(last?.headers.get('Retry-After')).toBeTruthy();
+
+    const body = await bodyOf(last as Response);
+    expect(errorResponseSchema.parse(body).error.code).toBe('RATE_LIMITED');
+    // A requisição barrada não pode custar query ao Postgres.
+    expect(prismaMock.episode.findMany).toHaveBeenCalledTimes(100);
+  });
+
+  it('conta por IP: um cliente estourado não bloqueia os outros', async () => {
+    prismaMock.episode.count.mockResolvedValue(0);
+    prismaMock.episode.findMany.mockResolvedValue([]);
+
+    for (let attempt = 0; attempt < 101; attempt += 1) {
+      await listEpisodes(listRequestFrom('203.0.113.11'));
+    }
+
+    const other = await listEpisodes(listRequestFrom('198.51.100.4'));
+    expect(other.status).toBe(200);
+  });
+
+  it('conta por rota: estourar a lista não derruba o detalhe', async () => {
+    prismaMock.episode.count.mockResolvedValue(0);
+    prismaMock.episode.findMany.mockResolvedValue([]);
+    prismaMock.episode.findUnique.mockResolvedValue(episodeRow());
+
+    for (let attempt = 0; attempt < 101; attempt += 1) {
+      await listEpisodes(listRequestFrom('203.0.113.12'));
+    }
+
+    const detail = await getEpisode(
+      new NextRequest(`http://localhost:3000/api/episodes/${EPISODE_ID}`, {
+        headers: { 'x-forwarded-for': '203.0.113.12' },
+      }),
+      context(EPISODE_ID),
+    );
+
+    expect(detail.status).toBe(200);
+  });
+
+  it('mutações usam a política administrativa de 60 req/min', async () => {
+    prismaMock.episode.create.mockImplementation(async ({ data }: { data: EpisodeRow }) =>
+      episodeRow(data),
+    );
+
+    let last: Response | undefined;
+    for (let attempt = 0; attempt < 61; attempt += 1) {
+      last = await createEpisode(mutationRequest('POST', validCreateBody(), '203.0.113.20'));
+    }
+
+    expect(last?.status).toBe(429);
+    expect(last?.headers.get('X-RateLimit-Limit')).toBe('60');
+    expect(prismaMock.episode.create).toHaveBeenCalledTimes(60);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Cabeçalhos                                                                 */
+/* -------------------------------------------------------------------------- */
+
+describe('cabeçalhos das respostas de erro', () => {
+  it('todo erro sai com Cache-Control: no-store', async () => {
+    prismaMock.episode.findUnique.mockResolvedValue(null);
+
+    const validation = await listEpisodes(listRequest());
+    const missing = await getEpisode(
+      new NextRequest(`http://localhost:3000/api/episodes/${EPISODE_ID}`),
+      context(EPISODE_ID),
+    );
+
+    expect(validation.status).toBe(422);
+    expect(validation.headers.get('cache-control')).toBe('no-store');
+    expect(missing.status).toBe(404);
+    expect(missing.headers.get('cache-control')).toBe('no-store');
+  });
+});
+
+/* -------------------------------------------------------------------------- */
 /* RBAC — costura com o guard de TCK-004                                      */
 /* -------------------------------------------------------------------------- */
 
@@ -433,6 +556,19 @@ describe('mutações exigem sessão administrativa', () => {
     expect(response.status).toBe(403);
     expect(authMock.requireRole).toHaveBeenCalledWith('ADMIN', expect.anything());
     expect(prismaMock.episode.delete).not.toHaveBeenCalled();
+  });
+
+  it('o rate limit é consumido ANTES da autorização', async () => {
+    // Sessão negada: sem o limite antes do guard, as 61 chamadas seriam 401 e a
+    // rota administrativa ficaria sem teto para força bruta de sessão.
+    authMock.requireRole.mockResolvedValue(denyWith(401, 'UNAUTHORIZED'));
+
+    let last: Response | undefined;
+    for (let attempt = 0; attempt < 61; attempt += 1) {
+      last = await createEpisode(mutationRequest('POST', validCreateBody(), '203.0.113.21'));
+    }
+
+    expect(last?.status).toBe(429);
   });
 
   it('leitura pública não passa pelo guard', async () => {
@@ -478,6 +614,26 @@ describe('GET /api/episodes/:id', () => {
     );
 
     expect(response.status).toBe(404);
+  });
+
+  it('devolve 404 quando o programa pai está soft-deletado', async () => {
+    prismaMock.episode.findUnique.mockResolvedValue(episodeRow());
+    prismaMock.podcast.findFirst.mockResolvedValue(null);
+
+    const response = await getEpisode(
+      new NextRequest(`http://localhost:3000/api/episodes/${EPISODE_ID}`),
+      context(EPISODE_ID),
+    );
+    const body = await bodyOf(response);
+
+    expect(response.status).toBe(404);
+    expect((body.error as Record<string, unknown>).code).toBe('NOT_FOUND');
+    expect(prismaMock.podcast.findFirst).toHaveBeenCalledWith({
+      where: { id: PODCAST_ID, deletedAt: null },
+      select: { id: true },
+    });
+    // O link direto não pode vazar título, descrição nem embeds do episódio.
+    expect(JSON.stringify(body)).not.toContain(YT_ID);
   });
 
   it('devolve 422 para id que não é UUID', async () => {

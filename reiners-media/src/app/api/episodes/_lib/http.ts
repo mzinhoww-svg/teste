@@ -6,16 +6,23 @@
  * privado do recurso. Quando TCK-005/TCK-007 estabilizarem um utilitário
  * comum de resposta, esta camada some sem mudar nenhum handler.
  *
- * Todo corpo de erro sai no envelope único do contrato
- * (`{ error: { code, message, details? } }`) e é validado por
- * `errorResponseSchema` antes de ir para a rede — assim uma mensagem vazia ou
- * um código fora de `ErrorCode` falha aqui, e não no cliente.
+ * A CONSTRUÇÃO da resposta de erro é sempre de `errorResponse`
+ * (`@/lib/auth-helpers`, TCK-004): é ela que fixa o status canônico de
+ * `ERROR_STATUS_BY_CODE` e o `Cache-Control: no-store` que todo erro da API
+ * carrega — um 404 cacheado por um CDN intermediário sobreviveria à criação do
+ * recurso. Montar `NextResponse.json` aqui faria as rotas de episódio
+ * divergirem de podcasts/auth/events em cabeçalho, que foi exatamente o achado
+ * da revisão da onda 1.
+ *
+ * O que este módulo acrescenta é a validação do corpo por `errorResponseSchema`
+ * antes de ir para a rede (mensagem vazia ou código fora de `ErrorCode` falham
+ * aqui, não no cliente) e os construtores nomeados por situação.
  */
-import { NextResponse } from 'next/server';
+import type { NextResponse } from 'next/server';
 import type { z } from 'zod';
 
+import { errorBody, errorResponse } from '@/lib/auth-helpers';
 import {
-  ERROR_STATUS_BY_CODE,
   type BusinessRuleViolation,
   errorCodeSchema,
   errorResponseSchema,
@@ -32,10 +39,8 @@ export function apiError(
   message: string,
   details?: ApiErrorDetails,
 ): NextResponse {
-  const body = errorResponseSchema.parse({
-    error: details === undefined ? { code, message } : { code, message, details },
-  });
-  return NextResponse.json(body, { status: ERROR_STATUS_BY_CODE[code] });
+  errorResponseSchema.parse(errorBody(code, message, details));
+  return errorResponse(code, message, details === undefined ? {} : { details });
 }
 
 /** 400 — corpo ilegível (JSON malformado). */

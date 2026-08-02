@@ -2,7 +2,9 @@
  * `GET|PATCH|DELETE /api/episodes/:id` — CONTRACT-007 (TCK-006).
  *
  * Contrato: `contracts/api/episodes.yaml` (`getEpisodeById`, `updateEpisode`,
- * `deleteEpisode`). RBAC e rate limit ficam no middleware de TCK-004.
+ * `deleteEpisode`). Rate limit (429) é aplicado em cada verbo com
+ * `enforceRateLimit` de TCK-004, como primeira checagem — o middleware não faz
+ * rate limit. RBAC (401/403) vem em seguida, via `requireRole`.
  *
  * O ponto sensível desta rota é BR-004 no PATCH: `episodeUpdateSchema` é
  * parcial e só consegue avaliar a regra quando `youtubeUrl` e `spotifyUrl`
@@ -10,11 +12,17 @@
  * YouTube passa no schema e zeraria a última trilha. Por isso o handler mescla
  * o estado persistido com o patch (`mergeEpisodeTracks`) e roda
  * `validateEpisodeTracks` sobre o resultado, devolvendo 409.
+ *
+ * SOFT DELETE DO PROGRAMA — a leitura pública (`GET`) esconde o episódio cujo
+ * programa foi soft-deletado, igual à listagem. `PATCH`/`DELETE` continuam
+ * operando: são superfície administrativa e autenticada, e bloquear ali
+ * impediria arrumar o acervo de um programa que ainda pode ser restaurado.
  */
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import type { Prisma } from '@prisma/client';
 
+import { RATE_LIMIT_POLICIES, enforceRateLimit } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 import {
   episodeResponseSchema,
@@ -24,7 +32,7 @@ import {
 } from '@/lib/schemas';
 import { deriveEpisodeEmbeds, mergeEpisodeTracks } from '@/lib/url-parser';
 
-import { episodeNumberTaken, serializeEpisode } from '../_lib/episodes';
+import { episodeNumberTaken, podcastExists, serializeEpisode } from '../_lib/episodes';
 import { requireAdmin, requireEditor } from '../_lib/guard';
 import {
   conflict,
@@ -47,9 +55,24 @@ function isRecordNotFound(error: unknown): boolean {
   return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2025';
 }
 
-/** Episódio por id. Rota pública. */
-export async function GET(_request: NextRequest, context: RouteContext): Promise<NextResponse> {
+/**
+ * Episódio por id. Rota pública.
+ *
+ * O soft delete do programa também esconde os episódios dele: depois de
+ * `DELETE /api/podcasts/:id`, o programa some da listagem, do detalhe e de
+ * `GET /api/episodes?podcastId=` — devolver 200 aqui deixaria título, descrição
+ * e embeds acessíveis por link direto, contradizendo o próprio ticket e o que
+ * TCK-005 documentou. A visibilidade do episódio segue a do programa pai.
+ */
+export async function GET(request: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
+    const limited = enforceRateLimit(
+      request,
+      'GET /api/episodes/:id',
+      RATE_LIMIT_POLICIES.publicApi,
+    );
+    if (limited) return limited;
+
     const params = idParamSchema.safeParse(context.params);
     if (!params.success) {
       return validationError(params.error, 'Identificador de episódio inválido');
@@ -57,6 +80,10 @@ export async function GET(_request: NextRequest, context: RouteContext): Promise
 
     const episode = await prisma.episode.findUnique({ where: { id: params.data.id } });
     if (episode === null) {
+      return notFound('Episódio não encontrado');
+    }
+
+    if (!(await podcastExists(episode.podcastId))) {
       return notFound('Episódio não encontrado');
     }
 
@@ -78,6 +105,13 @@ export async function GET(_request: NextRequest, context: RouteContext): Promise
  */
 export async function PATCH(request: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
+    const limited = enforceRateLimit(
+      request,
+      'PATCH /api/episodes/:id',
+      RATE_LIMIT_POLICIES.adminApi,
+    );
+    if (limited) return limited;
+
     const auth = await requireEditor(request);
     if (!auth.ok) return auth.response;
 
@@ -152,6 +186,13 @@ export async function PATCH(request: NextRequest, context: RouteContext): Promis
  */
 export async function DELETE(request: NextRequest, context: RouteContext): Promise<NextResponse> {
   try {
+    const limited = enforceRateLimit(
+      request,
+      'DELETE /api/episodes/:id',
+      RATE_LIMIT_POLICIES.adminApi,
+    );
+    if (limited) return limited;
+
     // BR-002: EDITOR não apaga. O guard devolve 403 antes de qualquer leitura.
     const auth = await requireAdmin(request);
     if (!auth.ok) return auth.response;
