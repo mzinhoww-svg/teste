@@ -412,7 +412,7 @@ components:
           maxLength: 2
         photo:
           type: string
-          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\@]+(?:[/?#][^\s<>"''`\\]*)?|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         bio:
@@ -426,26 +426,32 @@ components:
         instagram:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
         twitter:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
         tiktok:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
         linkedin:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
         website:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
         github:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
     PodcastCreate:
       type: object
@@ -478,11 +484,11 @@ components:
           maxLength: 5000
         coverImage:
           type: string
-          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\@]+(?:[/?#][^\s<>"''`\\]*)?|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
         heroImage:
           type: string
-          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\@]+(?:[/?#][^\s<>"''`\\]*)?|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         category:
@@ -533,11 +539,11 @@ components:
           type: string
         coverImage:
           type: string
-          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\@]+(?:[/?#][^\s<>"''`\\]*)?|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
         heroImage:
           type: string
-          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\@]+(?:[/?#][^\s<>"''`\\]*)?|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         category:
@@ -599,11 +605,11 @@ components:
           type: string
         coverImage:
           type: string
-          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\@]+(?:[/?#][^\s<>"''`\\]*)?|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
         heroImage:
           type: string
-          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\@]+(?:[/?#][^\s<>"''`\\]*)?|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         category:
