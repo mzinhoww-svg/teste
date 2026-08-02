@@ -149,3 +149,33 @@
 **Consequências:** Até lá, a aderência ao design system depende de revisão humana, não de ferramenta. Risco real e assumido conscientemente.
 **Status:** Aprovado com ressalva.
 **Tickets:** TCK-001, TCK-008.
+
+## DEC-019: cobertura automática de códigos de status no teste de contrato — não implementada
+**Contexto:** A varredura de rotas introduzida na onda 1 fechou a deriva "rota implementada e não publicada", mas compara apenas **path + método**. Foi por esse buraco que o 413 escapou: o TCK-007 mudou o comportamento de `POST /api/events` e `PATCH /api/site-config` e o YAML não acompanhou. A extensão natural seria extrair dos handlers os códigos que eles constroem e exigir que cada um exista nas `responses` da operação.
+**Decisão:** Não implementar. Quatro abordagens foram tentadas e cada uma falhou em silêncio, de um jeito distinto:
+1. AST + literais sem resolver alias de import → falso negativo: não enxergava o 413 de `PATCH /site-config`, emitido de dentro de `_lib/http.ts`.
+2. AST + `getAliasedSymbol` + tipo do argumento → os 19 métodos saturaram nos 10 códigos, porque wrappers como `apiError(code, …)` têm o parâmetro tipado `ErrorCode`, que é a união inteira.
+3. Idem, ignorando argumentos que são parâmetro → sobra e falta ao mesmo tempo (`POST /upload` acusava `NOT_FOUND`; `episodes/*` só via `RATE_LIMITED`).
+4. Texto/regex fatiando cada método → perdia justamente o 413, porque `readJsonBody` declara `Promise<{ ok: true; … }>` e a `{` do tipo de retorno vem antes da `{` do corpo.
+O que separa o certo do errado é propagação de constantes interprocedural com sensibilidade a caminho. Toda aproximação barata erra de um modo que só se detecta conferindo as 19 linhas à mão — ou seja, produz exatamente o teste verde em que ninguém confia e que todo mundo contorna.
+**Alternativas:** Manter uma das aproximações com allowlist de exceções — rejeitado: a lista de exceções vira o próprio ponto cego, e um teste com exceções não auditadas é pior que a ausência dele, porque transmite confiança falsa.
+**Consequências:** A deriva "handler devolve status não declarado" continua possível. Mitigação adotada: (a) três guardas puramente contratuais foram implementadas — componente de erro sob o status correspondente (`NotFound` só sob 404), status do YAML amarrado a `ERROR_STATUS_BY_CODE`, e lista explícita de operações que leem corpo com teto de bytes e portanto declaram 413; (b) recomendação de que o teste de contrato **de cada ticket** asserte o status do próprio handler, onde a verificação é local e confiável.
+**Status:** Aprovado com limitação registrada.
+**Tickets:** TCK-003, e todo ticket que adicione rota.
+
+## DEC-020: `/api/podcasts/{idOrSlug}` — o contrato original era inimplementável e inválido
+**Contexto:** `contracts/api/podcasts.yaml` declarava `/api/podcasts/{slug}` e `/api/podcasts/{id}` como paths distintos. A varredura de rotas acusou que nenhum dos dois existe; o real é `/api/podcasts/{idOrSlug}`.
+**Decisão:** Unificar em `/api/podcasts/{idOrSlug}`, preservando a distinção semântica por operação (`x-zod-params: slugParamSchema` no GET público, `idParamSchema` no PATCH/DELETE).
+**Justificativa — dois motivos independentes:** (1) o App Router só admite um segmento dinâmico por nível, então `[slug]` e `[id]` lado a lado é erro do Next.js; (2) o OpenAPI trata paths que diferem apenas no nome da variável como o **mesmo** path e proíbe declarar ambos. O contrato era inimplementável *e* OpenAPI inválido — não foi a implementação que divergiu do contrato, foi o contrato que nunca foi realizável.
+**Consequências:** `docs/API_CONTRACTS.md` (que escreve `:slug`/`:id`) não foi alterado por não ser `write_path` de nenhum ticket da onda; a checagem contra ele compara a forma do path com o nome da variável apagado.
+**Status:** Aprovado.
+**Tickets:** TCK-003, TCK-005.
+
+## DEC-021: teto de bytes não é uniforme entre os handlers que aceitam corpo
+**Contexto:** `POST /api/events`, `PATCH /api/site-config` e `POST /api/upload` limitam o tamanho do corpo em bytes e devolvem 413. `POST /api/podcasts`, `PATCH /api/podcasts` e as rotas de episódio usam um `readJsonBody` **sem** teto de bytes. A regra contratual "toda operação com `requestBody` declara 413" teria pego a omissão do 413 sozinha, mas não pode ser imposta enquanto a assimetria existir — declararia um status que essas rotas não produzem.
+**Decisão:** Não uniformizar nesta onda. A assimetria fica registrada como dívida, com a avaliação de risco explícita abaixo.
+**Risco real:** as rotas sem teto são todas autenticadas (EDITOR+) e sujeitas a rate limit de 60/min por IP. Um EDITOR autenticado poderia enviar corpos grandes repetidamente e pressionar memória da função serverless. É vetor real, porém de baixa exposição — exige credencial válida — e não foi levantado por nenhuma das revisões independentes.
+**Alternativas:** Padronizar agora — rejeitado nesta onda: exigiria reabrir TCK-005 e TCK-006 já aprovados e revisados, mais uma terceira rodada de revisão, para fechar um vetor que depende de credencial. Melhor endereçar de uma vez, junto com o endurecimento de deploy.
+**Consequências:** Atribuído a TCK-024 (deploy, CI e monitoramento), que já tem escopo de endurecimento. Ao padronizar, a regra "toda operação com `requestBody` declara 413" passa a valer e deve virar teste em `contract-validation.test.ts`.
+**Status:** Aprovado como dívida atribuída.
+**Tickets:** TCK-005, TCK-006, TCK-024.
