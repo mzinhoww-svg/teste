@@ -1,0 +1,79 @@
+{
+  "combo": "A14xP7",
+  "data": "2026-08-20",
+  "conta": "@viajaly",
+  "pilar": "antídoto",
+  "angulo_id": "A14",
+  "persona_id": "P7",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "A única pergunta e: você volta? (autônomo)",
+  "persona": "Autônomo / MEI",
+  "dor": "acha que a pergunta e sobre renda e vínculo formal",
+  "imagem": "acervo/familia/familia-selfie2.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "o que ele quer saber",
+      "titulo": "O cônsul não quer saber quanto o autônomo ganha. Quer saber se você volta.",
+      "sub": "Você tá se preparando pra pergunta errada.",
+      "destaques": [
+        "volta."
+      ],
+      "imagem": "acervo/familia/familia-selfie2.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "A pergunta real",
+      "corpo": "A lei presume que você quer ficar. Seu papel e mostrar que a sua vida te traz de volta pro Brasil.",
+      "destaques": [
+        "volta"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Por que o autônomo trava",
+      "corpo": "Você foca em provar renda e esquece o essencial: mostrar os lacos que te fazem voltar.",
+      "destaques": [
+        "lacos"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Vínculo não é carteira assinada. E uma vida que continua aqui te aguardando.",
+      "destaques": [
+        "vida"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O que responde a pergunta",
+      "corpo": "Clientes, família, casa, projetos em andamento. Coisas que só fazem sentido se você voltar.",
+      "destaques": [
+        "voltar."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Como dizer isso",
+      "corpo": "Com naturalidade, em poucas frases. Autônomo preparado responde melhor que assalariado despreparado.",
+      "destaques": [
+        "preparado"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta VOLTAMEI que eu te ajudo a montar a sua resposta. Ou link na bio.",
+      "acao": "Comenta VOLTAMEI",
+      "destaques": [
+        "VOLTAMEI"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "O cônsul não quer saber quanto o autônomo ganha. Quer saber uma coisa só: você volta?\n\nA lei presume que você quer ficar, e seu papel e mostrar que a sua vida te traz de volta. O autônomo trava porque foca em provar renda e esquece os lacos: clientes, família, casa, projetos. Vínculo não é carteira assinada, e uma vida que continua aqui te aguardando. Autônomo preparado responde melhor que assalariado despreparado.\n\nComenta VOLTAMEI que eu te ajudo a montar a sua resposta. Ou toca no link da bio.\n\n#autonomo #mei #vistoamericano #vistoeua #b1b2 #entrevistavisto #empreendedor"
+}

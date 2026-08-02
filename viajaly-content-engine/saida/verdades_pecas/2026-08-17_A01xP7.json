@@ -1,0 +1,79 @@
+{
+  "combo": "A01xP7",
+  "data": "2026-08-17",
+  "conta": "@leticia",
+  "pilar": "denúncia",
+  "angulo_id": "A01",
+  "persona_id": "P7",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Ninguém garante visto (autônomo)",
+  "persona": "Autônomo / MEI",
+  "dor": "acha que vai ser negado por ser MEI e te vendem garantia",
+  "imagem": "acervo/familia/familia-selfie.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "cuidado autônomo",
+      "titulo": "Te venderam garantia porque você e MEI e tem medo. E aí que pegam.",
+      "sub": "O medo do autônomo e o produto mais vendido do nicho.",
+      "destaques": [
+        "pegam."
+      ],
+      "imagem": "acervo/familia/familia-selfie.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O gancho do medo",
+      "corpo": "Sem carteira assinada, você acha que será negado. A promessa de garantia se vende exatamente nesse medo.",
+      "destaques": [
+        "medo."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "A verdade sobre ser MEI",
+      "corpo": "Autônomo aprova visto todo dia. Vínculo se comprova de várias formas. O que derruba e despreparo, não o CNPJ.",
+      "destaques": [
+        "despreparo,"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Ninguém garante seu visto. Quem promete isso pro autônomo só tá vendendo o seu medo.",
+      "destaques": [
+        "Ninguém"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O que muda o jogo",
+      "corpo": "Saber contar a sua vida de autônomo em uma frase segura. Isso dá pra preparar. O carimbo, não.",
+      "destaques": [
+        "preparar."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O teste",
+      "corpo": "Pergunta pra quem promete: vocês garantem? Quem e honesto diz que ninguém pode garantir.",
+      "destaques": [
+        "ninguém"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta MEIVISTO que eu te mostro como o autônomo se prepara. Ou link na bio.",
+      "acao": "Comenta MEIVISTO",
+      "destaques": [
+        "MEIVISTO"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Te prometeram visto garantido porque você e MEI e tem medo de ser negado por isso. E exatamente aí que pegam.\n\nSem carteira assinada, você acha que será negado, e a promessa se vende nesse medo. Mas autônomo aprova visto todo dia: vínculo se comprova de várias formas, e o que derruba e despreparo, não o CNPJ. Ninguém garante seu visto. Quem promete isso pro autônomo só tá vendendo o seu medo.\n\nComenta MEIVISTO que eu te mostro como o autônomo se prepara. Ou toca no link da bio.\n\n#autonomo #mei #vistoamericano #vistoeua #b1b2 #empreendedor #consuladoamericano"
+}

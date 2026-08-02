@@ -1,0 +1,300 @@
+/* ==========================================================================
+   Catálogo de podcasts — folha de estilo do módulo /portfolio.
+
+   Escopo: TUDO aqui vive sob `.pf-root`, então o CRM (que compartilha o mesmo
+   globals.css) não é afetado. Nenhum hex literal: só `var(--pf-*)`, emitidas
+   por lib/portfolio/tokens.ts.
+   ========================================================================== */
+
+.pf-root {
+  min-height: 100vh;
+  background: var(--pf-surface-base);
+  color: var(--pf-text-primary);
+  font-family: var(--pf-font);
+  font-size: var(--pf-text-base);
+  font-weight: 400;
+  line-height: var(--pf-leading-base);
+  /* Anti-pattern §7: nenhum scroll horizontal não intencional na página. */
+  overflow-x: hidden;
+}
+
+/* O globals.css do CRM pinta o body de claro; dentro do catálogo a superfície
+   é sempre surface.base, inclusive na área de overscroll. */
+body:has(.pf-root) {
+  background: var(--pf-surface-base);
+}
+
+/* --------------------------------------------------------------------------
+   Foco visível — outline ≥2px em text.inverse, offset 2px, em TODO elemento
+   interativo (a11y §6). Sobrescreve o anel `brand` global do CRM.
+   -------------------------------------------------------------------------- */
+.pf-root :focus-visible {
+  outline: 2px solid var(--pf-text-inverse);
+  outline-offset: 2px;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-ring-offset-shadow: 0 0 #0000;
+  box-shadow: none;
+}
+
+/* Skip link: invisível até receber foco. */
+.pf-skip-link {
+  position: absolute;
+  left: 16px;
+  top: -64px;
+  z-index: 200;
+  padding: 12px 16px;
+  border-radius: var(--pf-radius-md);
+  background: var(--pf-text-inverse);
+  color: var(--pf-surface-base);
+  font-size: var(--pf-text-xl);
+  font-weight: 500;
+  transition: top var(--pf-motion-fast) var(--pf-ease);
+}
+.pf-skip-link:focus {
+  top: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   Carrossel — scrollbar oculta, snap obrigatório
+   -------------------------------------------------------------------------- */
+.pf-scroll-x {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.pf-scroll-x::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Área rolável vertical (lista de episódios dentro do painel). */
+.pf-scroll-y {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.pf-scroll-y::-webkit-scrollbar {
+  width: 6px;
+}
+.pf-scroll-y::-webkit-scrollbar-thumb {
+  background: rgb(var(--pf-border-muted-rgb) / 0.15);
+  border-radius: var(--pf-radius-step8);
+}
+
+/* --------------------------------------------------------------------------
+   Painel expansível — max-height + opacity (transição `slow`)
+   -------------------------------------------------------------------------- */
+.pf-panel {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  transition:
+    max-height var(--pf-motion-slow) var(--pf-ease),
+    opacity var(--pf-motion-slow) var(--pf-ease),
+    margin-top var(--pf-motion-slow) var(--pf-ease);
+}
+.pf-panel[data-state="open"] {
+  max-height: 700px;
+  opacity: 1;
+  margin-top: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   Entrada escalonada dos posters — 60ms entre cada, dirigido por --pf-delay
+   -------------------------------------------------------------------------- */
+@keyframes pf-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.pf-stagger {
+  opacity: 0;
+  animation: pf-fade-in var(--pf-motion-slow) var(--pf-ease) forwards;
+  animation-delay: var(--pf-delay, 0ms);
+}
+
+/* Modal: opacity 0→1, scale 0.95→1 */
+@keyframes pf-modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.pf-modal-enter {
+  animation: pf-modal-in var(--pf-motion-slow) var(--pf-ease) forwards;
+}
+@keyframes pf-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.pf-overlay-enter {
+  animation: pf-overlay-in var(--pf-motion-slow) var(--pf-ease) forwards;
+}
+
+/* --------------------------------------------------------------------------
+   Skeleton — shimmer surface.strong → surface.raised → surface.strong
+   -------------------------------------------------------------------------- */
+@keyframes pf-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+.pf-skeleton {
+  background-image: linear-gradient(
+    90deg,
+    var(--pf-surface-strong) 25%,
+    var(--pf-surface-raised) 50%,
+    var(--pf-surface-strong) 75%
+  );
+  background-size: 200% 100%;
+  animation: pf-shimmer 1.5s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   Artes de poster — as 5 variantes de `visualStyle` (spec §3)
+   Cada uma é puramente CSS: funciona com ou sem imagem de capa.
+   -------------------------------------------------------------------------- */
+.pf-art {
+  position: absolute;
+  inset: 0;
+}
+
+/* PHOTO_REAL — gradiente raised→base + glow radial do accent, desfocado */
+.pf-art-photo_real {
+  background: linear-gradient(160deg, var(--pf-surface-raised), var(--pf-surface-base));
+}
+.pf-art-photo_real::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(
+    circle at 50% 35%,
+    rgb(var(--pf-text-inverse-rgb) / 0.1),
+    transparent 62%
+  );
+  filter: blur(24px);
+}
+
+/* ILLUSTRATION — formas geométricas com borda accent 15%, rotação sutil */
+.pf-art-illustration {
+  background: var(--pf-surface-raised);
+}
+.pf-art-illustration::before,
+.pf-art-illustration::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgb(var(--pf-text-inverse-rgb) / 0.15);
+}
+.pf-art-illustration::before {
+  inset: 18% 14% 34% 14%;
+  border-radius: var(--pf-radius-step8);
+  transform: rotate(-6deg);
+}
+.pf-art-illustration::after {
+  inset: 30% 26% 22% 26%;
+  transform: rotate(9deg);
+}
+
+/* MINIMAL — só superfície; o título lowercase é o elemento gráfico */
+.pf-art-minimal {
+  background: var(--pf-surface-raised);
+}
+
+/* DUOTONE — gradiente 45deg + faixas horizontais em accent 8% */
+.pf-art-duotone {
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgb(var(--pf-text-inverse-rgb) / 0.08) 0 2px,
+      transparent 2px 14px
+    ),
+    linear-gradient(45deg, var(--pf-surface-base), var(--pf-surface-raised));
+}
+
+/* COLLAGE — hachura diagonal em accent 3% sobre surface.base */
+.pf-art-collage {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgb(var(--pf-text-inverse-rgb) / 0.03) 0 6px,
+      transparent 6px 12px
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgb(var(--pf-text-inverse-rgb) / 0.03) 0 6px,
+      transparent 6px 12px
+    ),
+    var(--pf-surface-base);
+}
+
+/* Véu na base do poster para o título sempre ter contraste sobre a arte. */
+.pf-poster-fade {
+  background: linear-gradient(
+    to top,
+    rgb(var(--pf-surface-base-rgb) / 0.85) 0%,
+    rgb(var(--pf-surface-base-rgb) / 0.55) 45%,
+    transparent 100%
+  );
+}
+
+/* Hero: overlay gradiente sobre a arte de capa. */
+.pf-hero-overlay {
+  background: linear-gradient(
+    to top,
+    var(--pf-surface-base) 8%,
+    rgb(var(--pf-surface-base-rgb) / 0.72) 45%,
+    rgb(var(--pf-surface-base-rgb) / 0.25) 100%
+  );
+}
+
+/* Números de duração alinhados em coluna. */
+.pf-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   prefers-reduced-motion — desliga scale/translate, preserva opacidade.
+   O globals.css já zera durações globalmente; aqui neutralizamos também as
+   TRANSFORMAÇÕES, que são o que de fato incomoda (spec §6).
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .pf-root .pf-stagger {
+    opacity: 1;
+    animation: none;
+  }
+  .pf-root .pf-skeleton {
+    animation: none;
+  }
+  .pf-root .pf-modal-enter,
+  .pf-root .pf-overlay-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  /* Nenhum hover/estado move elementos. */
+  .pf-root .pf-motion-transform {
+    transform: none !important;
+  }
+  .pf-root .pf-panel {
+    transition: none;
+  }
+}

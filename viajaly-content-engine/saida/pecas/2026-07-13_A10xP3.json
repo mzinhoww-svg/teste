@@ -1,0 +1,81 @@
+{
+  "combo": "A10xP3",
+  "data": "2026-07-13",
+  "conta": "@viajaly",
+  "pilar": "utilidade",
+  "angulo_id": "A10",
+  "persona_id": "P3",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Menor de idade agora precisa ir na entrevista",
+  "persona": "Negado antes",
+  "dor": "vergonha + medo de repetir o erro + já perdeu US$185",
+  "fonte_url": "https://br.usembassy.gov/pt/vistos/",
+  "fonte_verificada_em": "2026-07-12",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "mudou a regra",
+      "titulo": "Mudou a regra: menor de idade agora vai na entrevista.",
+      "sub": "Se você já foi negado, isso muda o seu planejamento inteiro.",
+      "destaques": [
+        "comparecer."
+      ],
+      "imagem": "acervo/destinos/disney-goofy.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O que mudou",
+      "corpo": "Antes, em vários casos, menor era dispensado da entrevista. Agora costuma precisar aparecer. Confirme sempre no site do consulado.",
+      "destaques": [
+        "aparecer."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Por que isso te afeta",
+      "corpo": "Você já levou um não é sabe o peso de refazer tudo. Agora conte com a agenda das crianças também no dia.",
+      "destaques": [
+        "não"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Ser negado não foi o fim. Repetir sem entender o que mudou, esse sim seria o erro caro.",
+      "destaques": [
+        "mudou,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Organize a família",
+      "corpo": "Datas escolares, quem leva, quem responde por cada criança. Um imprevisto de agenda derruba um dia inteiro de entrevista.",
+      "destaques": [
+        "imprevisto"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "A taxa não volta",
+      "corpo": "São 185 dólares por pessoa, crianças incluídas, e não reembolsa se negar. Por isso a segunda tentativa tem que ser bem feita.",
+      "destaques": [
+        "185"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta MENOR que eu te mando o que confirmar no consulado. Ou link na bio.",
+      "acao": "Comenta MENOR",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "MENOR"
+      ]
+    }
+  ],
+  "legenda": "Mudou a regra: menor de idade agora costuma precisar comparecer na entrevista. Confirme sempre no site do consulado (br.usembassy.gov).\n\nSe você já foi negado uma vez, isso muda o seu planejamento. Refazer tudo já pesa, e agora conte com a agenda das crianças no mesmo dia. Ser negado não foi o fim. Repetir sem entender o que mudou, esse sim seria o erro caro.\n\nComenta MENOR que eu te mando o checklist do que confirmar antes. Ou toca no link da bio.\n\n#vistoamericano #vistonegado #segundatentativa #vistoeua #b1b2 #familia #consuladoamericano",
+  "imagem": "acervo/destinos/disney-goofy.jpg"
+}

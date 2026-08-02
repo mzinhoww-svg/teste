@@ -1,0 +1,80 @@
+{
+  "combo": "D01xP2",
+  "data": "2026-08-07",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D01",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Nova York a dois na primeira viagem",
+  "persona": "Casal primeira viagem",
+  "dor": "não sabe por onde começar a primeira internacional",
+  "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "primeira vez a dois",
+      "titulo": "Nova York na primeira viagem do casal: por onde começar.",
+      "sub": "A cidade que assusta de tão grande, resolvida.",
+      "destaques": [
+        "começar."
+      ],
+      "imagem": "acervo/destinos/ny-ponte-brooklyn.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Escolha uma base",
+      "corpo": "Fiquem perto do metro. NY se resolve no trilho, e a pé vocês perdem o dia e o fôlego.",
+      "destaques": [
+        "metro."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Menos e mais",
+      "corpo": "Primeira vez rende com poucos pontos por dia e tempo pra só olhar a cidade. Não virem turistas exaustos.",
+      "destaques": [
+        "poucos"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "O momento a dois",
+      "corpo": "Por do sol na ponte, um show, o parque no fim de tarde. NY entrega romance de graça pra quem desacelera.",
+      "destaques": [
+        "romance"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "A primeira viagem do casal não precisa ser perfeita. Precisa ser sem pressa.",
+      "destaques": [
+        "pressa."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que vem antes",
+      "corpo": "Nada de Nova York sem o visto dos dois na mão. Ele leva tempo pra sair, entao vem primeiro.",
+      "destaques": [
+        "primeiro."
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta NYCASAL que eu te mando o roteiro de 4 dias a dois. Ou link na bio.",
+      "acao": "Comenta NYCASAL",
+      "destaques": [
+        "NYCASAL"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Nova York na primeira viagem do casal parece assustadora de tão grande. Não é.\n\nFiquem perto do metro, porque NY se resolve no trilho. Menos pontos por dia, mais tempo pra olhar a cidade. E aproveitem o romance de graça: por do sol na ponte, um show, o parque no fim de tarde. A primeira viagem não precisa ser perfeita, precisa ser sem pressa.\n\nE nada disso acontece sem o visto dos dois. Ele vem primeiro.\n\nComenta NYCASAL que eu te mando o roteiro. Ou toca no link da bio.\n\n#novayork #luademel #viagemacasal #primeiraviagem #eua #vistoamericano #vistoeua"
+}

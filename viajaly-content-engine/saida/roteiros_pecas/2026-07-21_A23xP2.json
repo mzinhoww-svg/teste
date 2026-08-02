@@ -1,0 +1,79 @@
+{
+  "combo": "A23xP2",
+  "data": "2026-07-21",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "angulo_id": "A23",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Toda foto dos sonhos começa num consulado",
+  "persona": "Casal primeira viagem",
+  "dor": "não sabe por onde começar",
+  "imagem": "acervo/familia/familia-selfie2.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "o antes que ninguém mostra",
+      "titulo": "Essa foto de família começou num formulário. Não no aeroporto.",
+      "sub": "O feed mostra o depois. Ninguém mostra o antes.",
+      "destaques": [
+        "formulário."
+      ],
+      "imagem": "acervo/familia/familia-selfie2.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O que você ve",
+      "corpo": "Uma família viajando, feliz. O feed só mostra isso: o depois, bonito e pronto.",
+      "destaques": [
+        "depois,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que você não ve",
+      "corpo": "Semanas antes teve um DS-160, uma entrevista de um minuto e o medo de ouvir não.",
+      "destaques": [
+        "medo"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "A viagem dos sonhos não começa no aeroporto. Começa num formulário.",
+      "destaques": [
+        "formulário."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Por que isso é pra você",
+      "corpo": "Você tá na parte do medo agora, na primeira viagem. Todo mundo que já viajou passou por aqui.",
+      "destaques": [
+        "medo"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "A ordem certa",
+      "corpo": "Primeiro o visto, bem preparado. Depois a foto acontece sozinha.",
+      "destaques": [
+        "Primeiro"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta COMECO que eu te mando o primeiro passo. Ou link na bio.",
+      "acao": "Comenta COMECO",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "COMECO"
+      ]
+    }
+  ],
+  "legenda": "Essa foto de família viajando começou num formulário, não no aeroporto.\n\nO feed mostra o depois: bonito, pronto. Ninguém mostra o antes, que é um DS-160, uma entrevista de um minuto e o medo de ouvir não. Se você tá nessa parte agora, na primeira viagem, todo mundo que já viajou passou por aqui. A ordem que funciona: primeiro o visto, depois a foto acontece sozinha.\n\nComenta COMECO que eu te mando o primeiro passo do jeito certo. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagememfamilia #eua #luademel"
+}

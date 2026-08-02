@@ -1,0 +1,80 @@
+{
+  "combo": "D09xP1",
+  "data": "2026-08-05",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D09",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Praia com criança pequena nos EUA",
+  "persona": "Família Orlando",
+  "dor": "medo de dia de praia virar caos com criança pequena",
+  "imagem": "acervo/destinos/praia-crianca.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "dia de praia sem caos",
+      "titulo": "Praia com criança pequena nos EUA: o kit que salva o dia.",
+      "sub": "O que separa o dia perfeito do dia de choro.",
+      "destaques": [
+        "kit"
+      ],
+      "imagem": "acervo/destinos/praia-crianca.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Horário e tudo",
+      "corpo": "Cedo ou fim de tarde. Sol de meio-dia na praia americana e forte e não tem barraca de sombra pra alugar.",
+      "destaques": [
+        "sombra"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Leve de casa",
+      "corpo": "Guarda-sol, protetor, água e lanche. Lá na areia não tem o vendedor que você tá acostumado.",
+      "destaques": [
+        "Leve"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Escolha a praia calma",
+      "corpo": "Prefira praia de água mansa e com salva-vidas. Onda forte com criança pequena e estresse, não lazer.",
+      "destaques": [
+        "mansa"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Com criança pequena, praia boa não é a mais bonita. E a mais tranquila.",
+      "destaques": [
+        "tranquila."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que garante o dia de praia",
+      "corpo": "Nenhum dia de praia nos EUA acontece sem o item que vem lá atrás: o visto da família no prazo.",
+      "destaques": [
+        "Nenhum"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta PRAIAKIDS que eu te mando o checklist do dia de praia. Ou link na bio.",
+      "acao": "Comenta PRAIAKIDS",
+      "destaques": [
+        "PRAIAKIDS"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Praia com criança pequena nos EUA: o kit que separa o dia perfeito do dia de choro.\n\nVa cedo ou no fim de tarde, porque o sol de meio-dia e forte e não tem barraca de sombra pra alugar. Leve guarda-sol, protetor, água e lanche de casa, porque não tem o vendedor de sempre. E prefira praia de água mansa com salva-vidas. Praia boa com criança não é a mais bonita, e a mais tranquila.\n\nE nenhum dia de praia acontece sem o item lá atrás: o visto da família.\n\nComenta PRAIAKIDS que eu te mando o checklist. Ou toca no link da bio.\n\n#praia #viagememfamilia #eua #vistoamericano #vistoeua #feriascomcriancas #florida"
+}

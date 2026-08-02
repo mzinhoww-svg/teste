@@ -1,0 +1,81 @@
+{
+  "combo": "A20xP2",
+  "data": "2026-07-16",
+  "conta": "@viajaly",
+  "pilar": "prova",
+  "angulo_id": "A20",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Aprovados de 2026",
+  "persona": "Casal primeira viagem",
+  "dor": "não sabe por onde começar",
+  "exige_dado_real": true,
+  "nota_producao": "PROVA: substituir [N] pelo numero REAL de aprovados de 2026 da base interna, e so publicar se o numero for verdadeiro e conferivel. Ao inserir o numero, preencher fonte_verificada_em. Sem numero real, esta peca fica retida.",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "o número que eu tenho",
+      "titulo": "Sem promessa: esse e o número de casais que passaram em 2026.",
+      "sub": "Não é projeção. E o que aconteceu de verdade.",
+      "destaques": [
+        "verdade."
+      ],
+      "imagem": "acervo/familia/neve-mae-crianca.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "O número",
+      "corpo": "[N] pessoas preparadas por aqui foram aprovadas em 2026. E o dado que eu tenho pra te mostrar, não uma projeção.",
+      "destaques": [
+        "dado"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "O que ele não significa",
+      "corpo": "Não significa que você está garantido. Cada caso é um caso e a decisão e do cônsul. Significa que preparo muda a média.",
+      "destaques": [
+        "não"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Número sem contexto e propaganda. Número com método por trás e prova. A diferenca e o preparo.",
+      "destaques": [
+        "prova."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "Por que isso te ajuda",
+      "corpo": "Você e casal de primeira viagem e não sabe por onde começar. Ver que gente como vocês passou tira o medo do escuro.",
+      "destaques": [
+        "medo"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que esses casais fizeram",
+      "corpo": "Chegaram preparados, com história coerente e sem pressa comprada. Foi isso, não sorte, que arrumou a estatística.",
+      "destaques": [
+        "preparados,"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta PROVA que eu te mostro como esses casais se prepararam. Ou link na bio.",
+      "acao": "Comenta PROVA",
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares.",
+      "destaques": [
+        "PROVA"
+      ]
+    }
+  ],
+  "legenda": "[COMPLETAR COM O NUMERO REAL] Sem promessa: esse e o número de casais que se prepararam por aqui e passaram em 2026.\n\n[N] pessoas aprovadas. E o dado que eu tenho pra mostrar, não uma projeção. Ele não significa que você está garantido: cada caso é um caso, a decisão e do cônsul. Significa que preparo muda a média. Chegaram com história coerente e sem pressa comprada.\n\nComenta PROVA que eu te mostro o que esses casais fizeram diferente. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #viagemacasal #luademel #eua",
+  "imagem": "acervo/familia/neve-mae-crianca.jpg"
+}

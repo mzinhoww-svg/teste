@@ -1,0 +1,81 @@
+{
+  "combo": "A04xP1",
+  "data": "2026-08-18",
+  "conta": "@leticia",
+  "pilar": "denúncia",
+  "angulo_id": "A04",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "A taxa não volta, e por família isso multiplica",
+  "persona": "Família Orlando",
+  "dor": "se um filho for negado, perde a taxa de cada um",
+  "imagem": "acervo/destinos/disney-goofy.jpg",
+  "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
+  "fonte_verificada_em": "2026-07-12",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "a conta que assusta",
+      "titulo": "A taxa não volta. E numa família de quatro, isso multiplica.",
+      "sub": "185 dólares por pessoa, crianças incluídas, sem reembolso.",
+      "destaques": [
+        "multiplica."
+      ],
+      "imagem": "acervo/destinos/disney-goofy.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "A regra fria",
+      "corpo": "A taxa consular e paga por pessoa e não volta se for negado. Vale pra adulto e pra criança igual.",
+      "destaques": [
+        "igual."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Por que isso pesa na família",
+      "corpo": "Quatro pessoas e quatro taxas. Se um for negado, além da frustração, aquele valor já era.",
+      "destaques": [
+        "quatro"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Quem paga quatro taxas não pode tratar a preparacao como aposta.",
+      "destaques": [
+        "aposta."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O que reduz o risco",
+      "corpo": "Preparo coerente pra cada membro da família. Não elimina o risco, mas para de jogar dinheiro fora.",
+      "destaques": [
+        "coerente"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "A conta honesta",
+      "corpo": "Some as taxas, o preparo é só entao decida. Confere o valor atual no travel.state.gov antes.",
+      "destaques": [
+        "honesta"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta TAXA que eu te mando a conta da família fechada. Ou link na bio.",
+      "acao": "Comenta TAXA",
+      "destaques": [
+        "TAXA"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "A taxa do visto não volta. E numa família de quatro, isso multiplica: 185 dólares por pessoa, crianças incluídas, sem reembolso (confere no travel.state.gov).\n\nA taxa consular e paga por pessoa e não volta se for negado, adulto ou criança. Quatro pessoas, quatro taxas. Se um for negado, aquele valor já era. Quem paga quatro taxas não pode tratar a preparacao como aposta.\n\nComenta TAXA que eu te mando a conta da família fechada. Ou toca no link da bio.\n\n#vistoamericano #viagememfamilia #vistoeua #b1b2 #taxavisto #orlando #consuladoamericano"
+}

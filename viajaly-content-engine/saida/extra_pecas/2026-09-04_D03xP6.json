@@ -1,0 +1,80 @@
+{
+  "combo": "D03xP6",
+  "data": "2026-09-04",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D03",
+  "persona_id": "P6",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Califórnia em grupo de amigos",
+  "persona": "Grupo de amigos",
+  "dor": "quer roadtrip mas teme a logística em grupo",
+  "imagem": "acervo/destinos/disney-castelo-familia.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "roadtrip em grupo",
+      "titulo": "Califórnia em grupo e a melhor road trip, se a logística não te derrubar.",
+      "sub": "Estrada, praia e parque, com vários amigos no carro.",
+      "destaques": [
+        "road"
+      ],
+      "imagem": "acervo/destinos/disney-castelo-familia.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Um carro grande ganha",
+      "corpo": "Dividir em dois carros separa o grupo. Uma van rende mais e barateia por cabeça.",
+      "destaques": [
+        "van"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "LÁ, praia e parque",
+      "corpo": "Los Angeles num dia, a costa no outro, Disneyland pra fechar. Cenário novo todo dia.",
+      "destaques": [
+        "cenário"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Combinem paradas",
+      "corpo": "Cada um quer parar num lugar. Definam as paradas antes pra estrada não virar discussão.",
+      "destaques": [
+        "antes"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Road trip em grupo une ou racha. A diferenca está no combinado, não na estrada.",
+      "destaques": [
+        "combinado,"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "O que abre a estrada",
+      "corpo": "A road trip só começa com os vistos de todo mundo prontos e no prazo.",
+      "destaques": [
+        "todo"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta CALIGRUPO que eu te mando o roteiro de road trip. Ou link na bio.",
+      "acao": "Comenta CALIGRUPO",
+      "destaques": [
+        "CALIGRUPO"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Califórnia em grupo e a melhor road trip, se a logística não te derrubar.\n\nUm carro grande ganha: dividir em dois separa o grupo, uma van rende mais e barateia. LÁ num dia, a costa no outro, Disneyland pra fechar. E definam as paradas antes, pra estrada não virar discussão. Road trip em grupo une ou racha, e a diferenca está no combinado.\n\nÉ só começa com os vistos de todo mundo prontos.\n\nComenta CALIGRUPO que eu te mando o roteiro. Ou toca no link da bio.\n\n#california #roadtrip #viagemcomamigos #grupodeamigos #eua #vistoamericano #vistoeua"
+}

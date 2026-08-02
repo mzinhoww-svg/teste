@@ -1,0 +1,61 @@
+{
+  "_doc": "BANCO DE ANGULOS VIAJALY. O gargalo de 120 pecas/mes nao e producao, e IDEIA. Este banco resolve por combinatoria: ANGULO x PERSONA x FORMATO. 22 angulos x 7 personas = 154 pecas distintas SEM repetir tese. Cada peca fala da mesma verdade para uma pessoa diferente, que e como argumento vira posicionamento.",
+
+  "personas": [
+    {"id": "P1", "nome": "Familia Orlando", "perfil": "pai/mae, 2-3 filhos, primeira viagem, medo de perder a viagem das criancas", "dor": "se um for negado, a viagem inteira desmonta", "prioridade": "ALTA - maior ticket"},
+    {"id": "P2", "nome": "Casal primeira viagem", "perfil": "28-40, lua de mel ou primeira internacional", "dor": "nao sabe por onde comecar", "prioridade": "ALTA"},
+    {"id": "P3", "nome": "Negado antes", "perfil": "ja levou nao, quer tentar de novo", "dor": "vergonha + medo de repetir o erro + ja perdeu US$185", "prioridade": "ALTA - maior desespero, maior conversao"},
+    {"id": "P4", "nome": "Torcedor Copa", "perfil": "tem ingresso, nao tem visto, prazo apertado", "dor": "prazo. janela fecha", "prioridade": "URGENTE - sazonal, morre em julho"},
+    {"id": "P5", "nome": "Renovacao vencida", "perfil": "visto venceu ha mais de 12 meses, caiu na fila de entrevista", "dor": "achava que era automatico e nao e", "prioridade": "MEDIA"},
+    {"id": "P6", "nome": "Grupo de amigos", "perfil": "3-6 pessoas, Miami/NY, dividem custo", "dor": "coordenar datas de todo mundo", "prioridade": "MEDIA - bom ticket"},
+    {"id": "P7", "nome": "Autonomo / MEI", "perfil": "sem holerite, sem carteira assinada", "dor": "acha que vai ser negado por nao ter vinculo formal", "prioridade": "MEDIA - mito forte a desarmar"}
+  ],
+
+  "angulos": [
+    {"id": "A01", "pilar": "denuncia", "tese": "Ninguem garante visto. Quem garante mente.", "gancho_base": "Se te prometeram visto garantido, corre.", "prova": "decisao e do consul, na hora, olhando pra voce", "objetivo": "comentario"},
+    {"id": "A02", "pilar": "denuncia", "tese": "Bot de antecipacao bloqueia sua conta", "gancho_base": "Tem gente vendendo antecipacao com robo. Isso bloqueia sua conta.", "prova": "sistema do consulado detecta e bloqueia", "objetivo": "compartilhamento"},
+    {"id": "A03", "pilar": "denuncia", "tese": "O governo cobra US$750 pra furar fila; consultoria completa custa menos de um terco", "gancho_base": "O governo americano botou preco na sua pressa: 750 dolares.", "prova": "Federal Register 2026-11513", "fonte_url": "https://www.federalregister.gov", "objetivo": "salvamento", "perecivel": "taxa"},
+    {"id": "A04", "pilar": "denuncia", "tese": "Taxa nao volta. Nunca. E quem prometeu some.", "gancho_base": "Voce sabe que a taxa de US$185 nao volta se for negado?", "prova": "regra consular, nao reembolsavel", "objetivo": "comentario"},
+    {"id": "A05", "pilar": "denuncia", "tese": "Assessoria barata demais e cara demais sao os dois sinais de alerta", "gancho_base": "Cobraram R$99? Cobraram R$3 mil? Os dois sao sinal.", "prova": "faixa de mercado", "objetivo": "comentario"},
+    {"id": "A06", "pilar": "utilidade", "tese": "A fila por consulado, atualizada", "gancho_base": "A fila do visto hoje, consulado por consulado.", "prova": "dados publicos do Depto de Estado", "objetivo": "salvamento", "perecivel": "fila", "recorrente": true},
+    {"id": "A07", "pilar": "utilidade", "tese": "Da pra antecipar de graca por emergencia", "gancho_base": "Da pra antecipar sua entrevista de graca. O consulado nao faz questao de contar.", "prova": "pedido de emergencia, sem custo extra", "objetivo": "compartilhamento", "contra_o_proprio_bolso": true},
+    {"id": "A08", "pilar": "utilidade", "tese": "Quanto custa DE VERDADE (taxa + consultoria + passaporte)", "gancho_base": "Quanto custa um visto pra familia de 4? A conta real.", "prova": "decomposicao de custo", "objetivo": "salvamento", "perecivel": "taxa"},
+    {"id": "A09", "pilar": "utilidade", "tese": "CASV e consulado sao dois dias diferentes", "gancho_base": "Voce sabia que sao DUAS visitas, em dias diferentes?", "prova": "processo consular", "objetivo": "salvamento"},
+    {"id": "A10", "pilar": "utilidade", "tese": "Menor de idade agora precisa ir na entrevista", "gancho_base": "Mudou a regra: menor de idade agora precisa comparecer.", "prova": "regra desde out/2025", "objetivo": "compartilhamento", "perecivel": "regra"},
+    {"id": "A11", "pilar": "utilidade", "tese": "Renovacao sem entrevista so vale se venceu ha menos de 12 meses", "gancho_base": "Seu visto venceu ha mais de um ano? Voce caiu na fila.", "prova": "regra de dispensa de entrevista", "objetivo": "salvamento", "perecivel": "regra"},
+    {"id": "A12", "pilar": "antidoto", "tese": "O consul decide nos primeiros 10 segundos", "gancho_base": "A entrevista dura menos de um minuto. Ele decide nos primeiros 10 segundos.", "prova": "duracao media da entrevista", "objetivo": "seguidor"},
+    {"id": "A13", "pilar": "antidoto", "tese": "Ele nao olha sua pasta de documentos do jeito que voce pensa", "gancho_base": "Aquela pasta gorda de documentos? Ele nem abre.", "prova": "pratica consular", "objetivo": "comentario"},
+    {"id": "A14", "pilar": "antidoto", "tese": "A unica pergunta real e: voce volta?", "gancho_base": "Existe uma unica pergunta na cabeca do consul. E nao e sobre dinheiro.", "prova": "presuncao de imigracao", "objetivo": "salvamento"},
+    {"id": "A15", "pilar": "antidoto", "tese": "7 campos do DS-160 derrubam mais que qualquer coisa", "gancho_base": "Sete campos do DS-160 derrubam mais gente que perfil ruim.", "prova": "erros comuns", "objetivo": "salvamento"},
+    {"id": "A16", "pilar": "antidoto", "tese": "Nao ter carteira assinada NAO te reprova", "gancho_base": "Voce e autonomo e acha que vai ser negado por isso? Calma.", "prova": "vinculo se comprova de varias formas", "objetivo": "seguidor", "persona_alvo": "P7"},
+    {"id": "A17", "pilar": "antidoto", "tese": "Negado nao e o fim, mas tem uma coisa que voce NAO pode fazer", "gancho_base": "Foi negado? Tem uma coisa que voce nao pode fazer agora de jeito nenhum.", "prova": "reaplicar sem mudar nada = negar de novo", "objetivo": "salvamento", "persona_alvo": "P3"},
+    {"id": "A18", "pilar": "antidoto", "tese": "Incoerencia entre DS-160 e entrevista e a causa n1 de negativa", "gancho_base": "A maior causa de negativa nao e seu perfil. E a incoerencia.", "prova": "divergencia formulario x entrevista", "objetivo": "salvamento"},
+    {"id": "A19", "pilar": "prova", "tese": "Depoimento real de cliente aprovado", "gancho_base": "Essa familia achou que nao ia conseguir.", "prova": "video do cliente", "objetivo": "lead", "exige_leticia": true, "exige_deposito": true},
+    {"id": "A20", "pilar": "prova", "tese": "100+ aprovados em 2026", "gancho_base": "Cem vistos aprovados em 2026. E o numero que eu tenho pra te mostrar.", "prova": "base interna", "objetivo": "lead", "perecivel": "prova"},
+    {"id": "A21", "pilar": "desejo", "tese": "Orlando com criancas sem colapso no dia 4", "gancho_base": "Orlando com tres filhos: o roteiro que evita o colapso no quarto dia.", "prova": "experiencia de roteiro", "objetivo": "alcance", "persona_alvo": "P1"},
+    {"id": "A22", "pilar": "desejo", "tese": "O que ninguem te conta sobre a primeira vez em NY", "gancho_base": "Primeira vez em Nova York? Ninguem te conta isso.", "prova": "roteiro", "objetivo": "alcance", "persona_alvo": "P2"}
+  ],
+
+  "_matriz": {
+    "regra": "peca = ANGULO x PERSONA. O mesmo angulo A01 vira 7 pecas distintas, uma por persona. A01xP1 fala com a mae de familia ('se prometeram garantia pros seus filhos'). A01xP3 fala com quem ja foi negado ('te prometeram garantia e voce foi negado'). Mesma tese, dor diferente, copy diferente.",
+    "capacidade": "22 angulos x 7 personas = 154 pecas unicas por rodada, sem contar variacao de formato.",
+    "anti_repeticao": "Nenhuma combinacao ANGULO+PERSONA se repete em 30 dias. O gerador rastreia em usados.json.",
+    "por_que_importa": "Repetir o mesmo argumento em roupas diferentes NAO e preguica, e como argumento vira posicionamento. O erro e publicar 50 coisas diferentes; o acerto e publicar 5 verdades 30 vezes."
+  },
+
+  "distribuicao_por_conta": {
+    "@viajaly": {
+      "papel": "institucional. Precisa parecer confiavel pra quem tem medo de golpe.",
+      "pilares": ["utilidade", "antidoto", "prova", "desejo"],
+      "denuncia": "SO factual e com fonte. Nunca opinativa.",
+      "tom": "seguro, claro, institucional"
+    },
+    "@leticia": {
+      "papel": "pessoa. Pode ter opiniao, pode ser acida, pode chamar o mercado de mentiroso.",
+      "pilares": ["denuncia", "antidoto", "prova"],
+      "denuncia": "TODA a denuncia opinativa mora aqui. Pessoa reclama; empresa que reclama parece desesperada.",
+      "tom": "direto, indignado a favor do cliente, primeira pessoa",
+      "razao": "split-identity: protege a marca institucional do custo reputacional da polemica, e a polemica performa MELHOR em conta pessoal."
+    }
+  }
+}

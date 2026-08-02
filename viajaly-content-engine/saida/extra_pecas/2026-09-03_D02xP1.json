@@ -1,0 +1,80 @@
+{
+  "combo": "D02xP1",
+  "data": "2026-09-03",
+  "conta": "@viajaly",
+  "pilar": "desejo",
+  "tema": "destino",
+  "angulo_id": "D02",
+  "persona_id": "P1",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "Miami com a família",
+  "persona": "Família Orlando",
+  "dor": "quer emendar Orlando com Miami sem cansar",
+  "imagem": "acervo/destinos/miami-menina.jpg",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "orlando + miami",
+      "titulo": "Emendar Orlando com Miami e ótimo, se você não empilhar tudo.",
+      "sub": "Parque e cidade cansam de formas diferentes.",
+      "destaques": [
+        "empilhar"
+      ],
+      "imagem": "acervo/destinos/miami-menina.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "Miami e o respiro",
+      "corpo": "Depois dos parques, Miami pede ritmo lento: praia calma de manhã, cidade no fim de tarde.",
+      "destaques": [
+        "lento:"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Com criança, escolha praia mansa",
+      "corpo": "Key Biscayne ganha de South Beach pra família. Água calma e menos agito.",
+      "destaques": [
+        "mansa"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "04",
+      "titulo": "Um dia de bicho",
+      "corpo": "Zoo, aquario ou Everglades quebram a rotina de praia e viram o melhor dia da criança.",
+      "destaques": [
+        "bicho"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Duas cidades numa viagem só rende quando cada uma tem o seu ritmo.",
+      "destaques": [
+        "ritmo."
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Antes do combo",
+      "corpo": "Orlando mais Miami depende de uma coisa: o visto da família aprovado e no prazo.",
+      "destaques": [
+        "visto"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta MIAMIFAM que eu te mando o combo Orlando + Miami. Ou link na bio.",
+      "acao": "Comenta MIAMIFAM",
+      "destaques": [
+        "MIAMIFAM"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Emendar Orlando com Miami e ótimo, se você não empilhar tudo. Parque e cidade cansam de formas diferentes.\n\nDepois dos parques, Miami pede ritmo lento: praia calma de manhã, cidade no fim de tarde. Com criança, Key Biscayne ganha de South Beach. E um dia de zoo, aquario ou Everglades vira o melhor dia. Duas cidades numa viagem só rende quando cada uma tem o seu ritmo.\n\nE o combo depende do visto da família no prazo.\n\nComenta MIAMIFAM que eu te mando o combo. Ou toca no link da bio.\n\n#miami #orlando #viagememfamilia #eua #vistoamericano #vistoeua #feriascomcriancas"
+}

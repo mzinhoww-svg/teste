@@ -1,0 +1,81 @@
+{
+  "combo": "A04xP2",
+  "data": "2026-08-19",
+  "conta": "@leticia",
+  "pilar": "denúncia",
+  "angulo_id": "A04",
+  "persona_id": "P2",
+  "formato": "carrossel",
+  "kit": "corporate",
+  "tese": "A taxa não volta (casal)",
+  "persona": "Casal primeira viagem",
+  "dor": "primeira vez, não sabe que a taxa não reembolsa",
+  "imagem": "acervo/destinos/praia-crianca.jpg",
+  "fonte_url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
+  "fonte_verificada_em": "2026-07-12",
+  "slides": [
+    {
+      "tipo": "capa_foto",
+      "kicker": "antes de pagar",
+      "titulo": "Vocês sabem que a taxa do visto não volta se for negado?",
+      "sub": "Muita gente na primeira viagem descobre tarde demais.",
+      "destaques": [
+        "não"
+      ],
+      "imagem": "acervo/destinos/praia-crianca.jpg"
+    },
+    {
+      "tipo": "passo",
+      "numero": "02",
+      "titulo": "A regra",
+      "corpo": "A taxa consular de 185 dólares por pessoa e paga antes e não reembolsa. Aprovado ou negado, ela fica lá.",
+      "destaques": [
+        "185"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "03",
+      "titulo": "Por que isso importa pra vocês",
+      "corpo": "E a primeira vez e vocês vao pagar duas taxas. Tratar a entrevista como sorte e caro.",
+      "destaques": [
+        "duas"
+      ]
+    },
+    {
+      "tipo": "insight",
+      "texto": "Se a taxa não volta, o barato de verdade e chegar preparado da primeira vez.",
+      "destaques": [
+        "preparado"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "05",
+      "titulo": "O que evita o desperdício",
+      "corpo": "DS-160 coerente pros dois e vocês sabendo responder. Não garante nada, mas para de apostar.",
+      "destaques": [
+        "coerente"
+      ]
+    },
+    {
+      "tipo": "passo",
+      "numero": "06",
+      "titulo": "Confere na fonte",
+      "corpo": "O valor atual está no travel.state.gov. Sempre confira antes de fechar qualquer coisa.",
+      "destaques": [
+        "fonte"
+      ]
+    },
+    {
+      "tipo": "cta",
+      "titulo": "Comenta NAOVOLTA que eu te mando o que preparar antes de pagar. Ou link na bio.",
+      "acao": "Comenta NAOVOLTA",
+      "destaques": [
+        "NAOVOLTA"
+      ],
+      "sub": "A Viajaly nao garante aprovacao de vistos. A decisao e exclusiva das autoridades consulares."
+    }
+  ],
+  "legenda": "Vocês sabem que a taxa do visto não volta se for negado? Muita gente na primeira viagem descobre tarde demais.\n\nA taxa consular de 185 dólares por pessoa e paga antes e não reembolsa, aprovado ou negado (confere no travel.state.gov). E a primeira vez, são duas taxas, e tratar a entrevista como sorte e caro. Se a taxa não volta, o barato de verdade e chegar preparado da primeira vez.\n\nComenta NAOVOLTA que eu te mando o que preparar antes de pagar. Ou toca no link da bio.\n\n#vistoamericano #primeiraviagem #vistoeua #b1b2 #taxavisto #viagemacasal #consuladoamericano"
+}
