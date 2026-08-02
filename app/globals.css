@@ -10,9 +10,67 @@ body {
   @apply bg-slate-50 font-sans text-slate-800 antialiased;
 }
 
+/* ==========================================================================
+   Design tokens — PodFactory (site público: landing e portfólio)
+   ÚNICA fonte de valores crus do site. Componentes consomem os tokens
+   semânticos expostos no tailwind.config.ts (`site-*`) — nunca hex direto.
+   Ver docs/site-design-system.md.
+   ========================================================================== */
+:root {
+  /* Cores em canais RGB (habilita `bg-site-surface-base/70`) */
+  --site-surface-base: 0 0 0;         /* #000000 — fundo da página */
+  --site-surface-raised: 20 16 28;    /* #14101c — cards, painéis, modais */
+  --site-surface-strong: 34 34 34;    /* #222222 — inputs, botões secundários */
+  --site-text-primary: 252 252 252;   /* #fcfcfc — títulos e corpo */
+  --site-text-inverse: 216 125 255;   /* #d87dff — accent, CTA, glow */
+  --site-text-tertiary: 0 0 238;      /* #0000ee — links padrão, badges info */
+  --site-border-muted: 255 255 255;   /* #ffffff — bordas sutis (usar /10) */
+  --site-danger: 255 68 68;           /* #ff4444 — erro de formulário */
+
+  /* Sombras */
+  --site-shadow-1: rgba(0, 0, 0, 0.35) 0px 4px 24px 0px;
+  --site-shadow-2: rgba(0, 0, 0, 0.64) 0px 0px 87.5px 17.5px;
+  --site-shadow-3: rgba(216, 125, 255, 0.22) 0px 8px 32px 0px;
+  --site-shadow-4: rgba(0, 0, 0, 0.09) 0px 4px 9px 0px;
+
+  /* Tipografia: Borna é licenciada e não está no Google Fonts. Se os .woff2
+     forem colocados em /public/fonts e declarados via @font-face, esta família
+     assume; caso contrário o stack cai no Geist Sans (já instalado). */
+  --font-borna: "Borna";
+}
+
+/* O site público é sempre escuro, independente do tema do CRM: a raiz pinta o
+   documento inteiro para não vazar o `bg-slate-50` do body no overscroll. */
+html:has(.site-root),
+body:has(.site-root) {
+  background-color: rgb(var(--site-surface-base));
+}
+
+.site-root {
+  @apply bg-site-surface-base font-borna text-site-base text-site-text-primary;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Skip link: só visível no foco, sempre o primeiro elemento focável. */
+.site-skip-link {
+  @apply absolute left-4 top-4 z-[100] -translate-y-[200%] rounded-site-md bg-site-text-inverse px-4 py-3
+         text-site-base font-medium text-site-surface-base transition-transform duration-fast
+         focus-visible:translate-y-0;
+}
+
 /* Foco visível consistente para navegação por teclado */
 :focus-visible {
   @apply outline-none ring-2 ring-brand-400 ring-offset-1;
+}
+
+/* No site público o anel do CRM não vale: o token de foco é outline 2px
+   text.inverse com offset 2px (critério de acessibilidade da landing). */
+.site-root :focus-visible {
+  outline: 2px solid rgb(var(--site-text-inverse));
+  outline-offset: 2px;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-ring-offset-shadow: 0 0 #0000;
+  box-shadow: none;
 }
 
 /* Respeita usuários que preferem menos movimento */
