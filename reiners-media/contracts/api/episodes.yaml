@@ -1,0 +1,514 @@
+# CONTRACT-003 — Episodes API (TCK-003)
+# Implementacao: TCK-006 (src/app/api/episodes/**, src/lib/url-parser.ts)
+# BR-004: todo episodio precisa de pelo menos uma trilha (youtubeUrl ou spotifyUrl).
+# BR-007/BR-008: youtubeEmbed e spotifyEmbed sao derivados no servidor a partir
+# de YOUTUBE_URL_PATTERNS e SPOTIFY_URL_PATTERNS exportados por src/lib/schemas.ts.
+openapi: 3.1.0
+info:
+  title: Reiners Media — Episodes API
+  version: 1.0.0
+  description: CRUD de episodios com parser automatico de URLs de YouTube e Spotify.
+servers:
+  - url: /api
+    description: Base path das rotas Next.js App Router
+tags:
+  - name: episodes
+    description: Episodios de um programa
+paths:
+  /episodes:
+    get:
+      operationId: listEpisodes
+      tags:
+        - episodes
+      summary: Lista paginada de episodios de um programa
+      description: Rota publica. O filtro podcastId e obrigatorio.
+      security: []
+      x-zod-query: episodeQuerySchema
+      x-zod-response: episodeListResponseSchema
+      parameters:
+        - name: podcastId
+          in: query
+          required: true
+          description: UUID do programa dono dos episodios
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: publishedAt
+            enum:
+              - number
+              - publishedAt
+              - createdAt
+        - name: order
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SortOrder"
+      responses:
+        "200":
+          description: Lista paginada de episodios
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EpisodeListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      operationId: createEpisode
+      tags:
+        - episodes
+      summary: Cria um episodio
+      description: Requer ADMIN ou EDITOR. Rejeita com 422 quando nenhuma trilha e informada (BR-004) e com 409 quando ja existe episodio com o mesmo number no programa. Os campos youtubeEmbed e spotifyEmbed nao sao aceitos no body, sao derivados das URLs.
+      security:
+        - cookieAuth: []
+      x-zod-request: episodeCreateSchema
+      x-zod-response: episodeResponseSchema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EpisodeCreate"
+      responses:
+        "201":
+          description: Episodio criado com embeds derivados
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EpisodeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /episodes/{id}:
+    get:
+      operationId: getEpisodeById
+      tags:
+        - episodes
+      summary: Detalhe de um episodio
+      security: []
+      x-zod-params: idParamSchema
+      x-zod-response: episodeResponseSchema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Episodio encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EpisodeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      operationId: updateEpisode
+      tags:
+        - episodes
+      summary: Atualiza parcialmente um episodio
+      description: Requer ADMIN ou EDITOR. podcastId nao pode ser alterado. Quando youtubeUrl e spotifyUrl vem juntos no body, ao menos um precisa ser nao nulo (BR-004). A checagem final e feita contra o estado mesclado no servidor.
+      security:
+        - cookieAuth: []
+      x-zod-params: idParamSchema
+      x-zod-request: episodeUpdateSchema
+      x-zod-response: episodeResponseSchema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EpisodeUpdate"
+      responses:
+        "200":
+          description: Episodio atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EpisodeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      operationId: deleteEpisode
+      tags:
+        - episodes
+      summary: Remove um episodio
+      description: Requer ADMIN. BR-002 impede que EDITOR delete, resultando em 403.
+      security:
+        - cookieAuth: []
+      x-zod-params: idParamSchema
+      x-zod-response: episodeResponseSchema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Episodio removido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EpisodeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+      description: JWT de sessao Supabase em cookie httpOnly
+  responses:
+    BadRequest:
+      description: Requisicao malformada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Sessao ausente ou expirada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Papel sem permissao para a operacao
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Episodio ou programa inexistente
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: Numero de episodio duplicado no programa
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    UnprocessableEntity:
+      description: Falha de validacao Zod, inclusive BR-004
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    TooManyRequests:
+      description: Rate limit excedido
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Erro inesperado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    SortOrder:
+      type: string
+      x-zod-enum: SortOrder
+      enum:
+        - asc
+        - desc
+    ErrorCode:
+      type: string
+      x-zod-enum: ErrorCode
+      enum:
+        - BAD_REQUEST
+        - VALIDATION_ERROR
+        - UNAUTHORIZED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CONFLICT
+        - PAYLOAD_TOO_LARGE
+        - UNSUPPORTED_MEDIA_TYPE
+        - RATE_LIMITED
+        - INTERNAL_ERROR
+    Error:
+      type: object
+      x-zod-schema: errorObjectSchema
+      required:
+        - code
+        - message
+      properties:
+        code:
+          $ref: "#/components/schemas/ErrorCode"
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    ErrorResponse:
+      type: object
+      x-zod-schema: errorResponseSchema
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/Error"
+    PaginationMeta:
+      type: object
+      x-zod-schema: paginationMetaSchema
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+    EpisodeCreate:
+      type: object
+      x-zod-schema: episodeCreateSchema
+      additionalProperties: false
+      required:
+        - podcastId
+        - number
+        - title
+        - description
+        - duration
+        - publishedAt
+      properties:
+        podcastId:
+          type: string
+          format: uuid
+        number:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+          minLength: 1
+          maxLength: 160
+        description:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        thumbnail:
+          type: string
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
+          nullable: true
+        duration:
+          type: string
+          pattern: "^\\d{1,2}:[0-5]\\d(?::[0-5]\\d)?$"
+          description: MM:SS ou H:MM:SS
+        publishedAt:
+          type: string
+          format: date-time
+        youtubeUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: youtu.be/ID, youtube.com/watch?v=ID ou youtube.com/embed/ID
+        spotifyUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: open.spotify.com/episode/ID com querystring opcional
+    EpisodeUpdate:
+      type: object
+      x-zod-schema: episodeUpdateSchema
+      additionalProperties: false
+      description: Versao parcial de EpisodeCreate sem podcastId
+      properties:
+        number:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        description:
+          type: string
+        thumbnail:
+          type: string
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
+          nullable: true
+        duration:
+          type: string
+          pattern: "^\\d{1,2}:[0-5]\\d(?::[0-5]\\d)?$"
+        publishedAt:
+          type: string
+          format: date-time
+        youtubeUrl:
+          type: string
+          format: uri
+          nullable: true
+        spotifyUrl:
+          type: string
+          format: uri
+          nullable: true
+    Episode:
+      type: object
+      x-zod-schema: episodeSchema
+      required:
+        - id
+        - podcastId
+        - number
+        - title
+        - description
+        - duration
+        - publishedAt
+        - youtubeEmbed
+        - spotifyEmbed
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        podcastId:
+          type: string
+          format: uuid
+        number:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        thumbnail:
+          type: string
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
+          nullable: true
+        duration:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        youtubeUrl:
+          type: string
+          format: uri
+          nullable: true
+        youtubeEmbed:
+          type: string
+          nullable: true
+          description: Video ID de 11 caracteres derivado de youtubeUrl (BR-007)
+        spotifyUrl:
+          type: string
+          format: uri
+          nullable: true
+        spotifyEmbed:
+          type: string
+          nullable: true
+          description: URI spotify:episode:ID derivada de spotifyUrl (BR-008)
+        createdAt:
+          type: string
+          format: date-time
+    EpisodeResponse:
+      type: object
+      x-zod-schema: episodeResponseSchema
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/Episode"
+    EpisodeListResponse:
+      type: object
+      x-zod-schema: episodeListResponseSchema
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Episode"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"

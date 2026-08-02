@@ -1,0 +1,82 @@
+{
+  "id": "TCK-001",
+  "title": "Implementar design tokens semânticos e theme system",
+  "summary": "Criar sistema de design tokens baseado no PodFactory + Reiners Media DS, exportando cores, tipografia, espaçamento, sombras, radius e motion em TypeScript e Tailwind config.",
+  "status": "DONE",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-001",
+  "wave": 0,
+  "parallel_group": "W0-G1",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 100,
+  "estimated_size": "M",
+  "risk_level": "LOW",
+  "objective": "Disponibilizar tokens semânticos para todos os componentes",
+  "business_value": "Garante consistência visual e acelera desenvolvimento",
+  "requirements": [
+    "FR-001",
+    "NFR-006",
+    "NFR-010"
+  ],
+  "scope": {
+    "included": [
+      "src/lib/tokens.ts",
+      "tailwind.config.ts",
+      "src/styles/globals.css",
+      "src/types/tokens.ts"
+    ],
+    "excluded": [
+      "Componentes UI",
+      "Páginas"
+    ]
+  },
+  "dependencies": [],
+  "read_paths": [
+    "docs/PRD.md"
+  ],
+  "write_paths": [
+    "src/lib/tokens.ts",
+    "tailwind.config.ts",
+    "src/styles/globals.css",
+    "src/types/tokens.ts"
+  ],
+  "forbidden_paths": [
+    ".env*",
+    "node_modules/",
+    ".git/",
+    "src/app/",
+    "src/components/"
+  ],
+  "deliverables": [
+    "Sistema de tokens tipado",
+    "Config Tailwind customizada",
+    "CSS base com fontes"
+  ],
+  "acceptance_criteria": [
+    "Todos os tokens definidos em TS",
+    "Tailwind config estendida",
+    "Nenhum hex raw fora dos arquivos de tokens",
+    "Build passa"
+  ],
+  "test_plan": {
+    "unit": [
+      "tokens.test.ts"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm lint",
+    "pnpm typecheck",
+    "pnpm test:unit tokens"
+  ],
+  "claim": {
+    "agent": "frontend-engineer",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
+}

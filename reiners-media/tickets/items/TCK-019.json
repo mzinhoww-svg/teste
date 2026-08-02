@@ -1,0 +1,75 @@
+{
+  "id": "TCK-019",
+  "title": "Implementar CRUD de Episódios no painel admin",
+  "summary": "Criar formulários de criação/edição de episódios, parser automático URLs YouTube/Spotify, upload thumbnail, associação podcast.",
+  "status": "BACKLOG",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-010",
+  "wave": 4,
+  "parallel_group": "W4-G1",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 85,
+  "estimated_size": "L",
+  "risk_level": "MEDIUM",
+  "objective": "Admin permite criar e editar episódios com parser automático",
+  "business_value": "Atualização rápida do catálogo",
+  "requirements": [
+    "FR-014",
+    "BR-004",
+    "BR-007",
+    "BR-008"
+  ],
+  "scope": {
+    "included": [
+      "src/app/admin/episodios/",
+      "src/components/admin/episode-form.tsx"
+    ],
+    "excluded": [
+      "CRUD programas (TCK-018)",
+      "Analytics (TCK-020)"
+    ]
+  },
+  "dependencies": [
+    "TCK-006",
+    "TCK-017"
+  ],
+  "read_paths": [
+    "src/app/admin/layout.tsx",
+    "src/lib/url-parser.ts"
+  ],
+  "write_paths": [
+    "src/app/admin/episodios/",
+    "src/components/admin/episode-form.tsx"
+  ],
+  "forbidden_paths": [
+    "src/app/(public)/"
+  ],
+  "deliverables": [
+    "Listagem episódios",
+    "Form criação",
+    "Form edição",
+    "Parser URLs"
+  ],
+  "acceptance_criteria": [
+    "Criar persiste",
+    "Parser extrai ID/URI",
+    "Preview embed",
+    "Upload thumbnail"
+  ],
+  "test_plan": {
+    "unit": [
+      "episode-form.test.tsx"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "admin-episode.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit episode-form",
+    "pnpm lint"
+  ]
+}

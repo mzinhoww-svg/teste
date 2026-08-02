@@ -1,0 +1,91 @@
+{
+  "id": "TCK-004",
+  "title": "Implementar autenticação Supabase e middleware de proteção",
+  "summary": "Configurar Supabase Auth (email/password), middleware de sessão para /admin/*, RBAC (ADMIN/EDITOR), rate limiting.",
+  "status": "DONE",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-004",
+  "wave": 0,
+  "parallel_group": "W0-G2",
+  "recommended_agent": "backend-engineer",
+  "independence_score": 90,
+  "estimated_size": "M",
+  "risk_level": "MEDIUM",
+  "objective": "Sistema de autenticação funcional com proteção de rotas admin",
+  "business_value": "Segurança do painel administrativo",
+  "requirements": [
+    "FR-005",
+    "FR-006",
+    "NFR-005",
+    "SEC-001",
+    "SEC-002",
+    "SEC-003"
+  ],
+  "scope": {
+    "included": [
+      "src/lib/supabase.ts",
+      "src/middleware.ts",
+      "src/app/api/auth/",
+      "src/lib/auth-helpers.ts"
+    ],
+    "excluded": [
+      "Páginas login UI",
+      "CRUD usuários admin"
+    ]
+  },
+  "dependencies": [
+    "TCK-002"
+  ],
+  "read_paths": [
+    "docs/SECURITY.md",
+    "prisma/schema.prisma"
+  ],
+  "write_paths": [
+    "src/lib/supabase.ts",
+    "src/middleware.ts",
+    "src/app/api/auth/",
+    "src/lib/auth-helpers.ts"
+  ],
+  "forbidden_paths": [
+    "src/app/admin/",
+    "src/components/"
+  ],
+  "deliverables": [
+    "Supabase client SSR",
+    "Middleware",
+    "APIs login/logout",
+    "Helpers RBAC"
+  ],
+  "acceptance_criteria": [
+    "Middleware bloqueia não-autenticados",
+    "Login funciona",
+    "RBAC funciona",
+    "Rate limiting ativo"
+  ],
+  "test_plan": {
+    "unit": [
+      "auth-helpers.test.ts"
+    ],
+    "integration": [
+      "auth.integration.test.ts",
+      "middleware.integration.test.ts"
+    ],
+    "contract": [],
+    "e2e": [
+      "login.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:integration auth",
+    "pnpm lint",
+    "pnpm typecheck"
+  ],
+  "claim": {
+    "agent": "auto",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
+}

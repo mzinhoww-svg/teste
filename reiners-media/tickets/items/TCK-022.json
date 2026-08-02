@@ -1,0 +1,77 @@
+{
+  "id": "TCK-022",
+  "title": "Implementar SEO dinâmico, sitemap e metadata",
+  "summary": "Criar metadata dinâmica para todas as páginas, sitemap.xml gerado automaticamente, robots.txt, Open Graph tags.",
+  "status": "IN_PROGRESS",
+  "priority": "P1",
+  "type": "feature",
+  "epic": "EPIC-011",
+  "wave": 5,
+  "parallel_group": "W5-G1",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 90,
+  "estimated_size": "M",
+  "risk_level": "LOW",
+  "objective": "SEO técnico completo para indexação",
+  "business_value": "Descoberta orgânica e compartilhamento social",
+  "requirements": [
+    "FR-018",
+    "FR-019",
+    "NFR-004"
+  ],
+  "scope": {
+    "included": [
+      "src/app/sitemap.ts",
+      "src/app/robots.ts",
+      "src/lib/metadata.ts"
+    ],
+    "excluded": [
+      "Conteúdo das páginas"
+    ]
+  },
+  "dependencies": [
+    "TCK-005"
+  ],
+  "read_paths": [
+    "src/app/(public)/"
+  ],
+  "write_paths": [
+    "src/app/sitemap.ts",
+    "src/app/robots.ts",
+    "src/lib/metadata.ts"
+  ],
+  "forbidden_paths": [],
+  "deliverables": [
+    "Sitemap dinâmico",
+    "robots.txt",
+    "Metadata helper",
+    "OG tags"
+  ],
+  "acceptance_criteria": [
+    "Sitemap em /sitemap.xml",
+    "robots.txt",
+    "Meta tags dinâmicas",
+    "OG tags"
+  ],
+  "test_plan": {
+    "unit": [
+      "metadata.test.ts"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "seo.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit seo",
+    "pnpm lint"
+  ],
+  "claim": {
+    "agent": "auto",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
+}

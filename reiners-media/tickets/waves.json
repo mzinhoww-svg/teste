@@ -1,0 +1,77 @@
+{
+  "waves": [
+    {
+      "id": 0,
+      "name": "Funda\u00e7\u00e3o",
+      "max_concurrency": 4,
+      "tickets": [
+        "TCK-001",
+        "TCK-002",
+        "TCK-003",
+        "TCK-004"
+      ],
+      "gate": "Contratos revisados e aprovados. Schema validado."
+    },
+    {
+      "id": 1,
+      "name": "Backend Core",
+      "max_concurrency": 3,
+      "tickets": [
+        "TCK-005",
+        "TCK-006",
+        "TCK-007"
+      ],
+      "gate": "APIs passando testes de contrato."
+    },
+    {
+      "id": 2,
+      "name": "Frontend Shared",
+      "max_concurrency": 3,
+      "tickets": [
+        "TCK-008",
+        "TCK-009",
+        "TCK-010"
+      ],
+      "gate": "Componentes renderizando corretamente."
+    },
+    {
+      "id": 3,
+      "name": "Frontend Pages",
+      "max_concurrency": 5,
+      "tickets": [
+        "TCK-011",
+        "TCK-012",
+        "TCK-013",
+        "TCK-014",
+        "TCK-015",
+        "TCK-016",
+        "TCK-017"
+      ],
+      "gate": "Todas as p\u00e1ginas renderizando. Fluxos principais funcionando."
+    },
+    {
+      "id": 4,
+      "name": "Admin CRUD",
+      "max_concurrency": 3,
+      "tickets": [
+        "TCK-018",
+        "TCK-019",
+        "TCK-020"
+      ],
+      "gate": "CRUDs funcionais. Dados persistindo."
+    },
+    {
+      "id": 5,
+      "name": "Integra\u00e7\u00e3o & Polish",
+      "max_concurrency": 4,
+      "tickets": [
+        "TCK-021",
+        "TCK-022",
+        "TCK-023",
+        "TCK-024",
+        "TCK-025"
+      ],
+      "gate": "Lighthouse >= 90. Testes passando. Deploy em produ\u00e7\u00e3o."
+    }
+  ]
+}

@@ -1,0 +1,700 @@
+# CONTRACT-003 — Podcasts API (TCK-003)
+# Implementacao: TCK-005 (src/app/api/podcasts/**)
+# Cada operacao declara, via x-zod-query / x-zod-request / x-zod-response, o
+# schema exportado de src/lib/schemas.ts que a valida. O teste
+# tests/integration/contract-validation.test.ts falha se algum divergir.
+openapi: 3.1.0
+info:
+  title: Reiners Media — Podcasts API
+  version: 1.0.0
+  description: CRUD de programas de podcast com paginacao, filtros, soft delete e regras BR-003, BR-005 e BR-006.
+servers:
+  - url: /api
+    description: Base path das rotas Next.js App Router
+tags:
+  - name: podcasts
+    description: Programas do estudio
+paths:
+  /podcasts:
+    get:
+      operationId: listPodcasts
+      tags:
+        - podcasts
+      summary: Lista paginada de programas
+      description: Rota publica. Retorna apenas programas com deletedAt nulo.
+      security: []
+      x-zod-query: podcastQuerySchema
+      x-zod-response: podcastListResponseSchema
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Pagina desejada, iniciando em 1
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          description: Itens por pagina, teto de 100
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: displayOrder
+            enum:
+              - displayOrder
+              - createdAt
+              - updatedAt
+              - year
+              - title
+        - name: order
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SortOrder"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/PodcastStatus"
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 60
+        - name: featured
+          in: query
+          required: false
+          description: Aceita true, false, 1 ou 0
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Lista paginada de programas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PodcastListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      operationId: createPodcast
+      tags:
+        - podcasts
+      summary: Cria um programa
+      description: Requer ADMIN ou EDITOR. BR-003 exige ao menos um host. BR-005 limita a 3 programas em destaque e devolve 409 quando o limite e excedido. BR-006 impede destaque com status ENDED.
+      security:
+        - cookieAuth: []
+      x-zod-request: podcastCreateSchema
+      x-zod-response: podcastResponseSchema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PodcastCreate"
+      responses:
+        "201":
+          description: Programa criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PodcastResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  # O App Router admite UM segmento dinamico por nivel, e o OpenAPI trata
+  # /podcasts/{slug} e /podcasts/{id} como o MESMO path (diferem so no nome da
+  # variavel, o que a spec proibe). Por isso os tres metodos vivem sob
+  # {idOrSlug}: GET aceita slug (ou UUID, atalho do painel), PATCH e DELETE
+  # exigem UUID. Cada metodo declara o x-zod-params que aplica de fato.
+  /podcasts/{idOrSlug}:
+    get:
+      operationId: getPodcastBySlug
+      tags:
+        - podcasts
+      summary: Detalhe de um programa com seus episodios
+      description: Rota publica. Programas com deletedAt preenchido respondem 404.
+      security: []
+      x-zod-params: slugParamSchema
+      x-zod-response: podcastDetailResponseSchema
+      parameters:
+        - name: idOrSlug
+          in: path
+          required: true
+          description: Slug kebab-case do programa, ou o UUID (atalho usado pelo painel de TCK-018). Validado por slugParamSchema
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Programa com episodios embutidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PodcastDetailResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      operationId: updatePodcast
+      tags:
+        - podcasts
+      summary: Atualiza parcialmente um programa
+      description: Requer ADMIN ou EDITOR. Body parcial, mesmas regras de negocio do create.
+      security:
+        - cookieAuth: []
+      x-zod-params: idParamSchema
+      x-zod-request: podcastUpdateSchema
+      x-zod-response: podcastResponseSchema
+      parameters:
+        - name: idOrSlug
+          in: path
+          required: true
+          description: UUID do programa. Rotas administrativas nao aceitam slug. Validado por idParamSchema
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PodcastUpdate"
+      responses:
+        "200":
+          description: Programa atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PodcastResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      operationId: deletePodcast
+      tags:
+        - podcasts
+      summary: Soft delete de um programa
+      description: Requer ADMIN. BR-002 impede que EDITOR delete, resultando em 403. Preenche deletedAt em vez de remover a linha. Por ser rota administrativa, a resposta usa PodcastAdmin e expoe deletedAt.
+      security:
+        - cookieAuth: []
+      x-zod-params: idParamSchema
+      x-zod-response: podcastAdminResponseSchema
+      parameters:
+        - name: idOrSlug
+          in: path
+          required: true
+          description: UUID do programa. Rotas administrativas nao aceitam slug. Validado por idParamSchema
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Programa marcado como deletado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PodcastAdminResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+      description: JWT de sessao Supabase em cookie httpOnly
+  responses:
+    BadRequest:
+      description: Requisicao malformada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Sessao ausente ou expirada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Papel sem permissao para a operacao
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Recurso inexistente
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: Conflito de estado, por exemplo slug duplicado ou limite de destaques atingido
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    UnprocessableEntity:
+      description: Falha de validacao Zod
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    TooManyRequests:
+      description: Rate limit excedido
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Erro inesperado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    SortOrder:
+      type: string
+      x-zod-enum: SortOrder
+      enum:
+        - asc
+        - desc
+    PodcastStatus:
+      type: string
+      x-zod-enum: PodcastStatus
+      enum:
+        - ACTIVE
+        - ENDED
+        - HIATUS
+    VisualStyle:
+      type: string
+      x-zod-enum: VisualStyle
+      enum:
+        - PHOTO_REAL
+        - ILLUSTRATION
+        - MINIMAL
+        - DUOTONE
+        - COLLAGE
+    ErrorCode:
+      type: string
+      x-zod-enum: ErrorCode
+      enum:
+        - BAD_REQUEST
+        - VALIDATION_ERROR
+        - UNAUTHORIZED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CONFLICT
+        - PAYLOAD_TOO_LARGE
+        - UNSUPPORTED_MEDIA_TYPE
+        - RATE_LIMITED
+        - INTERNAL_ERROR
+    Error:
+      type: object
+      x-zod-schema: errorObjectSchema
+      required:
+        - code
+        - message
+      properties:
+        code:
+          $ref: "#/components/schemas/ErrorCode"
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    ErrorResponse:
+      type: object
+      x-zod-schema: errorResponseSchema
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/Error"
+    PaginationMeta:
+      type: object
+      x-zod-schema: paginationMetaSchema
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+    PodcastHost:
+      type: object
+      x-zod-schema: podcastHostSchema
+      required:
+        - name
+        - initial
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        initial:
+          type: string
+          minLength: 1
+          maxLength: 2
+        photo:
+          type: string
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
+          nullable: true
+        bio:
+          type: string
+          maxLength: 600
+          nullable: true
+    SocialLinks:
+      type: object
+      x-zod-schema: socialLinksSchema
+      properties:
+        instagram:
+          type: string
+          format: uri
+          nullable: true
+        twitter:
+          type: string
+          format: uri
+          nullable: true
+        tiktok:
+          type: string
+          format: uri
+          nullable: true
+        linkedin:
+          type: string
+          format: uri
+          nullable: true
+        website:
+          type: string
+          format: uri
+          nullable: true
+        github:
+          type: string
+          format: uri
+          nullable: true
+    PodcastCreate:
+      type: object
+      x-zod-schema: podcastCreateSchema
+      additionalProperties: false
+      required:
+        - slug
+        - title
+        - description
+        - coverImage
+        - category
+        - year
+        - hosts
+      properties:
+        slug:
+          type: string
+          pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          maxLength: 80
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        tagline:
+          type: string
+          maxLength: 160
+          nullable: true
+        description:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        coverImage:
+          type: string
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
+        heroImage:
+          type: string
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
+          nullable: true
+        category:
+          type: string
+          minLength: 1
+          maxLength: 60
+        status:
+          $ref: "#/components/schemas/PodcastStatus"
+        visualStyle:
+          $ref: "#/components/schemas/VisualStyle"
+        year:
+          type: integer
+          minimum: 2000
+        accentColor:
+          type: string
+          pattern: "^#[0-9a-fA-F]{6}$"
+          default: "#d87dff"
+        hosts:
+          type: array
+          minItems: 1
+          description: BR-003 exige pelo menos um host
+          items:
+            $ref: "#/components/schemas/PodcastHost"
+        socialLinks:
+          $ref: "#/components/schemas/SocialLinks"
+        featured:
+          type: boolean
+          default: false
+        displayOrder:
+          type: integer
+          minimum: 0
+          default: 0
+    PodcastUpdate:
+      type: object
+      x-zod-schema: podcastUpdateSchema
+      additionalProperties: false
+      description: Versao parcial de PodcastCreate, todos os campos opcionais
+      properties:
+        slug:
+          type: string
+          pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        title:
+          type: string
+        tagline:
+          type: string
+          nullable: true
+        description:
+          type: string
+        coverImage:
+          type: string
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
+        heroImage:
+          type: string
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
+          nullable: true
+        category:
+          type: string
+        status:
+          $ref: "#/components/schemas/PodcastStatus"
+        visualStyle:
+          $ref: "#/components/schemas/VisualStyle"
+        year:
+          type: integer
+        accentColor:
+          type: string
+          pattern: "^#[0-9a-fA-F]{6}$"
+        hosts:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/PodcastHost"
+        socialLinks:
+          $ref: "#/components/schemas/SocialLinks"
+        featured:
+          type: boolean
+        displayOrder:
+          type: integer
+    Podcast:
+      type: object
+      x-zod-schema: podcastSchema
+      description: Programa como sai da API publica. Nao expoe deletedAt, que e metadado interno de soft delete. Para a forma administrativa veja PodcastAdmin.
+      required:
+        - id
+        - slug
+        - title
+        - description
+        - coverImage
+        - category
+        - status
+        - visualStyle
+        - year
+        - accentColor
+        - hosts
+        - socialLinks
+        - featured
+        - displayOrder
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        title:
+          type: string
+        tagline:
+          type: string
+          nullable: true
+        description:
+          type: string
+        coverImage:
+          type: string
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
+        heroImage:
+          type: string
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
+          nullable: true
+        category:
+          type: string
+        status:
+          $ref: "#/components/schemas/PodcastStatus"
+        visualStyle:
+          $ref: "#/components/schemas/VisualStyle"
+        year:
+          type: integer
+        accentColor:
+          type: string
+          pattern: "^#[0-9a-fA-F]{6}$"
+        hosts:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/PodcastHost"
+        socialLinks:
+          $ref: "#/components/schemas/SocialLinks"
+        featured:
+          type: boolean
+        displayOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PodcastAdmin:
+      x-zod-schema: podcastAdminSchema
+      description: Programa com o metadado de soft delete. Exclusivo de rotas administrativas (DELETE e painel de TCK-018). Nunca serialize em rota publica.
+      allOf:
+        - $ref: "#/components/schemas/Podcast"
+        - type: object
+          required:
+            - deletedAt
+          properties:
+            deletedAt:
+              type: string
+              format: date-time
+              nullable: true
+              description: Timestamp do soft delete, ou null quando o programa esta ativo
+    PodcastAdminResponse:
+      type: object
+      x-zod-schema: podcastAdminResponseSchema
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/PodcastAdmin"
+    PodcastWithEpisodes:
+      x-zod-schema: podcastWithEpisodesSchema
+      description: Programa com a lista de episodios. O item de episodio segue contracts/api/episodes.yaml.
+      allOf:
+        - $ref: "#/components/schemas/Podcast"
+        - type: object
+          required:
+            - episodes
+          properties:
+            episodes:
+              type: array
+              items:
+                type: object
+    PodcastResponse:
+      type: object
+      x-zod-schema: podcastResponseSchema
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/Podcast"
+    PodcastDetailResponse:
+      type: object
+      x-zod-schema: podcastDetailResponseSchema
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/PodcastWithEpisodes"
+    PodcastListResponse:
+      type: object
+      x-zod-schema: podcastListResponseSchema
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Podcast"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"

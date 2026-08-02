@@ -1,0 +1,69 @@
+{
+  "id": "TCK-015",
+  "title": "Implementar modal de player com embeds YouTube/Spotify",
+  "summary": "Criar modal de reprodução com iframe embed YouTube/Spotify, fallback link externo, integração com TrackButton.",
+  "status": "BACKLOG",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-009",
+  "wave": 3,
+  "parallel_group": "W3-G2",
+  "recommended_agent": "frontend-engineer",
+  "independence_score": 90,
+  "estimated_size": "M",
+  "risk_level": "LOW",
+  "objective": "Modal de embed funcional",
+  "business_value": "Ouvir episódios sem sair do site",
+  "requirements": [
+    "FR-011",
+    "NFR-002"
+  ],
+  "scope": {
+    "included": [
+      "src/components/portfolio/player-modal.tsx"
+    ],
+    "excluded": [
+      "Página individual"
+    ]
+  },
+  "dependencies": [
+    "TCK-008",
+    "TCK-014"
+  ],
+  "read_paths": [
+    "src/components/ui/modal.tsx",
+    "src/components/portfolio/track-button.tsx"
+  ],
+  "write_paths": [
+    "src/components/portfolio/player-modal.tsx"
+  ],
+  "forbidden_paths": [
+    "src/app/admin/"
+  ],
+  "deliverables": [
+    "PlayerModal com iframe",
+    "Fallback link externo"
+  ],
+  "acceptance_criteria": [
+    "Modal abre com iframe",
+    "ESC fecha",
+    "Click fora fecha",
+    "Fallback funciona",
+    "Acessível"
+  ],
+  "test_plan": {
+    "unit": [
+      "player-modal.test.tsx"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [
+      "player.e2e.ts"
+    ],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit player-modal",
+    "pnpm lint"
+  ]
+}

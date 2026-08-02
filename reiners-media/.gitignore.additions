@@ -1,0 +1,10 @@
+# Reiners Media Delivery
+.claude/worktrees/
+tickets/state/locks/
+tickets/state/history/
+reports/*.tmp
+.env.local
+.env
+node_modules/
+.vercel
+*.lock

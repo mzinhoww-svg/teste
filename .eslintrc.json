@@ -1,4 +1,4 @@
 {
   "extends": "next/core-web-vitals",
-  "ignorePatterns": ["tests/**", "playwright.config.ts"]
+  "ignorePatterns": ["tests/**", "playwright.config.ts", "reiners-media/**", "viajaly-content-engine/**"]
 }

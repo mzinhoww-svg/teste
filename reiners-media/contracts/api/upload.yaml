@@ -1,0 +1,218 @@
+# CONTRACT-003 — Upload API (TCK-003)
+# Implementacao: TCK-005 (src/app/api/upload/**, src/lib/upload.ts)
+# Envio multipart para o Supabase Storage. O binario e validado no handler;
+# uploadRequestSchema valida os metadados (pasta, nome, mime, tamanho) antes de
+# qualquer escrita no bucket.
+openapi: 3.1.0
+info:
+  title: Reiners Media — Upload API
+  version: 1.0.0
+  description: Upload de imagens para o Supabase Storage, limitado a 5MB e aos tipos jpeg, png e webp.
+servers:
+  - url: /api
+    description: Base path das rotas Next.js App Router
+tags:
+  - name: upload
+    description: Midia do estudio
+paths:
+  /upload:
+    post:
+      operationId: uploadImage
+      tags:
+        - upload
+      summary: Envia uma imagem para o Storage
+      description: Requer ADMIN ou EDITOR. Rejeita arquivos acima de 5242880 bytes com 413 e mime nao suportado com 415. A URL devolvida alimenta coverImage, heroImage, thumbnail, avatarUrl e logoUrl.
+      security:
+        - cookieAuth: []
+      x-zod-request: uploadRequestSchema
+      x-zod-response: uploadResponseSchema
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UploadRequest"
+      responses:
+        "200":
+          description: Arquivo armazenado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+      description: JWT de sessao Supabase em cookie httpOnly
+  responses:
+    BadRequest:
+      description: Formulario multipart invalido ou campo file ausente
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Sessao ausente ou expirada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Papel sem permissao para a operacao
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: Ja existe objeto com o mesmo path no bucket
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    PayloadTooLarge:
+      description: Arquivo acima de 5MB
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    UnsupportedMediaType:
+      description: Mime type fora de jpeg, png e webp
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    UnprocessableEntity:
+      description: Falha de validacao dos metadados do arquivo
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    TooManyRequests:
+      description: Rate limit excedido
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Erro inesperado ou falha do Storage
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    ErrorCode:
+      type: string
+      x-zod-enum: ErrorCode
+      enum:
+        - BAD_REQUEST
+        - VALIDATION_ERROR
+        - UNAUTHORIZED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CONFLICT
+        - PAYLOAD_TOO_LARGE
+        - UNSUPPORTED_MEDIA_TYPE
+        - RATE_LIMITED
+        - INTERNAL_ERROR
+    UploadFolder:
+      type: string
+      x-zod-enum: UploadFolder
+      enum:
+        - podcasts
+        - episodes
+        - avatars
+        - logos
+    UploadMimeType:
+      type: string
+      x-zod-enum: UploadMimeType
+      enum:
+        - image/jpeg
+        - image/png
+        - image/webp
+    Error:
+      type: object
+      x-zod-schema: errorObjectSchema
+      required:
+        - code
+        - message
+      properties:
+        code:
+          $ref: "#/components/schemas/ErrorCode"
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    ErrorResponse:
+      type: object
+      x-zod-schema: errorResponseSchema
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/Error"
+    UploadRequest:
+      type: object
+      x-zod-schema: uploadRequestSchema
+      additionalProperties: false
+      description: Metadados derivados do campo file do multipart mais a pasta de destino
+      required:
+        - folder
+        - filename
+        - contentType
+        - size
+      properties:
+        folder:
+          $ref: "#/components/schemas/UploadFolder"
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        contentType:
+          $ref: "#/components/schemas/UploadMimeType"
+        size:
+          type: integer
+          minimum: 1
+          maximum: 5242880
+    UploadResult:
+      type: object
+      x-zod-schema: uploadResultSchema
+      required:
+        - url
+        - path
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL publica do objeto no Supabase Storage
+        path:
+          type: string
+          description: Caminho relativo dentro do bucket, por exemplo podcasts/uuid-arquivo.jpg
+    UploadResponse:
+      type: object
+      x-zod-schema: uploadResponseSchema
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/UploadResult"

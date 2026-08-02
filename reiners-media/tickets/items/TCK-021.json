@@ -1,0 +1,78 @@
+{
+  "id": "TCK-021",
+  "title": "Implementar analytics interno e integração GA4",
+  "summary": "Integrar Google Analytics 4 (script dinâmico com ID configurável), tracking de eventos no client, conexão com EventLog API.",
+  "status": "IN_PROGRESS",
+  "priority": "P1",
+  "type": "feature",
+  "epic": "EPIC-011",
+  "wave": 5,
+  "parallel_group": "W5-G1",
+  "recommended_agent": "backend-engineer",
+  "independence_score": 85,
+  "estimated_size": "M",
+  "risk_level": "LOW",
+  "objective": "Analytics de negócio funcionando (GA4 + EventLog)",
+  "business_value": "Métricas de conversão e engajamento",
+  "requirements": [
+    "FR-016",
+    "FR-017",
+    "ANA-001",
+    "ANA-002",
+    "ANA-003",
+    "ANA-006"
+  ],
+  "scope": {
+    "included": [
+      "src/components/analytics/ga4-script.tsx",
+      "src/lib/analytics-client.ts",
+      "src/hooks/useAnalytics.ts"
+    ],
+    "excluded": [
+      "Dashboard UI (TCK-020)"
+    ]
+  },
+  "dependencies": [
+    "TCK-007"
+  ],
+  "read_paths": [
+    "src/lib/analytics.ts"
+  ],
+  "write_paths": [
+    "src/components/analytics/ga4-script.tsx",
+    "src/lib/analytics-client.ts",
+    "src/hooks/useAnalytics.ts"
+  ],
+  "forbidden_paths": [
+    "src/app/admin/"
+  ],
+  "deliverables": [
+    "Script GA4 dinâmico",
+    "Hook useAnalytics",
+    "Tracking eventos"
+  ],
+  "acceptance_criteria": [
+    "GA4 carrega com ID dinâmico",
+    "Eventos enviados GA4+EventLog",
+    "page_view rastreia path"
+  ],
+  "test_plan": {
+    "unit": [
+      "analytics-client.test.ts"
+    ],
+    "integration": [],
+    "contract": [],
+    "e2e": [],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit analytics",
+    "pnpm lint"
+  ],
+  "claim": {
+    "agent": "auto",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
+}

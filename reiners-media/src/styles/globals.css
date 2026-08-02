@@ -1,0 +1,348 @@
+/**
+ * TCK-001 — Camada base do design system (Reiners Media DS 2026 + PodFactory).
+ *
+ * ATENÇÃO: arquivo de tokens. É o único CSS do projeto autorizado a conter
+ * valores literais — todos derivados de `src/lib/tokens.ts`.
+ *
+ * Convenção das custom properties de cor: canais RGB sem função, no formato
+ * `R G B`. Isso permite modificador de opacidade no Tailwind
+ * (`bg-surface-base/60`) e uso direto em CSS puro:
+ *
+ *     color: rgb(var(--color-text-primary));
+ *     background: rgb(var(--color-surface-base) / 0.6);
+ *
+ * Tema: `:root` = light. A classe `.dark` em <html> (darkMode: 'class')
+ * sobrescreve o conjunto. `color-scheme` acompanha para form controls nativos.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Fontes
+   ==========================================================================
+   Borna é fonte licenciada (PodFactory) e NÃO acompanha o repositório.
+   Para ativá-la: coloque os arquivos em `public/fonts/borna/` e descomente o
+   bloco abaixo. Enquanto isso, `--font-display` cai para a stack do sistema
+   declarada em `tokens.typography.family.display`.
+
+   Não use `next/font` aqui: este arquivo é CSS puro e é importado pelo
+   layout raiz (TCK-008).
+
+@font-face {
+  font-family: 'Borna';
+  src:
+    url('/fonts/borna/Borna-Regular.woff2') format('woff2'),
+    url('/fonts/borna/Borna-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Borna';
+  src:
+    url('/fonts/borna/Borna-SemiBold.woff2') format('woff2'),
+    url('/fonts/borna/Borna-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Borna';
+  src:
+    url('/fonts/borna/Borna-Bold.woff2') format('woff2'),
+    url('/fonts/borna/Borna-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
+/* ==========================================================================
+   Custom properties — tema light (default)
+   ========================================================================== */
+
+@layer base {
+  :root {
+    color-scheme: light;
+
+    /* surface */
+    --color-surface-base: 250 247 242;
+    --color-surface-sunken: 239 234 225;
+    --color-surface-raised: 255 255 255;
+    --color-surface-overlay: 11 11 15;
+    --color-surface-inverse: 11 11 15;
+    --color-surface-accent: 246 233 253;
+
+    /* text */
+    --color-text-primary: 11 11 15;
+    --color-text-secondary: 74 74 85;
+    --color-text-muted: 92 92 104;
+    --color-text-inverse: 250 247 242;
+    --color-text-accent: 155 63 192;
+    --color-text-brand: 110 87 38;
+    --color-text-on-accent: 255 255 255;
+    --color-text-link: 155 63 192;
+
+    /* border */
+    --color-border-subtle: 239 234 225;
+    --color-border-default: 138 128 114;
+    --color-border-strong: 110 102 90;
+    --color-border-accent: 155 63 192;
+    --color-border-focus: 155 63 192;
+
+    /* accent */
+    --color-accent-default: 155 63 192;
+    --color-accent-hover: 126 45 158;
+    --color-accent-active: 92 31 116;
+    --color-accent-subtle: 246 233 253;
+    --color-accent-contrast: 255 255 255;
+
+    /* state */
+    --color-state-success: 11 99 83;
+    --color-state-success-surface: 227 245 238;
+    --color-state-warning: 138 90 0;
+    --color-state-warning-surface: 251 240 220;
+    --color-state-danger: 180 35 24;
+    --color-state-danger-surface: 252 231 229;
+    --color-state-info: 23 92 211;
+    --color-state-info-surface: 228 238 252;
+
+    /* brand */
+    --color-brand-navy: 11 11 15;
+    --color-brand-cream: 250 247 242;
+    --color-brand-gold: 154 123 53;
+    --color-brand-orchid: 216 125 255;
+
+    /* forma, tipografia, elevação e motion
+       Estes não trocam com o tema — EXCETO `--shadow-raised` e
+       `--shadow-poster`, que embutem `var(--color-border-*)`. Como var() é
+       resolvida no elemento que usa, esses dois pegam a borda do tema ativo:
+       no dark a sombra preta some sobre `surface.base` #000000 e quem
+       delimita o card é o hairline de borda. */
+    --font-display: 'Borna', 'Borna Fallback', 'Söhne', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+    --radius-none: 0px;
+    --radius-xs: 0.25rem;
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    --radius-3xl: 2rem;
+    --radius-full: 9999px;
+    --shadow-none: none;
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.32);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.36), 0 1px 2px -1px rgb(0 0 0 / 0.32);
+    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.4), 0 2px 6px -2px rgb(0 0 0 / 0.32);
+    --shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.48), 0 4px 10px -4px rgb(0 0 0 / 0.32);
+    --shadow-xl: 0 24px 56px -16px rgb(0 0 0 / 0.56), 0 8px 20px -8px rgb(0 0 0 / 0.36);
+    --shadow-raised: 0 0 0 1px rgb(var(--color-border-default)), 0 4px 12px -2px rgb(0 0 0 / 0.4);
+    --shadow-poster: 0 0 0 1px rgb(var(--color-border-strong)), 0 32px 64px -24px rgb(0 0 0 / 0.7);
+    --shadow-glow: 0 0 0 1px rgb(216 125 255 / 0.4), 0 8px 32px -8px rgb(216 125 255 / 0.45);
+    --duration-instant: 0ms;
+    --duration-fast: 120ms;
+    --duration-normal: 200ms;
+    --duration-slow: 320ms;
+    --duration-slower: 480ms;
+    --duration-slowest: 720ms;
+    --ease-linear: linear;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+    --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+    --ease-emphasized: cubic-bezier(0.32, 0.72, 0, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --z-base: 0;
+    --z-raised: 10;
+    --z-sticky: 1100;
+    --z-dropdown: 1200;
+    --z-overlay: 1300;
+    --z-modal: 1400;
+    --z-popover: 1500;
+    --z-toast: 1600;
+    --z-tooltip: 1700;
+    --z-max: 2147483647;
+  }
+
+  /* ==========================================================================
+     Custom properties — tema dark (PodFactory: surface.base #000000)
+     ========================================================================== */
+
+  .dark {
+    color-scheme: dark;
+
+    /* surface */
+    --color-surface-base: 0 0 0;
+    --color-surface-sunken: 0 0 0;
+    --color-surface-raised: 11 11 15;
+    --color-surface-overlay: 0 0 0;
+    --color-surface-inverse: 250 247 242;
+    --color-surface-accent: 26 11 34;
+
+    /* text */
+    --color-text-primary: 250 247 242;
+    --color-text-secondary: 189 180 164;
+    --color-text-muted: 156 146 130;
+    --color-text-inverse: 11 11 15;
+    --color-text-accent: 216 125 255;
+    --color-text-brand: 185 154 80;
+    --color-text-on-accent: 11 11 15;
+    --color-text-link: 226 156 255;
+
+    /* border */
+    --color-border-subtle: 19 19 25;
+    --color-border-default: 99 99 110;
+    --color-border-strong: 138 138 150;
+    --color-border-accent: 184 79 224;
+    --color-border-focus: 184 79 224;
+
+    /* accent */
+    --color-accent-default: 216 125 255;
+    --color-accent-hover: 226 156 255;
+    --color-accent-active: 184 79 224;
+    --color-accent-subtle: 26 11 34;
+    --color-accent-contrast: 11 11 15;
+
+    /* state */
+    --color-state-success: 62 207 142;
+    --color-state-success-surface: 5 35 26;
+    --color-state-warning: 245 165 36;
+    --color-state-warning-surface: 42 27 2;
+    --color-state-danger: 240 68 56;
+    --color-state-danger-surface: 43 11 10;
+    --color-state-info: 94 176 239;
+    --color-state-info-surface: 7 28 44;
+
+    /* brand */
+    --color-brand-navy: 11 11 15;
+    --color-brand-cream: 250 247 242;
+    --color-brand-gold: 154 123 53;
+    --color-brand-orchid: 216 125 255;
+  }
+
+  /* ==========================================================================
+     Reset e estilos base
+     ========================================================================== */
+
+  * {
+    border-color: rgb(var(--color-border-default));
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    text-align: start; /* i18n-ready (NFR-010): nada de left/right fixos */
+  }
+
+  body {
+    background-color: rgb(var(--color-surface-base));
+    color: rgb(var(--color-text-primary));
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--font-mono);
+  }
+
+  ::selection {
+    background-color: rgb(var(--color-accent-default) / 0.32);
+    color: rgb(var(--color-text-primary));
+  }
+
+  /* ==========================================================================
+     Foco visível — WCAG 2.2 AA (2.4.11 Focus Not Obscured / 2.4.13 Focus
+     Appearance). Anel com 2px + offset de 2px, cor `border.focus`
+     (5.08:1 light / 10.43:1 dark contra a superfície base).
+     ========================================================================== */
+
+  :focus-visible {
+    outline: 0.125rem solid rgb(var(--color-border-focus));
+    outline-offset: 0.125rem;
+    border-radius: var(--radius-xs);
+  }
+
+  /* Remove o anel apenas para ponteiro/toque, nunca para teclado. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Alvo mínimo de 24x24 CSS px (WCAG 2.2 — 2.5.8 Target Size Minimum). */
+  a,
+  button,
+  [role='button'],
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+
+  /* Utilitário de skip-link / conteúdo só para leitores de tela. */
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+/* ==========================================================================
+   prefers-reduced-motion — NFR-002 / restrição do frontend-engineer
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Preferência de mais contraste
+   ========================================================================== */
+
+@media (prefers-contrast: more) {
+  :root,
+  .dark {
+    --color-border-default: var(--color-border-strong);
+  }
+}

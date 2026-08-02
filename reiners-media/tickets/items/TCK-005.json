@@ -1,0 +1,89 @@
+{
+  "id": "TCK-005",
+  "title": "Implementar API CRUD de Podcasts com upload de imagens",
+  "summary": "Endpoints REST para CRUD de podcasts (GET, POST, PATCH, DELETE soft), upload de imagens para Supabase Storage, paginação e filtros.",
+  "status": "DONE",
+  "priority": "P0",
+  "type": "feature",
+  "epic": "EPIC-005",
+  "wave": 1,
+  "parallel_group": "W1-G1",
+  "recommended_agent": "backend-engineer",
+  "independence_score": 95,
+  "estimated_size": "L",
+  "risk_level": "MEDIUM",
+  "objective": "API completa de podcasts com upload",
+  "business_value": "Core do produto; gestão do portfólio",
+  "requirements": [
+    "FR-003",
+    "FR-007",
+    "BR-003",
+    "BR-005",
+    "BR-006",
+    "SEC-004"
+  ],
+  "scope": {
+    "included": [
+      "src/app/api/podcasts/",
+      "src/app/api/upload/",
+      "src/lib/upload.ts"
+    ],
+    "excluded": [
+      "Frontend admin"
+    ]
+  },
+  "dependencies": [
+    "TCK-002",
+    "TCK-003"
+  ],
+  "read_paths": [
+    "prisma/schema.prisma",
+    "src/lib/schemas.ts"
+  ],
+  "write_paths": [
+    "src/app/api/podcasts/",
+    "src/app/api/upload/",
+    "src/lib/upload.ts"
+  ],
+  "forbidden_paths": [
+    "src/app/admin/",
+    "src/components/"
+  ],
+  "deliverables": [
+    "Endpoints podcasts",
+    "Endpoint upload",
+    "Validação de arquivos"
+  ],
+  "acceptance_criteria": [
+    "GET paginado",
+    "POST com upload",
+    "PATCH",
+    "Soft delete",
+    "Upload rejeita >5MB"
+  ],
+  "test_plan": {
+    "unit": [
+      "upload.test.ts"
+    ],
+    "integration": [
+      "podcasts.integration.test.ts",
+      "upload.integration.test.ts"
+    ],
+    "contract": [
+      "podcasts.contract.test.ts"
+    ],
+    "e2e": [],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:integration podcasts",
+    "pnpm lint",
+    "pnpm typecheck"
+  ],
+  "claim": {
+    "agent": "auto",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
+}

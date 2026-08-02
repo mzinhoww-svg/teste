@@ -1,0 +1,79 @@
+{
+  "id": "TCK-003",
+  "title": "Definir contratos de API e tipos compartilhados",
+  "summary": "Criar OpenAPI specs para endpoints REST, schemas Zod para validação, e tipos TypeScript compartilhados entre frontend e backend.",
+  "status": "DONE",
+  "priority": "P0",
+  "type": "chore",
+  "epic": "EPIC-003",
+  "wave": 0,
+  "parallel_group": "W0-G1",
+  "recommended_agent": "solution-architect",
+  "independence_score": 100,
+  "estimated_size": "M",
+  "risk_level": "LOW",
+  "objective": "Estabilizar contratos antes da implementação paralela",
+  "business_value": "Permite backend e frontend em paralelo",
+  "requirements": [
+    "FR-003",
+    "FR-004",
+    "NFR-006"
+  ],
+  "scope": {
+    "included": [
+      "contracts/api/",
+      "src/types/api.ts",
+      "src/lib/schemas.ts"
+    ],
+    "excluded": [
+      "Implementação endpoints",
+      "UI"
+    ]
+  },
+  "dependencies": [],
+  "read_paths": [
+    "docs/API_CONTRACTS.md"
+  ],
+  "write_paths": [
+    "contracts/api/",
+    "src/types/api.ts",
+    "src/lib/schemas.ts"
+  ],
+  "forbidden_paths": [
+    "src/app/api/",
+    "src/components/",
+    "prisma/"
+  ],
+  "deliverables": [
+    "OpenAPI specs",
+    "Zod schemas",
+    "Tipos TS compartilhados"
+  ],
+  "acceptance_criteria": [
+    "Endpoints documentados",
+    "Schemas Zod 100%",
+    "Tipos exportados",
+    "Sem any implícitos"
+  ],
+  "test_plan": {
+    "unit": [
+      "schemas.test.ts"
+    ],
+    "integration": [],
+    "contract": [
+      "contract-validation.test.ts"
+    ],
+    "e2e": [],
+    "regression": []
+  },
+  "validation_commands": [
+    "pnpm test:unit schemas",
+    "pnpm typecheck"
+  ],
+  "claim": {
+    "agent": "solution-architect",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
+}
