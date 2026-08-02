@@ -1,0 +1,272 @@
+# CONTRACT-003 — Auth API (TCK-003)
+# Implementacao: TCK-004 (src/app/api/auth/**, src/middleware.ts)
+# Sessao Supabase em cookie httpOnly. BR-001 e BR-002 dependem do papel
+# devolvido por GET /auth/session.
+openapi: 3.1.0
+info:
+  title: Reiners Media — Auth API
+  version: 1.0.0
+  description: Login, logout e leitura de sessao administrativa com RBAC ADMIN e EDITOR.
+servers:
+  - url: /api
+    description: Base path das rotas Next.js App Router
+tags:
+  - name: auth
+    description: Autenticacao do painel administrativo
+paths:
+  /auth/session:
+    get:
+      operationId: getSession
+      tags:
+        - auth
+      summary: Retorna a sessao atual
+      description: Sempre responde 200. Sem cookie valido devolve authenticated falso e user nulo.
+      security: []
+      x-zod-response: sessionResponseSchema
+      responses:
+        "200":
+          description: Estado da sessao
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /auth/login:
+    post:
+      operationId: login
+      tags:
+        - auth
+      summary: Autentica por email e senha
+      description: Rota publica com rate limit por IP. Credenciais invalidas devolvem 401 sem revelar qual campo falhou. Emite o cookie httpOnly de sessao.
+      security: []
+      x-zod-request: loginSchema
+      x-zod-response: sessionResponseSchema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Sessao criada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /auth/logout:
+    post:
+      operationId: logout
+      tags:
+        - auth
+      summary: Encerra a sessao atual
+      description: Requer sessao valida. Limpa o cookie httpOnly.
+      security:
+        - cookieAuth: []
+      x-zod-response: logoutResponseSchema
+      responses:
+        "200":
+          description: Sessao encerrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+      description: JWT de sessao Supabase em cookie httpOnly
+  responses:
+    BadRequest:
+      description: Requisicao malformada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Credenciais invalidas ou sessao ausente
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Usuario autenticado sem papel administrativo
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    UnprocessableEntity:
+      description: Falha de validacao Zod do corpo enviado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    TooManyRequests:
+      description: Tentativas de login acima do limite por IP
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Erro inesperado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    AdminRole:
+      type: string
+      x-zod-enum: AdminRole
+      enum:
+        - ADMIN
+        - EDITOR
+    ErrorCode:
+      type: string
+      x-zod-enum: ErrorCode
+      enum:
+        - BAD_REQUEST
+        - VALIDATION_ERROR
+        - UNAUTHORIZED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CONFLICT
+        - PAYLOAD_TOO_LARGE
+        - UNSUPPORTED_MEDIA_TYPE
+        - RATE_LIMITED
+        - INTERNAL_ERROR
+    Error:
+      type: object
+      x-zod-schema: errorObjectSchema
+      required:
+        - code
+        - message
+      properties:
+        code:
+          $ref: "#/components/schemas/ErrorCode"
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    ErrorResponse:
+      type: object
+      x-zod-schema: errorResponseSchema
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/Error"
+    LoginRequest:
+      type: object
+      x-zod-schema: loginSchema
+      additionalProperties: false
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+    AdminUser:
+      type: object
+      x-zod-schema: adminUserSchema
+      required:
+        - id
+        - email
+        - name
+        - role
+        - lastLoginAt
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          nullable: true
+        role:
+          $ref: "#/components/schemas/AdminRole"
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    Session:
+      type: object
+      x-zod-schema: sessionSchema
+      required:
+        - authenticated
+        - user
+        - expiresAt
+      properties:
+        authenticated:
+          type: boolean
+        user:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/AdminUser"
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+    SessionResponse:
+      type: object
+      x-zod-schema: sessionResponseSchema
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/Session"
+    LogoutResponse:
+      type: object
+      x-zod-schema: logoutResponseSchema
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - success
+          properties:
+            success:
+              type: boolean
+              const: true

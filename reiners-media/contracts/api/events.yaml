@@ -1,0 +1,319 @@
+# CONTRACT-003 — Events API (TCK-003)
+# Implementacao: TCK-007 (src/app/api/events/**, src/lib/analytics.ts)
+# POST e publico e limitado a 100 req/min por IP. GET e restrito a ADMIN.
+# BR-009: registros sao expurgados apos 90 dias (job de TCK-021).
+openapi: 3.1.0
+info:
+  title: Reiners Media — Events API
+  version: 1.0.0
+  description: Ingestao e consulta de eventos de analytics de primeira parte.
+servers:
+  - url: /api
+    description: Base path das rotas Next.js App Router
+tags:
+  - name: events
+    description: Telemetria de produto
+paths:
+  /events:
+    post:
+      operationId: createEvent
+      tags:
+        - events
+      summary: Registra um evento de analytics
+      description: Rota publica com rate limit de 100 requisicoes por minuto por IP. Responde 429 quando o limite e excedido.
+      security: []
+      x-zod-request: eventCreateSchema
+      x-zod-response: eventResponseSchema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventCreate"
+      responses:
+        "201":
+          description: Evento persistido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    get:
+      operationId: listEvents
+      tags:
+        - events
+      summary: Lista paginada de eventos
+      description: Requer ADMIN. Usada pelo dashboard de analytics.
+      security:
+        - cookieAuth: []
+      x-zod-query: eventQuerySchema
+      x-zod-response: eventListResponseSchema
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: createdAt
+            enum:
+              - createdAt
+        - name: order
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SortOrder"
+        - name: eventType
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/EventType"
+        - name: from
+          in: query
+          required: false
+          description: Limite inferior de createdAt, ISO-8601
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: false
+          description: Limite superior de createdAt, ISO-8601
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Lista paginada de eventos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+      description: JWT de sessao Supabase em cookie httpOnly
+  responses:
+    BadRequest:
+      description: Requisicao malformada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Sessao ausente ou expirada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Papel sem permissao para a operacao
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Recurso inexistente
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    UnprocessableEntity:
+      description: Falha de validacao Zod, por exemplo eventType desconhecido
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    TooManyRequests:
+      description: Mais de 100 eventos por minuto no mesmo IP
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Erro inesperado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    SortOrder:
+      type: string
+      x-zod-enum: SortOrder
+      enum:
+        - asc
+        - desc
+    EventType:
+      type: string
+      x-zod-enum: EventType
+      enum:
+        - PAGE_VIEW
+        - CARD_EXPAND
+        - YOUTUBE_CLICK
+        - SPOTIFY_CLICK
+        - EPISODE_PLAY
+        - ADMIN_LOGIN
+        - EPISODE_CREATE
+    ErrorCode:
+      type: string
+      x-zod-enum: ErrorCode
+      enum:
+        - BAD_REQUEST
+        - VALIDATION_ERROR
+        - UNAUTHORIZED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CONFLICT
+        - PAYLOAD_TOO_LARGE
+        - UNSUPPORTED_MEDIA_TYPE
+        - RATE_LIMITED
+        - INTERNAL_ERROR
+    Error:
+      type: object
+      x-zod-schema: errorObjectSchema
+      required:
+        - code
+        - message
+      properties:
+        code:
+          $ref: "#/components/schemas/ErrorCode"
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    ErrorResponse:
+      type: object
+      x-zod-schema: errorResponseSchema
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/Error"
+    PaginationMeta:
+      type: object
+      x-zod-schema: paginationMetaSchema
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+    EventPayload:
+      type: object
+      x-zod-schema: eventPayloadSchema
+      additionalProperties: true
+      description: Campos conhecidos mais chaves livres serializaveis em JSON
+      properties:
+        path:
+          type: string
+          maxLength: 2048
+        referrer:
+          type: string
+          maxLength: 2048
+        userAgent:
+          type: string
+          maxLength: 512
+        podcastId:
+          type: string
+          format: uuid
+        episodeId:
+          type: string
+          format: uuid
+    EventCreate:
+      type: object
+      x-zod-schema: eventCreateSchema
+      additionalProperties: false
+      required:
+        - eventType
+      properties:
+        eventType:
+          $ref: "#/components/schemas/EventType"
+        payload:
+          $ref: "#/components/schemas/EventPayload"
+    Event:
+      type: object
+      x-zod-schema: eventSchema
+      required:
+        - id
+        - eventType
+        - payload
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventType:
+          $ref: "#/components/schemas/EventType"
+        payload:
+          type: object
+          nullable: true
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+    EventResponse:
+      type: object
+      x-zod-schema: eventResponseSchema
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/Event"
+    EventListResponse:
+      type: object
+      x-zod-schema: eventListResponseSchema
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Event"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"

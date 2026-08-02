@@ -1,0 +1,276 @@
+# CONTRACT-003 — SiteConfig API (TCK-003)
+# Implementacao: TCK-007 (src/app/api/site-config/**)
+# Registro unico (singleton): GET publico, PATCH restrito a ADMIN.
+openapi: 3.1.0
+info:
+  title: Reiners Media — SiteConfig API
+  version: 1.0.0
+  description: Leitura publica e atualizacao administrativa das configuracoes globais do site.
+servers:
+  - url: /api
+    description: Base path das rotas Next.js App Router
+tags:
+  - name: site-config
+    description: Configuracao global do site
+paths:
+  /site-config:
+    get:
+      operationId: getSiteConfig
+      tags:
+        - site-config
+      summary: Retorna a configuracao vigente do site
+      description: Rota publica, consumida pelo layout raiz e pelo SEO. Responde 404 se o registro ainda nao foi semeado.
+      security: []
+      x-zod-response: siteConfigResponseSchema
+      responses:
+        "200":
+          description: Configuracao atual
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteConfigResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      operationId: updateSiteConfig
+      tags:
+        - site-config
+      summary: Atualiza parcialmente a configuracao do site
+      description: Requer ADMIN. BR-001 e BR-002 implicam 403 para EDITOR.
+      security:
+        - cookieAuth: []
+      x-zod-request: siteConfigUpdateSchema
+      x-zod-response: siteConfigResponseSchema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SiteConfigUpdate"
+      responses:
+        "200":
+          description: Configuracao atualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteConfigResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+      description: JWT de sessao Supabase em cookie httpOnly
+  responses:
+    BadRequest:
+      description: Requisicao malformada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Sessao ausente ou expirada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Papel sem permissao para a operacao
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Configuracao ainda nao criada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: Escrita concorrente sobre o registro singleton
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    UnprocessableEntity:
+      description: Falha de validacao Zod
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    TooManyRequests:
+      description: Rate limit excedido
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Erro inesperado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    ErrorCode:
+      type: string
+      x-zod-enum: ErrorCode
+      enum:
+        - BAD_REQUEST
+        - VALIDATION_ERROR
+        - UNAUTHORIZED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CONFLICT
+        - PAYLOAD_TOO_LARGE
+        - UNSUPPORTED_MEDIA_TYPE
+        - RATE_LIMITED
+        - INTERNAL_ERROR
+    Error:
+      type: object
+      x-zod-schema: errorObjectSchema
+      required:
+        - code
+        - message
+      properties:
+        code:
+          $ref: "#/components/schemas/ErrorCode"
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    ErrorResponse:
+      type: object
+      x-zod-schema: errorResponseSchema
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/Error"
+    SiteConfigUpdate:
+      type: object
+      x-zod-schema: siteConfigUpdateSchema
+      additionalProperties: false
+      description: Todos os campos sao opcionais
+      properties:
+        siteName:
+          type: string
+          minLength: 1
+          maxLength: 80
+        tagline:
+          type: string
+          minLength: 1
+          maxLength: 160
+        logoUrl:
+          type: string
+          format: uri
+          nullable: true
+        faviconUrl:
+          type: string
+          format: uri
+          nullable: true
+        primaryColor:
+          type: string
+          pattern: "^#[0-9a-fA-F]{6}$"
+        seoTitle:
+          type: string
+          maxLength: 70
+          nullable: true
+        seoDescription:
+          type: string
+          maxLength: 200
+          nullable: true
+        analyticsId:
+          type: string
+          maxLength: 60
+          nullable: true
+        facebookPixel:
+          type: string
+          maxLength: 60
+          nullable: true
+        customCss:
+          type: string
+          maxLength: 50000
+          nullable: true
+    SiteConfig:
+      type: object
+      x-zod-schema: siteConfigSchema
+      required:
+        - id
+        - siteName
+        - tagline
+        - primaryColor
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        siteName:
+          type: string
+        tagline:
+          type: string
+        logoUrl:
+          type: string
+          format: uri
+          nullable: true
+        faviconUrl:
+          type: string
+          format: uri
+          nullable: true
+        primaryColor:
+          type: string
+          pattern: "^#[0-9a-fA-F]{6}$"
+        seoTitle:
+          type: string
+          nullable: true
+        seoDescription:
+          type: string
+          nullable: true
+        analyticsId:
+          type: string
+          nullable: true
+        facebookPixel:
+          type: string
+          nullable: true
+        customCss:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SiteConfigResponse:
+      type: object
+      x-zod-schema: siteConfigResponseSchema
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/SiteConfig"
