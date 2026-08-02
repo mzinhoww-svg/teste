@@ -2,7 +2,7 @@
   "id": "TCK-003",
   "title": "Definir contratos de API e tipos compartilhados",
   "summary": "Criar OpenAPI specs para endpoints REST, schemas Zod para validação, e tipos TypeScript compartilhados entre frontend e backend.",
-  "status": "IN_PROGRESS",
+  "status": "DONE",
   "priority": "P0",
   "type": "chore",
   "epic": "EPIC-003",
