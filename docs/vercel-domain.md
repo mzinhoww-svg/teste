@@ -61,11 +61,19 @@ pago, é possível aumentar a frequência do cron da Vercel.
 O app serve três experiências no mesmo deploy, roteadas por **host** no
 middleware (`lib/supabase/middleware.ts`, `subdomainFor`):
 
-| Host | Reescreve para | Conteúdo |
-| --- | --- | --- |
-| `reiners.agency` (apex) e `www.` | `/` | Landing pública |
-| `crm.reiners.agency` | `/app…` | CRM interno (área logada da agência) |
-| `app.reiners.agency` | `/portal…` | Portal do cliente (`/portal/[cliente]/…`) |
+| Host | Caminho pedido | Reescreve para | Conteúdo |
+| --- | --- | --- | --- |
+| `reiners.agency` (apex) e `www.` | `/` | — | Landing da **Reiners Media** (estúdio de podcast) |
+| `reiners.agency` | `/portfolio` | — | Portfólio de programas |
+| `reiners.agency` | `/crm` | — | Landing do **CRM AI Studio** |
+| `crm.reiners.agency` | `/` | `/crm` | Landing do CRM |
+| `crm.reiners.agency` | `/contatos`, `/relatorios`… | `/app…` | CRM interno (área logada da agência) |
+| `crm.reiners.agency` | `/app…`, `/crm`, `/admin…` | — | Passam direto (`isCrmPassthrough`) |
+| `app.reiners.agency` | qualquer | `/portal…` | Portal do cliente (`/portal/[cliente]/…`) |
+
+O apex deixou de servir a landing do CRM: ela mora em **`/crm`** e é o que
+`crm.reiners.agency/` mostra na raiz. Isso libera o apex para o site do estúdio
+(landing + `/portfolio`) — ver `docs/site-landing.md`.
 
 Defina **`NEXT_PUBLIC_ROOT_DOMAIN=reiners.agency`** nas env vars. Em
 localhost/preview (sem esse subdomínio) o roteamento cai para **path**: `/app`,

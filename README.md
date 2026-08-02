@@ -6,6 +6,19 @@ Vendas e Customer Success, orquestrados por **9 agentes de IA**.
 Stack: **Next.js 14 (App Router) + TypeScript + Tailwind + Supabase (Postgres, Auth, RLS)**,
 com IA em **GLM 5.2 via OpenRouter**. Deploy na **Vercel**.
 
+## Rotas públicas
+
+O deploy serve três produtos no mesmo app, roteados por host/path
+(ver [`docs/vercel-domain.md`](docs/vercel-domain.md)):
+
+| URL | Conteúdo |
+| --- | --- |
+| `reiners.agency` | Landing da **Reiners Media** (estúdio de podcast) — [`docs/site-landing.md`](docs/site-landing.md) |
+| `reiners.agency/portfolio` | Portfólio de programas |
+| `reiners.agency/crm` · `crm.reiners.agency` | Landing do **CRM AI Studio** |
+| `crm.reiners.agency/app…` | CRM interno (área logada) |
+| `app.reiners.agency` | Portal do cliente |
+
 ## Funcionalidades
 
 - **Autenticação + multi-tenant** (Supabase Auth + RLS — cada org só vê seus dados).
@@ -98,6 +111,7 @@ npm run test:e2e   # testes E2E (Playwright) — ver docs/testing.md
 | Deploy na Vercel e domínio próprio | [`docs/vercel-domain.md`](docs/vercel-domain.md) |
 | Admin da plataforma | [`docs/admin.md`](docs/admin.md) |
 | Seed do primeiro tenant (Reiners Media) | [`docs/reiners-media-seed.md`](docs/reiners-media-seed.md) |
+| Site público (landing, portfólio e CMS) | [`docs/site-landing.md`](docs/site-landing.md) |
 
 ## Deploy na Vercel
 

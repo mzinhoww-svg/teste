@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { subdomainFor } from "@/lib/supabase/middleware";
+import { isCrmPassthrough, subdomainFor } from "@/lib/supabase/middleware";
 
 describe("subdomainFor", () => {
   const root = "reiners.agency";
@@ -26,5 +26,24 @@ describe("subdomainFor", () => {
 
   it("subdomínio de cliente arbitrário", () => {
     expect(subdomainFor("biglar.reiners.agency", root)).toBe("biglar");
+  });
+});
+
+describe("isCrmPassthrough", () => {
+  it("passa direto o que já é rota final em crm.<root>", () => {
+    expect(isCrmPassthrough("/app")).toBe(true);
+    expect(isCrmPassthrough("/app/studio")).toBe(true);
+    expect(isCrmPassthrough("/crm")).toBe(true);
+    // /admin vive fora de /app — sem passthrough viraria /app/admin (404).
+    expect(isCrmPassthrough("/admin")).toBe(true);
+    expect(isCrmPassthrough("/admin/site")).toBe(true);
+  });
+
+  it("o resto entra na área logada (recebe o prefixo /app)", () => {
+    expect(isCrmPassthrough("/contatos")).toBe(false);
+    expect(isCrmPassthrough("/relatorios")).toBe(false);
+    // Prefixo parecido não conta: /apps não é /app.
+    expect(isCrmPassthrough("/apps")).toBe(false);
+    expect(isCrmPassthrough("/administracao")).toBe(false);
   });
 });

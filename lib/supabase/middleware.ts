@@ -14,6 +14,13 @@ export function subdomainFor(host: string | null | undefined, root: string | nul
   return sub || null;
 }
 
+// Caminhos que, no host `crm.<root>`, são servidos como estão — não recebem o
+// prefixo `/app`. `/app…` já é a área logada; `/crm` é a landing do produto;
+// `/admin` é o admin da plataforma (vive fora de /app). Pura e determinística.
+export function isCrmPassthrough(path: string): boolean {
+  return ["/app", "/crm", "/admin"].some((p) => path === p || path.startsWith(`${p}/`));
+}
+
 function copyCookies(target: NextResponse, from: NextResponse): NextResponse {
   from.cookies.getAll().forEach((c) => target.cookies.set(c));
   return target;
@@ -61,14 +68,23 @@ export async function updateSession(request: NextRequest) {
     rawPath.startsWith("/sign") ||
     rawPath.startsWith("/portal/convite");
   if (!isAsset && !isPublicTop) {
-    if (sub === "crm" && !rawPath.startsWith("/app")) {
-      url.pathname = rawPath === "/" ? "/app" : `/app${rawPath}`;
-      rewrote = true;
+    if (sub === "crm") {
+      // crm.<root> serve o PRODUTO CRM: a raiz é a landing do CRM (/crm) e o
+      // resto entra na área logada (/app…). `/crm` e `/admin` passam direto —
+      // sem isso, `crm.<root>/admin` viraria `/app/admin` (404).
+      if (rawPath === "/") {
+        url.pathname = "/crm";
+        rewrote = true;
+      } else if (!isCrmPassthrough(rawPath)) {
+        url.pathname = `/app${rawPath}`;
+        rewrote = true;
+      }
     } else if (sub === "app" && !rawPath.startsWith("/portal")) {
       url.pathname = rawPath === "/" ? "/portal" : `/portal${rawPath}`;
       rewrote = true;
     }
-    // apex/www (sub === null) → landing: nada a reescrever.
+    // apex/www (sub === null) → site público (landing + /portfolio + /crm):
+    // nada a reescrever.
   }
 
   // Caminho "lógico" (pós-rewrite) usado pelos guards.
@@ -77,11 +93,14 @@ export async function updateSession(request: NextRequest) {
   const isPublic =
     path === "/" ||
     path === "/login" ||
+    path === "/crm" ||
+    path.startsWith("/portfolio") ||
     path.startsWith("/convite") ||
     path.startsWith("/portal/convite") ||
     path.startsWith("/sign") ||
     path.startsWith("/proposta") ||
     path.startsWith("/api/proposta") ||
+    path.startsWith("/api/site") ||
     path.startsWith("/api/health") ||
     path.startsWith("/api/webhooks") ||
     path.startsWith("/api/whatsapp/webhook") ||
