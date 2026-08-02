@@ -89,8 +89,8 @@
 
     /* border */
     --color-border-subtle: 239 234 225;
-    --color-border-default: 220 213 200;
-    --color-border-strong: 189 180 164;
+    --color-border-default: 138 128 114;
+    --color-border-strong: 110 102 90;
     --color-border-accent: 155 63 192;
     --color-border-focus: 155 63 192;
 
@@ -117,7 +117,12 @@
     --color-brand-gold: 154 123 53;
     --color-brand-orchid: 216 125 255;
 
-    /* forma, tipografia, elevação e motion (independentes de tema) */
+    /* forma, tipografia, elevação e motion
+       Estes não trocam com o tema — EXCETO `--shadow-raised` e
+       `--shadow-poster`, que embutem `var(--color-border-*)`. Como var() é
+       resolvida no elemento que usa, esses dois pegam a borda do tema ativo:
+       no dark a sombra preta some sobre `surface.base` #000000 e quem
+       delimita o card é o hairline de borda. */
     --font-display: 'Borna', 'Borna Fallback', 'Söhne', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
     --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
@@ -136,7 +141,8 @@
     --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.4), 0 2px 6px -2px rgb(0 0 0 / 0.32);
     --shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.48), 0 4px 10px -4px rgb(0 0 0 / 0.32);
     --shadow-xl: 0 24px 56px -16px rgb(0 0 0 / 0.56), 0 8px 20px -8px rgb(0 0 0 / 0.36);
-    --shadow-poster: 0 32px 64px -24px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(250 247 242 / 0.08);
+    --shadow-raised: 0 0 0 1px rgb(var(--color-border-default)), 0 4px 12px -2px rgb(0 0 0 / 0.4);
+    --shadow-poster: 0 0 0 1px rgb(var(--color-border-strong)), 0 32px 64px -24px rgb(0 0 0 / 0.7);
     --shadow-glow: 0 0 0 1px rgb(216 125 255 / 0.4), 0 8px 32px -8px rgb(216 125 255 / 0.45);
     --duration-instant: 0ms;
     --duration-fast: 120ms;
@@ -189,8 +195,8 @@
 
     /* border */
     --color-border-subtle: 19 19 25;
-    --color-border-default: 28 28 36;
-    --color-border-strong: 51 51 63;
+    --color-border-default: 99 99 110;
+    --color-border-strong: 138 138 150;
     --color-border-accent: 216 125 255;
     --color-border-focus: 226 156 255;
 

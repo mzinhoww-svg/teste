@@ -65,7 +65,19 @@ export type TextKey =
   | 'onAccent'
   | 'link';
 
-/** Papéis de borda / divisória. */
+/**
+ * Papéis de borda / divisória.
+ *
+ * ATENÇÃO ao escolher (WCAG 2.2 §1.4.11 — Non-text Contrast):
+ * - `subtle`  — DECORATIVO. ~1.1:1. Só para divisórias internas de um bloco
+ *               que já tem limite próprio. NUNCA como único indicador do
+ *               limite de um componente (card, input, botão fantasma).
+ * - `default` — limite de componente padrão, garantido >= 3:1 contra todas as
+ *               superfícies de conteúdo nos dois esquemas. É o token seguro.
+ * - `strong`  — limite enfático, >= 4.7:1.
+ * - `accent`  — limite em estado selecionado/ativo, >= 3:1.
+ * - `focus`   — anel de foco de teclado, >= 3:1.
+ */
 export type BorderKey = 'subtle' | 'default' | 'strong' | 'accent' | 'focus';
 
 /** Papéis do acento interativo (default de `Podcast.accentColor`). */
@@ -242,6 +254,12 @@ export type RadiusTokens = { readonly [K in RadiusKey]: RadiusToken };
 /** Valor de `box-shadow` já montado (pode conter múltiplas camadas). */
 export type ShadowToken = string;
 
+/**
+ * `raised` e `poster` são os tokens de ELEVAÇÃO: embutem um hairline derivado
+ * de `border.*` via CSS var, então funcionam nos dois esquemas. `xs`…`xl` são
+ * sombras pretas — decorativas no dark, onde somem sobre `surface.base`
+ * #000000 e não delimitam nada.
+ */
 export type ShadowKey =
   | 'none'
   | 'xs'
@@ -249,6 +267,7 @@ export type ShadowKey =
   | 'md'
   | 'lg'
   | 'xl'
+  | 'raised'
   | 'poster'
   | 'glow';
 

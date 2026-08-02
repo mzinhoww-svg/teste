@@ -37,8 +37,21 @@
  *  d) Verde de sucesso #0E7C66 entrega 4.28:1 sobre `surface.sunken` no tema
  *     light. → `state.success` (light) usa `green.800` #0B6353 (5.99:1).
  *
+ *  e) LIMITE DE COMPONENTE (WCAG 2.2 §1.4.11, 3:1). As duas superfícies do
+ *     card são de marca e quase idênticas em luminância — `surface.raised`
+ *     #0B0B0F sobre `surface.base` #000000 dá 1.07:1 no dark (1.07:1 também no
+ *     light, branco sobre creme). Nenhum dos dois valores pode mudar, então
+ *     quem carrega o limite é a BORDA, e ela foi elevada:
+ *       - `border.default`: #DCD5C8 → `cream.600` #8A8072 (light, min 3.24:1)
+ *                           #1C1C24 → `navy.400`  #63636E (dark,  min 3.18:1)
+ *       - `border.strong` : #BDB4A4 → `cream.700` #6E665A (light, min 4.72:1)
+ *                           #33333F → `navy.300`  #8A8A96 (dark,  min 5.52:1)
+ *     `border.subtle` segue baixo de propósito: é decorativo (ver o token).
+ *     Ver também o bloco de `shadow`: sombra preta não eleva nada no dark.
+ *
  * Contrastes mínimos garantidos por `tests/unit/tokens.test.ts`, que roda o
- * cálculo WCAG sobre a matriz texto × superfície nos dois esquemas.
+ * cálculo WCAG sobre a matriz texto × superfície e borda × superfície nos dois
+ * esquemas.
  *
  * i18n-ready (NFR-010): nenhum token é direcional (sem `left`/`right`);
  * espaçamentos são simétricos e o CSS base usa propriedades lógicas.
@@ -75,16 +88,22 @@ export const primitives = {
   black: '#000000', // PodFactory surface.base
   white: '#FFFFFF',
 
-  /** Reiners Navy — 900 é o valor oficial de marca. */
+  /**
+   * Reiners Navy — 900 é o valor oficial de marca.
+   * 400/300 existem para as bordas do tema dark: qualquer coisa abaixo de
+   * ~#595959 não alcança 3:1 contra `surface.base` #000000 (WCAG 1.4.11).
+   */
   navy: {
     900: '#0B0B0F',
     800: '#131319',
     700: '#1C1C24',
     600: '#262630',
     500: '#33333F',
+    400: '#63636E',
+    300: '#8A8A96',
   },
 
-  /** Neutros frios derivados do Navy, para texto e bordas no tema light. */
+  /** Neutros frios derivados do Navy, para texto no tema light. */
   ink: {
     700: '#33333F',
     600: '#4A4A55',
@@ -95,7 +114,11 @@ export const primitives = {
     100: '#E7E7EC',
   },
 
-  /** Reiners Creme — 100 é o valor oficial de marca. */
+  /**
+   * Reiners Creme — 100 é o valor oficial de marca.
+   * 600/700 são os degraus escuros o bastante para servirem de limite de
+   * componente sobre creme/branco (>= 3:1, WCAG 1.4.11).
+   */
   cream: {
     50: '#FFFDFA',
     100: '#FAF7F2',
@@ -103,7 +126,8 @@ export const primitives = {
     300: '#DCD5C8',
     400: '#BDB4A4',
     500: '#9C9282',
-    600: '#8E8474',
+    600: '#8A8072',
+    700: '#6E665A',
   },
 
   /** Reiners Ouro — 500 é o valor oficial de marca. */
@@ -235,9 +259,24 @@ const color = {
   },
 
   border: {
+    /**
+     * DECORATIVO. Hairline de baixo contraste (~1.1:1) para divisórias
+     * internas — listas, linhas de tabela, separadores dentro de um bloco que
+     * já tem limite próprio.
+     *
+     * NÃO USAR como único indicador de limite de componente: reprova em
+     * WCAG 2.2 §1.4.11 (Non-text Contrast). Card, input, botão fantasma,
+     * combobox e afins usam `border.default`.
+     */
     subtle: { light: primitives.cream[200], dark: primitives.navy[800] },
-    default: { light: primitives.cream[300], dark: primitives.navy[700] },
-    strong: { light: primitives.cream[400], dark: primitives.navy[500] },
+    /**
+     * Limite de componente padrão — mínimo 3.24:1 (light) / 3.18:1 (dark)
+     * contra qualquer superfície de conteúdo. É o token seguro quando a borda
+     * é a única coisa que define onde o componente começa e termina.
+     */
+    default: { light: primitives.cream[600], dark: primitives.navy[400] },
+    /** Limite enfático — 4.72:1 (light) / 5.52:1 (dark). */
+    strong: { light: primitives.cream[700], dark: primitives.navy[300] },
     accent: { light: primitives.orchid[700], dark: primitives.orchid[500] },
     /** Anel de foco — 5.08:1 (light) / 10.43:1 (dark), acima dos 3:1 de AA. */
     focus: { light: primitives.orchid[700], dark: primitives.orchid[400] },
@@ -397,8 +436,26 @@ const radius = {
 } as const satisfies RadiusTokens;
 
 /**
- * Sombras derivadas de primitivos (nada de hex solto): pretas para profundidade
- * e uma orquídea difusa (`glow`) para destaques do catálogo.
+ * Sombras derivadas de primitivos (nada de hex solto).
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * LIMITE CONHECIDO: sombra preta não eleva nada no tema dark.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * `xs`…`xl` são sombras pretas com alpha. Sobre `surface.base` dark (#000000,
+ * valor PodFactory) elas são preto sobre preto: contraste ~1:1, separação
+ * visual zero. No tema dark a elevação NÃO vem da sombra — vem da BORDA.
+ *
+ * Por isso existem dois tokens theme-aware, que embutem um hairline derivado
+ * das CSS vars de borda (portanto trocam junto com o tema):
+ *
+ *   - `raised`: elevação de card/painel. Use em qualquer superfície elevada
+ *               que precise de limite próprio (grid do portfólio, TCK-013).
+ *   - `poster`: elevação forte do card expandido (TCK-014).
+ *
+ * Regra prática para TCK-008/013/014: `shadow-raised` (ou `shadow-poster`)
+ * SOZINHO já entrega o limite acessível nos dois temas; `shadow-md`/`lg`/`xl`
+ * são puramente estéticos e precisam de `border-line-default` ao lado quando
+ * a borda for o único indicador do limite.
  */
 const shadow = {
   none: 'none',
@@ -407,8 +464,10 @@ const shadow = {
   md: `0 4px 12px -2px ${alpha(primitives.black, 0.4)}, 0 2px 6px -2px ${alpha(primitives.black, 0.32)}`,
   lg: `0 12px 28px -8px ${alpha(primitives.black, 0.48)}, 0 4px 10px -4px ${alpha(primitives.black, 0.32)}`,
   xl: `0 24px 56px -16px ${alpha(primitives.black, 0.56)}, 0 8px 20px -8px ${alpha(primitives.black, 0.36)}`,
-  /** Elevação do poster expandido (TCK-014). */
-  poster: `0 32px 64px -24px ${alpha(primitives.black, 0.7)}, 0 0 0 1px ${alpha(primitives.cream[100], 0.08)}`,
+  /** Elevação theme-aware: hairline 3:1 + profundidade. Funciona nos 2 temas. */
+  raised: `0 0 0 1px ${colorVar('border.default')}, 0 4px 12px -2px ${alpha(primitives.black, 0.4)}`,
+  /** Elevação do poster expandido (TCK-014), também theme-aware. */
+  poster: `0 0 0 1px ${colorVar('border.strong')}, 0 32px 64px -24px ${alpha(primitives.black, 0.7)}`,
   /** Brilho de acento para foco/hover em superfícies escuras. */
   glow: `0 0 0 1px ${alpha(primitives.orchid[500], 0.4)}, 0 8px 32px -8px ${alpha(primitives.orchid[500], 0.45)}`,
 } as const satisfies ShadowTokens;
@@ -531,17 +590,19 @@ export const tailwindColorGroupAlias = {
   brand: 'brand',
 } as const satisfies Readonly<Record<ColorGroupName, string>>;
 
-/** `onAccent` → `on-accent`. Usado em nomes de CSS var e chaves do Tailwind. */
+/**
+ * `onAccent` → `on-accent`. Usado em nomes de CSS var e chaves do Tailwind.
+ * Declarada como `function` (e não `const`) porque `shadow` a alcança via
+ * `colorVar()` durante a avaliação do módulo — hoisting evita TDZ.
+ */
 export function kebabCase(value: string): string {
   return value.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
-const kebab = kebabCase;
-
 /** `surface.base` → `--color-surface-base`. */
 export function colorVarName(path: ColorTokenPath): string {
   const [group, key] = path.split('.');
-  return `--color-${kebab(group ?? '')}-${kebab(key ?? '')}`;
+  return `--color-${kebabCase(group ?? '')}-${kebabCase(key ?? '')}`;
 }
 
 /** `surface.base` → `rgb(var(--color-surface-base))` (uso em CSS/inline style). */
@@ -593,22 +654,22 @@ export function staticCssVariables(): Record<string, string> {
   const result: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(tokens.typography.family)) {
-    result[`--font-${kebab(key)}`] = value;
+    result[`--font-${kebabCase(key)}`] = value;
   }
   for (const [key, value] of Object.entries(tokens.radius)) {
-    result[`--radius-${kebab(key)}`] = value;
+    result[`--radius-${kebabCase(key)}`] = value;
   }
   for (const [key, value] of Object.entries(tokens.shadow)) {
-    result[`--shadow-${kebab(key)}`] = value;
+    result[`--shadow-${kebabCase(key)}`] = value;
   }
   for (const [key, value] of Object.entries(tokens.motion.duration)) {
-    result[`--duration-${kebab(key)}`] = value;
+    result[`--duration-${kebabCase(key)}`] = value;
   }
   for (const [key, value] of Object.entries(tokens.motion.easing)) {
-    result[`--ease-${kebab(key)}`] = value;
+    result[`--ease-${kebabCase(key)}`] = value;
   }
   for (const [key, value] of Object.entries(tokens.zIndex)) {
-    result[`--z-${kebab(key)}`] = value;
+    result[`--z-${kebabCase(key)}`] = value;
   }
 
   return result;

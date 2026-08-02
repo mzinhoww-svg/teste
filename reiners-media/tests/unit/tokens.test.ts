@@ -398,6 +398,122 @@ describe('contraste WCAG 2.2 AA', () => {
 });
 
 /* -------------------------------------------------------------------------- */
+/* 3b. Limite de componente — WCAG 2.2 §1.4.11 (Non-text Contrast)             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Quando a borda é o ÚNICO indicador do limite de um componente — o caso do
+ * grid do portfólio (TCK-013), onde cards `bg-surface-raised` assentam sobre
+ * `surface.base` com diferença de 1.07:1 entre as duas superfícies — ela
+ * precisa de 3:1 contra as cores adjacentes.
+ *
+ * `border.subtle` está deliberadamente FORA desta suíte: é decorativo.
+ */
+describe('limite de componente (WCAG 2.2 §1.4.11)', () => {
+  const AA_NON_TEXT = 3;
+
+  /** Superfícies sobre as quais um card/campo pode assentar. */
+  const contentSurfaces: ColorTokenPath[] = [
+    'surface.base',
+    'surface.sunken',
+    'surface.raised',
+    'surface.accent',
+  ];
+
+  /** Bordas autorizadas a serem o único indicador de limite. */
+  const boundaryBorders: ColorTokenPath[] = ['border.default', 'border.strong'];
+
+  it('border.default e border.strong têm >= 3:1 contra toda superfície de conteúdo', () => {
+    const failures: string[] = [];
+
+    for (const scheme of SCHEMES) {
+      for (const border of boundaryBorders) {
+        for (const surface of contentSurfaces) {
+          const ratio = contrastRatio(
+            resolveColor(border, scheme),
+            resolveColor(surface, scheme),
+          );
+          if (ratio < AA_NON_TEXT) {
+            failures.push(
+              `[${scheme}] ${border} sobre ${surface} = ${ratio.toFixed(2)}:1`,
+            );
+          }
+        }
+      }
+    }
+
+    expect(failures).toEqual([]);
+  });
+
+  it('a borda do card é visível contra o próprio card e contra a página', () => {
+    // Caso concreto do TCK-013: card `surface.raised` sobre `surface.base`.
+    for (const scheme of SCHEMES) {
+      const border = resolveColor('border.default', scheme);
+      expect(
+        contrastRatio(border, resolveColor('surface.raised', scheme)),
+        `[${scheme}] borda do card contra o preenchimento do card`,
+      ).toBeGreaterThanOrEqual(AA_NON_TEXT);
+      expect(
+        contrastRatio(border, resolveColor('surface.base', scheme)),
+        `[${scheme}] borda do card contra a página`,
+      ).toBeGreaterThanOrEqual(AA_NON_TEXT);
+    }
+  });
+
+  it('a escala de bordas é monotônica: subtle < default <= strong', () => {
+    for (const scheme of SCHEMES) {
+      const base = resolveColor('surface.base', scheme);
+      const subtle = contrastRatio(resolveColor('border.subtle', scheme), base);
+      const def = contrastRatio(resolveColor('border.default', scheme), base);
+      const strong = contrastRatio(resolveColor('border.strong', scheme), base);
+
+      expect(subtle, `[${scheme}] subtle deveria ser mais discreto que default`).toBeLessThan(
+        def,
+      );
+      expect(strong, `[${scheme}] strong deveria ser >= default`).toBeGreaterThanOrEqual(
+        def,
+      );
+    }
+  });
+
+  it('border.subtle está documentado como decorativo (não serve de limite)', () => {
+    const source = readFileSync(path.resolve(process.cwd(), 'src/lib/tokens.ts'), 'utf8');
+    const types = readFileSync(
+      path.resolve(process.cwd(), 'src/types/tokens.ts'),
+      'utf8',
+    );
+    expect(`${source}${types}`).toMatch(/decorativ/i);
+    expect(`${source}${types}`).toMatch(/1\.4\.11/);
+  });
+
+  it('estados têm >= 3:1 contra a própria superfície tonal', () => {
+    const pairs: Array<[ColorTokenPath, ColorTokenPath]> = [
+      ['state.success', 'state.successSurface'],
+      ['state.warning', 'state.warningSurface'],
+      ['state.danger', 'state.dangerSurface'],
+      ['state.info', 'state.infoSurface'],
+    ];
+
+    for (const scheme of SCHEMES) {
+      for (const [foreground, background] of pairs) {
+        expect(
+          contrastRatio(resolveColor(foreground, scheme), resolveColor(background, scheme)),
+          `[${scheme}] ${foreground} sobre ${background}`,
+        ).toBeGreaterThanOrEqual(AA_NON_TEXT);
+      }
+    }
+  });
+
+  it('no dark a elevação não pode depender de sombra preta sobre base preta', () => {
+    // Sombras puramente pretas somem sobre `surface.base` #000000; o token de
+    // elevação precisa carregar uma borda derivada de CSS var (theme-aware).
+    expect(tokens.shadow.raised).toContain(colorVar('border.default'));
+    expect(tokens.shadow.poster).toContain(colorVar('border.strong'));
+  });
+});
+
+
+/* -------------------------------------------------------------------------- */
 /* 4. Espaço, forma e elevação                                                 */
 /* -------------------------------------------------------------------------- */
 
