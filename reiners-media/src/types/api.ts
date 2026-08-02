@@ -44,6 +44,8 @@ import type {
   planResponseSchema,
   planSchema,
   planUpdateSchema,
+  podcastAdminResponseSchema,
+  podcastAdminSchema,
   podcastCreateSchema,
   podcastDetailResponseSchema,
   podcastHostSchema,
@@ -141,8 +143,17 @@ export type PodcastCreateData = z.infer<typeof podcastCreateSchema>;
 export type PodcastUpdateInput = z.input<typeof podcastUpdateSchema>;
 export type PodcastUpdateData = z.infer<typeof podcastUpdateSchema>;
 export type PodcastListResponse = z.infer<typeof podcastListResponseSchema>;
+/** Forma administrativa, com `deletedAt`. Nunca serialize em rota publica. */
+export type PodcastAdmin = z.infer<typeof podcastAdminSchema>;
+export type PodcastAdminResponse = z.infer<typeof podcastAdminResponseSchema>;
 export type PodcastResponse = z.infer<typeof podcastResponseSchema>;
 export type PodcastDetailResponse = z.infer<typeof podcastDetailResponseSchema>;
+
+/**
+ * Contratos das regras de negocio fechadas no route handler (BR-004/005/006).
+ * Ver `validatePodcastRules` e `validateEpisodeTracks` em `@/lib/schemas`.
+ */
+export type { BusinessRuleId, BusinessRuleViolation, PodcastRuleState } from '@/lib/schemas';
 
 /* -------------------------------------------------------------------------- */
 /* Episode                                                                    */

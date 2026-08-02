@@ -64,7 +64,11 @@ quando é um enum, `x-zod-enum: <nome em ZOD_ENUMS>`.
 - um endpoint de `docs/API_CONTRACTS.md` não está documentado em nenhum YAML;
 - um `x-zod-*` aponta para algo que não é exportado por `src/lib/schemas.ts`;
 - os valores de um `enum:` divergem do `z.enum` correspondente;
-- as `properties` de um componente divergem das chaves do objeto Zod;
+- as `properties` de um componente divergem das chaves do objeto Zod (achatando
+  `allOf`, então `PodcastWithEpisodes` e `PodcastAdmin` também são cobertos);
+- o `required` do YAML diverge das chaves de fato obrigatórias no Zod
+  (`nullable != optional`: um campo `.nullable()` continua obrigatório);
+- o `type` de uma property diverge do tipo do campo Zod;
 - uma operação não declara 400/500, 401/403 quando protegida, 404 quando tem
   parâmetro de rota, 422 quando tem corpo, ou 429 quando é mutante;
 - uma resposta de erro não aponta para o envelope `ErrorResponse`.
@@ -77,15 +81,30 @@ quando é um enum, `x-zod-enum: <nome em ZOD_ENUMS>`.
 
 ### Regras de negócio no contrato
 
-| Regra | Onde vive |
-|-------|-----------|
-| BR-003 (>= 1 host) | `hosts.min(1)` em `podcastCreateSchema` / `minItems: 1` no YAML |
-| BR-004 (>= 1 trilha) | `.refine` em `episodeCreateSchema` / 422 documentado |
-| BR-006 (ENDED não é destaque) | `.refine` em `podcastCreate/UpdateSchema` |
-| BR-007 / BR-008 (embeds) | `YOUTUBE_URL_PATTERNS` / `SPOTIFY_URL_PATTERNS` (grupo 1 = ID) |
-| BR-001 / BR-002 (RBAC) | `security: cookieAuth` + respostas 401/403 |
-| BR-005 (máx. 3 destaques) | `MAX_FEATURED_PODCASTS` + resposta 409 (checagem no banco) |
-| BR-009 (retenção 90 dias) | `EVENT_LOG_RETENTION_DAYS` (job de TCK-021) |
+Um schema de payload **parcial não enxerga o estado persistido**. Por isso as
+regras têm três níveis de fechamento — e o contrato é explícito sobre de quem é
+a obrigação em cada um:
+
+| Regra | Fechada no schema? | Quem fecha de fato |
+|-------|--------------------|--------------------|
+| BR-003 (>= 1 host) | **Sim, total** — `hosts.min(1)` / `minItems: 1` | schema |
+| BR-007 / BR-008 (embeds) | **Sim, total** — `YOUTUBE_URL_PATTERNS` / `SPOTIFY_URL_PATTERNS` (grupo 1 = ID) | schema |
+| BR-004 (>= 1 trilha) | **Só no POST.** No PATCH só dispara se `youtubeUrl` e `spotifyUrl` vierem juntos | **TCK-006** chama `validateEpisodeTracks(merged)` |
+| BR-006 (ENDED não é destaque) | **Só no POST.** `PATCH {"featured": true}` passa no schema, porque `status` chega `undefined` | **TCK-005** chama `validatePodcastRules(resolvePodcastRuleState(...))` |
+| BR-005 (máx. 3 destaques) | **Não** — depende de `count` no banco | **TCK-005**, mesmo helper, com `otherFeaturedCount` |
+| BR-001 / BR-002 (RBAC) | **Não** | **TCK-004** — `security: cookieAuth` + 401/403 |
+| BR-009 (retenção 90 dias) | **Não** | **TCK-021** — job usando `EVENT_LOG_RETENTION_DAYS` |
+
+Uso obrigatório no PATCH de podcast (TCK-005), sob pena de "Ofício" (`ENDED` no
+seed) virar destaque na home:
+
+```ts
+const patch = podcastUpdateSchema.parse(await request.json());
+const violations = validatePodcastRules(
+  resolvePodcastRuleState(current, patch, otherFeaturedCount),
+);
+if (violations.length > 0) return conflict(violations); // 409
+```
 
 ### Decisões registradas
 
@@ -95,11 +114,29 @@ quando é um enum, `x-zod-enum: <nome em ZOD_ENUMS>`.
 3. **`coverImage` é obrigatório no create** — `Podcast.coverImage` é NOT NULL no
    Prisma; o fluxo é `POST /api/upload` primeiro, depois `POST /api/podcasts`
    com a URL retornada.
+3b. **Campos de imagem aceitam duas formas** (`imageRefSchema`): URL `http(s)`
+   absoluta (upload real no Supabase Storage) **ou** caminho root-relativo
+   iniciado por `/` (assets de demonstração em `public/`, que é o que o seed de
+   TCK-002 grava). Vale para `coverImage`, `heroImage`, `hosts[].photo`,
+   `thumbnail`, `logoUrl`, `faviconUrl` e `avatarUrl`. Rejeita `//host`,
+   `javascript:`, `data:`, path traversal e espaços. O que é link externo de
+   verdade (`socialLinks`, `youtubeUrl`, `spotifyUrl`) continua exigindo URL
+   absoluta via `urlSchema`.
+3c. **`deletedAt` não existe na resposta pública** — soft delete é metadado
+   interno. `podcastSchema` não o expõe; quem precisa usa `podcastAdminSchema`
+   (componente `PodcastAdmin`), devolvido por `DELETE /api/podcasts/:id` e pelo
+   painel de TCK-018.
+3d. **Schemas de entidade não herdam `.default()`** — numa resposta, `status`,
+   `visualStyle`, `accentColor`, `featured`, `displayOrder`, `socialLinks`,
+   `siteName`, `tagline` e `primaryColor` são obrigatórios. Se herdassem o
+   default, o validador aceitaria uma resposta incompleta e "consertaria"
+   silenciosamente o que o handler esqueceu de selecionar.
 4. **`youtubeEmbed` / `spotifyEmbed` não entram no body** — são derivados pelo
    servidor (BR-007/BR-008); enviá-los resulta em 422.
 5. **`podcastId` é imutável no PATCH de episódio** — mover episódio entre
    programas exige delete + create.
-6. **BR-004 no PATCH** só é validável em Zod quando as duas chaves vêm juntas;
-   a checagem contra o estado mesclado é responsabilidade de TCK-006.
+6. **BR-004 e BR-006 no PATCH** só são validáveis em Zod quando as chaves
+   relevantes vêm juntas no payload; a checagem contra o estado mesclado é
+   obrigação do route handler (ver tabela de regras acima).
 7. **IDs de embed são estritos** — YouTube com 11 caracteres, Spotify com 22.
    Alterar isso é mudança de contrato, não de implementação.

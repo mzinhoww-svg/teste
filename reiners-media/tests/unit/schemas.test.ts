@@ -33,21 +33,27 @@ import {
   eventCreateSchema,
   eventQuerySchema,
   eventTypeSchema,
+  imageRefSchema,
+  isImageRef,
   isSpotifyUrl,
   isYoutubeUrl,
   loginSchema,
   paginatedResponseSchema,
   paginationQuerySchema,
   planCreateSchema,
+  podcastAdminSchema,
   podcastCreateSchema,
   podcastQuerySchema,
   podcastSchema,
   podcastStatusSchema,
   podcastUpdateSchema,
+  resolvePodcastRuleState,
   sessionSchema,
   siteConfigUpdateSchema,
   testimonialCreateSchema,
   uploadRequestSchema,
+  validateEpisodeTracks,
+  validatePodcastRules,
   visualStyleSchema,
 } from '@/lib/schemas';
 
@@ -243,6 +249,82 @@ describe('SPOTIFY_URL_PATTERNS (BR-008)', () => {
 });
 
 /* -------------------------------------------------------------------------- */
+/* Referencia de imagem: URL absoluta OU caminho root-relativo                */
+/* -------------------------------------------------------------------------- */
+
+describe('imageRefSchema', () => {
+  it.each([
+    'https://abcdef.supabase.co/storage/v1/object/public/podcasts/capa.jpg',
+    'http://localhost:3000/images/capa.png',
+    '/images/podcasts/horizonte-digital-cover.jpg',
+    '/images/hosts/marina-alcantara.jpg',
+    '/logo.svg',
+  ])('aceita %s', (value) => {
+    expect(isImageRef(value)).toBe(true);
+    expect(imageRefSchema.safeParse(value).success).toBe(true);
+  });
+
+  it.each([
+    ['', 'string vazia'],
+    ['//evil.com/pwn.jpg', 'protocol-relative'],
+    ['javascript:alert(1)', 'esquema javascript'],
+    ['data:image/png;base64,AAAA', 'data URI'],
+    ['/../etc/passwd', 'traversal absoluto'],
+    ['/images/../../secret.jpg', 'traversal no meio'],
+    ['../images/capa.jpg', 'caminho relativo sem barra'],
+    ['images/capa.jpg', 'sem barra inicial'],
+    ['/images/ capa.jpg', 'espaco em branco'],
+    ['ftp://host/capa.jpg', 'esquema nao http'],
+    ['C:\\imagens\\capa.jpg', 'caminho windows'],
+  ])('rejeita %s (%s)', (value) => {
+    expect(isImageRef(value)).toBe(false);
+    expect(imageRefSchema.safeParse(value).success).toBe(false);
+  });
+
+  it('os campos de imagem do seed de TCK-002 passam no contrato', () => {
+    const seedShaped = {
+      ...validPodcast(),
+      coverImage: '/images/podcasts/horizonte-digital-cover.jpg',
+      heroImage: '/images/podcasts/horizonte-digital-hero.jpg',
+      hosts: [
+        { name: 'Marina Alcantara', initial: 'MA', photo: '/images/hosts/marina-alcantara.jpg' },
+      ],
+    };
+    expect(podcastCreateSchema.safeParse(seedShaped).success).toBe(true);
+    expect(
+      episodeCreateSchema.safeParse({
+        ...validEpisode(),
+        thumbnail: '/images/episodes/horizonte-01.jpg',
+      }).success,
+    ).toBe(true);
+    expect(
+      siteConfigUpdateSchema.safeParse({ logoUrl: '/images/logo.svg', faviconUrl: '/favicon.ico' })
+        .success,
+    ).toBe(true);
+    expect(
+      testimonialCreateSchema.safeParse({
+        name: 'Ana',
+        role: 'Head',
+        quote: 'Otimo',
+        avatarUrl: '/images/testimonials/ana.jpg',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('links externos continuam exigindo URL absoluta', () => {
+    expect(
+      podcastCreateSchema.safeParse({
+        ...validPodcast(),
+        socialLinks: { instagram: '/reiners' },
+      }).success,
+    ).toBe(false);
+    expect(
+      episodeCreateSchema.safeParse({ ...validEpisode(), youtubeUrl: '/videos/abc' }).success,
+    ).toBe(false);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
 /* Podcast                                                                    */
 /* -------------------------------------------------------------------------- */
 
@@ -374,38 +456,124 @@ describe('podcastUpdateSchema', () => {
   });
 });
 
-describe('podcastSchema (entidade)', () => {
+describe('podcastSchema (entidade publica)', () => {
+  const entity = () => ({
+    ...validPodcast(),
+    id: UUID,
+    socialLinks: {},
+    displayOrder: 0,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-02-01T12:30:00.000Z',
+  });
+
   it('valida a forma devolvida pela API', () => {
-    const result = podcastSchema.safeParse({
-      ...validPodcast(),
-      id: UUID,
-      deletedAt: null,
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-02-01T12:30:00.000Z',
-    });
-    expect(result.success).toBe(true);
+    expect(podcastSchema.safeParse(entity()).success).toBe(true);
+  });
+
+  it('nao expoe deletedAt: e metadado interno de soft delete', () => {
+    expect(podcastSchema.safeParse({ ...entity(), deletedAt: null }).success).toBe(false);
+    expect(Object.keys(podcastSchema.shape)).not.toContain('deletedAt');
+  });
+
+  it('exige os campos que o schema de escrita preenche por default', () => {
+    // Uma resposta sem `status` nao pode ser aceita "virando ACTIVE" em silencio.
+    for (const field of ['status', 'visualStyle', 'accentColor', 'featured', 'displayOrder']) {
+      const incomplete: Record<string, unknown> = { ...entity() };
+      delete incomplete[field];
+      expect(podcastSchema.safeParse(incomplete).success, field).toBe(false);
+    }
   });
 
   it('rejeita id que nao seja uuid', () => {
-    const result = podcastSchema.safeParse({
-      ...validPodcast(),
-      id: '123',
-      deletedAt: null,
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z',
-    });
-    expect(result.success).toBe(false);
+    expect(podcastSchema.safeParse({ ...entity(), id: '123' }).success).toBe(false);
   });
 
   it('rejeita timestamps que nao sejam ISO-8601', () => {
-    const result = podcastSchema.safeParse({
-      ...validPodcast(),
-      id: UUID,
-      deletedAt: null,
-      createdAt: '01/01/2024',
-      updatedAt: '2024-01-01T00:00:00Z',
+    expect(podcastSchema.safeParse({ ...entity(), createdAt: '01/01/2024' }).success).toBe(false);
+  });
+
+  it('podcastAdminSchema adiciona deletedAt como campo obrigatorio', () => {
+    expect(podcastAdminSchema.safeParse({ ...entity(), deletedAt: null }).success).toBe(true);
+    expect(
+      podcastAdminSchema.safeParse({ ...entity(), deletedAt: '2024-03-01T00:00:00Z' }).success,
+    ).toBe(true);
+    expect(podcastAdminSchema.safeParse(entity()).success).toBe(false);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* BR-005 / BR-006 sobre estado mesclado                                      */
+/* -------------------------------------------------------------------------- */
+
+describe('validatePodcastRules (estado mesclado)', () => {
+  it('documenta o buraco real do PATCH parcial: o schema sozinho deixa passar', () => {
+    // Este é o comportamento ATUAL e esperado de um schema de payload parcial:
+    // sem `status` no body, o refine nao tem como avaliar BR-006.
+    expect(podcastUpdateSchema.safeParse({ featured: true }).success).toBe(true);
+  });
+
+  it('BR-006: o helper pega o caso que o schema parcial deixa passar', () => {
+    const persisted = { status: 'ENDED' as const, featured: false };
+    const patch = podcastUpdateSchema.parse({ featured: true });
+    const violations = validatePodcastRules(resolvePodcastRuleState(persisted, patch));
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.rule).toBe('BR-006');
+    expect(violations[0]?.code).toBe('CONFLICT');
+    expect(violations[0]?.path).toEqual(['featured']);
+  });
+
+  it('BR-006: patch que tira o ENDED junto com o destaque e aceito', () => {
+    const persisted = { status: 'ENDED' as const, featured: false };
+    const patch = podcastUpdateSchema.parse({ featured: true, status: 'ACTIVE' });
+    expect(validatePodcastRules(resolvePodcastRuleState(persisted, patch))).toEqual([]);
+  });
+
+  it('BR-006: patch que nao mexe em featured num programa ACTIVE nao viola nada', () => {
+    const persisted = { status: 'ACTIVE' as const, featured: true };
+    const patch = podcastUpdateSchema.parse({ title: 'Novo titulo' });
+    expect(validatePodcastRules(resolvePodcastRuleState(persisted, patch))).toEqual([]);
+  });
+
+  it('BR-005: bloqueia o quarto destaque e libera o terceiro', () => {
+    const state = { status: 'ACTIVE' as const, featured: true };
+    expect(validatePodcastRules({ ...state, otherFeaturedCount: MAX_FEATURED_PODCASTS })).toEqual([
+      expect.objectContaining({ rule: 'BR-005', code: 'CONFLICT' }),
+    ]);
+    expect(
+      validatePodcastRules({ ...state, otherFeaturedCount: MAX_FEATURED_PODCASTS - 1 }),
+    ).toEqual([]);
+  });
+
+  it('BR-005 nao se aplica quando o programa nao e destaque', () => {
+    expect(
+      validatePodcastRules({ status: 'ACTIVE', featured: false, otherFeaturedCount: 99 }),
+    ).toEqual([]);
+  });
+
+  it('BR-005 e BR-006 podem violar juntas', () => {
+    const violations = validatePodcastRules({
+      status: 'ENDED',
+      featured: true,
+      otherFeaturedCount: MAX_FEATURED_PODCASTS,
     });
-    expect(result.success).toBe(false);
+    expect(violations.map((item) => item.rule)).toEqual(['BR-006', 'BR-005']);
+  });
+});
+
+describe('validateEpisodeTracks (estado mesclado)', () => {
+  it('BR-004: pega o PATCH que zera a unica trilha existente', () => {
+    const persisted = { youtubeUrl: YOUTUBE_URL, spotifyUrl: null };
+    const patch = episodeUpdateSchema.parse({ youtubeUrl: null });
+    const merged = { ...persisted, ...patch };
+    expect(episodeUpdateSchema.safeParse({ youtubeUrl: null }).success).toBe(true);
+    const violations = validateEpisodeTracks(merged);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.rule).toBe('BR-004');
+  });
+
+  it('BR-004: aceita quando a outra trilha persiste', () => {
+    const merged = { youtubeUrl: null, spotifyUrl: SPOTIFY_URL };
+    expect(validateEpisodeTracks(merged)).toEqual([]);
   });
 });
 

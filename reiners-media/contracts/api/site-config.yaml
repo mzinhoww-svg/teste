@@ -187,11 +187,13 @@ components:
           maxLength: 160
         logoUrl:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         faviconUrl:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         primaryColor:
           type: string
@@ -236,11 +238,13 @@ components:
           type: string
         logoUrl:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         faviconUrl:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         primaryColor:
           type: string

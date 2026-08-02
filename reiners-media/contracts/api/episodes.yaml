@@ -383,7 +383,8 @@ components:
           maxLength: 5000
         thumbnail:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         duration:
           type: string
@@ -417,7 +418,8 @@ components:
           type: string
         thumbnail:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         duration:
           type: string
@@ -462,7 +464,8 @@ components:
           type: string
         thumbnail:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         duration:
           type: string

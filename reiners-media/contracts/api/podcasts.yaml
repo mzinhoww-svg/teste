@@ -218,11 +218,11 @@ paths:
       tags:
         - podcasts
       summary: Soft delete de um programa
-      description: Requer ADMIN. BR-002 impede que EDITOR delete, resultando em 403. Preenche deletedAt em vez de remover a linha.
+      description: Requer ADMIN. BR-002 impede que EDITOR delete, resultando em 403. Preenche deletedAt em vez de remover a linha. Por ser rota administrativa, a resposta usa PodcastAdmin e expoe deletedAt.
       security:
         - cookieAuth: []
       x-zod-params: idParamSchema
-      x-zod-response: podcastResponseSchema
+      x-zod-response: podcastAdminResponseSchema
       parameters:
         - name: id
           in: path
@@ -236,7 +236,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PodcastResponse"
+                $ref: "#/components/schemas/PodcastAdminResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -407,7 +407,8 @@ components:
           maxLength: 2
         photo:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         bio:
           type: string
@@ -472,11 +473,12 @@ components:
           maxLength: 5000
         coverImage:
           type: string
-          format: uri
-          description: URL retornada por POST /api/upload
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
         heroImage:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         category:
           type: string
@@ -526,10 +528,12 @@ components:
           type: string
         coverImage:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
         heroImage:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         category:
           type: string
@@ -556,6 +560,7 @@ components:
     Podcast:
       type: object
       x-zod-schema: podcastSchema
+      description: Programa como sai da API publica. Nao expoe deletedAt, que e metadado interno de soft delete. Para a forma administrativa veja PodcastAdmin.
       required:
         - id
         - slug
@@ -568,6 +573,7 @@ components:
         - year
         - accentColor
         - hosts
+        - socialLinks
         - featured
         - displayOrder
         - createdAt
@@ -588,10 +594,12 @@ components:
           type: string
         coverImage:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
         heroImage:
           type: string
-          format: uri
+          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         category:
           type: string
@@ -615,16 +623,34 @@ components:
           type: boolean
         displayOrder:
           type: integer
-        deletedAt:
-          type: string
-          format: date-time
-          nullable: true
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
+    PodcastAdmin:
+      x-zod-schema: podcastAdminSchema
+      description: Programa com o metadado de soft delete. Exclusivo de rotas administrativas (DELETE e painel de TCK-018). Nunca serialize em rota publica.
+      allOf:
+        - $ref: "#/components/schemas/Podcast"
+        - type: object
+          required:
+            - deletedAt
+          properties:
+            deletedAt:
+              type: string
+              format: date-time
+              nullable: true
+              description: Timestamp do soft delete, ou null quando o programa esta ativo
+    PodcastAdminResponse:
+      type: object
+      x-zod-schema: podcastAdminResponseSchema
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/PodcastAdmin"
     PodcastWithEpisodes:
       x-zod-schema: podcastWithEpisodesSchema
       description: Programa com a lista de episodios. O item de episodio segue contracts/api/episodes.yaml.

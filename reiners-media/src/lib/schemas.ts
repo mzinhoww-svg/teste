@@ -8,17 +8,21 @@
  * `tests/integration/contract-validation.test.ts` garante que os dois lados
  * nunca divirjam.
  *
- * Regras de negócio codificadas aqui (docs/PRD.md §11):
+ * Regras de negócio TOTALMENTE fechadas pelo schema (docs/PRD.md §11):
  * - BR-003 — programa precisa de >= 1 host          -> `hosts.min(1)`
- * - BR-004 — episódio precisa de >= 1 trilha        -> refine youtubeUrl|spotifyUrl
- * - BR-006 — ENDED não pode ser destaque            -> refine featured/status
  * - BR-007 — YouTube URL -> embed ID                -> `YOUTUBE_URL_PATTERNS`
  * - BR-008 — Spotify URL -> embed URI               -> `SPOTIFY_URL_PATTERNS`
  *
- * Regras que dependem do banco e NÃO são expressáveis em Zod (documentadas nos
- * YAMLs como resposta 409):
+ * Regras fechadas no CREATE, mas NÃO no PATCH (payload parcial não enxerga o
+ * estado persistido). O route handler DEVE fechá-las sobre o estado mesclado
+ * usando os helpers abaixo, devolvendo 409/422:
+ * - BR-004 — episódio precisa de >= 1 trilha  -> `validateEpisodeTracks` (TCK-006)
+ * - BR-006 — ENDED não pode ser destaque      -> `validatePodcastRules` (TCK-005)
+ *
+ * Regras que dependem do banco e nunca são expressáveis em Zod (documentadas
+ * nos YAMLs como resposta 409):
  * - BR-001/BR-002 — RBAC (TCK-004)
- * - BR-005 — máximo de 3 programas em destaque (TCK-005, ver MAX_FEATURED_PODCASTS)
+ * - BR-005 — máximo de 3 programas em destaque -> `validatePodcastRules` + count
  * - BR-009 — retenção de 90 dias do EventLog (TCK-021, ver EVENT_LOG_RETENTION_DAYS)
  */
 import { z } from 'zod';
@@ -120,7 +124,50 @@ export const durationSchema = z
   .string()
   .regex(DURATION_REGEX, 'Duração deve estar em MM:SS ou H:MM:SS, ex: 45:30');
 
+/** URL absoluta. Use apenas para link externo de verdade (redes, YouTube, Spotify). */
 export const urlSchema = z.string().url().max(2048);
+
+/**
+ * Caminho root-relativo servido de `public/`, ex: `/images/podcasts/capa.jpg`.
+ * Exige barra inicial unica (barra dupla seria URL protocol-relative).
+ */
+export const IMAGE_ROOT_PATH_REGEX = /^\/(?!\/)[A-Za-z0-9._~\-/%()+,;=:@&$!]*$/;
+
+/** Padrao equivalente publicado nos YAMLs OpenAPI para campos de imagem. */
+export const IMAGE_REF_PATTERN = '^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$';
+
+/**
+ * Referencia de imagem aceita pelo produto. Existem duas origens legitimas:
+ * - upload real -> URL absoluta do Supabase Storage (`https://...`);
+ * - asset de demonstracao -> caminho root-relativo servido de `public/`
+ *   (`/images/podcasts/horizonte-digital-cover.jpg`), que e o formato gravado
+ *   pelo seed de TCK-002.
+ *
+ * Rejeita explicitamente: string vazia, `//host` (protocol-relative),
+ * `javascript:` e demais esquemas, path traversal (`..`) e espacos em branco.
+ */
+export function isImageRef(value: string): boolean {
+  if (value.length === 0 || value.length > 2048) return false;
+  if (/[\s<>"'`\\]/.test(value)) return false;
+  if (value.split('/').includes('..')) return false;
+  if (IMAGE_ROOT_PATH_REGEX.test(value)) return true;
+  if (!/^https?:\/\//i.test(value)) return false;
+  try {
+    const parsed = new URL(value);
+    return (parsed.protocol === 'http:' || parsed.protocol === 'https:') && parsed.host.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+export const imageRefSchema = z
+  .string()
+  .min(1)
+  .max(2048)
+  .refine(
+    isImageRef,
+    'Imagem deve ser uma URL http(s) absoluta ou um caminho iniciado por /, ex: /images/capa.jpg',
+  );
 
 export const yearSchema = z.number().int().min(MIN_YEAR).max(MAX_YEAR);
 
@@ -292,7 +339,7 @@ export const podcastHostSchema = z.object({
   name: z.string().min(1).max(80),
   /** Iniciais exibidas no avatar fallback, ex: `MR`. */
   initial: z.string().min(1).max(2),
-  photo: urlSchema.nullish(),
+  photo: imageRefSchema.nullish(),
   bio: z.string().max(600).nullish(),
 });
 
@@ -312,8 +359,8 @@ const podcastWritableSchema = z
     title: z.string().min(1).max(120),
     tagline: z.string().max(160).nullish(),
     description: z.string().min(1).max(5000),
-    coverImage: urlSchema,
-    heroImage: urlSchema.nullish(),
+    coverImage: imageRefSchema,
+    heroImage: imageRefSchema.nullish(),
     category: z.string().min(1).max(60),
     status: podcastStatusSchema.default('ACTIVE'),
     visualStyle: visualStyleSchema.default('PHOTO_REAL'),
@@ -344,16 +391,152 @@ export const podcastCreateSchema = podcastWritableSchema.refine(
   endedNotFeaturedError,
 );
 
+/**
+ * ATENÇÃO — o `.refine` de BR-006 aqui só dispara quando `status` e `featured`
+ * chegam JUNTOS no payload. Num PATCH `{ "featured": true }` o `status` vem
+ * `undefined` e a validação passa, mesmo que o programa persistido esteja
+ * ENDED. Isso é limitação intrínseca de schema de payload parcial, não um bug
+ * a ser "consertado" aqui.
+ *
+ * O fechamento de BR-006 (e de BR-005) é OBRIGAÇÃO do route handler de TCK-005,
+ * que deve chamar `validatePodcastRules(resolvePodcastRuleState(...))` sobre o
+ * estado mesclado e devolver 409 em caso de violação.
+ */
 export const podcastUpdateSchema = podcastWritableSchema
   .partial()
   .refine(refineEndedNotFeatured, endedNotFeaturedError);
 
+/**
+ * Programa como sai da API **pública**.
+ *
+ * Os campos que têm `.default()` no schema de escrita são redeclarados sem
+ * default: numa resposta eles sempre vêm preenchidos, e deixar o default aqui
+ * faria o validador aceitar uma resposta incompleta (`status` ausente vira
+ * 'ACTIVE' silenciosamente).
+ *
+ * `deletedAt` NÃO aparece aqui de propósito: é metadado interno de soft delete
+ * e expô-lo em rota pública vazaria estado interno. Quem precisa dele usa
+ * `podcastAdminSchema`.
+ */
 export const podcastSchema = podcastWritableSchema.extend({
   id: uuidSchema,
-  deletedAt: isoDateTimeSchema.nullable(),
+  status: podcastStatusSchema,
+  visualStyle: visualStyleSchema,
+  accentColor: hexColorSchema,
+  socialLinks: socialLinksSchema,
+  featured: z.boolean(),
+  displayOrder: z.number().int().min(0),
   createdAt: isoDateTimeSchema,
   updatedAt: isoDateTimeSchema,
 });
+
+/**
+ * Programa como sai das rotas administrativas, incluindo o metadado de soft
+ * delete. Usado na resposta de `DELETE /api/podcasts/:id` e pelo painel
+ * (TCK-018). Nunca serialize isto em rota pública.
+ */
+export const podcastAdminSchema = podcastSchema.extend({
+  deletedAt: isoDateTimeSchema.nullable(),
+});
+
+/* -------------------------------------------------------------------------- */
+/* Regras de negócio sobre estado MESCLADO (obrigação do route handler)        */
+/* -------------------------------------------------------------------------- */
+
+export type BusinessRuleId = 'BR-004' | 'BR-005' | 'BR-006';
+
+export interface BusinessRuleViolation {
+  rule: BusinessRuleId;
+  /** Código de erro a devolver no envelope padronizado. */
+  code: 'CONFLICT' | 'VALIDATION_ERROR';
+  message: string;
+  path: string[];
+}
+
+export interface PodcastRuleState {
+  status: z.infer<typeof podcastStatusSchema>;
+  featured: boolean;
+  /**
+   * Quantos OUTROS programas estão com `featured: true` (exclui o que está
+   * sendo salvo). O handler obtém com um `count` no Prisma.
+   */
+  otherFeaturedCount?: number;
+}
+
+/**
+ * Mescla o estado persistido com o patch já validado.
+ *
+ * Necessário porque `podcastUpdateSchema` é parcial: num PATCH
+ * `{ "featured": true }` o campo `status` chega `undefined`, então nenhum
+ * `.refine` de payload consegue avaliar BR-006 — só o estado final consegue.
+ */
+export function resolvePodcastRuleState(
+  current: { status: z.infer<typeof podcastStatusSchema>; featured: boolean },
+  patch: { status?: z.infer<typeof podcastStatusSchema>; featured?: boolean },
+  otherFeaturedCount?: number,
+): PodcastRuleState {
+  return {
+    status: patch.status ?? current.status,
+    featured: patch.featured ?? current.featured,
+    otherFeaturedCount,
+  };
+}
+
+/**
+ * Aplica BR-005 e BR-006 sobre o estado final de um programa.
+ *
+ * TCK-005 (POST e PATCH de podcasts) e TCK-018 (painel) DEVEM chamar isto
+ * depois do parse do payload — o schema Zod sozinho não fecha essas regras.
+ * Violações devem virar 409 CONFLICT.
+ */
+export function validatePodcastRules(state: PodcastRuleState): BusinessRuleViolation[] {
+  const violations: BusinessRuleViolation[] = [];
+
+  if (state.featured && state.status === 'ENDED') {
+    violations.push({
+      rule: 'BR-006',
+      code: 'CONFLICT',
+      message: 'BR-006: programa com status ENDED não pode ser destaque',
+      path: ['featured'],
+    });
+  }
+
+  if (
+    state.featured &&
+    state.otherFeaturedCount !== undefined &&
+    state.otherFeaturedCount + 1 > MAX_FEATURED_PODCASTS
+  ) {
+    violations.push({
+      rule: 'BR-005',
+      code: 'CONFLICT',
+      message: `BR-005: no máximo ${MAX_FEATURED_PODCASTS} programas podem estar em destaque`,
+      path: ['featured'],
+    });
+  }
+
+  return violations;
+}
+
+/**
+ * Aplica BR-004 sobre o estado final de um episódio.
+ *
+ * TCK-006 DEVE chamar isto no PATCH: `episodeUpdateSchema` só consegue avaliar
+ * a regra quando as duas chaves chegam juntas no payload.
+ */
+export function validateEpisodeTracks(state: {
+  youtubeUrl?: string | null;
+  spotifyUrl?: string | null;
+}): BusinessRuleViolation[] {
+  if (state.youtubeUrl || state.spotifyUrl) return [];
+  return [
+    {
+      rule: 'BR-004',
+      code: 'VALIDATION_ERROR',
+      message: 'BR-004: episódio precisa de pelo menos uma trilha (youtubeUrl ou spotifyUrl)',
+      path: ['youtubeUrl'],
+    },
+  ];
+}
 
 /* -------------------------------------------------------------------------- */
 /* Episode                                                                    */
@@ -376,7 +559,7 @@ const episodeWritableSchema = z
     number: z.number().int().min(1),
     title: z.string().min(1).max(160),
     description: z.string().min(1).max(5000),
-    thumbnail: urlSchema.nullish(),
+    thumbnail: imageRefSchema.nullish(),
     duration: durationSchema,
     publishedAt: isoDateTimeSchema,
     youtubeUrl: youtubeUrlSchema.nullish(),
@@ -431,8 +614,8 @@ const siteConfigWritableSchema = z
   .object({
     siteName: z.string().min(1).max(80).default('Reiners Media'),
     tagline: z.string().min(1).max(160).default('Conteúdo que conecta'),
-    logoUrl: urlSchema.nullish(),
-    faviconUrl: urlSchema.nullish(),
+    logoUrl: imageRefSchema.nullish(),
+    faviconUrl: imageRefSchema.nullish(),
     primaryColor: hexColorSchema.default('#d87dff'),
     seoTitle: z.string().max(70).nullish(),
     seoDescription: z.string().max(200).nullish(),
@@ -444,8 +627,12 @@ const siteConfigWritableSchema = z
 
 export const siteConfigCreateSchema = siteConfigWritableSchema;
 export const siteConfigUpdateSchema = siteConfigWritableSchema.partial();
+/** Campos com default são redeclarados obrigatórios: a resposta sempre os traz. */
 export const siteConfigSchema = siteConfigWritableSchema.extend({
   id: uuidSchema,
+  siteName: z.string().min(1).max(80),
+  tagline: z.string().min(1).max(160),
+  primaryColor: hexColorSchema,
   createdAt: isoDateTimeSchema,
   updatedAt: isoDateTimeSchema,
 });
@@ -490,7 +677,7 @@ const testimonialWritableSchema = z
     name: z.string().min(1).max(80),
     role: z.string().min(1).max(120),
     quote: z.string().min(1).max(1000),
-    avatarUrl: urlSchema.nullish(),
+    avatarUrl: imageRefSchema.nullish(),
     podcastId: uuidSchema.nullish(),
   })
   .strict();
@@ -524,6 +711,8 @@ export const planCreateSchema = planWritableSchema;
 export const planUpdateSchema = planWritableSchema.partial();
 export const planSchema = planWritableSchema.extend({
   id: uuidSchema,
+  isFeatured: z.boolean(),
+  displayOrder: z.number().int().min(0),
   createdAt: isoDateTimeSchema,
   updatedAt: isoDateTimeSchema,
 });
@@ -585,6 +774,8 @@ export const uploadResultSchema = z.object({
 
 export const podcastListResponseSchema = paginatedResponseSchema(podcastSchema);
 export const podcastResponseSchema = dataResponseSchema(podcastSchema);
+/** Resposta administrativa: inclui `deletedAt`. Usada por DELETE /api/podcasts/:id. */
+export const podcastAdminResponseSchema = dataResponseSchema(podcastAdminSchema);
 export const podcastDetailResponseSchema = dataResponseSchema(podcastWithEpisodesSchema);
 export const episodeListResponseSchema = paginatedResponseSchema(episodeSchema);
 export const episodeResponseSchema = dataResponseSchema(episodeSchema);

@@ -251,6 +251,81 @@ function unwrapObject(schema: unknown): z.ZodObject<z.ZodRawShape> | null {
   return null;
 }
 
+/** Chaves realmente obrigatorias de um objeto Zod (default e nullish nao contam). */
+function zodRequiredKeys(objectSchema: z.ZodObject<z.ZodRawShape>): string[] {
+  return Object.entries(objectSchema.shape)
+    .filter(([, value]) => !(value as z.ZodTypeAny).isOptional())
+    .map(([key]) => key)
+    .sort();
+}
+
+/** Traduz um schema Zod para o `type` equivalente em OpenAPI. */
+function zodTypeKind(schema: unknown): string | null {
+  let current: unknown = schema;
+  for (let depth = 0; depth < 12; depth += 1) {
+    if (current instanceof z.ZodString) return 'string';
+    if (current instanceof z.ZodNumber) {
+      const checks = (current._def as { checks: { kind: string }[] }).checks;
+      return checks.some((check) => check.kind === 'int') ? 'integer' : 'number';
+    }
+    if (current instanceof z.ZodBoolean) return 'boolean';
+    if (current instanceof z.ZodArray) return 'array';
+    if (current instanceof z.ZodObject || current instanceof z.ZodRecord) return 'object';
+    if (current instanceof z.ZodEnum || current instanceof z.ZodNativeEnum) return 'string';
+    if (current instanceof z.ZodLiteral) {
+      return typeof (current._def as { value: unknown }).value === 'boolean' ? 'boolean' : 'string';
+    }
+    if (!(current instanceof z.ZodType)) return null;
+    const def = current._def as { schema?: unknown; innerType?: unknown };
+    const next = def.schema ?? def.innerType;
+    if (next === undefined) return null;
+    current = next;
+  }
+  return null;
+}
+
+interface ResolvedComponent {
+  properties: Record<string, YamlNode>;
+  required: string[];
+  hasProperties: boolean;
+}
+
+/** Achata `allOf` (inclusive `$ref`) para comparar o componente inteiro. */
+function resolveComponent(
+  doc: Record<string, YamlNode>,
+  component: YamlNode,
+  depth = 0,
+): ResolvedComponent {
+  const record = asRecord(component);
+  let properties: Record<string, YamlNode> = {};
+  let hasProperties = false;
+  if (isRecord(record.properties)) {
+    properties = { ...record.properties };
+    hasProperties = true;
+  }
+  let required = asStringArray(record.required);
+
+  const allOf = Array.isArray(record.allOf) ? record.allOf : [];
+  if (depth < 5) {
+    for (const part of allOf) {
+      const partRecord = asRecord(part);
+      let target: YamlNode = partRecord;
+      if (typeof partRecord.$ref === 'string') {
+        const name = partRecord.$ref.replace('#/components/schemas/', '');
+        target = asRecord(asRecord(doc.components).schemas)[name] ?? {};
+      }
+      const nested = resolveComponent(doc, target, depth + 1);
+      if (nested.hasProperties) {
+        properties = { ...properties, ...nested.properties };
+        hasProperties = true;
+      }
+      required = [...required, ...nested.required];
+    }
+  }
+
+  return { properties, required: [...new Set(required)], hasProperties };
+}
+
 function isProtected(operation: Record<string, YamlNode>): boolean {
   const security = operation.security;
   return Array.isArray(security) && security.length > 0;
@@ -523,25 +598,82 @@ describe('contracts/api — enums', () => {
 /* -------------------------------------------------------------------------- */
 
 describe('contracts/api — propriedades vs shape Zod', () => {
-  it('todo componente com properties tem exatamente as chaves do objeto Zod', () => {
+  /** Componentes com x-zod-schema, com allOf ja achatado. */
+  const zodBackedComponents = documents.flatMap(({ file, doc }) =>
+    Object.entries(asRecord(asRecord(doc.components).schemas))
+      .filter(([, component]) => typeof asRecord(component)['x-zod-schema'] === 'string')
+      .map(([name, component]) => ({
+        file,
+        name,
+        zodName: String(asRecord(component)['x-zod-schema']),
+        resolved: resolveComponent(doc, component),
+      })),
+  );
+
+  it('cobre todos os componentes ligados a Zod, inclusive os que usam allOf', () => {
+    const covered = zodBackedComponents.filter((entry) => entry.resolved.hasProperties);
+    expect(covered.length).toBe(zodBackedComponents.length);
+    // PodcastWithEpisodes so tem properties via allOf: prova que o achatamento funciona.
+    const withEpisodes = covered.find((entry) => entry.name === 'PodcastWithEpisodes');
+    expect(withEpisodes).toBeDefined();
+    expect(Object.keys(withEpisodes?.resolved.properties ?? {})).toContain('episodes');
+    expect(Object.keys(withEpisodes?.resolved.properties ?? {})).toContain('slug');
+  });
+
+  it('todo componente tem exatamente as chaves do objeto Zod', () => {
     const mismatches: string[] = [];
-    for (const { file, doc } of documents) {
-      const componentSchemas = asRecord(asRecord(doc.components).schemas);
-      for (const [name, component] of Object.entries(componentSchemas)) {
-        const record = asRecord(component);
-        const zodName = record['x-zod-schema'];
-        if (typeof zodName !== 'string') continue;
-        if (!isRecord(record.properties)) continue;
-        const objectSchema = unwrapObject(zodExport(zodName));
-        if (objectSchema === null) {
-          mismatches.push(`${file} ${name}: ${zodName} nao e um objeto Zod`);
-          continue;
-        }
-        const yamlProps = Object.keys(record.properties).sort();
-        const zodProps = Object.keys(objectSchema.shape).sort();
-        if (JSON.stringify(yamlProps) !== JSON.stringify(zodProps)) {
+    for (const entry of zodBackedComponents) {
+      if (!entry.resolved.hasProperties) continue;
+      const objectSchema = unwrapObject(zodExport(entry.zodName));
+      if (objectSchema === null) {
+        mismatches.push(`${entry.file} ${entry.name}: ${entry.zodName} nao e um objeto Zod`);
+        continue;
+      }
+      const yamlProps = Object.keys(entry.resolved.properties).sort();
+      const zodProps = Object.keys(objectSchema.shape).sort();
+      if (JSON.stringify(yamlProps) !== JSON.stringify(zodProps)) {
+        mismatches.push(
+          `${entry.file} ${entry.name} (${entry.zodName}): yaml=[${yamlProps.join(',')}] zod=[${zodProps.join(',')}]`,
+        );
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+
+  it('o required do YAML bate com as chaves obrigatorias do Zod (nullable != optional)', () => {
+    const mismatches: string[] = [];
+    for (const entry of zodBackedComponents) {
+      if (!entry.resolved.hasProperties) continue;
+      const objectSchema = unwrapObject(zodExport(entry.zodName));
+      if (objectSchema === null) continue;
+      const yamlRequired = [...entry.resolved.required].sort();
+      const zodRequired = zodRequiredKeys(objectSchema);
+      if (JSON.stringify(yamlRequired) !== JSON.stringify(zodRequired)) {
+        mismatches.push(
+          `${entry.file} ${entry.name} (${entry.zodName}): yaml=[${yamlRequired.join(',')}] zod=[${zodRequired.join(',')}]`,
+        );
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+
+  it('o type de cada property bate com o tipo do campo Zod', () => {
+    const mismatches: string[] = [];
+    for (const entry of zodBackedComponents) {
+      if (!entry.resolved.hasProperties) continue;
+      const objectSchema = unwrapObject(zodExport(entry.zodName));
+      if (objectSchema === null) continue;
+      for (const [propertyName, property] of Object.entries(entry.resolved.properties)) {
+        const yamlType = asRecord(property).type;
+        if (typeof yamlType !== 'string') continue;
+        const field = objectSchema.shape[propertyName];
+        if (field === undefined) continue;
+        const zodKind = zodTypeKind(field);
+        if (zodKind === null) continue;
+        const accepted = zodKind === 'integer' ? ['integer', 'number'] : [zodKind];
+        if (!accepted.includes(yamlType)) {
           mismatches.push(
-            `${file} ${name} (${zodName}): yaml=[${yamlProps.join(',')}] zod=[${zodProps.join(',')}]`,
+            `${entry.file} ${entry.name}.${propertyName}: yaml=${yamlType} zod=${zodKind}`,
           );
         }
       }
@@ -554,10 +686,10 @@ describe('contracts/api — propriedades vs shape Zod', () => {
     for (const { file, doc } of documents) {
       const componentSchemas = asRecord(asRecord(doc.components).schemas);
       for (const [name, component] of Object.entries(componentSchemas)) {
-        const record = asRecord(component);
-        if (!isRecord(record.properties)) continue;
-        const properties = Object.keys(record.properties);
-        for (const required of asStringArray(record.required)) {
+        const resolved = resolveComponent(doc, component);
+        if (!resolved.hasProperties) continue;
+        const properties = Object.keys(resolved.properties);
+        for (const required of resolved.required) {
           if (!properties.includes(required)) mismatches.push(`${file} ${name}.${required}`);
         }
       }
