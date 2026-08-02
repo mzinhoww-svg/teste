@@ -3,11 +3,11 @@
  * (`GET /api/events`, `GET /api/events/summary`, `PATCH /api/site-config`).
  *
  * A decisão de autorização é DELEGADA a `requireAuth` de TCK-004
- * (`src/lib/auth-helpers.ts`) — nenhuma regra de RBAC é reimplementada aqui.
- * `requireAuth(request, { role })` já aplica a hierarquia de papéis e as regras
- * BR-001/BR-002 sobre método e pathname, e devolve
- * `{ ok: true, user, session }` ou `{ ok: false, response }` com a resposta
- * 401/403 pronta.
+ * (`src/lib/auth-helpers.ts`): `requireAuth(request, { role })` aplica a
+ * hierarquia de papéis e as regras BR-001/BR-002 sobre método e pathname, e
+ * devolve `{ ok: true, user, session }` ou `{ ok: false, response }` com a
+ * resposta 401/403 pronta. Nada de RBAC é reimplementado aqui — a única
+ * conferência local é a asserção final documentada em `normalizeAuthResult`.
  *
  * O que esta ponte acrescenta:
  * 1. traduz o resultado para `{ ok, code, message }`, para que os handlers de
@@ -70,43 +70,35 @@ function statusOf(value: unknown): number | null {
 }
 
 /**
- * Normaliza o resultado de `requireAuth` e reforça o papel exigido pela rota.
+ * Normaliza o `AuthOutcome` de TCK-004 para o formato dos handlers.
  *
- * Formas cobertas:
- * - `{ ok: true, user, session }`   -> forma de TCK-004
- * - `{ ok: false, response }`       -> negativa de TCK-004 (401 ou 403)
- * - `{ user }` / `{ data: { user } }` / o próprio usuário
- * - `Response` 401/403
- * - `null` / `undefined` / qualquer outra coisa -> negado (401)
+ * Formas reconhecidas — exatamente as que `requireAuth` devolve:
+ * - `{ ok: true, user, session }` -> autorizado
+ * - `{ ok: false, response }`     -> negado, com 401/403 lido da resposta
  *
- * A checagem de papel é repetida aqui de propósito: se a chamada esquecer de
- * passar `role`, a rota ainda assim não abre para EDITOR (defesa em
- * profundidade, mesma postura de `docs/SECURITY.md`).
+ * Qualquer outra coisa (`null`, exceção já tratada, retorno inesperado de uma
+ * versão futura do helper) degrada para **negado com 401**. É deliberado que o
+ * caso desconhecido feche a porta em vez de tentar adivinhar.
+ *
+ * A conferência de papel abaixo NÃO é uma segunda implementação de RBAC — a
+ * decisão continua sendo do `authorize()` de TCK-004, que já roda dentro de
+ * `requireAuth`. É uma asserção final: se um dia alguém chamar esta ponte sem
+ * `role`, ou o helper mudar o default, a rota ainda não abre para EDITOR.
  */
 export function normalizeAuthResult(
   raw: unknown,
   requiredRole: AdminRoleValue,
 ): AuthorizationResult {
-  if (raw === null || raw === undefined) return UNAUTHORIZED;
+  if (!isRecord(raw)) return UNAUTHORIZED;
 
-  const asResponseStatus = statusOf(raw);
-  if (asResponseStatus !== null) {
-    return asResponseStatus === 403 ? forbidden(requiredRole) : UNAUTHORIZED;
+  if (raw.ok !== true) {
+    return statusOf(raw.response) === 403 ? forbidden(requiredRole) : UNAUTHORIZED;
   }
 
-  if (isRecord(raw) && raw.ok === false) {
-    const status = statusOf(raw.response);
-    if (status !== null) return status === 403 ? forbidden(requiredRole) : UNAUTHORIZED;
-    return raw.code === 'FORBIDDEN' ? forbidden(requiredRole) : UNAUTHORIZED;
-  }
-
-  const envelope = isRecord(raw) ? raw : {};
-  const nested = isRecord(envelope.data) ? envelope.data : {};
-  const user =
-    readUser(envelope.user) ?? readUser(nested.user) ?? readUser(nested) ?? readUser(envelope);
+  const user = readUser(raw.user);
   if (user === null) return UNAUTHORIZED;
 
-  // BR-001/BR-002: ADMIN é estritamente mais forte que EDITOR.
+  // Asserção de defesa em profundidade (BR-001/BR-002 já foram avaliadas).
   if (requiredRole === 'ADMIN' && user.role !== 'ADMIN') return forbidden(requiredRole);
 
   return { ok: true, user };

@@ -168,15 +168,56 @@ describe('POST /api/events', () => {
     expect(mocks.eventLog.create).not.toHaveBeenCalled();
   });
 
-  it('recusa corpo acima do teto de bytes', async () => {
+  it('recusa corpo acima do teto com 413 (mesmo código de POST /api/upload)', async () => {
     const response = await POST(
       postRequest({ eventType: 'PAGE_VIEW', payload: { path: 'x'.repeat(9_000) } }),
     );
     const body = await response.json();
 
-    expect(response.status).toBe(422);
+    expect(response.status).toBe(413);
+    expect(body.error.code).toBe('PAYLOAD_TOO_LARGE');
     expect(body.error.message).toContain('bytes');
     expect(mocks.eventLog.create).not.toHaveBeenCalled();
+  });
+
+  it('mede o corpo em bytes UTF-8: 3.000 ideogramas não passam por um teto de 8.192', async () => {
+    // `length` do corpo fica abaixo de 8.192, mas são ~9.000 bytes UTF-8.
+    const raw = JSON.stringify({ eventType: 'PAGE_VIEW', payload: { path: '漢'.repeat(3_000) } });
+    expect(raw.length).toBeLessThan(8_192);
+    expect(new TextEncoder().encode(raw).length).toBeGreaterThan(8_192);
+
+    const response = await POST(postRequest(raw));
+
+    expect(response.status).toBe(413);
+    expect((await response.json()).error.code).toBe('PAYLOAD_TOO_LARGE');
+    expect(mocks.eventLog.create).not.toHaveBeenCalled();
+  });
+
+  it('payload multibyte acima do teto da coluna Json também vira 413', async () => {
+    const response = await POST(
+      postRequest({ eventType: 'PAGE_VIEW', payload: { path: '漢'.repeat(1_500) } }),
+    );
+
+    expect(response.status).toBe(413);
+    expect(mocks.eventLog.create).not.toHaveBeenCalled();
+  });
+
+  it('aceita payload multibyte dentro do teto', async () => {
+    const response = await POST(
+      postRequest({ eventType: 'PAGE_VIEW', payload: { path: '/programa/edição-🎙' } }),
+    );
+
+    expect(response.status).toBe(201);
+    expect(mocks.eventLog.create).toHaveBeenCalledWith({
+      data: { eventType: 'PAGE_VIEW', payload: { path: '/programa/edição-🎙' } },
+    });
+  });
+
+  it('respostas de erro não são cacheáveis (Cache-Control: no-store)', async () => {
+    const response = await POST(postRequest({ eventType: 'NAO_EXISTE' }));
+
+    expect(response.status).toBe(422);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
   });
 
   it('recusa corpo malformado ou vazio com 400', async () => {
@@ -388,11 +429,19 @@ describe('normalizeAuthResult (ponte para requireAuth de TCK-004)', () => {
       '@/app/api/events/_lib/admin-auth',
     );
 
-  it('nega quando requireAuth devolve vazio', async () => {
+  it.each([
+    ['null', null],
+    ['undefined', undefined],
+    ['string solta', 'ok'],
+    ['objeto vazio', {}],
+    ['ok:true sem usuário', { ok: true, user: null }],
+    ['ok:true com papel desconhecido', { ok: true, user: { id: 'u', role: 'ROOT' } }],
+  ])('degrada para 401 no retorno inesperado: %s', async (_label, raw) => {
     const { normalizeAuthResult } = await load();
-    expect(normalizeAuthResult(null, 'ADMIN')).toMatchObject({ ok: false, code: 'UNAUTHORIZED' });
-    expect(normalizeAuthResult(undefined, 'ADMIN')).toMatchObject({ code: 'UNAUTHORIZED' });
-    expect(normalizeAuthResult({ user: null }, 'ADMIN')).toMatchObject({ code: 'UNAUTHORIZED' });
+    expect(normalizeAuthResult(raw, 'ADMIN')).toMatchObject({
+      ok: false,
+      code: 'UNAUTHORIZED',
+    });
   });
 
   it('traduz o AuthOutcome real de TCK-004', async () => {
@@ -411,29 +460,15 @@ describe('normalizeAuthResult (ponte para requireAuth de TCK-004)', () => {
     ).toMatchObject({ ok: false, code: 'FORBIDDEN' });
   });
 
-  it('aceita as formas plausíveis de retorno do helper', async () => {
-    const { normalizeAuthResult } = await load();
-    const user = { id: 'u1', email: 'a@b.co', role: 'ADMIN' };
-    expect(normalizeAuthResult(user, 'ADMIN')).toEqual({ ok: true, user });
-    expect(normalizeAuthResult({ user }, 'ADMIN')).toEqual({ ok: true, user });
-    expect(normalizeAuthResult({ data: { user } }, 'ADMIN')).toEqual({ ok: true, user });
-  });
-
-  it('traduz Response de erro em 401/403', async () => {
-    const { normalizeAuthResult } = await load();
-    expect(normalizeAuthResult(new Response(null, { status: 401 }), 'ADMIN')).toMatchObject({
-      code: 'UNAUTHORIZED',
-    });
-    expect(normalizeAuthResult(new Response(null, { status: 403 }), 'ADMIN')).toMatchObject({
-      code: 'FORBIDDEN',
-    });
-  });
-
-  it('EDITOR não passa onde ADMIN é exigido (BR-002)', async () => {
+  it('asserção final de papel: EDITAR autorizado não abre rota de ADMIN', async () => {
     const { normalizeAuthResult } = await load();
     const editor = { id: 'u2', email: 'editor@b.co', role: 'EDITOR' };
-    expect(normalizeAuthResult(editor, 'ADMIN')).toMatchObject({ ok: false, code: 'FORBIDDEN' });
-    expect(normalizeAuthResult(editor, 'EDITOR')).toMatchObject({ ok: true });
+
+    expect(normalizeAuthResult({ ok: true, user: editor }, 'ADMIN')).toMatchObject({
+      ok: false,
+      code: 'FORBIDDEN',
+    });
+    expect(normalizeAuthResult({ ok: true, user: editor }, 'EDITOR')).toMatchObject({ ok: true });
   });
 
   it('nega por padrão quando a resolução da sessão explode', async () => {

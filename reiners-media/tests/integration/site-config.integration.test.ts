@@ -236,6 +236,28 @@ describe('PATCH /api/site-config', () => {
     expect(response.status).toBe(400);
   });
 
+  it('recusa corpo acima do teto com 413, medido em bytes UTF-8', async () => {
+    // `customCss` aceita 50k caracteres; o teto do corpo é 131.072 bytes.
+    // 60.000 ideogramas têm `length` 60.000 e ~180.000 bytes UTF-8.
+    const raw = JSON.stringify({ customCss: '漢'.repeat(60_000) });
+    expect(raw.length).toBeLessThan(131_072);
+    expect(new TextEncoder().encode(raw).length).toBeGreaterThan(131_072);
+
+    const response = await PATCH(patchRequest(raw));
+
+    expect(response.status).toBe(413);
+    expect((await response.json()).error.code).toBe('PAYLOAD_TOO_LARGE');
+    expect(mocks.siteConfig.update).not.toHaveBeenCalled();
+  });
+
+  it('erros de autorização não são cacheáveis (Cache-Control: no-store)', async () => {
+    mocks.auth.result = EDITOR_DENIED;
+    const response = await PATCH(patchRequest({ siteName: 'Editor tentando' }));
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+  });
+
   it('responde 404 quando a configuração ainda não existe', async () => {
     mocks.siteConfig.findFirst.mockResolvedValueOnce(null);
 

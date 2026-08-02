@@ -108,9 +108,33 @@ export const FORBIDDEN_PAYLOAD_KEYS: readonly string[] = [
 
 export type SanitizedPayload = Record<string, unknown> | null;
 
+/**
+ * Motivo da recusa, que o handler traduz em status HTTP.
+ *
+ * REGRA: `PAYLOAD_TOO_LARGE` (413) é reservado a limite de TAMANHO EM BYTES —
+ * o mesmo significado que `POST /api/upload` dá ao arquivo acima de 5MB.
+ * Limite estrutural (profundidade, nº de chaves, itens de lista, tamanho de
+ * texto) é `VALIDATION_ERROR` (422): o cliente conserta reestruturando o
+ * payload, não encolhendo bytes.
+ */
+export type PayloadRejectionCode = 'VALIDATION_ERROR' | 'PAYLOAD_TOO_LARGE';
+
 export type PayloadSanitizationResult =
   | { ok: true; payload: SanitizedPayload }
-  | { ok: false; reason: string; path: string };
+  | { ok: false; code: PayloadRejectionCode; reason: string; path: string };
+
+/**
+ * Tamanho em BYTES UTF-8 — que é o que ocupa disco na coluna `Json` e o que
+ * trafega na rede.
+ *
+ * `String.length` conta unidades UTF-16 e SUBCONTA em até 3x: `'漢'.length` é 1
+ * e ocupa 3 bytes; um emoji fora do BMP tem `length` 2 e ocupa 4 bytes. Como
+ * `POST /api/events` é público e escreve no banco, medir errado aqui é
+ * exatamente o buraco que o teto deveria fechar.
+ */
+export function utf8ByteLength(value: string): number {
+  return new TextEncoder().encode(value).length;
+}
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -131,11 +155,16 @@ function formatPath(segments: (string | number)[]): string {
 export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult {
   if (input === undefined || input === null) return { ok: true, payload: null };
   if (!isPlainObject(input)) {
-    return { ok: false, reason: 'payload deve ser um objeto JSON', path: 'payload' };
+    return {
+      ok: false,
+      code: 'VALIDATION_ERROR',
+      reason: 'payload deve ser um objeto JSON',
+      path: 'payload',
+    };
   }
 
   let nodes = 0;
-  let failure: { reason: string; path: string } | null = null;
+  let failure: { code: PayloadRejectionCode; reason: string; path: string } | null = null;
 
   function walk(value: unknown, depth: number, path: (string | number)[]): unknown {
     if (failure !== null) return undefined;
@@ -145,6 +174,7 @@ export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult 
     nodes += 1;
     if (nodes > EVENT_PAYLOAD_MAX_NODES) {
       failure = {
+        code: 'VALIDATION_ERROR',
         reason: `payload excede ${EVENT_PAYLOAD_MAX_NODES} nós`,
         path: formatPath(path),
       };
@@ -153,6 +183,7 @@ export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult 
 
     if (depth > EVENT_PAYLOAD_MAX_DEPTH) {
       failure = {
+        code: 'VALIDATION_ERROR',
         reason: `payload excede a profundidade máxima de ${EVENT_PAYLOAD_MAX_DEPTH}`,
         path: formatPath(path),
       };
@@ -165,6 +196,7 @@ export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult 
       case 'string':
         if (value.length > EVENT_PAYLOAD_MAX_STRING_LENGTH) {
           failure = {
+            code: 'VALIDATION_ERROR',
             reason: `texto excede ${EVENT_PAYLOAD_MAX_STRING_LENGTH} caracteres`,
             path: formatPath(path),
           };
@@ -175,7 +207,11 @@ export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult 
         return value;
       case 'number':
         if (!Number.isFinite(value)) {
-          failure = { reason: 'número precisa ser finito', path: formatPath(path) };
+          failure = {
+            code: 'VALIDATION_ERROR',
+            reason: 'número precisa ser finito',
+            path: formatPath(path),
+          };
           return undefined;
         }
         return value;
@@ -183,6 +219,7 @@ export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult 
         break;
       default:
         failure = {
+          code: 'VALIDATION_ERROR',
           reason: `tipo ${typeof value} não é serializável em JSON`,
           path: formatPath(path),
         };
@@ -192,6 +229,7 @@ export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult 
     if (Array.isArray(value)) {
       if (value.length > EVENT_PAYLOAD_MAX_ARRAY_ITEMS) {
         failure = {
+          code: 'VALIDATION_ERROR',
           reason: `lista excede ${EVENT_PAYLOAD_MAX_ARRAY_ITEMS} itens`,
           path: formatPath(path),
         };
@@ -207,13 +245,18 @@ export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult 
     }
 
     if (!isPlainObject(value)) {
-      failure = { reason: 'objeto não serializável em JSON', path: formatPath(path) };
+      failure = {
+        code: 'VALIDATION_ERROR',
+        reason: 'objeto não serializável em JSON',
+        path: formatPath(path),
+      };
       return undefined;
     }
 
     const keys = Object.keys(value);
     if (keys.length > EVENT_PAYLOAD_MAX_KEYS) {
       failure = {
+        code: 'VALIDATION_ERROR',
         reason: `objeto excede ${EVENT_PAYLOAD_MAX_KEYS} chaves`,
         path: formatPath(path),
       };
@@ -223,11 +266,16 @@ export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult 
     const result: Record<string, unknown> = {};
     for (const key of keys) {
       if (FORBIDDEN_PAYLOAD_KEYS.includes(key.toLowerCase())) {
-        failure = { reason: `chave "${key}" não é permitida`, path: formatPath([...path, key]) };
+        failure = {
+          code: 'VALIDATION_ERROR',
+          reason: `chave "${key}" não é permitida`,
+          path: formatPath([...path, key]),
+        };
         return undefined;
       }
       if (!EVENT_PAYLOAD_KEY_REGEX.test(key)) {
         failure = {
+          code: 'VALIDATION_ERROR',
           reason: `chave "${key}" fora do formato aceito (${EVENT_PAYLOAD_KEY_REGEX.source})`,
           path: formatPath([...path, key]),
         };
@@ -241,13 +289,20 @@ export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult 
   }
 
   const sanitized = walk(input, 1, []);
-  if (failure !== null) return { ok: false, ...(failure as { reason: string; path: string }) };
+  if (failure !== null) {
+    // O cast existe porque o fluxo de controle não enxerga as atribuições
+    // feitas dentro de `walk`, e por isso estreita `failure` para `null`.
+    const rejection = failure as { code: PayloadRejectionCode; reason: string; path: string };
+    return { ok: false, code: rejection.code, reason: rejection.reason, path: rejection.path };
+  }
 
-  const serialized = JSON.stringify(sanitized ?? {});
-  if (serialized.length > EVENT_PAYLOAD_MAX_BYTES) {
+  // BYTES UTF-8, não `String.length`: ver `utf8ByteLength`.
+  const serializedBytes = utf8ByteLength(JSON.stringify(sanitized ?? {}));
+  if (serializedBytes > EVENT_PAYLOAD_MAX_BYTES) {
     return {
       ok: false,
-      reason: `payload serializado excede ${EVENT_PAYLOAD_MAX_BYTES} bytes`,
+      code: 'PAYLOAD_TOO_LARGE',
+      reason: `payload serializado excede ${EVENT_PAYLOAD_MAX_BYTES} bytes UTF-8 (recebido: ${serializedBytes})`,
       path: 'payload',
     };
   }
@@ -257,6 +312,7 @@ export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult 
     const issue = parsed.error.issues[0];
     return {
       ok: false,
+      code: 'VALIDATION_ERROR',
       reason: issue?.message ?? 'payload inválido',
       path: formatPath(issue?.path ?? []),
     };
@@ -268,11 +324,14 @@ export function sanitizeEventPayload(input: unknown): PayloadSanitizationResult 
 /** Erro lançado por `recordEvent` quando o payload não passa no saneamento. */
 export class AnalyticsPayloadError extends Error {
   readonly path: string;
+  /** `PAYLOAD_TOO_LARGE` -> 413; `VALIDATION_ERROR` -> 422. */
+  readonly code: PayloadRejectionCode;
 
-  constructor(reason: string, path: string) {
+  constructor(reason: string, path: string, code: PayloadRejectionCode = 'VALIDATION_ERROR') {
     super(reason);
     this.name = 'AnalyticsPayloadError';
     this.path = path;
+    this.code = code;
   }
 }
 
@@ -343,7 +402,9 @@ export async function recordEvent(
 ): Promise<PublicEvent> {
   const eventType = eventTypeSchema.parse(input.eventType);
   const sanitized = sanitizeEventPayload(input.payload);
-  if (!sanitized.ok) throw new AnalyticsPayloadError(sanitized.reason, sanitized.path);
+  if (!sanitized.ok) {
+    throw new AnalyticsPayloadError(sanitized.reason, sanitized.path, sanitized.code);
+  }
 
   const row = await client.eventLog.create({
     data: {

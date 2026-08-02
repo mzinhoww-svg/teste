@@ -43,6 +43,7 @@ import {
   summarizeEvents,
   toPublicEvent,
   toPublicSiteConfig,
+  utf8ByteLength,
 } from '@/lib/analytics';
 import { EVENT_LOG_RETENTION_DAYS } from '@/lib/schemas';
 
@@ -161,12 +162,70 @@ describe('sanitizeEventPayload', () => {
     for (let i = 0; i < 5; i += 1) payload[`f${i}`] = chunk;
     const result = sanitizeEventPayload(payload);
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.reason).toContain(String(EVENT_PAYLOAD_MAX_BYTES));
+    if (!result.ok) {
+      expect(result.reason).toContain(String(EVENT_PAYLOAD_MAX_BYTES));
+      expect(result.code).toBe('PAYLOAD_TOO_LARGE');
+    }
+  });
+
+  it('mede o teto em BYTES UTF-8, não em unidades UTF-16', () => {
+    // 1500 ideogramas: `length` 1.500 (< 4096, passaria pela medida errada),
+    // mas 4.500 bytes UTF-8 — acima do teto.
+    const cjk = '漢'.repeat(1_500);
+    expect(cjk.length).toBeLessThan(EVENT_PAYLOAD_MAX_BYTES);
+    expect(utf8ByteLength(cjk)).toBeGreaterThan(EVENT_PAYLOAD_MAX_BYTES);
+
+    const result = sanitizeEventPayload({ path: cjk });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.code).toBe('PAYLOAD_TOO_LARGE');
+  });
+
+  it('emoji fora do BMP conta 4 bytes, não 2 unidades UTF-16', () => {
+    expect('🎙'.length).toBe(2);
+    expect(utf8ByteLength('🎙')).toBe(4);
+
+    // Dois campos de 1.000 emojis: cada string tem `length` 2.000 e passa no
+    // limite por texto (2.048), mas o payload inteiro tem ~8.000 bytes UTF-8 —
+    // acima do teto de 4.096. Medido em `String.length` (4.000) passaria.
+    const chunk = '🎙'.repeat(1_000);
+    expect(chunk.length).toBeLessThanOrEqual(EVENT_PAYLOAD_MAX_STRING_LENGTH);
+    const payload = { a: chunk, b: chunk };
+    expect(JSON.stringify(payload).length).toBeLessThan(EVENT_PAYLOAD_MAX_BYTES + 100);
+    expect(utf8ByteLength(JSON.stringify(payload))).toBeGreaterThan(EVENT_PAYLOAD_MAX_BYTES);
+
+    const result = sanitizeEventPayload(payload);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.code).toBe('PAYLOAD_TOO_LARGE');
+  });
+
+  it('aceita conteúdo multibyte que cabe no teto real', () => {
+    const result = sanitizeEventPayload({ path: '/programa/edição-especial-🎙' });
+    expect(result.ok).toBe(true);
   });
 
   it('recusa número não finito', () => {
     const result = sanitizeEventPayload({ ratio: Number.POSITIVE_INFINITY });
     expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('413 é só para bytes; limite estrutural é 422', () => {
+    // Estrutural -> VALIDATION_ERROR (o cliente conserta reestruturando).
+    for (const structural of [
+      JSON.parse('{"__proto__": {"a": 1}}') as unknown,
+      { items: Array.from({ length: EVENT_PAYLOAD_MAX_ARRAY_ITEMS + 1 }, (_v, i) => i) },
+      { a: { b: { c: { d: { e: 1 } } } } },
+      { note: 'x'.repeat(EVENT_PAYLOAD_MAX_STRING_LENGTH + 1) },
+    ]) {
+      const result = sanitizeEventPayload(structural);
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.code).toBe('VALIDATION_ERROR');
+    }
+
+    // Tamanho em bytes -> PAYLOAD_TOO_LARGE.
+    const big = sanitizeEventPayload({ path: '漢'.repeat(1_500) });
+    expect(big.ok).toBe(false);
+    if (!big.ok) expect(big.code).toBe('PAYLOAD_TOO_LARGE');
   });
 
   it('descarta valores undefined em vez de recusar', () => {
@@ -196,6 +255,16 @@ describe('sanitizeEventPayload', () => {
 
   it('mantém o teto de nós compatível com o teto de chaves', () => {
     expect(EVENT_PAYLOAD_MAX_NODES).toBeGreaterThan(EVENT_PAYLOAD_MAX_KEYS);
+  });
+});
+
+describe('utf8ByteLength', () => {
+  it('conta bytes UTF-8, divergindo de String.length em multibyte', () => {
+    expect(utf8ByteLength('abc')).toBe(3);
+    expect(utf8ByteLength('漢')).toBe(3);
+    expect('漢'.length).toBe(1);
+    expect(utf8ByteLength('ç')).toBe(2);
+    expect(utf8ByteLength('🎙')).toBe(4);
   });
 });
 
@@ -325,6 +394,10 @@ describe('recordEvent', () => {
       }),
     ).rejects.toBeInstanceOf(AnalyticsPayloadError);
     expect(create).not.toHaveBeenCalled();
+
+    await expect(
+      recordEvent(client, { eventType: 'PAGE_VIEW', payload: { path: '漢'.repeat(2_000) } }),
+    ).rejects.toMatchObject({ code: 'PAYLOAD_TOO_LARGE' });
   });
 
   it('recordEventSafe engole a falha e devolve false', async () => {

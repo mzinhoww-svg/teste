@@ -14,21 +14,27 @@
 import { NextResponse } from 'next/server';
 import type { z } from 'zod';
 
+import { utf8ByteLength } from '@/lib/analytics';
 import type { RateLimitPolicy, RateLimitResult } from '@/lib/auth-helpers';
 import {
   consumeRateLimit,
+  errorResponse,
   getClientIp,
   rateLimitHeaders,
   rateLimitKey,
 } from '@/lib/auth-helpers';
-import { ERROR_STATUS_BY_CODE, errorResponseSchema } from '@/lib/schemas';
+import { errorResponseSchema } from '@/lib/schemas';
 
 export type ApiErrorCode = z.infer<typeof errorResponseSchema>['error']['code'];
 
 /**
  * Envelope de erro único da API: `{ error: { code, message, details? } }`.
- * O corpo é validado pelo próprio `errorResponseSchema` antes de sair — um erro
- * malformado é tão quebrado quanto um sucesso malformado.
+ *
+ * Delega em `errorResponse` de TCK-004 — mesmo construtor usado pelo middleware,
+ * por `/api/auth/**` e pelos handlers de TCK-005/006. Isso garante o mesmo mapa
+ * `ERROR_STATUS_BY_CODE` e, principalmente, o mesmo `Cache-Control: no-store`:
+ * uma resposta de erro cacheada na borda serviria 403 (ou 429) a quem tinha
+ * direito de passar.
  */
 export function apiError(
   code: ApiErrorCode,
@@ -36,12 +42,9 @@ export function apiError(
   details?: Record<string, unknown>,
   init?: { headers?: Record<string, string> },
 ): NextResponse {
-  const body = errorResponseSchema.parse({
-    error: { code, message, ...(details === undefined ? {} : { details }) },
-  });
-  return NextResponse.json(body, {
-    status: ERROR_STATUS_BY_CODE[code],
-    headers: init?.headers,
+  return errorResponse(code, message, {
+    ...(details === undefined ? {} : { details }),
+    ...(init?.headers === undefined ? {} : { headers: init.headers }),
   });
 }
 
@@ -96,7 +99,18 @@ export function enforceRateLimit(
   };
 }
 
-/** Lê e faz `JSON.parse` do corpo com teto de bytes, sem estourar exceção. */
+/**
+ * Lê e faz `JSON.parse` do corpo com teto de bytes, sem estourar exceção.
+ *
+ * O teto é medido em BYTES UTF-8 (`utf8ByteLength`), não em `String.length`:
+ * `'漢'.repeat(7000)` tem `length` 7.000 e ocupa 21.000 bytes — passaria por um
+ * teto de 8.192 medido em unidades UTF-16. `String.length` é apenas um limite
+ * INFERIOR do tamanho real, então não serve como guarda: a medição é sempre a
+ * de bytes, feita uma única vez sobre o corpo já materializado por `.text()`.
+ *
+ * Excesso de tamanho responde 413 PAYLOAD_TOO_LARGE — o mesmo código que
+ * `POST /api/upload` usa para arquivo acima de 5MB.
+ */
 export async function readJsonBody(
   request: Request,
   maxBytes: number,
@@ -104,16 +118,17 @@ export async function readJsonBody(
   | { ok: true; value: unknown }
   | { ok: false; response: NextResponse }
 > {
+  const tooLarge = (receivedBytes: number): { ok: false; response: NextResponse } => ({
+    ok: false,
+    response: apiError('PAYLOAD_TOO_LARGE', `Corpo da requisição excede ${maxBytes} bytes`, {
+      maxBytes,
+      receivedBytes,
+    }),
+  });
+
   const raw = await request.text();
-  if (raw.length > maxBytes) {
-    return {
-      ok: false,
-      response: apiError('VALIDATION_ERROR', `Corpo da requisição excede ${maxBytes} bytes`, {
-        maxBytes,
-        receivedBytes: raw.length,
-      }),
-    };
-  }
+  const receivedBytes = utf8ByteLength(raw);
+  if (receivedBytes > maxBytes) return tooLarge(receivedBytes);
   if (raw.trim() === '') {
     return { ok: false, response: apiError('BAD_REQUEST', 'Corpo da requisição é obrigatório') };
   }

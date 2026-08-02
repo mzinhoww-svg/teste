@@ -76,7 +76,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(responseBody, { status: 201, headers: limit.headers });
   } catch (error) {
     if (error instanceof AnalyticsPayloadError) {
-      return apiError('VALIDATION_ERROR', error.message, { path: error.path }, {
+      // Tamanho estourado -> 413 (mesmo código de POST /api/upload);
+      // qualquer outra recusa do saneamento -> 422.
+      return apiError(error.code, error.message, { path: error.path }, {
         headers: limit.headers,
       });
     }
