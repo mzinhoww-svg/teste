@@ -102,6 +102,47 @@ A distinção semântica não se perdeu: cada operação declara o `x-zod-params
 aplica de fato — `slugParamSchema` no GET público (que também aceita UUID, como
 atalho do painel) e `idParamSchema` no PATCH e no DELETE administrativos.
 
+### 413 x 422: qual limite foi estourado
+
+Regra fixada por TCK-007 e valida para toda a API:
+
+| Status | Significado | O que o cliente faz |
+|--------|-------------|---------------------|
+| **413** `PAYLOAD_TOO_LARGE` | limite de **tamanho em bytes** (corpo da requisicao, arquivo) | encolher o payload |
+| **422** `VALIDATION_ERROR` | limite **estrutural** (profundidade, numero de chaves, itens de lista) ou schema invalido | reestruturar o payload |
+
+Declaram 413 hoje: `POST /api/upload` (arquivo > 5MB), `POST /api/events` e
+`PATCH /api/site-config` (corpo acima do teto de bytes, medido em bytes UTF-8).
+
+### Limitação conhecida: o contrato não verifica status contra os handlers
+
+A varredura de rotas compara **path + método**. Ela **não** compara os códigos de
+status: um handler que devolve um status não declarado continua invisível — foi
+assim que o 413 de `POST /api/events` e `PATCH /api/site-config` escapou.
+
+Tentei fechar esse eixo extraindo os `ErrorCode` dos handlers. Quatro
+implementações, quatro modos de errar em silêncio:
+
+| Abordagem | Resultado |
+|-----------|-----------|
+| AST + literais, sem resolver alias de import | Falsos negativos: não via o 413 de `PATCH /site-config`, porque o helper vem de outro módulo |
+| AST + `getAliasedSymbol` + tipo do argumento | Todos os 19 métodos saturavam nos 10 códigos: wrappers como `apiError(code, …)` têm parâmetro tipado `ErrorCode`, a união inteira |
+| Idem, ignorando argumentos que são parâmetro | Simultaneamente sobra e falta: `POST /upload` acusava `NOT_FOUND`, `GET /podcasts` acusava 409, e `episodes/*` só via `RATE_LIMITED` |
+| Texto/regex, fatiando o corpo de cada método e resolvendo o `_lib` importado | Perdia justamente o 413: `readJsonBody` declara `Promise<{ ok: true; … }>`, e o `{` do **tipo de retorno** vem antes do `{` do corpo, então a fatia pegava a anotação |
+
+Fazer isso direito exige propagação de constantes interprocedural e sensibilidade
+a caminho. Cada aproximação barata erra de um jeito que só aparece conferindo as
+19 linhas à mão contra o código — e um teste verde em que ninguém confia é pior
+que uma limitação registrada.
+
+**Recomendação:** que o teste de contrato de cada ticket asserte o status das
+respostas de erro do próprio handler, onde a verificação é local e confiável.
+Do lado do contrato ficam três guardas que não dependem de analisar handler:
+o componente de erro tem de ser usado sob o status correspondente
+(`NotFound` só sob 404), o status tem de bater com `ERROR_STATUS_BY_CODE`, e as
+operações que leem corpo com teto de bytes têm de declarar 413 — esta última por
+lista explícita, que falha alto se alguém remover o 413.
+
 ### Envelopes
 
 - Sucesso único: `{ "data": <recurso> }`

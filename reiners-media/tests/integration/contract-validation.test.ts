@@ -621,6 +621,69 @@ describe('contracts/api — respostas obrigatorias', () => {
     expect(codes).toContain('415');
   });
 
+  /**
+   * Nome do componente de resposta -> status sob o qual ele pode ser
+   * referenciado. Impede trocas silenciosas (um `"409": $ref NotFound` passaria
+   * na checagem de envelope, que so olha se aponta para ErrorResponse).
+   */
+  const RESPONSE_COMPONENT_STATUS: Record<string, string> = {
+    BadRequest: '400',
+    Unauthorized: '401',
+    Forbidden: '403',
+    NotFound: '404',
+    Conflict: '409',
+    PayloadTooLarge: '413',
+    UnsupportedMediaType: '415',
+    UnprocessableEntity: '422',
+    TooManyRequests: '429',
+    InternalServerError: '500',
+  };
+
+  it('cada componente de erro e usado sob o status que lhe corresponde', () => {
+    const mismatches: string[] = [];
+    for (const entry of operations) {
+      for (const [code, response] of Object.entries(asRecord(entry.operation.responses))) {
+        const ref = asRecord(response).$ref;
+        if (typeof ref !== 'string') continue;
+        const componentName = ref.replace('#/components/responses/', '');
+        const expected = RESPONSE_COMPONENT_STATUS[componentName];
+        if (expected === undefined) {
+          mismatches.push(`${entry.label}: componente desconhecido ${componentName}`);
+        } else if (expected !== code) {
+          mismatches.push(`${entry.label}: ${componentName} usado sob ${code}, esperado ${expected}`);
+        }
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+
+  it('o status de cada componente de erro bate com ERROR_STATUS_BY_CODE', () => {
+    // PAYLOAD_TOO_LARGE -> 413 e VALIDATION_ERROR -> 422 sao a regra de divisao
+    // documentada: 413 e limite de bytes, 422 e limite estrutural.
+    expect(schemas.ERROR_STATUS_BY_CODE.PAYLOAD_TOO_LARGE).toBe(413);
+    expect(schemas.ERROR_STATUS_BY_CODE.VALIDATION_ERROR).toBe(422);
+    const used = new Set<string>();
+    for (const entry of operations) {
+      for (const response of Object.values(asRecord(entry.operation.responses))) {
+        const ref = asRecord(response).$ref;
+        if (typeof ref === 'string') used.add(ref.replace('#/components/responses/', ''));
+      }
+    }
+    expect(used.has('PayloadTooLarge')).toBe(true);
+  });
+
+  it('as operacoes que leem corpo com teto de bytes declaram 413', () => {
+    // Lista explicita: a extracao estatica dos status a partir dos handlers foi
+    // avaliada e rejeitada (ver contracts/README.md). Enquanto nao houver uma
+    // fonte confiavel, o vinculo e mantido a mao — e falha alto se alguem
+    // remover o 413 de uma destas.
+    for (const label of ['POST /api/events', 'PATCH /api/site-config', 'POST /api/upload']) {
+      const entry = operations.find((item) => item.label === label);
+      expect(entry, label).toBeDefined();
+      expect(responseCodes(entry?.operation ?? {}), label).toContain('413');
+    }
+  });
+
   it('toda resposta de erro aponta para o envelope padronizado', () => {
     for (const entry of operations) {
       const doc = documents.find((item) => item.file === entry.file)?.doc ?? {};

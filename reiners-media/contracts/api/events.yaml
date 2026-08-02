@@ -39,6 +39,8 @@ paths:
                 $ref: "#/components/schemas/EventResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
         "429":
@@ -214,6 +216,12 @@ components:
             $ref: "#/components/schemas/ErrorResponse"
     UnprocessableEntity:
       description: Falha de validacao Zod, por exemplo eventType desconhecido
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    PayloadTooLarge:
+      description: Corpo da requisicao acima do teto de bytes. 413 e reservado a limite de TAMANHO EM BYTES; limite ESTRUTURAL (profundidade, numero de chaves, itens de lista) responde 422, porque o cliente conserta reestruturando o payload em vez de encolher bytes
       content:
         application/json:
           schema:
