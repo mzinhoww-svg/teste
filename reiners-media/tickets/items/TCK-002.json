@@ -2,7 +2,7 @@
   "id": "TCK-002",
   "title": "Criar schema Prisma, migrations e seed data",
   "summary": "Definir schema Prisma completo com Podcast, Episode, SiteConfig, AdminUser, EventLog, Testimonial, Plan. Criar migrations e seed com 5 programas, 25 episódios e 1 admin.",
-  "status": "IN_PROGRESS",
+  "status": "IN_REVIEW",
   "priority": "P0",
   "type": "feature",
   "epic": "EPIC-002",
