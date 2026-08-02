@@ -1,6 +1,7 @@
 // @vitest-environment node
 /**
- * TCK-004 — testes unitários de `src/lib/auth-helpers.ts`.
+ * TCK-004 — testes unitários de `src/lib/auth-helpers.ts` e do endurecimento de
+ * cookies de `src/lib/supabase.ts`.
  *
  * Ambiente `node` (e não o jsdom padrão do projeto) porque `next/server`
  * depende de `Request`/`Response`/`Headers` do runtime, que o jsdom não
@@ -8,10 +9,34 @@
  *
  * Foco: as decisões que, se sumirem, viram falha de segurança —
  * BR-001, BR-002, origem do papel (`app_metadata` x `user_metadata`), janela
- * deslizante do rate limiter e ausência de vazamento nas respostas de erro.
+ * deslizante do rate limiter, precedência de IP e as flags `httpOnly`/`secure`/
+ * `sameSite` do cookie de sessão.
  */
+import type { CookieOptions } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 import type { User } from '@supabase/supabase-js';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { NextRequest, NextResponse } from 'next/server';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+/**
+ * O `@supabase/ssr` é substituído para CAPTURAR o adaptador de cookies que
+ * `src/lib/supabase.ts` monta. É a única forma de provar que cada adaptador
+ * realmente CHAMA `hardenCookieOptions` — testar só a função pura deixaria
+ * passar a remoção da chamada.
+ */
+vi.mock('@supabase/ssr', () => ({
+  createBrowserClient: vi.fn(() => ({})),
+  createServerClient: vi.fn(() => ({})),
+}));
+
+const { cookieStoreStub } = vi.hoisted(() => ({
+  cookieStoreStub: {
+    getAll: vi.fn((): { name: string; value: string }[] => []),
+    set: vi.fn(),
+  },
+}));
+
+vi.mock('next/headers', () => ({ cookies: () => cookieStoreStub }));
 
 import {
   ADMIN_ONLY_PATH_PREFIXES,
@@ -38,6 +63,12 @@ import {
   toExpiresAt,
 } from '@/lib/auth-helpers';
 import { ERROR_STATUS_BY_CODE, adminUserSchema, errorResponseSchema, loginSchema } from '@/lib/schemas';
+import {
+  EXPIRED_COOKIE_OPTIONS,
+  createMiddlewareSupabaseClient,
+  createRouteHandlerSupabaseClient,
+  hardenCookieOptions,
+} from '@/lib/supabase';
 
 const USER_ID = '9f8e7d6c-5b4a-4321-9876-543210fedcba';
 
@@ -268,7 +299,24 @@ describe('ANONYMOUS_SESSION', () => {
 });
 
 describe('getClientIp', () => {
-  it('usa o primeiro endereço de x-forwarded-for', () => {
+  it('prefere o IP da plataforma (não falsificável) ao cabeçalho', () => {
+    const spoofed = {
+      headers: new Headers({ 'x-forwarded-for': '1.2.3.4', 'x-real-ip': '5.6.7.8' }),
+      ip: '203.0.113.1',
+    };
+    expect(getClientIp(spoofed)).toBe('203.0.113.1');
+  });
+
+  it('um x-forwarded-for rotativo NÃO troca a chave quando a plataforma dá o IP', () => {
+    const keys = new Set(
+      ['9.9.9.1', '9.9.9.2', '9.9.9.3'].map((forged) =>
+        getClientIp({ headers: new Headers({ 'x-forwarded-for': forged }), ip: '203.0.113.1' }),
+      ),
+    );
+    expect(keys).toEqual(new Set(['203.0.113.1']));
+  });
+
+  it('usa o primeiro endereço de x-forwarded-for quando a plataforma não informa o IP', () => {
     expect(getClientIp(makeHeaders({ 'x-forwarded-for': '203.0.113.5, 10.0.0.1, 10.0.0.2' }))).toBe(
       '203.0.113.5',
     );
@@ -418,5 +466,227 @@ describe('enforceRateLimit', () => {
     expect(enforceRateLimit(attacker, 'rota', policy)).toBeNull();
     expect(enforceRateLimit(attacker, 'rota', policy)).not.toBeNull();
     expect(enforceRateLimit(visitor, 'rota', policy)).toBeNull();
+  });
+
+  it('não é evadível girando o x-forwarded-for quando a plataforma informa o IP', () => {
+    const policy = { limit: 3, windowMs: 60_000 };
+    let blocked = 0;
+
+    for (let attempt = 0; attempt < 50; attempt += 1) {
+      const forged = {
+        headers: new Headers({ 'x-forwarded-for': `10.0.0.${attempt}` }),
+        ip: '203.0.113.99',
+      };
+      if (enforceRateLimit(forged, 'rota', policy) !== null) blocked += 1;
+    }
+
+    expect(blocked).toBe(47);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Endurecimento do cookie de sessão (src/lib/supabase.ts)                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * docs/SECURITY.md — "JWT em cookie httpOnly, secure, SameSite=strict".
+ *
+ * Estes testes existem porque a garantia mora em DOIS lugares: a função pura
+ * `hardenCookieOptions` E a chamada dela dentro de cada adaptador de cookies.
+ * Testar só a função deixaria passar a remoção da chamada; testar só o
+ * adaptador deixaria passar o enfraquecimento da função. Os dois são cobertos.
+ *
+ * Se `httpOnly` cair, o cookie de sessão passa a ser legível por
+ * `document.cookie` e o roubo de token por XSS — a ameaça que o cookie httpOnly
+ * existe para mitigar — volta a ser possível.
+ */
+const SUPABASE_ENV = {
+  NEXT_PUBLIC_SUPABASE_URL: 'https://projeto-de-teste.supabase.co',
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: 'anon-key-de-teste',
+};
+
+/** Opções cruas como o `@supabase/ssr` as emite: SEM nenhuma flag de segurança. */
+const RAW_SUPABASE_COOKIE_OPTIONS: CookieOptions = { path: '/', maxAge: 86_400 };
+
+interface CapturedCookieAdapter {
+  getAll: () => { name: string; value: string }[];
+  setAll?: (cookies: { name: string; value: string; options: CookieOptions }[]) => void;
+}
+
+/** Adaptador de cookies entregue ao `createServerClient` na última chamada. */
+function capturedCookieAdapter(): CapturedCookieAdapter {
+  const lastCall = vi.mocked(createServerClient).mock.calls.at(-1);
+  expect(lastCall).toBeDefined();
+  const options = lastCall?.[2] as { cookies: CapturedCookieAdapter };
+  return options.cookies;
+}
+
+describe('hardenCookieOptions (função pura)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('impõe httpOnly, sameSite=strict e path em opções cruas do Supabase', () => {
+    const hardened = hardenCookieOptions(RAW_SUPABASE_COOKIE_OPTIONS);
+
+    expect(hardened.httpOnly).toBe(true);
+    expect(hardened.sameSite).toBe('strict');
+    expect(hardened.path).toBe('/');
+  });
+
+  it('preserva as opções de expiração vindas do Supabase', () => {
+    const hardened = hardenCookieOptions({ ...RAW_SUPABASE_COOKIE_OPTIONS, domain: '.reiners.media' });
+
+    expect(hardened.maxAge).toBe(86_400);
+    expect(hardened.domain).toBe('.reiners.media');
+  });
+
+  it('NÃO deixa o chamador enfraquecer as flags de segurança', () => {
+    const hardened = hardenCookieOptions({
+      httpOnly: false,
+      sameSite: 'none',
+      secure: false,
+      path: '/admin',
+    });
+
+    expect(hardened.httpOnly).toBe(true);
+    expect(hardened.sameSite).toBe('strict');
+    /* `path` é a única flag que o chamador pode escolher. */
+    expect(hardened.path).toBe('/admin');
+  });
+
+  it('marca secure em produção', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    expect(hardenCookieOptions(RAW_SUPABASE_COOKIE_OPTIONS).secure).toBe(true);
+  });
+
+  it('não marca secure fora de produção (http://localhost precisa funcionar)', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    expect(hardenCookieOptions(RAW_SUPABASE_COOKIE_OPTIONS).secure).toBe(false);
+  });
+
+  it('endurece até a chamada sem argumento', () => {
+    const hardened = hardenCookieOptions();
+
+    expect(hardened.httpOnly).toBe(true);
+    expect(hardened.sameSite).toBe('strict');
+    expect(hardened.path).toBe('/');
+  });
+
+  it('EXPIRED_COOKIE_OPTIONS (logout) também é httpOnly e strict', () => {
+    expect(EXPIRED_COOKIE_OPTIONS.httpOnly).toBe(true);
+    expect(EXPIRED_COOKIE_OPTIONS.sameSite).toBe('strict');
+    expect(EXPIRED_COOKIE_OPTIONS.maxAge).toBe(0);
+  });
+});
+
+describe('adaptador de cookies do route handler', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', SUPABASE_ENV.NEXT_PUBLIC_SUPABASE_URL);
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', SUPABASE_ENV.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('grava o cookie de sessão SEMPRE endurecido', async () => {
+    await createRouteHandlerSupabaseClient();
+
+    capturedCookieAdapter().setAll?.([
+      { name: 'sb-projeto-auth-token', value: 'jwt', options: RAW_SUPABASE_COOKIE_OPTIONS },
+    ]);
+
+    expect(cookieStoreStub.set).toHaveBeenCalledTimes(1);
+    const [name, value, options] = cookieStoreStub.set.mock.calls[0] as [
+      string,
+      string,
+      CookieOptions,
+    ];
+
+    expect(name).toBe('sb-projeto-auth-token');
+    expect(value).toBe('jwt');
+    /* Falha se `hardenCookieOptions` sumir da chamada ou for enfraquecida. */
+    expect(options.httpOnly).toBe(true);
+    expect(options.sameSite).toBe('strict');
+    expect(options.maxAge).toBe(86_400);
+  });
+
+  it('lê os cookies da request sem carregar campos extras', async () => {
+    cookieStoreStub.getAll.mockReturnValueOnce([
+      { name: 'sb-projeto-auth-token', value: 'jwt', extra: 'ignorado' } as unknown as {
+        name: string;
+        value: string;
+      },
+    ]);
+
+    await createRouteHandlerSupabaseClient();
+
+    expect(capturedCookieAdapter().getAll()).toEqual([
+      { name: 'sb-projeto-auth-token', value: 'jwt' },
+    ]);
+  });
+
+  it('falha alto quando falta variável de ambiente, sem ecoar valores', async () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', '');
+
+    await expect(createRouteHandlerSupabaseClient()).rejects.toThrow(
+      /NEXT_PUBLIC_SUPABASE_ANON_KEY/,
+    );
+  });
+});
+
+describe('adaptador de cookies do middleware', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', SUPABASE_ENV.NEXT_PUBLIC_SUPABASE_URL);
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', SUPABASE_ENV.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('grava o cookie renovado na RESPONSE sempre endurecido', () => {
+    const request = new NextRequest('https://reiners.media/admin');
+    const response = NextResponse.next();
+
+    createMiddlewareSupabaseClient(request, response);
+    capturedCookieAdapter().setAll?.([
+      { name: 'sb-projeto-auth-token', value: 'jwt-renovado', options: RAW_SUPABASE_COOKIE_OPTIONS },
+    ]);
+
+    const cookie = response.cookies.get('sb-projeto-auth-token');
+    expect(cookie?.value).toBe('jwt-renovado');
+    /* Falha se `hardenCookieOptions` sumir da chamada ou for enfraquecida. */
+    expect(cookie?.httpOnly).toBe(true);
+    expect(cookie?.sameSite).toBe('strict');
+    expect(cookie?.maxAge).toBe(86_400);
+  });
+
+  it('propaga o cookie renovado para a REQUEST (evita deslogar por 1 request)', () => {
+    const request = new NextRequest('https://reiners.media/admin');
+    const response = NextResponse.next();
+
+    createMiddlewareSupabaseClient(request, response);
+    capturedCookieAdapter().setAll?.([
+      { name: 'sb-projeto-auth-token', value: 'jwt-renovado', options: RAW_SUPABASE_COOKIE_OPTIONS },
+    ]);
+
+    expect(request.cookies.get('sb-projeto-auth-token')?.value).toBe('jwt-renovado');
+  });
+
+  it('lê os cookies da NextRequest', () => {
+    const request = new NextRequest('https://reiners.media/admin', {
+      headers: { cookie: 'sb-projeto-auth-token=jwt; outro=valor' },
+    });
+
+    createMiddlewareSupabaseClient(request, NextResponse.next());
+
+    expect(capturedCookieAdapter().getAll()).toEqual([
+      { name: 'sb-projeto-auth-token', value: 'jwt' },
+      { name: 'outro', value: 'valor' },
+    ]);
   });
 });

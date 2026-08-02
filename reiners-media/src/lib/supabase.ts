@@ -78,6 +78,14 @@ function isProduction(): boolean {
  * `sameSite: 'strict'` vem de docs/SECURITY.md. O fluxo de login é same-site
  * (form do painel -> `/api/auth/login` -> redirect para `/admin`), então
  * `strict` não quebra nada e elimina CSRF em requisições cross-site.
+ *
+ * O spread vem PRIMEIRO de propósito: `httpOnly`, `sameSite` e `secure`
+ * sobrescrevem o que o chamador mandou e não são negociáveis. Só `path` é
+ * escolha de quem chama. Inverter essa ordem devolveria ao `@supabase/ssr` (ou
+ * a qualquer chamador) o poder de desligar o `httpOnly`.
+ *
+ * Coberto por `tests/unit/auth-helpers.test.ts` tanto na função quanto na
+ * CHAMADA de cada adaptador — remover qualquer uma das duas derruba teste.
  */
 export function hardenCookieOptions(options: CookieOptions = {}): CookieOptions {
   return {

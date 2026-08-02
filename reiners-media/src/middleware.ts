@@ -41,6 +41,12 @@ export const NEXT_PARAM = 'next';
  * - `POST /api/auth/login` — é o próprio ato de criar a sessão;
  * - `POST /api/events` — ingestão pública de analytics (docs/API_CONTRACTS.md),
  *   protegida por rate limit no handler (TCK-021), não por autenticação.
+ *
+ * A lista é uma allowlist EXATA, nunca por prefixo. Casar por prefixo faria
+ * qualquer rota futura sob `/api/events/*` (por exemplo um `POST` em
+ * `/api/events/summary`) nascer isenta do guard de sessão sem que ninguém
+ * tivesse decidido isso — uma isenção acidental é a pior forma de isenção.
+ * Uma rota nova só fica pública se for adicionada aqui explicitamente.
  */
 export const PUBLIC_MUTATION_PATHS: readonly string[] = ['/api/auth/login', '/api/events'];
 
@@ -49,9 +55,7 @@ function isAdminPage(pathname: string): boolean {
 }
 
 function isPublicMutation(pathname: string): boolean {
-  return PUBLIC_MUTATION_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
+  return PUBLIC_MUTATION_PATHS.includes(pathname);
 }
 
 /* -------------------------------------------------------------------------- */

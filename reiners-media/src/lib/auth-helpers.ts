@@ -480,15 +480,32 @@ export function rateLimitKey(routeId: string, identifier: string): string {
 }
 
 /**
- * IP do cliente atrás do proxy da Vercel. `x-forwarded-for` é uma lista
- * `cliente, proxy1, proxy2`: só o primeiro elemento interessa.
+ * IP do cliente, em ordem DECRESCENTE de confiança.
+ *
+ * 1. `request.ip` — preenchido pela própria plataforma (`NextRequest.ip` na
+ *    Vercel) a partir da conexão TCP. É o único valor que o cliente não
+ *    consegue escolher, então vem primeiro.
+ * 2. `x-forwarded-for` / `x-real-ip` — cabeçalhos, e portanto FALSIFICÁVEIS por
+ *    quem fala direto com a aplicação. Só são consultados quando a plataforma
+ *    não fornece o IP (self-host atrás de um proxy reverso confiável, ambiente
+ *    de teste). `x-forwarded-for` é a lista `cliente, proxy1, proxy2`: apenas o
+ *    primeiro elemento identifica o cliente.
+ *
+ * A ordem importa: com os cabeçalhos na frente, um atacante gira o
+ * `x-forwarded-for` a cada requisição, cai numa chave de rate limit nova toda
+ * vez e nunca é bloqueado. Na Vercel o cabeçalho é reescrito pela borda e o
+ * ataque não se aplica — mas depender dessa normalização seria confiar num
+ * detalhe de plataforma para uma garantia de segurança.
  */
 export function getClientIp(request: { headers: Headers; ip?: string }): string {
+  const platformIp = request.ip?.trim();
+  if (platformIp) return platformIp;
+
   const forwardedFor = request.headers.get('x-forwarded-for');
   const first = forwardedFor?.split(',')[0]?.trim();
   if (first) return first;
 
-  return request.headers.get('x-real-ip')?.trim() || request.ip || 'unknown';
+  return request.headers.get('x-real-ip')?.trim() || 'unknown';
 }
 
 /** Remove baldes cujas marcas já saíram da janela. */

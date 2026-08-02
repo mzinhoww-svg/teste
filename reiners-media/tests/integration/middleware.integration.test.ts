@@ -195,6 +195,22 @@ describe('APIs mutantes — 401 sem sessão', () => {
     expect(response.status).toBe(401);
   });
 
+  it.each([
+    '/api/events/summary',
+    '/api/events/export',
+    '/api/auth/login/callback',
+  ])(
+    'a isenção é por caminho EXATO: %s continua exigindo sessão',
+    async (pathname) => {
+      const response = await middleware(request(pathname, { method: 'POST' }));
+
+      /* Casar a allowlist por prefixo faria esta sub-rota nascer pública sem
+         que ninguém tivesse decidido isso. */
+      expect(response.status).toBe(401);
+      expect((await response.json()).error.code).toBe('UNAUTHORIZED');
+    },
+  );
+
   it('deixa passar a mutação de um EDITOR autenticado', async () => {
     givenSupabaseUser(makeUser('EDITOR'));
 
