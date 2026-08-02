@@ -77,6 +77,11 @@ export type TextKey =
  * - `strong`  — limite enfático, >= 4.7:1.
  * - `accent`  — limite em estado selecionado/ativo, >= 3:1.
  * - `focus`   — anel de foco de teclado, >= 3:1.
+ *
+ * `accent` e `focus` são meios-tons de propósito: garantem os 3:1 tanto sobre
+ * as superfícies normais quanto sobre `surface.inverse`, que inverte a
+ * polaridade dentro do mesmo tema. Não troque por um tom mais claro no dark
+ * "para destacar" — é exatamente o que reprova sobre a faixa invertida.
  */
 export type BorderKey = 'subtle' | 'default' | 'strong' | 'accent' | 'focus';
 

@@ -91,10 +91,47 @@ function flatten(value: unknown, prefix = ''): Array<[string, string]> {
 }
 
 const allPrimitiveValues = new Set(flatten(primitives).map(([, value]) => value));
-const globalsCss = readFileSync(
-  path.resolve(process.cwd(), 'src/styles/globals.css'),
-  'utf8',
-);
+
+const readSource = (relative: string): string =>
+  readFileSync(path.resolve(process.cwd(), relative), 'utf8');
+
+const globalsCss = readSource('src/styles/globals.css');
+const tokensSource = readSource('src/lib/tokens.ts');
+const typesSource = readSource('src/types/tokens.ts');
+
+/** Recorta o trecho entre duas âncoras — para ancorar asserções ao contexto. */
+function sectionOf(source: string, startAnchor: string, endAnchor: string): string {
+  const start = source.indexOf(startAnchor);
+  expect(start, `bloco não encontrado: "${startAnchor}"`).toBeGreaterThan(-1);
+
+  const end = source.indexOf(endAnchor, start + startAnchor.length);
+  expect(end, `fim do bloco não encontrado: "${endAnchor}"`).toBeGreaterThan(start);
+
+  return source.slice(start, end);
+}
+
+/**
+ * Devolve o docblock COLADO acima de `anchor`. Falha se não houver docblock ou
+ * se existir qualquer código entre o `*​/` e a âncora — é isso que impede o
+ * teste de ser satisfeito por uma menção solta em outro ponto do arquivo.
+ */
+function docblockAbove(source: string, anchor: string): string {
+  const index = source.indexOf(anchor);
+  expect(index, `âncora não encontrada: "${anchor}"`).toBeGreaterThan(-1);
+
+  const before = source.slice(0, index);
+  const open = before.lastIndexOf('/**');
+  const close = before.lastIndexOf('*/');
+
+  expect(open, `não há docblock antes de "${anchor}"`).toBeGreaterThan(-1);
+  expect(close, `docblock antes de "${anchor}" não foi fechado`).toBeGreaterThan(open);
+  expect(
+    before.slice(close + 2).trim(),
+    `o docblock não está colado em "${anchor}" — há código entre os dois`,
+  ).toBe('');
+
+  return before.slice(open, close + 2);
+}
 
 function toNumber(value: string, unit: string): number {
   expect(value.endsWith(unit), `"${value}" deveria terminar em "${unit}"`).toBe(true);
@@ -412,18 +449,33 @@ describe('contraste WCAG 2.2 AA', () => {
 describe('limite de componente (WCAG 2.2 §1.4.11)', () => {
   const AA_NON_TEXT = 3;
 
-  /** Superfícies sobre as quais um card/campo pode assentar. */
+  /**
+   * Superfícies sobre as quais um componente pode assentar.
+   * `surface.inverse` INVERTE a polaridade dentro do mesmo tema (no dark é
+   * creme, no light é navy), então uma borda válida precisa sobreviver aos
+   * dois extremos do mesmo esquema — é a superfície que mais aperta.
+   */
   const contentSurfaces: ColorTokenPath[] = [
     'surface.base',
     'surface.sunken',
     'surface.raised',
     'surface.accent',
+    'surface.inverse',
   ];
 
-  /** Bordas autorizadas a serem o único indicador de limite. */
-  const boundaryBorders: ColorTokenPath[] = ['border.default', 'border.strong'];
+  /**
+   * Bordas que podem ser o único indicador de limite ou de estado.
+   * `focus` e `accent` entram: o anel de foco de teclado é desenhado sobre
+   * qualquer superfície onde o componente estiver, inclusive a invertida.
+   */
+  const boundaryBorders: ColorTokenPath[] = [
+    'border.default',
+    'border.strong',
+    'border.accent',
+    'border.focus',
+  ];
 
-  it('border.default e border.strong têm >= 3:1 contra toda superfície de conteúdo', () => {
+  it('toda borda de limite tem >= 3:1 contra toda superfície, inclusive a invertida', () => {
     const failures: string[] = [];
 
     for (const scheme of SCHEMES) {
@@ -476,14 +528,49 @@ describe('limite de componente (WCAG 2.2 §1.4.11)', () => {
     }
   });
 
-  it('border.subtle está documentado como decorativo (não serve de limite)', () => {
-    const source = readFileSync(path.resolve(process.cwd(), 'src/lib/tokens.ts'), 'utf8');
-    const types = readFileSync(
-      path.resolve(process.cwd(), 'src/types/tokens.ts'),
-      'utf8',
+  /**
+   * Estes três testes são ancorados ao CONTEXTO, não ao arquivo inteiro:
+   * casam o docblock imediatamente acima do alvo. Apagar a documentação real
+   * de `border.subtle` derruba o teste mesmo que as palavras "decorativo" e
+   * "1.4.11" continuem existindo em outras linhas dos mesmos arquivos.
+   */
+  it('o docblock colado em border.subtle avisa que ele não serve de limite', () => {
+    const borderGroup = sectionOf(tokensSource, '  border: {', '\n  },');
+    const doc = docblockAbove(borderGroup, 'subtle:');
+
+    expect(doc, 'docblock de border.subtle: falta "decorativo"').toMatch(/decorativ/i);
+    expect(doc, 'docblock de border.subtle: falta a referência 1.4.11').toMatch(
+      /1\.4\.11/,
     );
-    expect(`${source}${types}`).toMatch(/decorativ/i);
-    expect(`${source}${types}`).toMatch(/1\.4\.11/);
+    expect(doc, 'docblock de border.subtle: falta a proibição de uso').toMatch(
+      /(nunca|não\s+usar|nao\s+usar)/i,
+    );
+    expect(doc, 'docblock de border.subtle: falta apontar a alternativa').toMatch(
+      /border\.default|`default`/,
+    );
+  });
+
+  it('o docblock de BorderKey diferencia subtle de default', () => {
+    const doc = docblockAbove(typesSource, 'export type BorderKey');
+
+    expect(doc, 'docblock de BorderKey: falta citar `subtle`').toMatch(/subtle/);
+    expect(doc, 'docblock de BorderKey: falta "decorativo"').toMatch(/decorativ/i);
+    expect(doc, 'docblock de BorderKey: falta a referência 1.4.11').toMatch(/1\.4\.11/);
+    expect(doc, 'docblock de BorderKey: falta descrever `default` como seguro').toMatch(
+      /default/,
+    );
+  });
+
+  it('o cabeçalho de tokens.ts registra o ajuste de limite de componente', () => {
+    const header = tokensSource.slice(0, tokensSource.indexOf('*/') + 2);
+
+    expect(header, 'cabeçalho: falta a seção de limite de componente').toMatch(
+      /LIMITE DE COMPONENTE/i,
+    );
+    expect(header, 'cabeçalho: falta a referência 1.4.11').toMatch(/1\.4\.11/);
+    expect(header, 'cabeçalho: falta registrar a borda ajustada').toMatch(
+      /border\.default/,
+    );
   });
 
   it('estados têm >= 3:1 contra a própria superfície tonal', () => {

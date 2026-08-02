@@ -197,13 +197,13 @@
     --color-border-subtle: 19 19 25;
     --color-border-default: 99 99 110;
     --color-border-strong: 138 138 150;
-    --color-border-accent: 216 125 255;
-    --color-border-focus: 226 156 255;
+    --color-border-accent: 184 79 224;
+    --color-border-focus: 184 79 224;
 
     /* accent */
     --color-accent-default: 216 125 255;
     --color-accent-hover: 226 156 255;
-    --color-accent-active: 196 91 238;
+    --color-accent-active: 184 79 224;
     --color-accent-subtle: 26 11 34;
     --color-accent-contrast: 11 11 15;
 

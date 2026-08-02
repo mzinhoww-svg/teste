@@ -49,6 +49,21 @@
  *     `border.subtle` segue baixo de propósito: é decorativo (ver o token).
  *     Ver também o bloco de `shadow`: sombra preta não eleva nada no dark.
  *
+ *  f) LIMITE DE COMPONENTE SOBRE SUPERFÍCIE INVERTIDA. `surface.inverse`
+ *     inverte a polaridade DENTRO do mesmo tema (no dark ela é creme; no
+ *     light, navy). Um anel de foco claro como `orchid.400` #E29CFF resolve
+ *     10.43:1 sobre o preto do dark e desaba para 1.88:1 assim que o botão
+ *     entra numa faixa `bg-surface-inverse` — e `border.accent` #d87dff cai
+ *     para 2.37:1. Como o foco de teclado é desenhado onde quer que o
+ *     componente esteja, o token precisa sobreviver aos dois extremos.
+ *     → `border.focus` e `border.accent` (dark) passaram a `orchid.600`
+ *       #B84FE0, meio-tom com luminância ~0.216, dentro da janela [0.10,
+ *       0.27] que garante >= 3:1 contra preto E contra creme: 5.23:1 sobre
+ *       `surface.base` e 3.76:1 sobre `surface.inverse`. No light,
+ *       `orchid.700` #9B3FC0 já cumpria os dois lados (5.08:1 / 3.62:1).
+ *     Não foi preciso tornar o token sensível à superfície nem tocar em
+ *     marca: #d87dff segue intacto em `brand.orchid` e `accent.default`.
+ *
  * Contrastes mínimos garantidos por `tests/unit/tokens.test.ts`, que roda o
  * cálculo WCAG sobre a matriz texto × superfície e borda × superfície nos dois
  * esquemas.
@@ -141,13 +156,20 @@ export const primitives = {
     100: '#F3E9D2',
   },
 
-  /** PodFactory orquídea — 500 (#d87dff) é o accentColor default de Podcast. */
+  /**
+   * PodFactory orquídea — 500 (#d87dff) é o accentColor default de Podcast.
+   *
+   * 600 e 700 são os "meios-tons de inversão": luminância relativa entre
+   * ~0.10 e ~0.27, a única janela que entrega >= 3:1 SIMULTANEAMENTE contra
+   * preto (#000000) e contra creme (#FAF7F2). São eles que permitem um anel
+   * de foco único por tema, válido também sobre `surface.inverse`.
+   */
   orchid: {
     950: '#1A0B22',
     900: '#5C1F74',
     800: '#7E2D9E',
     700: '#9B3FC0',
-    600: '#C45BEE',
+    600: '#B84FE0',
     500: '#d87dff',
     400: '#E29CFF',
     300: '#ECBCFF',
@@ -277,9 +299,19 @@ const color = {
     default: { light: primitives.cream[600], dark: primitives.navy[400] },
     /** Limite enfático — 4.72:1 (light) / 5.52:1 (dark). */
     strong: { light: primitives.cream[700], dark: primitives.navy[300] },
-    accent: { light: primitives.orchid[700], dark: primitives.orchid[500] },
-    /** Anel de foco — 5.08:1 (light) / 10.43:1 (dark), acima dos 3:1 de AA. */
-    focus: { light: primitives.orchid[700], dark: primitives.orchid[400] },
+    /**
+     * Limite em estado selecionado/ativo. Usa meio-tom de orquídea (não o
+     * #d87dff de marca) para continuar visível quando o componente assenta
+     * sobre `surface.inverse` — mín. 3.62:1 (light) / 3.76:1 (dark).
+     */
+    accent: { light: primitives.orchid[700], dark: primitives.orchid[600] },
+    /**
+     * Anel de foco de teclado. Valor ÚNICO por tema que atravessa todas as
+     * superfícies, inclusive a invertida: mín. 3.62:1 (light, o pior caso é
+     * sobre `surface.inverse` navy) e 3.76:1 (dark, pior caso sobre
+     * `surface.inverse` creme). Ver nota (f) no cabeçalho.
+     */
+    focus: { light: primitives.orchid[700], dark: primitives.orchid[600] },
   },
 
   accent: {
