@@ -2,7 +2,7 @@
   "id": "TCK-002",
   "title": "Criar schema Prisma, migrations e seed data",
   "summary": "Definir schema Prisma completo com Podcast, Episode, SiteConfig, AdminUser, EventLog, Testimonial, Plan. Criar migrations e seed com 5 programas, 25 episódios e 1 admin.",
-  "status": "READY",
+  "status": "IN_PROGRESS",
   "priority": "P0",
   "type": "feature",
   "epic": "EPIC-002",
@@ -75,5 +75,11 @@
     "npx prisma migrate dev",
     "npx prisma db seed",
     "pnpm test:integration migration"
-  ]
+  ],
+  "claim": {
+    "agent": "backend-engineer",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
 }

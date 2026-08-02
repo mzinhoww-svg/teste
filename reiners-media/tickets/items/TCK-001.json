@@ -2,7 +2,7 @@
   "id": "TCK-001",
   "title": "Implementar design tokens semânticos e theme system",
   "summary": "Criar sistema de design tokens baseado no PodFactory + Reiners Media DS, exportando cores, tipografia, espaçamento, sombras, radius e motion em TypeScript e Tailwind config.",
-  "status": "READY",
+  "status": "IN_PROGRESS",
   "priority": "P0",
   "type": "feature",
   "epic": "EPIC-001",
@@ -72,5 +72,11 @@
     "pnpm lint",
     "pnpm typecheck",
     "pnpm test:unit tokens"
-  ]
+  ],
+  "claim": {
+    "agent": "frontend-engineer",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
 }

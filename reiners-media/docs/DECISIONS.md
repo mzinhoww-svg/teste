@@ -92,3 +92,11 @@
 **Consequências:** `tailwind.config.ts` fica de fora do scaffold por ser `write_path` explícito de TCK-001.
 **Status:** Aprovado.
 **Tickets:** Pré-onda 0.
+
+## DEC-012: Tickets JSON prevalecem sobre a tabela de ondas do ROADMAP.md
+**Contexto:** A partir de TCK-008 a tabela "Ondas de Execução" de `docs/ROADMAP.md` está deslocada em relação aos tickets canônicos. O ROADMAP descreve TCK-008 como "Admin auth & RBAC" e TCK-009 como "Shared UI components"; nos tickets, TCK-008 é "Criar componentes UI compartilhados base" (wave 2) e TCK-009 é "Implementar layout system" (wave 2). O deslocamento se propaga até TCK-025. Os campos `wave` dos tickets, `tickets/waves.json` e `tickets/manifest.json` são mutuamente consistentes; só a prosa do ROADMAP diverge.
+**Decisão:** Seguir os tickets JSON, conforme CLAUDE.md §3 ("tickets/items/TCK-XXX.json — fonte de verdade do estado") e §4 (hierarquia de documentos). O ROADMAP não é alterado nesta execução — a divergência fica registrada aqui para não ser reintroduzida como "correção" numa sessão futura.
+**Alternativas:** Reescrever a tabela do ROADMAP — rejeitado nesta execução: alterar documento de planejamento sem necessidade funcional, quando as três outras fontes já concordam entre si.
+**Consequências:** Quem ler apenas o ROADMAP verá um mapa ticket→escopo defasado a partir de TCK-008. As fases ("Fase 0..5") e os gates do ROADMAP continuam válidos.
+**Status:** Aprovado.
+**Tickets:** TCK-008 a TCK-025.
