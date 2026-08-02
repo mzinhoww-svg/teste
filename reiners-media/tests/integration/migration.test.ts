@@ -122,3 +122,32 @@ describe('down.sql (rollback)', () => {
     expect(down).not.toMatch(/CREATE TABLE/);
   });
 });
+
+describe('down.sql — histórico de migrations (docs/ROLLBACK_PLAN.md §2)', () => {
+  it('remove o registro da migration em _prisma_migrations', () => {
+    expect(down).toMatch(/DELETE FROM "_prisma_migrations"/);
+    expect(down).toMatch(/"migration_name"\s*=\s*'20260802000000_init'/);
+  });
+
+  it('protege o DELETE quando _prisma_migrations não existe', () => {
+    expect(down).toMatch(/information_schema\.tables/);
+    expect(down).toMatch(/IF EXISTS/);
+    expect(down).toMatch(/DO \$\$/);
+  });
+
+  it('limpa o histórico depois de derrubar as tabelas', () => {
+    const lastDrop = down.lastIndexOf('DROP TABLE');
+    const cleanup = down.indexOf('DELETE FROM "_prisma_migrations"');
+
+    expect(cleanup).toBeGreaterThan(lastDrop);
+  });
+
+  it('documenta a ausência de down nativa e a alternativa suportada', () => {
+    expect(down).toMatch(/prisma migrate resolve --rolled-back 20260802000000_init/);
+  });
+
+  it('o nome da migration no down bate com a pasta da migration', () => {
+    const folder = path.basename(INIT_DIR);
+    expect(down).toContain(folder);
+  });
+});

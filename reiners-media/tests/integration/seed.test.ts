@@ -1,5 +1,13 @@
 // @vitest-environment node
-import { describe, expect, it } from 'vitest';
+import type { PrismaClient } from '@prisma/client';
+import { describe, expect, it, vi } from 'vitest';
+
+import {
+  episodeCreateSchema,
+  podcastCreateSchema,
+  siteConfigCreateSchema,
+  testimonialCreateSchema,
+} from '@/lib/schemas';
 
 import {
   ADMIN_USER_SEED,
@@ -7,13 +15,16 @@ import {
   EPISODE_SEED,
   PLAN_SEED,
   PODCAST_SEED,
+  PRODUCTION_SEED_OVERRIDE,
   SITE_CONFIG_ID,
   SITE_CONFIG_SEED,
   TESTIMONIAL_SEED,
+  assertSeedAllowed,
   buildAdminUser,
   buildEpisodes,
   deterministicId,
   episodeId,
+  seed,
 } from '../../prisma/seed';
 
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
@@ -291,10 +302,325 @@ describe('idempotência — identificadores determinísticos', () => {
   });
 });
 
-describe('efeitos colaterais', () => {
-  it('importar o seed não executa main() nem abre conexão', async () => {
-    const module = await import('../../prisma/seed');
-    expect(typeof module.seed).toBe('function');
-    expect(module.PODCAST_SEED).toHaveLength(5);
+/* -------------------------------------------------------------------------- */
+/* Contrato Zod — os dados do seed precisam passar pelos schemas reais da API  */
+/* -------------------------------------------------------------------------- */
+
+describe('contrato — dados do seed vs. schemas Zod de src/lib/schemas', () => {
+  const fakePodcastId = (slug: string) => deterministicId(`podcast:${slug}`);
+
+  it.each(PODCAST_SEED.map((p) => [p.slug, p] as const))(
+    'programa %s satisfaz podcastCreateSchema',
+    (_slug, podcast) => {
+      const result = podcastCreateSchema.safeParse(podcast);
+
+      expect(
+        result.success ? null : result.error.issues,
+        'seed de programa rejeitado pelo contrato Zod',
+      ).toBeNull();
+    },
+  );
+
+  it.each(EPISODE_SEED.map((e) => [`${e.podcastSlug}#${e.number}`, e] as const))(
+    'episódio %s satisfaz episodeCreateSchema',
+    (_label, episode) => {
+      // `*Embed` é derivado no servidor (BR-007/BR-008) e não faz parte do create.
+      const payload = {
+        podcastId: fakePodcastId(episode.podcastSlug),
+        number: episode.number,
+        title: episode.title,
+        description: episode.description,
+        thumbnail: episode.thumbnail,
+        duration: episode.duration,
+        publishedAt: episode.publishedAt,
+        youtubeUrl: episode.youtubeUrl,
+        spotifyUrl: episode.spotifyUrl,
+      };
+
+      const result = episodeCreateSchema.safeParse(payload);
+
+      expect(
+        result.success ? null : result.error.issues,
+        'seed de episódio rejeitado pelo contrato Zod',
+      ).toBeNull();
+    },
+  );
+
+  it('SITE_CONFIG_SEED satisfaz siteConfigCreateSchema', () => {
+    const result = siteConfigCreateSchema.safeParse(SITE_CONFIG_SEED);
+
+    expect(result.success ? null : result.error.issues).toBeNull();
+  });
+
+  it.each(TESTIMONIAL_SEED.map((t) => [t.name, t] as const))(
+    'depoimento de %s satisfaz testimonialCreateSchema',
+    (_name, testimonial) => {
+      const payload = {
+        name: testimonial.name,
+        role: testimonial.role,
+        quote: testimonial.quote,
+        avatarUrl: testimonial.avatarUrl,
+        podcastId: testimonial.podcastSlug
+          ? fakePodcastId(testimonial.podcastSlug)
+          : null,
+      };
+
+      const result = testimonialCreateSchema.safeParse(payload);
+
+      expect(result.success ? null : result.error.issues).toBeNull();
+    },
+  );
+});
+
+/* -------------------------------------------------------------------------- */
+/* Guarda de ambiente (segurança)                                             */
+/* -------------------------------------------------------------------------- */
+
+describe('assertSeedAllowed — não popula produção sem confirmação', () => {
+  it('permite fora de produção', () => {
+    expect(() => assertSeedAllowed({})).not.toThrow();
+    expect(() => assertSeedAllowed({ NODE_ENV: 'development' })).not.toThrow();
+    expect(() => assertSeedAllowed({ NODE_ENV: 'test' })).not.toThrow();
+  });
+
+  it('bloqueia em produção sem a variável de confirmação', () => {
+    expect(() => assertSeedAllowed({ NODE_ENV: 'production' })).toThrow(
+      /ALLOW_PRODUCTION_SEED/,
+    );
+  });
+
+  it('bloqueia em produção com confirmação inválida', () => {
+    for (const value of ['', 'false', '1', 'yes', 'TRUE']) {
+      expect(() =>
+        assertSeedAllowed({
+          NODE_ENV: 'production',
+          [PRODUCTION_SEED_OVERRIDE]: value,
+        }),
+      ).toThrow(/Seed bloqueado/);
+    }
+  });
+
+  it('libera em produção com ALLOW_PRODUCTION_SEED=true', () => {
+    expect(() =>
+      assertSeedAllowed({
+        NODE_ENV: 'production',
+        [PRODUCTION_SEED_OVERRIDE]: 'true',
+      }),
+    ).not.toThrow();
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* seed() — execução contra um PrismaClient mockado                            */
+/* -------------------------------------------------------------------------- */
+
+interface UpsertArgs {
+  where: Record<string, unknown>;
+  create: Record<string, unknown>;
+  update: Record<string, unknown>;
+}
+
+interface RecordedCall extends UpsertArgs {
+  model: string;
+}
+
+/** id previsível devolvido pelo upsert de Podcast, para rastrear a FK. */
+const mockPodcastId = (slug: string) => `podcast-row-id::${slug}`;
+
+function createPrismaMock() {
+  const calls: RecordedCall[] = [];
+  const rawCreates: string[] = [];
+
+  const model = (
+    name: string,
+    onUpsert: (args: UpsertArgs) => { id: string },
+  ) => ({
+    upsert: vi.fn((args: UpsertArgs) => {
+      calls.push({ model: name, ...args });
+      return Promise.resolve(onUpsert(args));
+    }),
+    create: vi.fn(() => {
+      rawCreates.push(name);
+      return Promise.resolve({ id: 'raw' });
+    }),
+    createMany: vi.fn(() => {
+      rawCreates.push(`${name}.createMany`);
+      return Promise.resolve({ count: 0 });
+    }),
+  });
+
+  const podcast = {
+    ...model(
+      'podcast',
+      (args) => ({ id: mockPodcastId(String(args.where.slug)) }),
+    ),
+    findUnique: vi.fn((args: { where: { slug: string } }) =>
+      Promise.resolve({ id: mockPodcastId(args.where.slug) }),
+    ),
+  };
+
+  const client = {
+    podcast,
+    episode: model('episode', () => ({ id: 'episode-row-id' })),
+    plan: model('plan', () => ({ id: 'plan-row-id' })),
+    testimonial: model('testimonial', () => ({ id: 'testimonial-row-id' })),
+    siteConfig: model('siteConfig', () => ({ id: 'site-config-row-id' })),
+    adminUser: model('adminUser', () => ({ id: 'admin-row-id' })),
+    $disconnect: vi.fn(() => Promise.resolve()),
+  };
+
+  return {
+    client: client as unknown as PrismaClient,
+    calls,
+    rawCreates,
+    podcastFindUnique: podcast.findUnique,
+    of: (name: string) => calls.filter((c) => c.model === name),
+  };
+}
+
+describe('seed() — escrita no banco (PrismaClient mockado)', () => {
+  it('faz exatamente 5 upserts de Podcast, com where por slug', async () => {
+    const mock = createPrismaMock();
+    await seed(mock.client);
+
+    const podcasts = mock.of('podcast');
+    expect(podcasts).toHaveLength(5);
+    expect(podcasts.map((c) => c.where.slug)).toEqual(
+      PODCAST_SEED.map((p) => p.slug),
+    );
+  });
+
+  it('faz exatamente 25 upserts de Episode, com where por id determinístico', async () => {
+    const mock = createPrismaMock();
+    await seed(mock.client);
+
+    const episodes = mock.of('episode');
+    expect(episodes).toHaveLength(25);
+
+    const expectedIds = EPISODE_SEED.map((e) =>
+      episodeId(e.podcastSlug, e.number),
+    );
+    expect(episodes.map((c) => c.where.id).sort()).toEqual(expectedIds.sort());
+  });
+
+  it('grava o Podcast antes de qualquer Episode (senão a FK quebra)', async () => {
+    const mock = createPrismaMock();
+    await seed(mock.client);
+
+    const firstPodcast = mock.calls.findIndex((c) => c.model === 'podcast');
+    const firstEpisode = mock.calls.findIndex((c) => c.model === 'episode');
+
+    expect(firstPodcast).toBeGreaterThanOrEqual(0);
+    expect(firstEpisode).toBeGreaterThan(firstPodcast);
+  });
+
+  it('cada Episode é gravado depois do SEU Podcast e com o podcastId resolvido', async () => {
+    const mock = createPrismaMock();
+    await seed(mock.client);
+
+    // Mapeia id determinístico do episódio -> slug esperado.
+    const slugByEpisodeId = new Map(
+      EPISODE_SEED.map((e) => [episodeId(e.podcastSlug, e.number), e.podcastSlug]),
+    );
+
+    for (const [index, call] of mock.calls.entries()) {
+      if (call.model !== 'episode') continue;
+
+      const slug = slugByEpisodeId.get(String(call.where.id));
+      expect(slug, `episódio ${String(call.where.id)} sem programa`).toBeDefined();
+
+      // FK aponta para o id devolvido pelo upsert do programa certo.
+      expect(call.create.podcastId).toBe(mockPodcastId(slug!));
+      expect(call.update.podcastId).toBe(mockPodcastId(slug!));
+
+      const ownerIndex = mock.calls.findIndex(
+        (c) => c.model === 'podcast' && c.where.slug === slug,
+      );
+      expect(ownerIndex).toBeGreaterThanOrEqual(0);
+      expect(ownerIndex).toBeLessThan(index);
+    }
+  });
+
+  it('grava planos, depoimentos, configuração e admin', async () => {
+    const mock = createPrismaMock();
+    await seed(mock.client);
+
+    expect(mock.of('plan')).toHaveLength(3);
+    expect(mock.of('testimonial')).toHaveLength(3);
+    expect(mock.of('siteConfig')).toHaveLength(1);
+    expect(mock.of('adminUser')).toHaveLength(1);
+
+    expect(mock.of('siteConfig')[0].where.id).toBe(SITE_CONFIG_ID);
+    expect(mock.of('adminUser')[0].where.email).toBe(ADMIN_USER_SEED.email);
+  });
+
+  it('resolve o podcastId dos depoimentos pelo slug, e usa null quando não há', async () => {
+    const mock = createPrismaMock();
+    await seed(mock.client);
+
+    const testimonials = mock.of('testimonial');
+
+    for (const [index, testimonial] of TESTIMONIAL_SEED.entries()) {
+      const call = testimonials[index];
+      expect(call.create.name).toBe(testimonial.name);
+      expect(call.create.podcastId).toBe(
+        testimonial.podcastSlug ? mockPodcastId(testimonial.podcastSlug) : null,
+      );
+    }
+
+    // Só consulta o programa para os depoimentos que declaram um slug.
+    const withSlug = TESTIMONIAL_SEED.filter((t) => t.podcastSlug).length;
+    expect(mock.podcastFindUnique).toHaveBeenCalledTimes(withSlug);
+  });
+
+  it('nunca usa create/createMany cru — só upsert', async () => {
+    const mock = createPrismaMock();
+    await seed(mock.client);
+
+    expect(mock.rawCreates).toEqual([]);
+    expect(mock.calls).toHaveLength(5 + 25 + 3 + 3 + 1 + 1);
+  });
+
+  it('não promove a ADMIN uma conta já existente (role fora do update)', async () => {
+    const mock = createPrismaMock();
+    await seed(mock.client);
+
+    const admin = mock.of('adminUser')[0];
+
+    expect(admin.create.role).toBe('ADMIN');
+    expect(admin.update).not.toHaveProperty('role');
+  });
+
+  it('é idempotente: duas execuções emitem exatamente os mesmos where', async () => {
+    const first = createPrismaMock();
+    await seed(first.client);
+
+    const second = createPrismaMock();
+    await seed(second.client);
+
+    const signature = (mock: ReturnType<typeof createPrismaMock>) =>
+      mock.calls.map((c) => `${c.model}:${JSON.stringify(c.where)}`);
+
+    expect(signature(second)).toEqual(signature(first));
+
+    // E o where de todo upsert é uma chave estável, nunca um id aleatório.
+    for (const call of first.calls) {
+      const key = Object.keys(call.where);
+      expect(key).toHaveLength(1);
+      expect(['slug', 'id', 'email']).toContain(key[0]);
+      expect(call.where[key[0]]).toBeTruthy();
+    }
+  });
+
+  it('propaga erro do banco em vez de engolir', async () => {
+    const mock = createPrismaMock();
+    const failing = {
+      ...(mock.client as unknown as Record<string, unknown>),
+      podcast: {
+        upsert: vi.fn(() => Promise.reject(new Error('FK violation'))),
+      },
+    } as unknown as PrismaClient;
+
+    await expect(seed(failing)).rejects.toThrow('FK violation');
   });
 });

@@ -758,6 +758,31 @@ export function buildAdminUser(env: SeedEnv = process.env): AdminUserSeed {
 export const ADMIN_USER_SEED: AdminUserSeed = buildAdminUser();
 
 /* -------------------------------------------------------------------------- */
+/* Guarda de ambiente                                                          */
+/* -------------------------------------------------------------------------- */
+
+/** Variável que libera explicitamente o seed contra um banco de produção. */
+export const PRODUCTION_SEED_OVERRIDE = 'ALLOW_PRODUCTION_SEED';
+
+export const PRODUCTION_SEED_BLOCKED_MESSAGE =
+  `Seed bloqueado: NODE_ENV=production. Este script insere programas de demonstração ` +
+  `e um AdminUser com role ADMIN. Se a intenção é mesmo popular produção, rode novamente ` +
+  `com ${PRODUCTION_SEED_OVERRIDE}=true.`;
+
+/**
+ * Impede que `pnpm db:seed` apontado para a DATABASE_URL de produção insira
+ * dados de demonstração e um administrador. Exige confirmação explícita.
+ */
+export function assertSeedAllowed(env: SeedEnv = process.env): void {
+  const isProduction = env.NODE_ENV === 'production';
+  const hasOverride = env[PRODUCTION_SEED_OVERRIDE]?.trim() === 'true';
+
+  if (isProduction && !hasOverride) {
+    throw new Error(PRODUCTION_SEED_BLOCKED_MESSAGE);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
 /* Execução                                                                    */
 /* -------------------------------------------------------------------------- */
 
@@ -866,12 +891,17 @@ export async function seed(prisma: PrismaClient): Promise<void> {
   const admin = buildAdminUser();
   await prisma.adminUser.upsert({
     where: { email: admin.email },
-    update: { name: admin.name, role: admin.role },
+    // `role` fica DE FORA do update de propósito: se a conta já existe como
+    // EDITOR, rodar o seed não pode promovê-la silenciosamente a ADMIN.
+    // O papel só é definido na criação inicial.
+    update: { name: admin.name },
     create: admin,
   });
 }
 
 async function main(): Promise<void> {
+  assertSeedAllowed();
+
   const prisma = new PrismaClient();
 
   try {
