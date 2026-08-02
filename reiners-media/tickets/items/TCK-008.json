@@ -2,7 +2,7 @@
   "id": "TCK-008",
   "title": "Criar componentes UI compartilhados base",
   "summary": "Implementar Button, Card, Input, Modal, Badge, Skeleton com 7 estados cada e acessibilidade WCAG 2.2 AA.",
-  "status": "BACKLOG",
+  "status": "IN_PROGRESS",
   "priority": "P0",
   "type": "feature",
   "epic": "EPIC-007",
@@ -69,5 +69,11 @@
     "pnpm test:unit ui",
     "pnpm lint",
     "pnpm typecheck"
-  ]
+  ],
+  "claim": {
+    "agent": "auto",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
 }

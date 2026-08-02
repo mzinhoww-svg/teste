@@ -2,7 +2,7 @@
   "id": "TCK-007",
   "title": "Implementar APIs de SiteConfig e EventLog",
   "summary": "Endpoints para gerenciar configurações do site e ingestão de eventos de analytics.",
-  "status": "BACKLOG",
+  "status": "IN_PROGRESS",
   "priority": "P1",
   "type": "feature",
   "epic": "EPIC-006",
@@ -75,5 +75,11 @@
   "validation_commands": [
     "pnpm test:integration events",
     "pnpm lint"
-  ]
+  ],
+  "claim": {
+    "agent": "auto",
+    "claimed_at": "2026-08-02T13:30:00Z",
+    "worktree": null,
+    "branch": null
+  }
 }
