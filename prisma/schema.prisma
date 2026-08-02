@@ -1,0 +1,112 @@
+// ==========================================================================
+// Catálogo de podcasts — Reiners Media (/portfolio)
+//
+// Este schema cobre EXCLUSIVAMENTE o módulo de portfólio. O CRM deste mesmo
+// repositório continua acessando o Postgres via supabase-js sob RLS (ver
+// supabase/migrations/*.sql) — os dois convivem no mesmo banco sem colisão de
+// nomes, porque todas as tabelas daqui usam o prefixo `portfolio_`.
+//
+// DATABASE_URL  → pooler do Supabase (pgbouncer, porta 6543) — runtime
+// DIRECT_URL    → conexão direta (porta 5432) — migrations
+// ==========================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Podcast {
+  id           String    @id @default(uuid())
+  slug         String    @unique
+  title        String
+  tagline      String?
+  description  String    @db.Text
+  coverImage   String
+  heroImage    String?
+  category     String
+  /// "ACTIVE" | "ENDED" | "HIATUS"
+  status       String
+  /// "PHOTO_REAL" | "ILLUSTRATION" | "MINIMAL" | "DUOTONE" | "COLLAGE"
+  visualStyle  String
+  year         Int
+  accentColor  String    @default("#d87dff")
+  /// [{ name, photo, bio, initial }]
+  hosts        Json?
+  /// { instagram?, twitter?, tiktok?, linkedin?, website?, github? }
+  socialLinks  Json?
+  episodes     Episode[]
+  featured     Boolean   @default(false)
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([featured, displayOrder])
+  @@map("portfolio_podcasts")
+}
+
+model Episode {
+  id           String   @id @default(uuid())
+  podcastId    String
+  podcast      Podcast  @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  number       Int
+  title        String
+  description  String   @db.Text
+  thumbnail    String?
+  duration     String
+  publishedAt  DateTime
+  youtubeUrl   String?
+  youtubeEmbed String?
+  spotifyUrl   String?
+  spotifyEmbed String?
+  createdAt    DateTime @default(now())
+
+  @@unique([podcastId, number])
+  @@index([podcastId, publishedAt])
+  @@map("portfolio_episodes")
+}
+
+model SiteConfig {
+  id             String   @id @default(uuid())
+  siteName       String   @default("Reiners Media")
+  tagline        String   @default("Conteúdo que conecta")
+  logoUrl        String?
+  faviconUrl     String?
+  primaryColor   String   @default("#d87dff")
+  seoTitle       String?
+  seoDescription String?
+  analyticsId    String?
+  facebookPixel  String?
+  customCss      String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("portfolio_site_config")
+}
+
+model AdminUser {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  name        String?
+  /// "ADMIN" | "EDITOR"
+  role        String    @default("EDITOR")
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@map("portfolio_admin_users")
+}
+
+model EventLog {
+  id        String   @id @default(uuid())
+  /// "PAGE_VIEW" | "CARD_EXPAND" | "YOUTUBE_CLICK" | "SPOTIFY_CLICK" | "EPISODE_PLAY"
+  eventType String
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  @@index([eventType, createdAt])
+  @@map("portfolio_event_log")
+}

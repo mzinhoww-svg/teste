@@ -98,12 +98,42 @@ npm run test:e2e   # testes E2E (Playwright) — ver docs/testing.md
 | Deploy na Vercel e domínio próprio | [`docs/vercel-domain.md`](docs/vercel-domain.md) |
 | Admin da plataforma | [`docs/admin.md`](docs/admin.md) |
 | Seed do primeiro tenant (Reiners Media) | [`docs/reiners-media-seed.md`](docs/reiners-media-seed.md) |
+| Catálogo de podcasts (`/portfolio`) | [`docs/portfolio.md`](docs/portfolio.md) |
+
+## Catálogo de podcasts — `/portfolio`
+
+Catálogo estilo Netflix da Reiners Media, anexado à landing page: posters com
+cinco estilos visuais distintos, painel que expande inline (sem navegar), modal
+de player YouTube/Spotify e admin próprio em `/admin/portfolio`.
+
+Módulo isolado do CRM: usa **Prisma** sobre o mesmo Postgres do Supabase, com
+tabelas prefixadas `portfolio_` e um design system próprio (`pf-*`) que não
+toca na paleta `brand-*` do CRM.
+
+```bash
+npm run portfolio:migrate   # cria as tabelas (precisa de DATABASE_URL + DIRECT_URL)
+npm run portfolio:seed      # 5 programas × 5 episódios + config + admin inicial
+```
+
+Depois aplique `supabase/migrations/0005_portfolio_catalog.sql` — ele habilita
+RLS nas tabelas novas (sem ele, a chave anônima pública poderia escrever no
+catálogo pela API REST do Supabase) e cria o bucket de Storage.
+
+Sem `DATABASE_URL` a rota funciona em **modo demonstração**, com dados de
+exemplo e gravação desativada — o deploy atual do CRM não quebra.
+
+Setup, decisões de arquitetura, pendências de contraste e desvios da
+especificação estão em [`docs/portfolio.md`](docs/portfolio.md).
 
 ## Deploy na Vercel
 
 O repositório já traz `vercel.json` (framework `nextjs`). Basta importar o repo
 na Vercel. Para IA ao vivo, adicione a variável de ambiente `OPENROUTER_API_KEY`
 (modelo padrão `z-ai/glm-5.2`, configurável via `OPENROUTER_MODEL`).
+
+O `postinstall` roda `prisma generate` — necessário para o build do módulo de
+portfólio. Para o catálogo com banco, adicione também `DATABASE_URL`,
+`DIRECT_URL` e `PORTFOLIO_ADMIN_EMAILS`.
 
 ## Entregue
 

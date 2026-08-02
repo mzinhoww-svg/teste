@@ -54,11 +54,14 @@ export async function updateSession(request: NextRequest) {
   // Rotas públicas de topo (login/convite/proposta/assinatura) são servidas como
   // estão em QUALQUER host — não podem ser reescritas para /app ou /portal, senão
   // os links profissionais (crm.<root>/convite, <root>/proposta) quebrariam.
+  // `/portfolio` é o catálogo público anexado à landing: mora no apex e NÃO
+  // pode ser reescrito para /app ou /portal em nenhum host.
   const isPublicTop =
     rawPath === "/login" ||
     rawPath.startsWith("/convite") ||
     rawPath.startsWith("/proposta") ||
     rawPath.startsWith("/sign") ||
+    rawPath.startsWith("/portfolio") ||
     rawPath.startsWith("/portal/convite");
   if (!isAsset && !isPublicTop) {
     if (sub === "crm" && !rawPath.startsWith("/app")) {
@@ -81,6 +84,10 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/portal/convite") ||
     path.startsWith("/sign") ||
     path.startsWith("/proposta") ||
+    // Catálogo público de podcasts + ingestão de telemetria dele. O admin do
+    // catálogo (/admin/portfolio) NÃO entra aqui: cai no guard de login abaixo.
+    path.startsWith("/portfolio") ||
+    path.startsWith("/api/portfolio/events") ||
     path.startsWith("/api/proposta") ||
     path.startsWith("/api/health") ||
     path.startsWith("/api/webhooks") ||
