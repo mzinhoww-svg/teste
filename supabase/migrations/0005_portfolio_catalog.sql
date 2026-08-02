@@ -27,12 +27,18 @@ alter table if exists public.portfolio_event_log    enable row level security;
 -- Force garante que nem o dono da tabela escapa da RLS via PostgREST.
 alter table if exists public.portfolio_admin_users  force row level security;
 
+-- `_prisma_migrations` é criada pelo Prisma no schema `public` e, portanto,
+-- também é publicada pelo PostgREST: sem isto, o histórico de schema fica
+-- legível pela chave anônima.
+alter table if exists public."_prisma_migrations" enable row level security;
+
 -- Revoga o grant padrão do Supabase para os papéis expostos na internet.
 revoke all on public.portfolio_podcasts    from anon, authenticated;
 revoke all on public.portfolio_episodes    from anon, authenticated;
 revoke all on public.portfolio_site_config from anon, authenticated;
 revoke all on public.portfolio_admin_users from anon, authenticated;
 revoke all on public.portfolio_event_log   from anon, authenticated;
+revoke all on public."_prisma_migrations"  from anon, authenticated;
 
 -- ---- 2. Storage: bucket das imagens do catálogo --------------------------
 -- Leitura pública (as capas aparecem no site), escrita só autenticada.
@@ -49,10 +55,12 @@ on conflict (id) do update
       file_size_limit = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
 
+-- ATENÇÃO: NÃO criar policy de SELECT em storage.objects para este bucket.
+-- Um bucket `public` já serve os objetos por /object/public/<bucket>/<path>
+-- sem policy nenhuma. Uma policy de SELECT ampla não é necessária para as
+-- capas carregarem e permite que qualquer cliente LISTE todos os arquivos do
+-- bucket (linter 0025_public_bucket_allows_listing). Por isso ela é removida.
 drop policy if exists "portfolio_public_read" on storage.objects;
-create policy "portfolio_public_read"
-  on storage.objects for select
-  using (bucket_id = 'portfolio');
 
 drop policy if exists "portfolio_authenticated_write" on storage.objects;
 create policy "portfolio_authenticated_write"

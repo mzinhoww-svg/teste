@@ -30,6 +30,18 @@ Depois aplique `supabase/migrations/0005_portfolio_catalog.sql` no Supabase
 (SQL Editor ou CLI). Ele **não** cria tabelas — endurece as que o Prisma criou e
 provisiona o bucket de Storage. Detalhes em §5.
 
+### Estado do projeto `crm-ai-studio` (aplicado em 02/08/2026)
+
+O banco de produção já está preparado: tabelas criadas, RLS ativa, bucket
+provisionado e seed carregado (5 programas, 25 episódios, 1 SiteConfig, 1 admin).
+A migration está registrada em `_prisma_migrations`, então `prisma migrate
+deploy` a considera aplicada e não tenta recriá-la.
+
+**Falta um passo, e ele não é opcional:** definir `DATABASE_URL` e `DIRECT_URL`
+nas variáveis de ambiente da Vercel. Sem elas o app não alcança essas tabelas e
+`/portfolio` continua servindo o dataset de demonstração — visualmente idêntico,
+já que o seed veio da mesma fonte, mas o admin recusa qualquer gravação.
+
 ### Modo demonstração
 
 Sem `DATABASE_URL`, o catálogo cai no dataset de `lib/portfolio/demo-data.ts`
@@ -196,6 +208,16 @@ Outras medidas:
 - `customCss` do SiteConfig tem `<` escapado antes de entrar na tag `<style>`.
 - Export CSV neutraliza fórmulas de planilha (`=`, `+`, `-`, `@`).
 - Upload valida MIME e tamanho (5 MB) no servidor, não só no cliente.
+- O bucket é `public`, mas **sem** policy de SELECT em `storage.objects`: um
+  bucket público já serve os objetos por `/object/public/<bucket>/<path>` sem
+  policy. Criar uma policy de SELECT ampla não ajuda as capas a carregarem e
+  permitiria que qualquer cliente listasse todos os arquivos.
+- `_prisma_migrations` também vive em `public` e é publicada pelo PostgREST; a
+  migration a fecha junto com as tabelas do catálogo.
+
+Verificado contra o projeto real com a chave anônima: leitura e escrita nas
+cinco tabelas retornam `401 permission denied`, a listagem do bucket volta
+vazia e o upload anônimo é recusado.
 
 ---
 
