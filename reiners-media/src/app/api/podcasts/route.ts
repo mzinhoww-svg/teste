@@ -25,6 +25,7 @@ import {
   searchParamsToObject,
   validatedJson,
 } from '@/app/api/podcasts/_lib/http';
+import { buildPodcastOrderBy, buildPodcastWhere } from '@/app/api/podcasts/_lib/query';
 import { RATE_LIMIT_POLICIES, enforceRateLimit } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 import {
@@ -36,26 +37,14 @@ import {
   validatePodcastRules,
 } from '@/lib/schemas';
 
-/** Prisma acessa o banco: nada aqui pode ser renderizado estaticamente. */
+/**
+ * Prisma acessa o banco: nada aqui pode ser renderizado estaticamente.
+ *
+ * `dynamic` e os verbos HTTP são os ÚNICOS exports permitidos num módulo de
+ * rota. Helpers ficam em `_lib/` (ver `_lib/query.ts`), sob pena de
+ * "is not a valid Route export field" no `next build`.
+ */
 export const dynamic = 'force-dynamic';
-
-type PodcastQuery = ReturnType<typeof podcastQuerySchema.parse>;
-
-/** Monta o `where` do Prisma a partir dos filtros já validados. */
-export function buildPodcastWhere(query: PodcastQuery): Record<string, unknown> {
-  const where: Record<string, unknown> = { deletedAt: null };
-  if (query.status !== undefined) where.status = query.status;
-  if (query.featured !== undefined) where.featured = query.featured;
-  if (query.category !== undefined) {
-    where.category = { equals: query.category, mode: 'insensitive' };
-  }
-  return where;
-}
-
-/** Ordenação estável: o critério pedido + `id` como desempate determinístico. */
-export function buildPodcastOrderBy(query: PodcastQuery): Record<string, string>[] {
-  return [{ [query.sort]: query.order }, { id: 'asc' }];
-}
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
