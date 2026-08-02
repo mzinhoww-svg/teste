@@ -10,6 +10,7 @@
  * o Footer entram via TCK-009 nos layouts de segmento.
  */
 import type { Metadata, Viewport } from 'next';
+import { tokens } from '@/lib/tokens';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -23,9 +24,13 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: 'dark light',
+  // Derivado dos tokens, nunca literal: o critério de aceitação de TCK-001 é
+  // "nenhum hex raw fora dos arquivos de tokens", e vale para o repositório
+  // inteiro. Hardcodar aqui faria a cor da barra do navegador mobile divergir
+  // silenciosamente da marca quando a paleta mudasse.
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#FAF7F2' },
-    { media: '(prefers-color-scheme: dark)', color: '#0B0B0F' },
+    { media: '(prefers-color-scheme: light)', color: tokens.color.surface.base.light },
+    { media: '(prefers-color-scheme: dark)', color: tokens.color.surface.base.dark },
   ],
 };
 

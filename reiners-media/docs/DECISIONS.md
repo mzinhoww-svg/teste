@@ -108,3 +108,44 @@
 **Consequências:** São as duas únicas alterações desta entrega fora de `reiners-media/`, e existem só para que o subprojeto não quebre o build do projeto pré-existente. O CI da raiz não valida `reiners-media/`; essa validação é responsabilidade do workflow próprio, entregue por TCK-024.
 **Status:** Aprovado.
 **Tickets:** Infra (TCK-000), TCK-024.
+
+## DEC-014: `imageRefSchema` aceita URL absoluta ou path root-relativo
+**Contexto:** A revisão independente da onda 0 encontrou um bloqueador: os dois "contratos estabilizados" da onda se contradizem. O seed (TCK-002) grava `coverImage: "/images/podcasts/horizonte-digital-cover.jpg"`, enquanto `urlSchema = z.string().url()` (TCK-003) exige URL absoluta. `podcastCreateSchema.safeParse()` rejeita os 5 programas do seed, todo `hosts[].photo`, os `thumbnail` de episódio, `logoUrl`/`faviconUrl` e os 3 `avatarUrl`. Na prática o admin (TCK-018) abriria qualquer programa vindo do seed, clicaria em salvar e receberia 422 `Invalid url`.
+**Decisão:** Introduzir `imageRefSchema`, que aceita **URL absoluta `http(s)` ou path começando com `/`**, rejeitando `//`, `javascript:`, path traversal e string vazia. Aplicado a todos os campos de imagem. `urlSchema` permanece estrito para links de fato externos (`socialLinks`, `youtubeUrl`, `spotifyUrl`). O seed mantém os paths relativos.
+**Justificativa:** as duas formas são legítimas no produto — upload real vai para o Supabase Storage e produz URL absoluta; assets de demonstração ficam em `public/` e são referenciados por path root-relativo. Forçar uma só das pontas quebraria o outro caso de uso.
+**Alternativas:** (a) Seed usar URLs absolutas de CDN — rejeitado: inventa um host que não existe e torna o seed dependente de infraestrutura externa para rodar localmente; (b) afrouxar para `z.string()` — rejeitado: perde a validação inteira e abre `javascript:` em atributo de imagem.
+**Consequências:** TCK-002 ganha um teste que valida as estruturas do seed contra os schemas Zod reais, para a contradição não voltar.
+**Status:** Aprovado.
+**Tickets:** TCK-002, TCK-003, e os consumidores TCK-005, TCK-006, TCK-013, TCK-018.
+
+## DEC-015: `deletedAt` fora do schema de resposta pública
+**Contexto:** `podcastSchema` declarava `deletedAt: isoDateTimeSchema.nullable()` — chave obrigatória, porque `nullable ≠ optional` — enquanto o componente `Podcast` do OpenAPI não o lista em `required`. Deriva real entre YAML e Zod, que o teste de contrato não detectava por comparar apenas nomes de propriedades. TCK-005 implementaria `GET /api/podcasts` seguindo o OpenAPI, faria um `select` sem o campo, e `podcastResponseSchema.parse()` explodiria em runtime numa rota pública.
+**Decisão:** `deletedAt` é metadado interno de soft delete e sai do schema de resposta pública; se o admin precisar dele, vai num schema separado (`podcastAdminSchema`). YAML e Zod ficam coerentes.
+**Alternativas:** Adicionar `deletedAt` ao `required` do YAML — rejeitado: expor estado interno de soft delete numa resposta pública vaza informação sem benefício.
+**Consequências:** O teste de contrato foi endurecido para comparar também obrigatoriedade (`required` do YAML × `isOptional()` do Zod), não só nomes — senão a classe inteira de deriva continuaria invisível.
+**Status:** Aprovado.
+**Tickets:** TCK-003, TCK-005, TCK-018.
+
+## DEC-016: BR-006 não é verificável num schema de payload parcial
+**Contexto:** `podcastUpdateSchema` é `.partial().refine(refineEndedNotFeatured)`. Num PATCH parcial `status` vem `undefined`, então o refine sempre passa: `podcastUpdateSchema.safeParse({ featured: true }).success === true`. O "Ofício" está `ENDED` no seed, então `PATCH /api/podcasts/<id>` com `{"featured": true}` o tornaria destaque na home, violando BR-006. A limitação equivalente do BR-004 estava documentada; a do BR-006 não — pior, o YAML afirmava "mesmas regras de negocio do create".
+**Decisão:** Um schema de payload parcial não tem como validar uma regra que depende do estado atual do registro. A checagem de BR-005 e BR-006 contra o **estado mesclado** (registro atual + patch) é obrigação do route handler, e isso passa a estar explícito no contrato e no README, com um helper exportado para TCK-005 e TCK-018 consumirem.
+**Alternativas:** Tornar `status` obrigatório no update — rejeitado: descaracteriza o PATCH, forçando o cliente a reenviar campos que não quer mudar.
+**Consequências:** TCK-005 e TCK-018 têm obrigação explícita de aplicar o helper; sem ele a regra de negócio fica sem dono.
+**Status:** Aprovado.
+**Tickets:** TCK-003, TCK-005, TCK-018.
+
+## DEC-017: `tests/` não consta nos `write_paths` de nenhum ticket
+**Contexto:** Os três tickets da onda 0 escreveram em `tests/`, que aparece apenas nos `test_plan` e em nenhum `write_paths`. A revisão apontou como escrita fora de escopo. O mesmo vale para `contracts/README.md` (TCK-003 declara `contracts/api/`, não `contracts/`).
+**Decisão:** Tratar como defeito de declaração dos tickets, não das implementações: o pacote exige testes de todo ticket (CLAUDE.md §17) e lista os arquivos em `test_plan`, então escrevê-los é obrigatório e a omissão em `write_paths` é uma inconsistência do pacote. A interpretação foi consistente nos três tickets. Os arquivos de teste permanecem.
+**Alternativas:** Reverter os testes — rejeitado: violaria §17 e os critérios de aceitação; (b) editar os `write_paths` dos 24 tickets — rejeitado nesta execução: altera a fonte de verdade dos tickets em massa, com risco maior que o do defeito.
+**Consequências:** `path_guard.py` emite AVISO (não erro) para arquivos de teste — comportamento correto do script, já que ele distingue aviso de violação. Fica registrado para quem for revisar ownership depois.
+**Status:** Aprovado.
+**Tickets:** Todos.
+
+## DEC-018: paleta padrão do Tailwind permanece acessível (`extend`)
+**Contexto:** `tailwind.config.ts` declara `colors`/`spacing` dentro de `extend`, então `bg-red-500`, `text-purple-400` e `p-7` continuam gerando CSS. Um componente escrito fora do design system passaria por `lint`, por `tokens.test.ts` e pelo grep de hex sem nenhum sinal.
+**Decisão:** Manter `extend` nesta entrega. O critério de aceitação do TCK-001 diz literalmente "Tailwind config estendida", e substituir `theme` inteiro é mudança de contrato do ticket.
+**Alternativas:** Mover para `theme` (substituindo a paleta padrão) — rejeitado agora por contrariar o critério declarado; fica registrado como endurecimento a decidir antes da onda 2, quando TCK-008 define os componentes base.
+**Consequências:** Até lá, a aderência ao design system depende de revisão humana, não de ferramenta. Risco real e assumido conscientemente.
+**Status:** Aprovado com ressalva.
+**Tickets:** TCK-001, TCK-008.
