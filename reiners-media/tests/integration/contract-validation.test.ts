@@ -681,6 +681,133 @@ describe('contracts/api — propriedades vs shape Zod', () => {
     expect(mismatches).toEqual([]);
   });
 
+  /**
+   * Corpus compartilhado: cada valor precisa ser aceito/rejeitado do MESMO jeito
+   * pelo `pattern` publicado no YAML e pelo schema Zod que valida de fato. Foi
+   * assim que a divergencia de `IMAGE_REF_PATTERN` passou despercebida — o
+   * teste comparava chaves e tipos, mas nunca o `pattern`.
+   */
+  const PATTERN_PROBES = [
+    'https://abc.supabase.co/storage/v1/object/public/podcasts/capa.jpg',
+    'http://localhost:3000/images/capa.png',
+    '/images/podcasts/horizonte-digital-cover.jpg',
+    '/logo.svg',
+    '/images/x.jpg?v=2',
+    '/imagens/edição.jpg',
+    '',
+    '//evil.com/pwn.jpg',
+    'javascript:alert(1)',
+    'data:image/png;base64,AAAA',
+    '/../../etc/passwd',
+    '/images/../../secret.jpg',
+    '../images/capa.jpg',
+    'images/capa.jpg',
+    '/images/ capa.jpg',
+    'ftp://host/capa.jpg',
+    '/a<script>b',
+    '/foo..bar.jpg',
+    '/foo/..',
+    'horizonte-digital',
+    'Horizonte_Digital',
+    '#d87dff',
+    '45:30',
+    '45:60',
+  ];
+
+  /** Desembrulha optional/nullable/default (mantendo ZodEffects intacto). */
+  function unwrapField(field: unknown): unknown {
+    let current: unknown = field;
+    for (let depth = 0; depth < 6; depth += 1) {
+      if (
+        current instanceof z.ZodOptional ||
+        current instanceof z.ZodNullable ||
+        current instanceof z.ZodDefault
+      ) {
+        current = (current._def as { innerType: unknown }).innerType;
+        continue;
+      }
+      return current;
+    }
+    return current;
+  }
+
+  /** Regex declarado no `.regex()` de um ZodString, se houver. */
+  function zodRegexSource(field: unknown): string | null {
+    const inner = unwrapObject(field) === null ? unwrapField(field) : unwrapField(field);
+    let current: unknown = inner;
+    for (let depth = 0; depth < 6; depth += 1) {
+      if (current instanceof z.ZodString) {
+        const checks = (current._def as { checks: { kind: string; regex?: RegExp }[] }).checks;
+        const regexCheck = checks.find((check) => check.kind === 'regex');
+        return regexCheck?.regex?.source ?? null;
+      }
+      if (!(current instanceof z.ZodType)) return null;
+      const def = current._def as { schema?: unknown; innerType?: unknown };
+      const next = def.schema ?? def.innerType;
+      if (next === undefined) return null;
+      current = next;
+    }
+    return null;
+  }
+
+  const propertiesWithPattern = zodBackedComponents.flatMap((entry) => {
+    const objectSchema = unwrapObject(zodExport(entry.zodName));
+    if (objectSchema === null) return [];
+    return Object.entries(entry.resolved.properties).flatMap(([propertyName, property]) => {
+      const pattern = asRecord(property).pattern;
+      const field = objectSchema.shape[propertyName];
+      if (typeof pattern !== 'string' || field === undefined) return [];
+      return [{ ...entry, propertyName, pattern, field }];
+    });
+  });
+
+  it('existe pelo menos um pattern publicado para conferir', () => {
+    expect(propertiesWithPattern.length).toBeGreaterThan(10);
+  });
+
+  it('o pattern do YAML e igual ao regex declarado no Zod, quando houver', () => {
+    const mismatches: string[] = [];
+    for (const entry of propertiesWithPattern) {
+      const source = zodRegexSource(entry.field);
+      if (source === null) continue;
+      if (source !== entry.pattern) {
+        mismatches.push(
+          `${entry.file} ${entry.name}.${entry.propertyName}: yaml=${entry.pattern} zod=${source}`,
+        );
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+
+  it('todo campo de imagem publica exatamente IMAGE_REF_PATTERN', () => {
+    const imageFields = propertiesWithPattern.filter(
+      (entry) => unwrapField(entry.field) === schemas.imageRefSchema,
+    );
+    expect(imageFields.length).toBeGreaterThan(0);
+    for (const entry of imageFields) {
+      expect(entry.pattern, `${entry.file} ${entry.name}.${entry.propertyName}`).toBe(
+        schemas.IMAGE_REF_PATTERN,
+      );
+    }
+  });
+
+  it('pattern do YAML e schema Zod concordam em todo o corpus de probes', () => {
+    const divergences: string[] = [];
+    for (const entry of propertiesWithPattern) {
+      const regex = new RegExp(entry.pattern);
+      for (const probe of PATTERN_PROBES) {
+        const yamlAccepts = regex.test(probe);
+        const zodAccepts = (entry.field as z.ZodTypeAny).safeParse(probe).success;
+        if (yamlAccepts !== zodAccepts) {
+          divergences.push(
+            `${entry.file} ${entry.name}.${entry.propertyName} ${JSON.stringify(probe)}: yaml=${yamlAccepts} zod=${zodAccepts}`,
+          );
+        }
+      }
+    }
+    expect(divergences).toEqual([]);
+  });
+
   it('todo campo required existe entre as properties do componente', () => {
     const mismatches: string[] = [];
     for (const { file, doc } of documents) {

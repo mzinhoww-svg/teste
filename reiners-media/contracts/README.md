@@ -100,6 +100,11 @@ seed) virar destaque na home:
 
 ```ts
 const patch = podcastUpdateSchema.parse(await request.json());
+// `otherFeaturedCount` e obrigatorio no tipo: sem ele o compilador reclama,
+// justamente para que BR-005 nao deixe de disparar em silencio.
+const otherFeaturedCount = await prisma.podcast.count({
+  where: { featured: true, deletedAt: null, id: { not: params.id } },
+});
 const violations = validatePodcastRules(
   resolvePodcastRuleState(current, patch, otherFeaturedCount),
 );
@@ -114,29 +119,68 @@ if (violations.length > 0) return conflict(violations); // 409
 3. **`coverImage` é obrigatório no create** — `Podcast.coverImage` é NOT NULL no
    Prisma; o fluxo é `POST /api/upload` primeiro, depois `POST /api/podcasts`
    com a URL retornada.
-3b. **Campos de imagem aceitam duas formas** (`imageRefSchema`): URL `http(s)`
+4. **Campos de imagem aceitam duas formas** (`imageRefSchema`): URL `http(s)`
    absoluta (upload real no Supabase Storage) **ou** caminho root-relativo
    iniciado por `/` (assets de demonstração em `public/`, que é o que o seed de
    TCK-002 grava). Vale para `coverImage`, `heroImage`, `hosts[].photo`,
-   `thumbnail`, `logoUrl`, `faviconUrl` e `avatarUrl`. Rejeita `//host`,
-   `javascript:`, `data:`, path traversal e espaços. O que é link externo de
-   verdade (`socialLinks`, `youtubeUrl`, `spotifyUrl`) continua exigindo URL
-   absoluta via `urlSchema`.
-3c. **`deletedAt` não existe na resposta pública** — soft delete é metadado
+   `thumbnail`, `logoUrl`, `faviconUrl` e `avatarUrl`. Aceita querystring
+   (`/capa.jpg?v=2`) e acentos (`/imagens/edição.jpg`). Bloqueia `//host`,
+   `javascript:`, `data:`, path traversal (`/../`, `/foo/..`), espaços e
+   `< > " ' \` \\`. O que é link externo de verdade (`socialLinks`,
+   `youtubeUrl`, `spotifyUrl`) continua exigindo URL absoluta via `urlSchema`.
+5. **O `pattern` publicado no YAML é o `.source` do regex que valida de fato.**
+   `IMAGE_REF_PATTERN === IMAGE_REF_REGEX.source`, então validação de cliente
+   (formulário do admin, cliente gerado do OpenAPI) e de servidor não podem
+   divergir. O teste de contrato compara os dois byte a byte **e** confere que
+   concordam sobre um corpus de probes — foi assim que uma divergência anterior
+   (o `pattern` aceitava `/../../etc/passwd` e o Zod rejeitava) foi pega.
+6. **`deletedAt` não existe na resposta pública** — soft delete é metadado
    interno. `podcastSchema` não o expõe; quem precisa usa `podcastAdminSchema`
    (componente `PodcastAdmin`), devolvido por `DELETE /api/podcasts/:id` e pelo
    painel de TCK-018.
-3d. **Schemas de entidade não herdam `.default()`** — numa resposta, `status`,
+7. **Schemas de entidade não herdam `.default()`** — numa resposta, `status`,
    `visualStyle`, `accentColor`, `featured`, `displayOrder`, `socialLinks`,
    `siteName`, `tagline` e `primaryColor` são obrigatórios. Se herdassem o
    default, o validador aceitaria uma resposta incompleta e "consertaria"
    silenciosamente o que o handler esqueceu de selecionar.
-4. **`youtubeEmbed` / `spotifyEmbed` não entram no body** — são derivados pelo
+8. **`youtubeEmbed` / `spotifyEmbed` não entram no body** — são derivados pelo
    servidor (BR-007/BR-008); enviá-los resulta em 422.
-5. **`podcastId` é imutável no PATCH de episódio** — mover episódio entre
+9. **`podcastId` é imutável no PATCH de episódio** — mover episódio entre
    programas exige delete + create.
-6. **BR-004 e BR-006 no PATCH** só são validáveis em Zod quando as chaves
-   relevantes vêm juntas no payload; a checagem contra o estado mesclado é
-   obrigação do route handler (ver tabela de regras acima).
-7. **IDs de embed são estritos** — YouTube com 11 caracteres, Spotify com 22.
-   Alterar isso é mudança de contrato, não de implementação.
+10. **BR-004 e BR-006 no PATCH** só são validáveis em Zod quando as chaves
+    relevantes vêm juntas no payload; a checagem contra o estado mesclado é
+    obrigação do route handler (ver tabela de regras acima).
+11. **IDs de embed são estritos** — YouTube com 11 caracteres, Spotify com 22.
+    Alterar isso é mudança de contrato, não de implementação.
+
+### Armadilha: não passe a linha crua do Prisma para o schema
+
+Os schemas de entidade são `.strict()` e não têm `deletedAt`. Toda linha do
+Prisma traz o campo, então isto **falha** com `unrecognized_keys: ['deletedAt']`
+e vira 500 numa rota pública:
+
+```ts
+// ERRADO
+podcastListResponseSchema.parse({ data: await prisma.podcast.findMany(), meta });
+```
+
+Além do `deletedAt`, o Prisma devolve `Date` (não string ISO) nos timestamps e
+`null` em `socialLinks`/`hosts`, que são `Json?` no banco mas obrigatórios na
+resposta. Use os serializadores exportados — eles resolvem os três casos e
+ignoram colunas novas:
+
+```ts
+// CERTO
+const rows = await prisma.podcast.findMany({ where: { deletedAt: null } });
+podcastListResponseSchema.parse({ data: rows.map(toPublicPodcast), meta });
+```
+
+| Helper | Uso |
+|--------|-----|
+| `toPublicPodcast(row)` | rotas públicas de programa |
+| `toAdminPodcast(row)` | rotas administrativas (mantém `deletedAt`) |
+| `toPublicEpisode(row)` | rotas de episódio |
+| `toPublicPodcastWithEpisodes(row)` | `GET /api/podcasts/:slug` |
+
+A alternativa é um `select` explícito omitindo `deletedAt` — mas aí a
+normalização de `Date` e de `Json` nulo fica por sua conta.

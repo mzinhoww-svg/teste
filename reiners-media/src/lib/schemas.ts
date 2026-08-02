@@ -128,36 +128,32 @@ export const durationSchema = z
 export const urlSchema = z.string().url().max(2048);
 
 /**
- * Caminho root-relativo servido de `public/`, ex: `/images/podcasts/capa.jpg`.
- * Exige barra inicial unica (barra dupla seria URL protocol-relative).
- */
-export const IMAGE_ROOT_PATH_REGEX = /^\/(?!\/)[A-Za-z0-9._~\-/%()+,;=:@&$!]*$/;
-
-/** Padrao equivalente publicado nos YAMLs OpenAPI para campos de imagem. */
-export const IMAGE_REF_PATTERN = '^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$';
-
-/**
- * Referencia de imagem aceita pelo produto. Existem duas origens legitimas:
- * - upload real -> URL absoluta do Supabase Storage (`https://...`);
- * - asset de demonstracao -> caminho root-relativo servido de `public/`
- *   (`/images/podcasts/horizonte-digital-cover.jpg`), que e o formato gravado
- *   pelo seed de TCK-002.
+ * Referência de imagem aceita pelo produto. Duas origens legítimas:
+ * - upload real -> URL absoluta `http(s)` do Supabase Storage;
+ * - asset de demonstração -> caminho root-relativo servido de `public/`
+ *   (`/images/podcasts/horizonte-digital-cover.jpg`), formato gravado pelo
+ *   seed de TCK-002.
  *
- * Rejeita explicitamente: string vazia, `//host` (protocol-relative),
- * `javascript:` e demais esquemas, path traversal (`..`) e espacos em branco.
+ * Aceita querystring (`/capa.jpg?v=2`, cache-busting é comum) e caracteres
+ * acentuados (`/imagens/edição.jpg`), porque o produto é em português.
+ *
+ * Bloqueia: string vazia, `//host` (protocol-relative), `javascript:`, `data:`
+ * e qualquer outro esquema, path traversal (`/../`, `/foo/..`), espaços em
+ * branco e os caracteres `< > " ' \` \\` (injeção em atributo `src`).
+ *
+ * ESTE regex é a única fonte de verdade: `IMAGE_REF_PATTERN` é literalmente o
+ * `.source` dele e é o que vai publicado nos YAMLs OpenAPI, de modo que a
+ * validação de cliente (formulário de TCK-018, cliente gerado do OpenAPI) e a
+ * validação de servidor não podem divergir.
  */
+export const IMAGE_REF_REGEX =
+  /^(?:https?:\/\/[^\s/?#<>"'`\\]+[^\s<>"'`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"'`\\]*)$/;
+
+/** `.source` de `IMAGE_REF_REGEX`, publicado como `pattern` nos YAMLs. */
+export const IMAGE_REF_PATTERN = IMAGE_REF_REGEX.source;
+
 export function isImageRef(value: string): boolean {
-  if (value.length === 0 || value.length > 2048) return false;
-  if (/[\s<>"'`\\]/.test(value)) return false;
-  if (value.split('/').includes('..')) return false;
-  if (IMAGE_ROOT_PATH_REGEX.test(value)) return true;
-  if (!/^https?:\/\//i.test(value)) return false;
-  try {
-    const parsed = new URL(value);
-    return (parsed.protocol === 'http:' || parsed.protocol === 'https:') && parsed.host.length > 0;
-  } catch {
-    return false;
-  }
+  return value.length > 0 && value.length <= 2048 && IMAGE_REF_REGEX.test(value);
 }
 
 export const imageRefSchema = z
@@ -399,8 +395,18 @@ export const podcastCreateSchema = podcastWritableSchema.refine(
  * a ser "consertado" aqui.
  *
  * O fechamento de BR-006 (e de BR-005) é OBRIGAÇÃO do route handler de TCK-005,
- * que deve chamar `validatePodcastRules(resolvePodcastRuleState(...))` sobre o
- * estado mesclado e devolver 409 em caso de violação.
+ * que deve avaliar o estado mesclado e devolver 409 em caso de violação:
+ *
+ * ```ts
+ * const patch = podcastUpdateSchema.parse(await request.json());
+ * const otherFeaturedCount = await prisma.podcast.count({
+ *   where: { featured: true, deletedAt: null, id: { not: params.id } },
+ * });
+ * const violations = validatePodcastRules(
+ *   resolvePodcastRuleState(current, patch, otherFeaturedCount),
+ * );
+ * if (violations.length > 0) return conflict(violations); // 409
+ * ```
  */
 export const podcastUpdateSchema = podcastWritableSchema
   .partial()
@@ -440,6 +446,54 @@ export const podcastAdminSchema = podcastSchema.extend({
 });
 
 /* -------------------------------------------------------------------------- */
+/* Serialização Prisma -> resposta pública                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * ARMADILHA que estes helpers existem para evitar:
+ *
+ * Os schemas de entidade são `.strict()` e NÃO têm `deletedAt`. Uma linha crua
+ * do Prisma sempre traz `deletedAt`, então o caminho óbvio
+ *
+ * ```ts
+ * podcastListResponseSchema.parse({ data: await prisma.podcast.findMany(), meta })
+ * ```
+ *
+ * falha com `unrecognized_keys: ['deletedAt']` e vira 500 numa rota pública.
+ * Some-se a isso que o Prisma devolve `Date` (e não string ISO) nos timestamps,
+ * e `null` em `socialLinks`/`hosts`, que são `Json?` no banco mas obrigatórios
+ * na resposta.
+ *
+ * Use SEMPRE estes serializadores (ou um `select` explícito) em TCK-005/006.
+ */
+function serializeRow<TShape extends z.ZodRawShape>(
+  schema: z.ZodObject<TShape>,
+  row: Record<string, unknown>,
+  fallbacks: Record<string, unknown> = {},
+): z.infer<z.ZodObject<TShape>> {
+  const picked: Record<string, unknown> = {};
+  for (const key of Object.keys(schema.shape)) {
+    const value = row[key] ?? fallbacks[key];
+    picked[key] = value instanceof Date ? value.toISOString() : value;
+  }
+  return schema.parse(picked);
+}
+
+/**
+ * Converte uma linha do Prisma na forma **pública** de programa: descarta
+ * `deletedAt` e qualquer coluna nova, serializa `Date` em ISO-8601 e normaliza
+ * `socialLinks`/`hosts` nulos.
+ */
+export function toPublicPodcast(row: Record<string, unknown>): z.infer<typeof podcastSchema> {
+  return serializeRow(podcastSchema, row, { socialLinks: {}, hosts: [] });
+}
+
+/** Idem, preservando `deletedAt`. Só para rotas administrativas. */
+export function toAdminPodcast(row: Record<string, unknown>): z.infer<typeof podcastAdminSchema> {
+  return serializeRow(podcastAdminSchema, row, { socialLinks: {}, hosts: [], deletedAt: null });
+}
+
+/* -------------------------------------------------------------------------- */
 /* Regras de negócio sobre estado MESCLADO (obrigação do route handler)        */
 /* -------------------------------------------------------------------------- */
 
@@ -458,9 +512,16 @@ export interface PodcastRuleState {
   featured: boolean;
   /**
    * Quantos OUTROS programas estão com `featured: true` (exclui o que está
-   * sendo salvo). O handler obtém com um `count` no Prisma.
+   * sendo salvo). OBRIGATÓRIO de propósito: se fosse opcional, esquecer o
+   * `count` faria BR-005 nunca disparar — sem erro de tipo e sem aviso.
+   *
+   * ```ts
+   * const otherFeaturedCount = await prisma.podcast.count({
+   *   where: { featured: true, deletedAt: null, id: { not: podcastId } },
+   * });
+   * ```
    */
-  otherFeaturedCount?: number;
+  otherFeaturedCount: number;
 }
 
 /**
@@ -473,7 +534,7 @@ export interface PodcastRuleState {
 export function resolvePodcastRuleState(
   current: { status: z.infer<typeof podcastStatusSchema>; featured: boolean },
   patch: { status?: z.infer<typeof podcastStatusSchema>; featured?: boolean },
-  otherFeaturedCount?: number,
+  otherFeaturedCount: number,
 ): PodcastRuleState {
   return {
     status: patch.status ?? current.status,
@@ -501,11 +562,7 @@ export function validatePodcastRules(state: PodcastRuleState): BusinessRuleViola
     });
   }
 
-  if (
-    state.featured &&
-    state.otherFeaturedCount !== undefined &&
-    state.otherFeaturedCount + 1 > MAX_FEATURED_PODCASTS
-  ) {
+  if (state.featured && state.otherFeaturedCount + 1 > MAX_FEATURED_PODCASTS) {
     violations.push({
       rule: 'BR-005',
       code: 'CONFLICT',
@@ -605,6 +662,22 @@ export const episodeSchema = episodeWritableSchema.extend({
 export const podcastWithEpisodesSchema = podcastSchema.extend({
   episodes: z.array(episodeSchema),
 });
+
+/** Serializa uma linha de episódio do Prisma (ver aviso em `toPublicPodcast`). */
+export function toPublicEpisode(row: Record<string, unknown>): z.infer<typeof episodeSchema> {
+  return serializeRow(episodeSchema, row, { youtubeEmbed: null, spotifyEmbed: null });
+}
+
+/** Serializa o programa com os episódios embutidos para GET /api/podcasts/:slug. */
+export function toPublicPodcastWithEpisodes(
+  row: Record<string, unknown>,
+): z.infer<typeof podcastWithEpisodesSchema> {
+  const episodes = Array.isArray(row.episodes) ? row.episodes : [];
+  return {
+    ...toPublicPodcast(row),
+    episodes: episodes.map((episode) => toPublicEpisode(episode as Record<string, unknown>)),
+  };
+}
 
 /* -------------------------------------------------------------------------- */
 /* SiteConfig                                                                 */

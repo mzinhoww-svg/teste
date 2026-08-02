@@ -43,6 +43,7 @@ import {
   planCreateSchema,
   podcastAdminSchema,
   podcastCreateSchema,
+  podcastDetailResponseSchema,
   podcastQuerySchema,
   podcastSchema,
   podcastStatusSchema,
@@ -51,6 +52,10 @@ import {
   sessionSchema,
   siteConfigUpdateSchema,
   testimonialCreateSchema,
+  toAdminPodcast,
+  toPublicEpisode,
+  toPublicPodcast,
+  toPublicPodcastWithEpisodes,
   uploadRequestSchema,
   validateEpisodeTracks,
   validatePodcastRules,
@@ -259,6 +264,9 @@ describe('imageRefSchema', () => {
     '/images/podcasts/horizonte-digital-cover.jpg',
     '/images/hosts/marina-alcantara.jpg',
     '/logo.svg',
+    '/images/capa.jpg?v=2',
+    '/imagens/edição.jpg',
+    '/foo..bar.jpg',
   ])('aceita %s', (value) => {
     expect(isImageRef(value)).toBe(true);
     expect(imageRefSchema.safeParse(value).success).toBe(true);
@@ -274,6 +282,8 @@ describe('imageRefSchema', () => {
     ['../images/capa.jpg', 'caminho relativo sem barra'],
     ['images/capa.jpg', 'sem barra inicial'],
     ['/images/ capa.jpg', 'espaco em branco'],
+    ['/a<script>b', 'caractere de injecao'],
+    ['/foo/..', 'traversal no fim'],
     ['ftp://host/capa.jpg', 'esquema nao http'],
     ['C:\\imagens\\capa.jpg', 'caminho windows'],
   ])('rejeita %s (%s)', (value) => {
@@ -505,6 +515,104 @@ describe('podcastSchema (entidade publica)', () => {
 /* BR-005 / BR-006 sobre estado mesclado                                      */
 /* -------------------------------------------------------------------------- */
 
+describe('serializadores Prisma -> resposta (armadilha do .strict())', () => {
+  /** Linha crua como o Prisma devolve: Date, deletedAt e Json nulo. */
+  const prismaRow = () => ({
+    id: UUID,
+    slug: 'horizonte-digital',
+    title: 'Horizonte Digital',
+    tagline: null,
+    description: 'Conversas sobre tecnologia.',
+    coverImage: '/images/podcasts/horizonte-digital-cover.jpg',
+    heroImage: null,
+    category: 'tech',
+    status: 'ACTIVE',
+    visualStyle: 'PHOTO_REAL',
+    year: 2024,
+    accentColor: '#d87dff',
+    hosts: [{ name: 'Marina', initial: 'MA' }],
+    socialLinks: null,
+    featured: false,
+    displayOrder: 0,
+    deletedAt: null,
+    createdAt: new Date('2024-01-01T00:00:00Z'),
+    updatedAt: new Date('2024-02-01T00:00:00Z'),
+  });
+
+  it('a linha crua do Prisma NAO passa direto no schema publico', () => {
+    const result = podcastSchema.safeParse(prismaRow());
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.code === 'unrecognized_keys')).toBe(true);
+    }
+  });
+
+  it('toPublicPodcast remove deletedAt, serializa Date e normaliza Json nulo', () => {
+    const parsed = toPublicPodcast(prismaRow());
+    expect(parsed).not.toHaveProperty('deletedAt');
+    expect(parsed.createdAt).toBe('2024-01-01T00:00:00.000Z');
+    expect(parsed.socialLinks).toEqual({});
+    expect(podcastSchema.safeParse(parsed).success).toBe(true);
+  });
+
+  it('toPublicPodcast ignora colunas novas do Prisma em vez de explodir', () => {
+    const parsed = toPublicPodcast({ ...prismaRow(), colunaNovaDoFuturo: 'x' });
+    expect(parsed.slug).toBe('horizonte-digital');
+  });
+
+  it('toAdminPodcast preserva deletedAt', () => {
+    const parsed = toAdminPodcast({ ...prismaRow(), deletedAt: new Date('2024-03-01T00:00:00Z') });
+    expect(parsed.deletedAt).toBe('2024-03-01T00:00:00.000Z');
+    expect(podcastAdminSchema.safeParse(parsed).success).toBe(true);
+  });
+
+  it('toPublicEpisode serializa datas e embeds ausentes', () => {
+    const parsed = toPublicEpisode({
+      id: UUID,
+      podcastId: OTHER_UUID,
+      number: 1,
+      title: 'Ep 1',
+      description: 'desc',
+      thumbnail: null,
+      duration: '45:30',
+      publishedAt: new Date('2024-01-01T00:00:00Z'),
+      youtubeUrl: YOUTUBE_URL,
+      spotifyUrl: null,
+      youtubeEmbed: 'dQw4w9WgXcQ',
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+    });
+    expect(parsed.publishedAt).toBe('2024-01-01T00:00:00.000Z');
+    expect(parsed.spotifyEmbed).toBeNull();
+  });
+
+  it('toPublicPodcastWithEpisodes monta a resposta de GET /api/podcasts/:slug', () => {
+    const parsed = toPublicPodcastWithEpisodes({
+      ...prismaRow(),
+      episodes: [
+        {
+          id: OTHER_UUID,
+          podcastId: UUID,
+          number: 1,
+          title: 'Ep 1',
+          description: 'desc',
+          duration: '45:30',
+          publishedAt: new Date('2024-01-01T00:00:00Z'),
+          youtubeUrl: YOUTUBE_URL,
+          youtubeEmbed: 'dQw4w9WgXcQ',
+          spotifyEmbed: null,
+          createdAt: new Date('2024-01-01T00:00:00Z'),
+        },
+      ],
+    });
+    expect(podcastDetailResponseSchema.safeParse({ data: parsed }).success).toBe(true);
+    expect(parsed.episodes).toHaveLength(1);
+  });
+
+  it('falha alto quando a linha viola BR-003 (hosts nulo)', () => {
+    expect(() => toPublicPodcast({ ...prismaRow(), hosts: null })).toThrow();
+  });
+});
+
 describe('validatePodcastRules (estado mesclado)', () => {
   it('documenta o buraco real do PATCH parcial: o schema sozinho deixa passar', () => {
     // Este é o comportamento ATUAL e esperado de um schema de payload parcial:
@@ -515,7 +623,7 @@ describe('validatePodcastRules (estado mesclado)', () => {
   it('BR-006: o helper pega o caso que o schema parcial deixa passar', () => {
     const persisted = { status: 'ENDED' as const, featured: false };
     const patch = podcastUpdateSchema.parse({ featured: true });
-    const violations = validatePodcastRules(resolvePodcastRuleState(persisted, patch));
+    const violations = validatePodcastRules(resolvePodcastRuleState(persisted, patch, 0));
     expect(violations).toHaveLength(1);
     expect(violations[0]?.rule).toBe('BR-006');
     expect(violations[0]?.code).toBe('CONFLICT');
@@ -525,13 +633,13 @@ describe('validatePodcastRules (estado mesclado)', () => {
   it('BR-006: patch que tira o ENDED junto com o destaque e aceito', () => {
     const persisted = { status: 'ENDED' as const, featured: false };
     const patch = podcastUpdateSchema.parse({ featured: true, status: 'ACTIVE' });
-    expect(validatePodcastRules(resolvePodcastRuleState(persisted, patch))).toEqual([]);
+    expect(validatePodcastRules(resolvePodcastRuleState(persisted, patch, 0))).toEqual([]);
   });
 
   it('BR-006: patch que nao mexe em featured num programa ACTIVE nao viola nada', () => {
     const persisted = { status: 'ACTIVE' as const, featured: true };
     const patch = podcastUpdateSchema.parse({ title: 'Novo titulo' });
-    expect(validatePodcastRules(resolvePodcastRuleState(persisted, patch))).toEqual([]);
+    expect(validatePodcastRules(resolvePodcastRuleState(persisted, patch, 0))).toEqual([]);
   });
 
   it('BR-005: bloqueia o quarto destaque e libera o terceiro', () => {

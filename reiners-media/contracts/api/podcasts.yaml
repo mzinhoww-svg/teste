@@ -407,7 +407,7 @@ components:
           maxLength: 2
         photo:
           type: string
-          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         bio:
@@ -473,11 +473,11 @@ components:
           maxLength: 5000
         coverImage:
           type: string
-          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
         heroImage:
           type: string
-          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         category:
@@ -528,11 +528,11 @@ components:
           type: string
         coverImage:
           type: string
-          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
         heroImage:
           type: string
-          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         category:
@@ -594,11 +594,11 @@ components:
           type: string
         coverImage:
           type: string
-          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
         heroImage:
           type: string
-          pattern: "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)$"
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         category:
