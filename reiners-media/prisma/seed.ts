@@ -764,21 +764,75 @@ export const ADMIN_USER_SEED: AdminUserSeed = buildAdminUser();
 /** Variável que libera explicitamente o seed contra um banco de produção. */
 export const PRODUCTION_SEED_OVERRIDE = 'ALLOW_PRODUCTION_SEED';
 
+/**
+ * Allowlist de hosts adicionais (separados por vírgula) considerados seguros.
+ * Existe para que um banco de desenvolvimento remoto — um projeto Supabase de
+ * dev, um Postgres efêmero de CI — seja liberado NOMINALMENTE, sem desligar a
+ * guarda. É a diferença entre "libero este host" e "libero qualquer host".
+ */
+export const SEED_ALLOWED_HOSTS_VAR = 'SEED_ALLOWED_DB_HOSTS';
+
+/** Hosts sempre aceitos: banco local da máquina de quem roda o seed. */
+export const LOCAL_DB_HOSTS = ['localhost', '127.0.0.1', '::1'];
+
 export const PRODUCTION_SEED_BLOCKED_MESSAGE =
   `Seed bloqueado: NODE_ENV=production. Este script insere programas de demonstração ` +
   `e um AdminUser com role ADMIN. Se a intenção é mesmo popular produção, rode novamente ` +
   `com ${PRODUCTION_SEED_OVERRIDE}=true.`;
 
+export const remoteDatabaseBlockedMessage = (host: string): string =>
+  `Seed bloqueado: DATABASE_URL aponta para o host remoto "${host}". Este script insere ` +
+  `programas de demonstração e um AdminUser com role ADMIN — rodá-lo contra o banco errado ` +
+  `polui produção. Se o host é um banco de desenvolvimento, adicione-o a ` +
+  `${SEED_ALLOWED_HOSTS_VAR} (ex.: ${SEED_ALLOWED_HOSTS_VAR}="${host}"). ` +
+  `Para forçar mesmo assim, use ${PRODUCTION_SEED_OVERRIDE}=true.`;
+
+/** Extrai o hostname da connection string; `null` quando ausente ou inválida. */
+export function databaseHost(rawUrl: string | undefined): string | null {
+  if (!rawUrl?.trim()) return null;
+
+  try {
+    const { hostname } = new URL(rawUrl);
+    if (!hostname) return null;
+    // IPv6 chega como "[::1]".
+    return hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Impede que `pnpm db:seed` apontado para a DATABASE_URL de produção insira
- * dados de demonstração e um administrador. Exige confirmação explícita.
+ * Impede que `pnpm db:seed` insira dados de demonstração e um administrador no
+ * banco errado. Duas checagens, ambas com escape explícito:
+ *
+ *  1. `NODE_ENV=production`.
+ *  2. `DATABASE_URL` apontando para um host que não é local nem está na
+ *     allowlist — este é o acidente real, porque num shell comum `NODE_ENV` é
+ *     indefinido e a checagem (1) sozinha não dispara.
+ *
+ * Se a connection string estiver ausente ou for inválida não há o que proteger:
+ * o Prisma falharia ao conectar de qualquer forma.
  */
 export function assertSeedAllowed(env: SeedEnv = process.env): void {
-  const isProduction = env.NODE_ENV === 'production';
-  const hasOverride = env[PRODUCTION_SEED_OVERRIDE]?.trim() === 'true';
+  if (env[PRODUCTION_SEED_OVERRIDE]?.trim() === 'true') return;
 
-  if (isProduction && !hasOverride) {
+  if (env.NODE_ENV === 'production') {
     throw new Error(PRODUCTION_SEED_BLOCKED_MESSAGE);
+  }
+
+  const host = databaseHost(env.DATABASE_URL);
+  if (host === null) return;
+
+  const allowed = new Set([
+    ...LOCAL_DB_HOSTS,
+    ...(env[SEED_ALLOWED_HOSTS_VAR] ?? '')
+      .split(',')
+      .map((entry) => entry.trim().toLowerCase())
+      .filter(Boolean),
+  ]);
+
+  if (!allowed.has(host)) {
+    throw new Error(remoteDatabaseBlockedMessage(host));
   }
 }
 
@@ -899,10 +953,21 @@ export async function seed(prisma: PrismaClient): Promise<void> {
   });
 }
 
-async function main(): Promise<void> {
-  assertSeedAllowed();
+/**
+ * Ponto de entrada do `prisma db seed`.
+ *
+ * A guarda roda ANTES de qualquer coisa — inclusive antes de instanciar o
+ * PrismaClient — para que um seed bloqueado não chegue a abrir conexão nem a
+ * emitir uma única escrita. `createClient` e `env` são injetáveis apenas para
+ * que os testes possam observar exatamente isso.
+ */
+export async function main(
+  createClient: () => PrismaClient = () => new PrismaClient(),
+  env: SeedEnv = process.env,
+): Promise<void> {
+  assertSeedAllowed(env);
 
-  const prisma = new PrismaClient();
+  const prisma = createClient();
 
   try {
     await seed(prisma);

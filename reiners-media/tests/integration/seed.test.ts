@@ -13,17 +13,21 @@ import {
   ADMIN_USER_SEED,
   DEFAULT_ADMIN_EMAIL,
   EPISODE_SEED,
+  LOCAL_DB_HOSTS,
   PLAN_SEED,
   PODCAST_SEED,
   PRODUCTION_SEED_OVERRIDE,
+  SEED_ALLOWED_HOSTS_VAR,
   SITE_CONFIG_ID,
   SITE_CONFIG_SEED,
   TESTIMONIAL_SEED,
   assertSeedAllowed,
   buildAdminUser,
   buildEpisodes,
+  databaseHost,
   deterministicId,
   episodeId,
+  main,
   seed,
 } from '../../prisma/seed';
 
@@ -407,6 +411,143 @@ describe('assertSeedAllowed — não popula produção sem confirmação', () =>
         [PRODUCTION_SEED_OVERRIDE]: 'true',
       }),
     ).not.toThrow();
+  });
+});
+
+describe('assertSeedAllowed — host da DATABASE_URL (acidente sem NODE_ENV)', () => {
+  const local = 'postgresql://u:p@localhost:5432/postgres';
+  const remote =
+    'postgresql://u:p@db.abcdefgh.supabase.co:6543/postgres?pgbouncer=true';
+
+  it('libera bancos locais', () => {
+    for (const host of LOCAL_DB_HOSTS) {
+      const url = `postgresql://u:p@${host.includes(':') ? `[${host}]` : host}:5432/postgres`;
+      expect(() => assertSeedAllowed({ DATABASE_URL: url })).not.toThrow();
+    }
+    expect(() => assertSeedAllowed({ DATABASE_URL: local })).not.toThrow();
+  });
+
+  it('bloqueia host remoto mesmo com NODE_ENV indefinido', () => {
+    // Este é o cenário real: shell comum, NODE_ENV não setado.
+    expect(() => assertSeedAllowed({ DATABASE_URL: remote })).toThrow(
+      /db\.abcdefgh\.supabase\.co/,
+    );
+  });
+
+  it('a mensagem ensina a saída correta', () => {
+    expect(() => assertSeedAllowed({ DATABASE_URL: remote })).toThrow(
+      /SEED_ALLOWED_DB_HOSTS/,
+    );
+  });
+
+  it('SEED_ALLOWED_DB_HOSTS libera o host nomeado', () => {
+    expect(() =>
+      assertSeedAllowed({
+        DATABASE_URL: remote,
+        [SEED_ALLOWED_HOSTS_VAR]: 'db.abcdefgh.supabase.co',
+      }),
+    ).not.toThrow();
+  });
+
+  it('aceita lista com espaços e várias entradas', () => {
+    expect(() =>
+      assertSeedAllowed({
+        DATABASE_URL: remote,
+        [SEED_ALLOWED_HOSTS_VAR]: ' outro.host , db.abcdefgh.supabase.co ',
+      }),
+    ).not.toThrow();
+  });
+
+  it('a allowlist NÃO vira liberação geral: trocar para produção volta a bloquear', () => {
+    // O ponto do design: quem libera o banco de dev por nome continua protegido
+    // se a DATABASE_URL passar a apontar para outro host.
+    expect(() =>
+      assertSeedAllowed({
+        DATABASE_URL: 'postgresql://u:p@db.producao.supabase.co:6543/postgres',
+        [SEED_ALLOWED_HOSTS_VAR]: 'db.abcdefgh.supabase.co',
+      }),
+    ).toThrow(/db\.producao\.supabase\.co/);
+  });
+
+  it('ALLOW_PRODUCTION_SEED=true continua sendo a válvula de escape', () => {
+    expect(() =>
+      assertSeedAllowed({
+        DATABASE_URL: remote,
+        [PRODUCTION_SEED_OVERRIDE]: 'true',
+      }),
+    ).not.toThrow();
+  });
+
+  it('não bloqueia quando não há DATABASE_URL utilizável', () => {
+    expect(() => assertSeedAllowed({})).not.toThrow();
+    expect(() => assertSeedAllowed({ DATABASE_URL: '' })).not.toThrow();
+    expect(() => assertSeedAllowed({ DATABASE_URL: 'nao-e-url' })).not.toThrow();
+  });
+
+  it('databaseHost extrai o host ignorando credenciais, porta e query', () => {
+    expect(databaseHost(remote)).toBe('db.abcdefgh.supabase.co');
+    expect(databaseHost(local)).toBe('localhost');
+    expect(databaseHost('postgresql://u:p@[::1]:5432/db')).toBe('::1');
+    expect(databaseHost(undefined)).toBeNull();
+    expect(databaseHost('nao-e-url')).toBeNull();
+  });
+});
+
+describe('main() — a guarda é realmente invocada antes de escrever', () => {
+  it('em produção: rejeita sem instanciar o client nem emitir upserts', async () => {
+    const mock = createPrismaMock();
+    const createClient = vi.fn(() => mock.client);
+
+    await expect(
+      main(createClient, { NODE_ENV: 'production' }),
+    ).rejects.toThrow(/Seed bloqueado/);
+
+    // Se alguém remover `assertSeedAllowed()` de main(), estes dois falham.
+    expect(createClient).not.toHaveBeenCalled();
+    expect(mock.calls).toHaveLength(0);
+  });
+
+  it('com DATABASE_URL remota: rejeita sem emitir upserts', async () => {
+    const mock = createPrismaMock();
+    const createClient = vi.fn(() => mock.client);
+
+    await expect(
+      main(createClient, {
+        DATABASE_URL: 'postgresql://u:p@db.producao.supabase.co:6543/postgres',
+      }),
+    ).rejects.toThrow(/Seed bloqueado/);
+
+    expect(createClient).not.toHaveBeenCalled();
+    expect(mock.calls).toHaveLength(0);
+  });
+
+  it('controle positivo: liberado, main() de fato escreve (o assert enxerga)', async () => {
+    const mock = createPrismaMock();
+    const createClient = vi.fn(() => mock.client);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+    try {
+      await main(createClient, { DATABASE_URL: 'postgresql://u:p@localhost:5432/db' });
+    } finally {
+      log.mockRestore();
+    }
+
+    expect(createClient).toHaveBeenCalledTimes(1);
+    expect(mock.calls).toHaveLength(5 + 25 + 3 + 3 + 1 + 1);
+  });
+
+  it('fecha a conexão mesmo quando o seed falha', async () => {
+    const disconnect = vi.fn(() => Promise.resolve());
+    const failing = {
+      podcast: { upsert: vi.fn(() => Promise.reject(new Error('boom'))) },
+      $disconnect: disconnect,
+    } as unknown as PrismaClient;
+
+    await expect(
+      main(() => failing, { DATABASE_URL: 'postgresql://u:p@localhost:5432/db' }),
+    ).rejects.toThrow('boom');
+
+    expect(disconnect).toHaveBeenCalledTimes(1);
   });
 });
 
