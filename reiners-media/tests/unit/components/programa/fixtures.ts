@@ -31,6 +31,31 @@ export function makeEpisode(overrides: Partial<Episode> = {}): Episode {
   };
 }
 
+/**
+ * Linha como o **Prisma** devolve: `Date` nos timestamps e — o ponto todo —
+ * `deletedAt` presente. É a forma que `podcastSchema.strict()` REJEITA, e é por
+ * isso que o teste da página usa esta e não `makePodcast()`: só assim o
+ * caminho `toPublicPodcastWithEpisodes` é de fato exercido.
+ */
+export function makePrismaPodcastRow(
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
+  const podcast = makePodcast();
+
+  return {
+    ...podcast,
+    createdAt: new Date(podcast.createdAt),
+    updatedAt: new Date(podcast.updatedAt),
+    deletedAt: null,
+    episodes: podcast.episodes.map((episode) => ({
+      ...episode,
+      publishedAt: new Date(episode.publishedAt),
+      createdAt: new Date(episode.createdAt),
+    })),
+    ...overrides,
+  };
+}
+
 export function makePodcast(overrides: Partial<PodcastWithEpisodes> = {}): PodcastWithEpisodes {
   return {
     id: '00000000-0000-4000-8000-000000000000',

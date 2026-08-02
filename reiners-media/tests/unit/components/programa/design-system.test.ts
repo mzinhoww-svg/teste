@@ -227,6 +227,46 @@ describe('aderência ao design system em src/components/programa', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('todo target="_blank" vem com rel="noopener noreferrer"', () => {
+    // Tabnabbing: sem `rel`, a página aberta recebe `window.opener` e pode
+    // reescrever a aba de origem. Os links daqui apontam para domínio de
+    // terceiro cujo endereço veio do BANCO — é exatamente o caso em que isso
+    // importa. O teste de render cobre o comportamento; este cobre o arquivo,
+    // para que um `<a target="_blank">` novo não entre sem o par.
+    for (const { file, source } of componentFiles) {
+      const clean = stripComments(source);
+      const blanks = (clean.match(/target="_blank"/g) ?? []).length;
+      const rels = (clean.match(/rel="noopener noreferrer"/g) ?? []).length;
+
+      expect(rels, `${file}: ${blanks} target="_blank" para ${rels} rel seguro`).toBe(blanks);
+    }
+  });
+
+  it('quem interpola URL do banco em href passa pela allowlist', () => {
+    // `socialLinks` é texto livre gravado pelo admin. `urlSchema` já recusa
+    // esquema executável na ESCRITA (DEC-022), mas linha antiga não passa por
+    // validação nova — por isso a renderização sanitiza de novo.
+    const rendersDbUrl = componentFiles.filter(({ source }) =>
+      /socialLinks|SocialLinks/.test(stripComments(source)),
+    );
+
+    expect(rendersDbUrl.length).toBeGreaterThan(0);
+    for (const { file, source } of rendersDbUrl) {
+      expect(source, `${file}: href de valor do banco sem toSafeExternalUrl`).toContain(
+        'toSafeExternalUrl',
+      );
+    }
+  });
+
+  it('a allowlist não é redigitada — vem de @/lib/schemas', () => {
+    // Duas implementações do mesmo predicado divergem na primeira regra nova.
+    const safeUrl = componentFiles.find(({ file }) => file === 'safe-url.ts');
+
+    expect(safeUrl).toBeDefined();
+    expect(safeUrl?.source).toMatch(/from ['"]@\/lib\/schemas['"]/);
+    expect(safeUrl?.source).toContain('isSafeHttpUrl');
+  });
+
   /**
    * PROVA POR MUTAÇÃO — cada detector recebe uma violação sintética e um caso
    * legítimo. Um detector que nunca dispara é um teste que sempre passa.
@@ -291,6 +331,16 @@ describe('aderência ao design system em src/components/programa', () => {
 
       expect(/^['"]use client['"]/m.test(directive)).toBe(true);
       expect(/^['"]use client['"]/m.test(mention)).toBe(false);
+    });
+
+    it('a contagem de target/rel pega um link sem rel', () => {
+      const semRel = '<a target="_blank" href={h}>x</a>';
+      const comRel = '<a target="_blank" rel="noopener noreferrer" href={h}>x</a>';
+      const count = (source: string, needle: RegExp) => (source.match(needle) ?? []).length;
+
+      expect(count(semRel, /target="_blank"/g)).toBe(1);
+      expect(count(semRel, /rel="noopener noreferrer"/g)).toBe(0);
+      expect(count(comRel, /target="_blank"/g)).toBe(count(comRel, /rel="noopener noreferrer"/g));
     });
 
     it('a varredura de limite pega bloco com fundo e sem borda', () => {

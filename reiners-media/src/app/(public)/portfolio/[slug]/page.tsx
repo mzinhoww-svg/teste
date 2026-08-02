@@ -49,7 +49,19 @@
  * que virar 500 visível, não um 404 silencioso que o buscador desindexa.
  *
  * ═════════════════════════════════════════════════════════════════════════════
- * 5. SERVER vs CLIENT
+ * 5. CONTRATO DO `<main>` (TCK-009)
+ * ═════════════════════════════════════════════════════════════════════════════
+ * `src/components/layout/index.ts` publica: o `<main>` da página PRECISA ser
+ * `id={MAIN_CONTENT_ID}` e `tabIndex={-1}`. Sem o id, o skip-link "Pular para o
+ * conteúdo" da `Navbar` aponta para uma âncora inexistente; sem o `tabIndex`, o
+ * WebKit rola a página mas deixa o foco no `<body>`, e o Tab seguinte volta ao
+ * topo (WCAG 2.2 §2.4.1). Hoje ainda não existe `layout.tsx` público, então
+ * nada quebra visivelmente — mas o defeito nasceria pronto no instante em que
+ * TCK-011/012 montasse a `<Navbar />` acima desta página, e numa das duas
+ * únicas rotas públicas do produto. O `AdminLayout` já cumpre o mesmo contrato.
+ *
+ * ═════════════════════════════════════════════════════════════════════════════
+ * 6. SERVER vs CLIENT
  * ═════════════════════════════════════════════════════════════════════════════
  * Página e hero: Server Components, zero JS. A única ilha de cliente é
  * `ProgramaTabs`, que recebe o conteúdo dos painéis já renderizado no servidor.
@@ -74,6 +86,11 @@ import {
   isPubliclyVisible,
   publicPodcastWhere,
 } from '@/components/programa';
+// Import profundo, e não pelo barrel `@/components/layout`: o barrel reexporta
+// `Navbar`/`MobileDrawer`, que são `'use client'`, e puxá-los para o grafo desta
+// rota só para ler uma constante arriscaria carregar client references que a
+// página não renderiza. `nav-config` é módulo de servidor puro.
+import { MAIN_CONTENT_ID } from '@/components/layout/nav-config';
 import { jsonLdScriptProps, podcastBreadcrumbJsonLd, podcastSeriesJsonLd } from '@/lib/metadata';
 import { prisma } from '@/lib/prisma';
 import { slugSchema, toPublicPodcastWithEpisodes } from '@/lib/schemas';
@@ -135,7 +152,13 @@ export default async function ProgramaPage({ params }: ProgramaPageProps) {
   const episodeCount = podcast.episodes.length;
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 md:px-6">
+    <main
+      // Contrato do TCK-009 — ver nota 5 do cabeçalho. Os dois atributos andam
+      // juntos: o id é o alvo do skip-link, o tabIndex é o que move o FOCO.
+      id={MAIN_CONTENT_ID}
+      tabIndex={-1}
+      className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 md:px-6"
+    >
       {/*
         JSON-LD vem inteiro de `@/lib/metadata` (TCK-022), inclusive a
         serialização: `serializeJsonLd` escapa `<`, `>`, `&` e U+2028/29, então

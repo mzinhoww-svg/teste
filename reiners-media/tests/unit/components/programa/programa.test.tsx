@@ -267,6 +267,79 @@ describe('ProgramaSocialLinks', () => {
     expect(resolveSocialLinks(undefined)).toEqual([]);
   });
 
+  it('abre em nova aba com rel seguro contra tabnabbing', () => {
+    // `rel="noopener noreferrer"` é a única defesa declarada contra tabnabbing
+    // em link de terceiro vindo do banco: sem ele a página aberta recebe
+    // `window.opener` e pode reescrever a aba de origem.
+    render(
+      <ProgramaSocialLinks
+        links={{ instagram: 'https://i.example', website: 'https://x.example' }}
+        podcastTitle="Ofício"
+      />,
+    );
+
+    const links = screen.getAllByRole('link');
+    expect(links).toHaveLength(2);
+    for (const link of links) {
+      expect(link).toHaveAttribute('target', '_blank');
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    }
+  });
+
+  it('avisa da nova aba no nome acessível (WCAG 2.2 §3.2.5)', () => {
+    render(<ProgramaSocialLinks links={{ instagram: 'https://i.example' }} podcastTitle="Ofício" />);
+    expect(
+      screen.getByRole('link', { name: 'Instagram — Ofício no Instagram (abre em nova aba)' }),
+    ).toBeInTheDocument();
+  });
+
+  describe('XSS armazenado — href nunca recebe o valor cru do banco', () => {
+    it.each([
+      'javascript:alert(1)',
+      'JAVASCRIPT:alert(1)',
+      'java\tscript:alert(1)',
+      ' javascript:alert(1)',
+      'data:text/html,<script>alert(1)</script>',
+      'vbscript:msgbox(1)',
+    ])('não renderiza link para %s', (payload) => {
+      const { container } = render(
+        <ProgramaSocialLinks links={{ instagram: payload }} podcastTitle="Ofício" />,
+      );
+
+      // Nem como link, nem como âncora sem href, nem como texto.
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+      expect(container.querySelectorAll('a')).toHaveLength(0);
+      expect(container.innerHTML).not.toContain('javascript');
+      expect(container.innerHTML).not.toContain('vbscript');
+      // Cai no estado vazio, que é a resposta honesta: o programa não tem essa rede.
+      expect(screen.getByText(/ainda não divulgou perfis/)).toBeInTheDocument();
+    });
+
+    it('descarta só a rede hostil e mantém as legítimas', () => {
+      render(
+        <ProgramaSocialLinks
+          links={{ instagram: 'javascript:alert(1)', website: 'https://x.example' }}
+          podcastTitle="Ofício"
+        />,
+      );
+
+      const links = screen.getAllByRole('link');
+      expect(links).toHaveLength(1);
+      expect(links[0]).toHaveAttribute('href', 'https://x.example/');
+    });
+
+    it('o href renderizado é a forma normalizada, não a string crua', () => {
+      render(
+        <ProgramaSocialLinks
+          links={{ website: 'HTTPS://Example.com/Path' }}
+          podcastTitle="Ofício"
+        />,
+      );
+
+      expect(screen.getByRole('link')).toHaveAttribute('href', 'https://example.com/Path');
+    });
+  });
+
   it('mostra estado vazio quando não há nenhuma rede', () => {
     render(<ProgramaSocialLinks links={{}} podcastTitle="Ofício" />);
     expect(screen.getByText(/ainda não divulgou perfis/)).toBeInTheDocument();

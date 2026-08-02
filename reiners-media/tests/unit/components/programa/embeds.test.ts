@@ -21,7 +21,9 @@ import {
   toYoutubeEmbedUrl,
   toYoutubeWatchUrl,
 } from '@/components/programa/embeds';
+import { toSafeExternalUrl } from '@/components/programa/safe-url';
 import { SPOTIFY_EPISODE_URI_PREFIX, parseSpotifyEmbed, parseYoutubeEmbed } from '@/lib/url-parser';
+import { makeEpisode } from './fixtures';
 
 const YOUTUBE_ID = 'dQw4w9WgXcQ';
 const SPOTIFY_ID = '4rOoJ6Egrf8K2IrywzwOMk';
@@ -129,23 +131,36 @@ describe('resolveEpisodeTracks', () => {
     expect(resolveEpisodeTracks({})).toEqual([]);
   });
 
-  it('prefere a URL canônica derivada do embed à coluna crua', () => {
-    const [track] = resolveEpisodeTracks({
-      youtubeEmbed: YOUTUBE_ID,
-      youtubeUrl: `https://youtu.be/${YOUTUBE_ID}?t=42&list=abc`,
-    });
+  it('o href é derivado do embed, nunca lido da coluna crua', () => {
+    // A coluna `youtubeUrl` do episódio guarda o que o admin digitou
+    // (`?t=42&list=abc`, prefixo de locale...). Ela é ignorada de propósito:
+    // `href` e `embedUrl` saem das constantes deste módulo mais um ID que já
+    // casou com o alfabeto canônico — o que torna `javascript:` e path
+    // traversal impossíveis por construção, e não por acidente.
+    const episode = makeEpisode({ youtubeUrl: `https://youtu.be/${YOUTUBE_ID}?t=42&list=abc` });
+    const [track] = resolveEpisodeTracks(episode);
 
     expect(track?.href).toBe(`${YOUTUBE_WATCH_BASE}${YOUTUBE_ID}`);
+    expect(track?.href).not.toContain('t=42');
   });
 
-  it('embed corrompido não vira link, mesmo com `youtubeUrl` preenchido', () => {
+  it('embed corrompido não vira link, mesmo com `youtubeUrl` intacto', () => {
     // Sem embed utilizável não há como montar o player do TCK-015; publicar só
     // o link deixaria um botão que abre e um modal que não abre.
-    const tracks = resolveEpisodeTracks({
+    const episode = makeEpisode({
       youtubeEmbed: '../../../evil',
-      youtubeUrl: 'https://youtu.be/dQw4w9WgXcQ',
+      youtubeUrl: `https://youtu.be/${YOUTUBE_ID}`,
+      spotifyEmbed: null,
+      spotifyUrl: null,
     });
 
-    expect(tracks).toEqual([]);
+    expect(resolveEpisodeTracks(episode)).toEqual([]);
+  });
+
+  it('todo href produzido é http(s) — a mesma allowlist da renderização', () => {
+    for (const track of resolveEpisodeTracks(makeEpisode())) {
+      expect(toSafeExternalUrl(track.href)).toBe(track.href);
+      expect(toSafeExternalUrl(track.embedUrl)).toBe(track.embedUrl);
+    }
   });
 });
