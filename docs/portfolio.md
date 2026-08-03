@@ -146,33 +146,36 @@ Implementado e verificado em navegador:
 | Sem scroll horizontal fora do carrossel (desktop e mobile) | ✅ |
 | `aria-busy` / `aria-label` no skeleton | ✅ |
 
-### Contraste — duas pendências reais
+### Contraste — WCAG 2.2 AA cumprido
 
 `tests/unit/portfolio-tokens.test.ts` **mede** os pares de cor em vez de confiar
-nos números da spec. Resultado:
+nos números da spec. Resultado atual:
 
 | Par | Medido | Veredito |
 |---|---|---|
 | text.primary sobre surface.base | 20,5:1 | ✅ AAA |
 | text.primary sobre surface.raised | 18,3:1 | ✅ AAA |
+| text.primary sobre surface.strong | 15,5:1 | ✅ AAA |
 | text.inverse sobre surface.base | 8,3:1 | ✅ AA/AAA |
 | text.primary sobre `#cc0000` (YouTube) | 5,7:1 | ✅ AA |
-| **text.primary sobre `#1db954` (Spotify)** | **2,5:1** | ❌ reprova AA |
-| **text.tertiary `#0000ee` sobre fundo escuro** | **2,0:1** | ❌ reprova AA |
+| surface.base sobre `#1db954` (Spotify) | 8,1:1 | ✅ AAA |
+| text.tertiary sobre surface.raised | 7,5:1 | ✅ AAA |
+| text.tertiary sobre surface.base | 8,4:1 | ✅ AAA |
 
-Os dois tokens foram implementados **como especificados** — são decisões de
-design, não bugs de implementação, e mudá-los por conta própria alteraria o
-design system. Mas o item "Contraste WCAG 2.2 AA validado" do checklist **não
-está satisfeito** por causa deles. Os testes travam esse fato: se um dos tokens
-for corrigido, o teste correspondente falha e obriga a atualização consciente.
+Dois pares da spec original reprovavam e foram corrigidos **sem alterar nenhuma
+cor de marca**:
 
-Saídas possíveis, quando houver decisão de design:
+- **Spotify.** Com `text.primary` o rótulo ficava em 2,5:1. O verde `#1db954`
+  continua intacto; o que mudou foi a cor do rótulo naquela variante, que passou
+  a `surface.base` — 8,1:1. É também o que as diretrizes do próprio Spotify
+  fazem. O YouTube não precisou mudar: o vermelho é escuro o bastante.
+- **text.tertiary.** `#0000ee` é o azul de link clássico, pensado para fundo
+  claro; sobre `surface.raised` dava 1,99:1. Passou a `#7aa2ff`, o equivalente
+  para fundo escuro, preservando a leitura de "link".
 
-- **Spotify**: usar texto escuro (`surface.base`) sobre o verde — vai a 8,1:1;
-  ou escurecer o verde para `#0f7a37`.
-- **text.tertiary**: `#0000ee` é um azul de link pensado para fundo claro. Sobre
-  fundo escuro, o equivalente seria algo como `#7aa2ff`. Alternativa sem mexer
-  no token: usar `text.inverse` nos links externos do catálogo.
+Um teste de rede de segurança (`nenhum par de texto do catálogo reprova AA`)
+percorre todos os pares realmente usados na UI e falha listando quais ficaram
+abaixo de 4,5:1 — então um token novo não passa despercebido.
 
 ### Tipografia
 

@@ -18,8 +18,16 @@ export const palette = {
   textPrimary: "#fcfcfc",
   /** accent roxo — CTA primário, hover, glow, badges */
   textInverse: "#d87dff",
-  /** links externos / badges informativos */
-  textTertiary: "#0000ee",
+  /**
+   * Links externos / badges informativos.
+   *
+   * A spec do PodFactory define `#0000ee` — o azul de link clássico, pensado
+   * para fundo CLARO. Sobre as superfícies escuras deste catálogo ele fica em
+   * 1,99:1 contra surface.raised, muito abaixo dos 4,5:1 exigidos por WCAG AA.
+   * Trocado pelo equivalente para fundo escuro, mantendo a leitura de "link":
+   * 7,5:1 sobre surface.raised e 8,4:1 sobre surface.base.
+   */
+  textTertiary: "#7aa2ff",
   /** base das bordas, sempre usada com opacidade (8–15%) */
   borderMuted: "#ffffff",
   /** trilhas — cores de marca das plataformas */

@@ -61,21 +61,43 @@ describe("contraste dos tokens", () => {
     expect(contrastRatio(palette.textInverse, palette.surfaceRaised)).toBeGreaterThanOrEqual(3);
   });
 
-  it("rótulos das trilhas passam AA sobre as cores de marca", () => {
-    // O texto do botão é text.primary sobre #cc0000 / #1db954.
+  it("rótulo do YouTube passa AA — text.primary sobre o vermelho da marca", () => {
     expect(contrastRatio(palette.textPrimary, palette.youtube)).toBeGreaterThanOrEqual(4.5);
-    // Spotify é um verde claro: só atinge AA para texto GRANDE. O botão usa
-    // Borna xs, então este par é uma exceção conhecida — ver docs/portfolio.md.
+  });
+
+  it("rótulo do Spotify passa AA — surface.base sobre o verde da marca", () => {
+    // O verde do Spotify é claro: com text.primary o rótulo ficava em 2,5:1.
+    // O TrilhaButton usa surface.base nessa variante (ver components/portfolio/
+    // TrilhaButton.tsx), preservando a cor de marca. Se alguém trocar o rótulo
+    // de volta para text.primary, a asserção de baixo denuncia o motivo.
+    expect(contrastRatio(palette.surfaceBase, palette.spotify)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(palette.textPrimary, palette.spotify)).toBeLessThan(4.5);
   });
 
-  it("REGRESSÃO CONHECIDA: text.tertiary não é legível sobre fundo escuro", () => {
-    // #0000ee sobre #14101c fica em 1,99:1 — muito abaixo dos 4,5:1 exigidos.
-    // A spec designa text.tertiary para links externos; mantivemos o token como
-    // especificado, mas isto é uma pendência de design, não um "passou".
-    // Se o token for corrigido, este teste falha e deve ser atualizado.
-    const ratio = contrastRatio(palette.textTertiary, palette.surfaceRaised);
-    expect(ratio).toBeLessThan(4.5);
+  it("text.tertiary passa AA sobre as duas superfícies escuras", () => {
+    // A spec define #0000ee, um azul de link para fundo CLARO, que sobre
+    // surface.raised fica em 1,99:1. O token foi ajustado para o equivalente
+    // de fundo escuro — ver lib/portfolio/tokens.ts.
+    expect(contrastRatio(palette.textTertiary, palette.surfaceRaised)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(palette.textTertiary, palette.surfaceBase)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("nenhum par de texto do catálogo reprova AA", () => {
+    // Rede de segurança: cobre de uma vez todos os pares realmente usados na
+    // UI, para que um token novo não passe despercebido.
+    const pares: [string, string, string][] = [
+      ["text.primary / surface.base", palette.textPrimary, palette.surfaceBase],
+      ["text.primary / surface.raised", palette.textPrimary, palette.surfaceRaised],
+      ["text.primary / surface.strong", palette.textPrimary, palette.surfaceStrong],
+      ["text.tertiary / surface.base", palette.textTertiary, palette.surfaceBase],
+      ["text.tertiary / surface.raised", palette.textTertiary, palette.surfaceRaised],
+      ["rótulo YouTube", palette.textPrimary, palette.youtube],
+      ["rótulo Spotify", palette.surfaceBase, palette.spotify],
+    ];
+    const reprovados = pares
+      .filter(([, fg, bg]) => contrastRatio(fg, bg) < 4.5)
+      .map(([nome, fg, bg]) => `${nome} = ${contrastRatio(fg, bg).toFixed(2)}:1`);
+    expect(reprovados).toEqual([]);
   });
 });
 
