@@ -55,6 +55,32 @@ export default async function SiteAdminSettings() {
             <SiteInput id="cta_secondary_url" name="cta_secondary_url" label="CTA secundário — destino" placeholder="Ex.: /portfolio" defaultValue={v("cta_secondary_url", DEFAULT_CONFIG.ctaSecondaryUrl)} />
           </div>
 
+          <div className="grid gap-5 sm:grid-cols-2">
+          <SiteInput
+            id="location"
+            name="location"
+            label="Praça"
+            helper="Aparece no hero, no CTA final e no rodapé."
+            placeholder="Ex.: Cuiabá/MT"
+            defaultValue={v("location", DEFAULT_CONFIG.location)}
+          />
+          <SiteInput
+            id="whatsapp_number"
+            name="whatsapp_number"
+            label="WhatsApp de atendimento"
+            helper="Canal principal do site: botão flutuante, rodapé e continuação do formulário. Com DDI e DDD."
+            placeholder="Ex.: +55 65 99920-7108"
+            defaultValue={v("whatsapp_number", DEFAULT_CONFIG.whatsappNumber)}
+          />
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <SiteInput id="instagram_url" name="instagram_url" label="Instagram" helper="Vazio = ícone não aparece no rodapé." placeholder="Ex.: https://instagram.com/reinersmedia" defaultValue={v("instagram_url")} />
+            <SiteInput id="linkedin_url" name="linkedin_url" label="LinkedIn" helper="Vazio = ícone não aparece no rodapé." placeholder="Ex.: https://linkedin.com/company/reinersmedia" defaultValue={v("linkedin_url")} />
+            <SiteInput id="youtube_url" name="youtube_url" label="YouTube" helper="Vazio = ícone não aparece no rodapé." placeholder="Ex.: https://youtube.com/@reinersmedia" defaultValue={v("youtube_url")} />
+            <SiteInput id="spotify_url" name="spotify_url" label="Spotify" helper="Vazio = ícone não aparece no rodapé." placeholder="Ex.: https://open.spotify.com/show/..." defaultValue={v("spotify_url")} />
+          </div>
+
           <SiteInput id="seo_title" name="seo_title" label="Título SEO" placeholder="Ex.: Reiners Media — Estúdio de podcast premium" defaultValue={v("seo_title")} />
           <SiteTextarea id="seo_description" name="seo_description" label="Descrição SEO" placeholder="Ex.: Gravação, edição, mixagem e distribuição em um só lugar." defaultValue={v("seo_description")} />
           <SiteInput id="analytics_id" name="analytics_id" label="ID de analytics externo" helper="Opcional — a coleta própria já roda sem isso." placeholder="Ex.: G-XXXXXXX" defaultValue={v("analytics_id")} />

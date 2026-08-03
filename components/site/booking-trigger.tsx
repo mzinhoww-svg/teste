@@ -11,9 +11,10 @@ import { trackSiteEvent } from "@/lib/site/track";
  */
 export function BookingTrigger({
   label,
+  whatsappNumber,
   children,
   ...buttonProps
-}: SiteButtonProps & { label: string }) {
+}: SiteButtonProps & { label: string; whatsappNumber: string }) {
   const [open, setOpen] = React.useState(false);
   return (
     <>
@@ -26,7 +27,7 @@ export function BookingTrigger({
       >
         {children}
       </SiteButton>
-      <BookingModal open={open} onClose={() => setOpen(false)} />
+      <BookingModal open={open} onClose={() => setOpen(false)} whatsappNumber={whatsappNumber} />
     </>
   );
 }

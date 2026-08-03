@@ -7,7 +7,7 @@ import type { Plan } from "@/lib/site/content";
 // Seção 2 — Planos. 3 cards (1 coluna no mobile). O card em destaque ganha
 // borda accent e o badge "Mais popular".
 
-export function PlansSection({ plans }: { plans: Plan[] }) {
+export function PlansSection({ plans, whatsappNumber }: { plans: Plan[]; whatsappNumber: string }) {
   return (
     <section id="planos" className="bg-site-surface-raised px-6 py-24" aria-labelledby="planos-title">
       <div className="mx-auto max-w-6xl">
@@ -57,6 +57,7 @@ export function PlansSection({ plans }: { plans: Plan[] }) {
                 <div className="mt-auto pt-8">
                   <BookingTrigger
                     label={`plan_${plan.name.toLowerCase().replace(/\s+/g, "_")}`}
+                    whatsappNumber={whatsappNumber}
                     variant="surface"
                     block
                   >
