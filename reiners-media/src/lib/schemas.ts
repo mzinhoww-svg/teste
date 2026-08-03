@@ -124,8 +124,54 @@ export const durationSchema = z
   .string()
   .regex(DURATION_REGEX, 'Duração deve estar em MM:SS ou H:MM:SS, ex: 45:30');
 
-/** URL absoluta. Use apenas para link externo de verdade (redes, YouTube, Spotify). */
-export const urlSchema = z.string().url().max(2048);
+/**
+ * Protocolos aceitos em qualquer URL absoluta que o produto armazene e
+ * eventualmente renderize em `href`/`src`.
+ */
+export const SAFE_URL_PROTOCOLS: readonly string[] = ['http:', 'https:'];
+
+/**
+ * Valida URL absoluta com **allowlist de protocolo**.
+ *
+ * SEGURANÇA (DEC-022) — `z.string().url()` valida SINTAXE de URI, não
+ * protocolo: `javascript:alert(1)` é URI sintaticamente válida e passava.
+ * Como `socialLinks` é interpolado em `href`, isso era XSS armazenado —
+ * um EDITOR gravava `javascript:...` e qualquer visitante que clicasse
+ * (inclusive um ADMIN) executava script na origem do site.
+ *
+ * A checagem usa o parser WHATWG (`new URL`), NÃO regex sobre a string crua,
+ * porque é ele que decide o que o browser vai executar. O parser já normaliza
+ * as evasões clássicas antes de expor `protocol`:
+ * - remove tab/LF/CR internos -> `java\tscript:` vira `javascript:`;
+ * - remove espaços e controles nas pontas -> ` javascript:` vira `javascript:`;
+ * - normaliza o esquema para minúsculas -> `JAVASCRIPT:` vira `javascript:`.
+ * Sobre a string normalizada, só `http:` e `https:` passam.
+ *
+ * Também recusa credenciais embutidas (`https://user:senha@host`): nenhum link
+ * legítimo de rede social as usa, e elas servem para disfarçar o host real.
+ */
+export function isSafeHttpUrl(value: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    return false;
+  }
+  if (!SAFE_URL_PROTOCOLS.includes(parsed.protocol)) return false;
+  if (parsed.host.length === 0) return false;
+  if (parsed.username !== '' || parsed.password !== '') return false;
+  return true;
+}
+
+/** URL absoluta http(s). Use apenas para link externo (redes, YouTube, Spotify). */
+export const urlSchema = z
+  .string()
+  .min(1)
+  .max(2048)
+  .refine(
+    isSafeHttpUrl,
+    'URL deve ser absoluta e usar http:// ou https://; esquemas como javascript:, data: e file: são recusados',
+  );
 
 /**
  * Referência de imagem aceita pelo produto. Duas origens legítimas:
@@ -146,8 +192,17 @@ export const urlSchema = z.string().url().max(2048);
  * validação de cliente (formulário de TCK-018, cliente gerado do OpenAPI) e a
  * validação de servidor não podem divergir.
  */
+/**
+ * SEGURANÇA (DEC-022): o ramo absoluto exige literalmente `http://` ou
+ * `https://` no início, então nenhum outro esquema entra — `javascript:`,
+ * `data:`, `vbscript:`, `file:` e `blob:` não casam, e a classe proíbe espaço,
+ * tab e quebra de linha, fechando as evasões por caractere de controle. O `@`
+ * é proibido na AUTORIDADE (mas continua válido no caminho, ex.
+ * `/images/@2x/logo.png`) para recusar credenciais embutidas do tipo
+ * `https://user:senha@evil.test`, que servem para disfarçar o host real.
+ */
 export const IMAGE_REF_REGEX =
-  /^(?:https?:\/\/[^\s/?#<>"'`\\]+[^\s<>"'`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"'`\\]*)$/;
+  /^(?:https?:\/\/[^\s/?#<>"'`\\@]+(?:[/?#][^\s<>"'`\\]*)?|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"'`\\]*)$/;
 
 /** `.source` de `IMAGE_REF_REGEX`, publicado como `pattern` nos YAMLs. */
 export const IMAGE_REF_PATTERN = IMAGE_REF_REGEX.source;

@@ -69,12 +69,15 @@ export interface ResolvedTrack {
   readonly embedUrl: string;
 }
 
-/** Recorte de episódio que este módulo precisa. Evita acoplar à entidade toda. */
+/**
+ * Recorte de episódio que este módulo precisa. Evita acoplar à entidade toda.
+ *
+ * As colunas `youtubeUrl` / `spotifyUrl` NÃO entram aqui de propósito — ver a
+ * nota "A COLUNA CRUA NÃO É FONTE DE `href`" em `resolveEpisodeTracks`.
+ */
 export interface EpisodeTrackSource {
   readonly youtubeEmbed?: string | null;
   readonly spotifyEmbed?: string | null;
-  readonly youtubeUrl?: string | null;
-  readonly spotifyUrl?: string | null;
 }
 
 /**
@@ -127,19 +130,37 @@ export function toSpotifyEpisodeUrl(embed: string | null | undefined): string | 
 }
 
 /**
- * Trilhas de um episódio, na ordem em que aparecem na interface.
+ * Trilhas de um episódio, na ordem em que aparecem na interface. Episódio sem
+ * nenhuma trilha utilizável devolve lista vazia — quem consome decide se some
+ * com o bloco ou mostra estado vazio.
  *
- * O `href` prefere a URL canônica derivada do embed e só cai para a coluna
- * `*Url` quando o embed é inutilizável: a coluna guarda a URL exatamente como o
- * admin digitou (com `?si=`, `&t=42`, prefixo de locale), enquanto o embed já
- * passou pelo parser canônico. Um episódio sem nenhuma trilha válida devolve
- * lista vazia — quem consome decide se some com o bloco ou mostra estado vazio.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * A COLUNA CRUA NÃO É FONTE DE `href` — decisão explícita
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Uma versão anterior tinha `?? episode.youtubeUrl` como fallback. A revisão
+ * mostrou que ele era **inalcançável**: `toYoutubeWatchUrl` e `toYoutubeEmbedUrl`
+ * partem do MESMO `normalizeYoutubeId`, então ou os dois devolvem string (e o
+ * fallback não roda) ou os dois devolvem `null` (e a trilha inteira é
+ * descartada antes). O fallback protegia por acidente, não por desenho.
+ *
+ * Agora é por desenho: `href` e `embedUrl` são construídos AQUI, a partir de
+ * constantes deste módulo mais um ID que passou pelo alfabeto e pelo
+ * comprimento canônicos. Nenhum caractere de `Episode` chega ao `href` sem ter
+ * casado com `/^[A-Za-z0-9_-]{11}$/` ou `/^[A-Za-z0-9]{22}$/`, o que torna
+ * `javascript:`, `data:` e path traversal impossíveis por construção — o mesmo
+ * risco que `safe-url.ts` fecha com allowlist para `socialLinks`, que não tem
+ * como ser derivado e por isso precisa ser inspecionado.
+ *
+ * Consequência aceita: um episódio cujo `youtubeEmbed` esteja corrompido no
+ * banco não vira link, mesmo que `youtubeUrl` esteja intacto. É o resultado
+ * certo — sem embed utilizável não haveria player para o TCK-015 abrir, e um
+ * botão que leva para fora mas não abre o modal é pior que botão nenhum.
  */
 export function resolveEpisodeTracks(episode: EpisodeTrackSource): ResolvedTrack[] {
   const tracks: ResolvedTrack[] = [];
 
   const youtubeEmbedUrl = toYoutubeEmbedUrl(episode.youtubeEmbed);
-  const youtubeHref = toYoutubeWatchUrl(episode.youtubeEmbed) ?? episode.youtubeUrl ?? null;
+  const youtubeHref = toYoutubeWatchUrl(episode.youtubeEmbed);
   if (youtubeEmbedUrl !== null && youtubeHref !== null) {
     tracks.push({
       platform: 'youtube',
@@ -150,7 +171,7 @@ export function resolveEpisodeTracks(episode: EpisodeTrackSource): ResolvedTrack
   }
 
   const spotifyEmbedUrl = toSpotifyEmbedUrl(episode.spotifyEmbed);
-  const spotifyHref = toSpotifyEpisodeUrl(episode.spotifyEmbed) ?? episode.spotifyUrl ?? null;
+  const spotifyHref = toSpotifyEpisodeUrl(episode.spotifyEmbed);
   if (spotifyEmbedUrl !== null && spotifyHref !== null) {
     tracks.push({
       platform: 'spotify',

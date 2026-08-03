@@ -383,7 +383,7 @@ components:
           maxLength: 5000
         thumbnail:
           type: string
-          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\@]+(?:[/?#][^\s<>"''`\\]*)?|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         duration:
@@ -396,11 +396,13 @@ components:
         youtubeUrl:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
           description: youtu.be/ID, youtube.com/watch?v=ID ou youtube.com/embed/ID
         spotifyUrl:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
           description: open.spotify.com/episode/ID com querystring opcional
     EpisodeUpdate:
@@ -418,7 +420,7 @@ components:
           type: string
         thumbnail:
           type: string
-          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\@]+(?:[/?#][^\s<>"''`\\]*)?|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         duration:
@@ -430,10 +432,12 @@ components:
         youtubeUrl:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
         spotifyUrl:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
     Episode:
       type: object
@@ -464,7 +468,7 @@ components:
           type: string
         thumbnail:
           type: string
-          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\]+[^\s<>"''`\\]*|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
+          pattern: '^(?:https?:\/\/[^\s/?#<>"''`\\@]+(?:[/?#][^\s<>"''`\\]*)?|\/(?!\/)(?!\.\.(?:[/?#]|$))(?![^?#]*\/\.\.(?:[/?#]|$))[^\s<>"''`\\]*)$'
           description: URL http(s) absoluta (upload no Storage) ou caminho iniciado por / servido de public/
           nullable: true
         duration:
@@ -475,6 +479,7 @@ components:
         youtubeUrl:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
         youtubeEmbed:
           type: string
@@ -483,6 +488,7 @@ components:
         spotifyUrl:
           type: string
           format: uri
+          description: 'Link externo. Apenas http:// ou https://. Esquemas como javascript:, data:, vbscript: e file: sao recusados, assim como credenciais embutidas'
           nullable: true
         spotifyEmbed:
           type: string

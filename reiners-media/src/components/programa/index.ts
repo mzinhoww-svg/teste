@@ -67,6 +67,13 @@ export {
 } from './query';
 
 export {
+  ALLOWED_URL_PROTOCOLS,
+  isSafeExternalUrl,
+  normalizeUrlCandidate,
+  toSafeExternalUrl,
+} from './safe-url';
+
+export {
   PODCAST_STATUS_PRESENTATION,
   podcastStatusPresentation,
   type PodcastStatusPresentation,
