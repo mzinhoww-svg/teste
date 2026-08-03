@@ -9,9 +9,14 @@ import { track } from "@/lib/portfolio/track";
 
 export type TrackVariant = "YOUTUBE" | "SPOTIFY";
 
-const VARIANT: Record<TrackVariant, { label: string; bg: string; icon: string }> = {
-  YOUTUBE: { label: "YouTube", bg: "bg-pf-youtube", icon: "▶" },
-  SPOTIFY: { label: "Spotify", bg: "bg-pf-spotify", icon: "♪" },
+// O verde do Spotify (#1db954) é claro demais para receber texto claro: com
+// text.primary o rótulo fica em 2,5:1, reprovando WCAG AA. Em vez de alterar a
+// cor de marca, o rótulo dessa variante usa surface.base — 8,1:1, e é também
+// o que as próprias diretrizes do Spotify fazem. O vermelho do YouTube é
+// escuro o bastante e mantém text.primary (5,7:1).
+const VARIANT: Record<TrackVariant, { label: string; bg: string; fg: string; icon: string }> = {
+  YOUTUBE: { label: "YouTube", bg: "bg-pf-youtube", fg: "text-pf-primary", icon: "▶" },
+  SPOTIFY: { label: "Spotify", bg: "bg-pf-spotify", fg: "text-pf-base", icon: "♪" },
 };
 
 export function TrilhaButton({
@@ -55,9 +60,10 @@ export function TrilhaButton({
         onOpen({ variant, embedUrl, externalUrl, title: episodeTitle });
       }}
       className={[
-        "pf-motion-transform inline-flex min-h-[44px] items-center gap-[5px] rounded-pf-xs px-3 py-[6px] text-pf-xs uppercase tracking-pf-track text-pf-primary",
+        "pf-motion-transform inline-flex min-h-[44px] items-center gap-[5px] rounded-pf-xs px-3 py-[6px] text-pf-xs uppercase tracking-pf-track",
         "transition-[filter,transform,box-shadow] duration-pf-fast ease-pf",
         v.bg,
+        v.fg,
         disabled
           ? "cursor-not-allowed opacity-[0.35]"
           : "hover:scale-[1.02] hover:shadow-pf-4 hover:brightness-110 active:scale-[0.97] active:duration-pf-instant",
