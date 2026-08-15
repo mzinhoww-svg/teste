@@ -10,6 +10,7 @@ import { AboutSection } from "@/components/site/sections/about";
 import { FinalCtaSection } from "@/components/site/sections/final-cta";
 import { FooterSection } from "@/components/site/sections/footer";
 import { WhatsappFab } from "@/components/site/whatsapp-fab";
+import { ApolloTracker } from "@/components/site/apollo-tracker";
 
 // Landing pública da Reiners Media (apex: reiners.agency).
 // A landing do CRM foi para /crm (também servida em crm.reiners.agency) —
@@ -63,6 +64,7 @@ export default async function LandingPage() {
       <FooterSection config={config} programs={programs} />
       <WhatsappFab number={config.whatsappNumber} />
       <SitePageView />
+      <ApolloTracker />
     </div>
   );
 }
