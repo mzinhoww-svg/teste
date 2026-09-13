@@ -66,8 +66,10 @@ export type Program = {
 export const DEFAULT_CONFIG: SiteConfig = {
   siteName: "Reiners Media",
   tagline: "Estúdio de Podcast Premium",
-  heroVideoUrl: null,
-  heroImageUrl: null,
+  // Servidos de /public pelo próprio Vercel — sem dependência do Storage. O CMS
+  // sobrescreve quando houver URL lá (ver toConfig).
+  heroVideoUrl: "/hero.mp4",
+  heroImageUrl: "/hero-poster.jpg",
   ctaPrimaryText: "Ver planos",
   ctaPrimaryUrl: "#planos",
   ctaSecondaryText: "Ouvir programas",
@@ -285,8 +287,10 @@ export function toConfig(row: Record<string, unknown>): SiteConfig {
   return {
     siteName: str("site_name", DEFAULT_CONFIG.siteName),
     tagline: str("tagline", DEFAULT_CONFIG.tagline),
-    heroVideoUrl: nullable("hero_video_url"),
-    heroImageUrl: nullable("hero_image_url"),
+    // `?? default`: coluna vazia no banco não deve APAGAR o hero — só uma URL
+    // de fato preenchida no CMS substitui o arquivo versionado.
+    heroVideoUrl: nullable("hero_video_url") ?? DEFAULT_CONFIG.heroVideoUrl,
+    heroImageUrl: nullable("hero_image_url") ?? DEFAULT_CONFIG.heroImageUrl,
     ctaPrimaryText: str("cta_primary_text", DEFAULT_CONFIG.ctaPrimaryText),
     ctaPrimaryUrl: str("cta_primary_url", DEFAULT_CONFIG.ctaPrimaryUrl),
     ctaSecondaryText: str("cta_secondary_text", DEFAULT_CONFIG.ctaSecondaryText),

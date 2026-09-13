@@ -25,7 +25,9 @@ describe("normalização das linhas do CMS", () => {
     expect(config.siteName).toBe(DEFAULT_CONFIG.siteName);
     expect(config.ctaPrimaryText).toBe("Ver preços");
     expect(config.seoTitle).toBe(DEFAULT_CONFIG.seoTitle);
-    expect(config.heroVideoUrl).toBeNull();
+    // Mudou de propósito: campo vazio cai no arquivo versionado em /public,
+    // em vez de deixar o hero sem mídia. Ver "mídia do hero" abaixo.
+    expect(config.heroVideoUrl).toBe(DEFAULT_CONFIG.heroVideoUrl);
   });
 
   it("toTestimonial e toProgram mapeiam os campos opcionais", () => {
@@ -58,5 +60,23 @@ describe("initials", () => {
     expect(initials("Ana Furtado")).toBe("AF");
     expect(initials("Ana Maria Furtado")).toBe("AM");
     expect(initials("Ana")).toBe("A");
+  });
+});
+
+describe("mídia do hero", () => {
+  it("tem vídeo e pôster por padrão, servidos pelo próprio site", () => {
+    expect(DEFAULT_CONFIG.heroVideoUrl).toBe("/hero.mp4");
+    expect(DEFAULT_CONFIG.heroImageUrl).toBe("/hero-poster.jpg");
+  });
+
+  it("coluna vazia no banco não apaga o hero — cai no arquivo versionado", () => {
+    const config = toConfig({ hero_video_url: null, hero_image_url: "  " });
+    expect(config.heroVideoUrl).toBe("/hero.mp4");
+    expect(config.heroImageUrl).toBe("/hero-poster.jpg");
+  });
+
+  it("uma URL de fato preenchida no CMS substitui o arquivo", () => {
+    const config = toConfig({ hero_video_url: "https://cdn.exemplo/novo.mp4" });
+    expect(config.heroVideoUrl).toBe("https://cdn.exemplo/novo.mp4");
   });
 });
