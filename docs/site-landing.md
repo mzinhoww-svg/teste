@@ -85,6 +85,41 @@ continua soberano para trocar sem deploy.
 extensões estáticas. Um formato fora dessa lista vira `307 /login` para o
 visitante anônimo — foi o que aconteceu com `.mp4` antes da correção.
 
+## "O que fazemos" — as frentes do estúdio
+
+`site_services` responde **o que dá para contratar**; `site_plans` responde
+**quanto custa**. São perguntas diferentes, e por isso tabelas diferentes: o
+plano é o desdobramento comercial da frente, não o mesmo dado com outro nome.
+
+A seção é o padrão **tabs** da APG, não uma lista de links:
+
+- um único painel no DOM por vez;
+- **tabindex rotativo** — a lista inteira ocupa uma parada de `Tab`, não seis;
+- setas trocam a aba, com ativação automática (o painel é barato de montar);
+- aceita os dois eixos (`←→` e `↑↓`) porque a lista é horizontal no mobile e
+  vertical a partir de `lg`. Mesmo DOM nos dois casos — nada é duplicado.
+
+### Mídia: vídeo **ou** até três imagens
+
+| `video_url` | `images` | Resultado |
+| --- | --- | --- |
+| preenchido | qualquer | `<video controls>` com `poster_url` |
+| vazio | 1–3 URLs | grade de imagens |
+| vazio | vazio | **nenhuma moldura** — só título, descrição e fecho |
+
+O terceiro caso é o estado inicial e é deliberado: reservar uma caixa preta
+esperando arquivo deixa a seção parecendo quebrada. `toService` corta em 3 e
+descarta o que não for string, porque `images` é `jsonb` e pode ser editada na
+mão.
+
+O campo `footnote` aceita **só** `**negrito**`. O parser é intencionalmente
+burro (`components/site/sections/services.tsx`): quem escreve ali não edita
+código, e um campo que aceitasse HTML seria injeção.
+
+> As descrições em `DEFAULT_SERVICES` são um rascunho escrito a partir do que o
+> resto do site já afirma (Cuiabá, in loco, domo geodésico, 48h). Confira contra
+> o que o estúdio de fato vende antes de considerar como texto final.
+
 ## Prova social: duas seções, dois níveis de afirmação
 
 | Seção | O que afirma | Exige |
@@ -178,7 +213,7 @@ arbitrário injetado em todas as páginas é vetor de exfiltração.
 | `Plan` | `site_plans` |
 | `Testimonial` | `site_testimonials` |
 | `AdminUser` | `site_admins` (`ADMIN` \| `EDITOR`) |
-| — (novo) | `site_programs`, `site_events`, `site_leads` |
+| — (novo) | `site_programs`, `site_events`, `site_leads`, `site_services`, `site_guests` |
 
 **Por que não Prisma:** o repositório já tem uma camada Supabase completa
 (migrations SQL versionadas, RLS por policy, `@supabase/ssr` no server e no
@@ -204,8 +239,9 @@ migration aplicada ou a rede falha. É por isso que o E2E roda sem segredos.
 ## CMS (`/admin/site`)
 
 Sidebar fixa de 240px, mesmos tokens do site. Seções: Dashboard (KPIs de 14 dias
-+ gráfico Recharts), Planos (CRUD + reordenar + destaque), Depoimentos (CRUD),
-Programas (CRUD, controla o teaser e o `/portfolio`) e Configurações
++ gráfico Recharts), O que fazemos (CRUD das frentes e da mídia de cada aba),
+Planos (CRUD + reordenar + destaque), Depoimentos (CRUD), Programas (CRUD,
+controla o teaser e o `/portfolio`), Convidados (CRUD) e Configurações
 (identidade, hero, CTAs, SEO).
 
 Acesso: linha em `site_admins` casada por `user_id` **ou** e-mail (permite

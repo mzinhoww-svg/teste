@@ -58,6 +58,11 @@ export async function listAllGuests() {
   return data ?? [];
 }
 
+export async function listAllServices() {
+  const { data } = await createClient().from("site_services").select("*").order("display_order");
+  return data ?? [];
+}
+
 export async function getConfigRow() {
   const { data } = await createClient().from("site_config").select("*").limit(1).maybeSingle();
   return data ?? null;

@@ -60,6 +60,19 @@ export type Guest = {
   displayOrder: number;
 };
 
+export type Service = {
+  id: string;
+  title: string;
+  badge: string | null;
+  description: string | null;
+  footnote: string | null;
+  videoUrl: string | null;
+  posterUrl: string | null;
+  /** Até 3. Ignorado quando há vídeo. */
+  images: string[];
+  displayOrder: number;
+};
+
 export type Program = {
   id: string;
   title: string;
@@ -188,6 +201,86 @@ export const DEFAULT_TESTIMONIALS: Testimonial[] = [
 // gravou no estúdio seria fabricar credencial.
 export const DEFAULT_GUESTS: Guest[] = [];
 
+// As seis frentes do estúdio. Diferente dos convidados, descrever o próprio
+// serviço não é credencial de terceiro — é a oferta da casa, e a landing
+// precisa dela no ar desde o primeiro deploy. O CMS sobrescreve.
+//
+// Mídia vazia de propósito: os vídeos entram pelo /admin depois.
+export const DEFAULT_SERVICES: Service[] = [
+  {
+    id: "podcast",
+    title: "Podcast",
+    badge: "Estúdio próprio",
+    description:
+      "O programa da sua marca, do roteiro ao episódio publicado. Grava no nosso estúdio, com equipe, equipamento e edição inclusos.",
+    footnote: "Tratamento acústico, até 3 câmeras 4K e **entrega em 48h**.",
+    videoUrl: null,
+    posterUrl: null,
+    images: [],
+    displayOrder: 1,
+  },
+  {
+    id: "cobertura-de-evento",
+    title: "Cobertura de evento",
+    badge: null,
+    description:
+      "Feira, congresso ou convenção: levamos filmmaker e estrutura de podcast — inclusive o domo geodésico — para gravar no meio do movimento.",
+    footnote: "Episódio gravado **ao vivo**, no estande ou no palco.",
+    videoUrl: null,
+    posterUrl: null,
+    images: [],
+    displayOrder: 2,
+  },
+  {
+    id: "gravar-com-os-seus-clientes",
+    title: "Gravar com os seus clientes",
+    badge: null,
+    description:
+      "Recebemos os seus clientes e convidados no estúdio, ou montamos a produção onde você quiser. Depoimento, entrevista, série: a sua marca conduz, a gente grava.",
+    footnote: "A mesma direção do podcast, a serviço da **sua marca e dos seus convidados**.",
+    videoUrl: null,
+    posterUrl: null,
+    images: [],
+    displayOrder: 3,
+  },
+  {
+    id: "o-seu-evento-proprio",
+    title: "O seu evento próprio",
+    badge: null,
+    description:
+      "Jantar, encontro de clientes ou lançamento. Registramos o que acontece na sala e devolvemos conteúdo editado, pronto para publicar.",
+    footnote: "Curadoria, registro e edição: do **painel ao corte final**.",
+    videoUrl: null,
+    posterUrl: null,
+    images: [],
+    displayOrder: 4,
+  },
+  {
+    id: "o-estudio-a-sua-disposicao",
+    title: "O estúdio à sua disposição",
+    badge: null,
+    description:
+      "Quer usar o estúdio para produzir o seu próprio conteúdo? Espaço, equipamentos e operador ficam com você, pelo tempo que precisar.",
+    footnote: "Estrutura completa em **Cuiabá/MT**: câmeras, áudio, iluminação e operador incluso.",
+    videoUrl: null,
+    posterUrl: null,
+    images: [],
+    displayOrder: 5,
+  },
+  {
+    id: "projeto-especial",
+    title: "Projeto especial",
+    badge: null,
+    description:
+      "Quer algo mais elaborado? Série, documentário, filme de marca. A mesma produção do podcast, agora contando a história da sua empresa.",
+    footnote: "Projetos sob medida, com **roteiro, direção e edição próprios**.",
+    videoUrl: null,
+    posterUrl: null,
+    images: [],
+    displayOrder: 6,
+  },
+];
+
 export const DEFAULT_PROGRAMS: Program[] = [
   {
     id: "conversas-que-cooperam",
@@ -251,6 +344,11 @@ export const DEFAULT_PROGRAMS: Program[] = [
   },
 ];
 
+/** Texto opcional do CMS: string vazia ou só espaços conta como ausente. */
+function nullableText(v: unknown): string | null {
+  return typeof v === "string" && v.trim() ? v.trim() : null;
+}
+
 /** Normaliza a linha do banco (snake_case, jsonb) para o tipo da aplicação. */
 export function toPlan(row: Record<string, unknown>): Plan {
   const raw = row.features;
@@ -286,6 +384,25 @@ export function toGuest(row: Record<string, unknown>): Guest {
     name: String(row.name ?? ""),
     role: (row.role as string | null) ?? null,
     photoUrl: (row.photo_url as string | null) ?? null,
+    displayOrder: Number(row.display_order ?? 0),
+  };
+}
+
+export function toService(row: Record<string, unknown>): Service {
+  const raw = row.images;
+  // Coluna jsonb: pode vir com qualquer coisa dentro se editada na mão.
+  const images = Array.isArray(raw)
+    ? raw.filter((i): i is string => typeof i === "string" && i.trim() !== "").slice(0, 3)
+    : [];
+  return {
+    id: String(row.id),
+    title: String(row.title ?? ""),
+    badge: nullableText(row.badge),
+    description: nullableText(row.description),
+    footnote: nullableText(row.footnote),
+    videoUrl: nullableText(row.video_url),
+    posterUrl: nullableText(row.poster_url),
+    images,
     displayOrder: Number(row.display_order ?? 0),
   };
 }

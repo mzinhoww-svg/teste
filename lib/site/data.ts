@@ -1,9 +1,10 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
-  DEFAULT_CONFIG, DEFAULT_GUESTS, DEFAULT_PLANS, DEFAULT_PROGRAMS, DEFAULT_TESTIMONIALS,
-  toConfig, toGuest, toPlan, toProgram, toTestimonial,
-  type Guest, type Plan, type Program, type SiteConfig, type Testimonial,
+  DEFAULT_CONFIG, DEFAULT_GUESTS, DEFAULT_PLANS, DEFAULT_PROGRAMS, DEFAULT_SERVICES,
+  DEFAULT_TESTIMONIALS,
+  toConfig, toGuest, toPlan, toProgram, toService, toTestimonial,
+  type Guest, type Plan, type Program, type Service, type SiteConfig, type Testimonial,
 } from "./content";
 
 // Leitura do conteúdo público do site.
@@ -81,5 +82,13 @@ export function getGuests(): Promise<Guest[]> {
     (db) => db.from("site_guests").select("*").eq("published", true).order("display_order"),
     DEFAULT_GUESTS,
     (rows) => rows.map(toGuest),
+  );
+}
+
+export function getServices(): Promise<Service[]> {
+  return safe(
+    (db) => db.from("site_services").select("*").eq("published", true).order("display_order"),
+    DEFAULT_SERVICES,
+    (rows) => rows.map(toService),
   );
 }
