@@ -166,35 +166,15 @@ export const DEFAULT_PLANS: Plan[] = [
   },
 ];
 
-export const DEFAULT_TESTIMONIALS: Testimonial[] = [
-  {
-    id: "ana-furtado",
-    name: "Ana Furtado",
-    role: "Gerente de Comunicação · Sicredi MT",
-    quote:
-      "Saímos de posts avulsos para um programa próprio. A diretoria virou porta-voz e a pauta deixou de depender de agência.",
-    avatarUrl: null,
-    displayOrder: 1,
-  },
-  {
-    id: "rodrigo-menezes",
-    name: "Rodrigo Menezes",
-    role: "Diretor · Federação das Indústrias",
-    quote:
-      "A equipe montou estúdio na nossa sede em duas horas. O episódio ficou pronto em 48h, com cortes prontos para publicar.",
-    avatarUrl: null,
-    displayOrder: 2,
-  },
-  {
-    id: "camila-prado",
-    name: "Camila Prado",
-    role: "Head de Marketing · Associação do Agro",
-    quote:
-      "O rigor de estúdio aparece no resultado. É o único fornecedor que entrega roteiro, gravação e distribuição sem terceirizar.",
-    avatarUrl: null,
-    displayOrder: 3,
-  },
-];
+// Vazio pela MESMA razão de DEFAULT_GUESTS: um depoimento afirma que uma
+// pessoa nomeada recomendou o estúdio. Escrever essa frase por ela fabrica um
+// endosso — e os três que moravam aqui (Ana Furtado, Rodrigo Menezes, Camila
+// Prado) eram exatamente isso: nomes e falas inventados.
+//
+// Foram despublicados no banco em vez de apagados: se alguém com esse nome de
+// fato falar, é só republicar. Enquanto não houver frase real, a seção não
+// existe — a prova social do site é a de convidados, que afirma só presença.
+export const DEFAULT_TESTIMONIALS: Testimonial[] = [];
 
 // Vazio de propósito: sem convidado publicado a seção não renderiza. Prova
 // social é o único conteúdo do site que NÃO tem placeholder — inventar quem

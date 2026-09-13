@@ -42,7 +42,6 @@ describe("normalização das linhas do CMS", () => {
 describe("defaults da landing", () => {
   it("existem e são suficientes para renderizar sem banco", () => {
     expect(DEFAULT_PLANS).toHaveLength(3);
-    expect(DEFAULT_TESTIMONIALS).toHaveLength(3);
     expect(DEFAULT_PROGRAMS).toHaveLength(5);
     expect(DEFAULT_PLANS.filter((p) => p.isFeatured)).toHaveLength(1);
     expect(DEFAULT_PROGRAMS.every((p) => p.featured)).toBe(true);
@@ -100,6 +99,12 @@ describe("imagem do Sobre e card de compartilhamento", () => {
     });
     expect(config.aboutImageUrl).toBe("https://cdn.exemplo/sobre.webp");
     expect(config.ogImageUrl).toBe("https://cdn.exemplo/card.jpg");
+  });
+});
+
+describe("prova social não tem placeholder", () => {
+  it("depoimento sem frase real seria endosso fabricado — o default é vazio", () => {
+    expect(DEFAULT_TESTIMONIALS).toEqual([]);
   });
 });
 

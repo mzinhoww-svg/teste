@@ -20,7 +20,6 @@ test.describe("Landing Reiners Media (/)", () => {
       /Diga o que você precisa gravar/i,
       /Escolha o formato ideal/i,
       /Programas que criamos/i,
-      /O que dizem nossos clientes/i,
       /Por que a Reiners Media/i,
       /Pronto para começar seu podcast/i,
     ]) {
@@ -154,19 +153,21 @@ test.describe("Drawer mobile", () => {
   });
 });
 
-test.describe("carrossel", () => {
-  test("a lista é rolável e anunciada para leitor de tela", async ({ page }) => {
+// Sem banco (que é como o E2E roda), não há depoimento nem convidado
+// publicado. As duas seções de prova social somem — nenhuma promete conteúdo
+// que não existe, e nenhum controle de carrossel fica órfão na página.
+test.describe("prova social sem dados", () => {
+  test("a seção de depoimentos não existe sem frase publicada", async ({ page }) => {
     await page.goto("/");
-    const track = page.getByRole("list", { name: "Depoimentos de clientes" });
-    await expect(track).toBeVisible();
-    // Recebe foco: as setas do teclado rolam a lista sem depender dos botões.
-    await expect(track).toHaveAttribute("tabindex", "0");
+    await expect(page.getByRole("heading", { name: /O que dizem sobre o estúdio/i })).toHaveCount(0);
+    // O placeholder antigo não pode voltar: "em breve" ainda afirma que
+    // existem clientes dizendo algo.
+    await expect(page.getByText(/Depoimentos em breve/i)).toHaveCount(0);
   });
 
-  test("com tudo cabendo na tela, os botões não aparecem", async ({ page }) => {
+  test("nenhum botão de carrossel órfão", async ({ page }) => {
     await page.goto("/");
-    // Três depoimentos cabem no desktop — botão sem função é ruído.
-    await expect(page.getByRole("button", { name: "Próximo" })).toBeHidden();
+    await expect(page.getByRole("button", { name: "Próximo" })).toHaveCount(0);
   });
 });
 
