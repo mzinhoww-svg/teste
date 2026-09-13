@@ -163,6 +163,40 @@ export async function deleteProgram(formData: FormData) {
   revalidateSite();
 }
 
+// ────────────────────────────── Convidados ───────────────────────────────────
+
+export async function saveGuest(formData: FormData) {
+  await requireSiteEditor();
+  const db = createClient();
+
+  const id = String(formData.get("id") ?? "").trim();
+  const row = {
+    name: String(formData.get("name") ?? "").trim(),
+    role: String(formData.get("role") ?? "").trim() || null,
+    photo_url: String(formData.get("photo_url") ?? "").trim() || null,
+    display_order: Number(formData.get("display_order") ?? 0),
+    published: formData.get("published") === "on",
+    updated_at: new Date().toISOString(),
+  };
+
+  if (!row.name) throw new Error("Nome é obrigatório.");
+
+  const { error } = id
+    ? await db.from("site_guests").update(row).eq("id", id)
+    : await db.from("site_guests").insert(row);
+  if (error) throw new Error(error.message);
+
+  revalidateSite();
+}
+
+export async function deleteGuest(formData: FormData) {
+  await requireSiteEditor();
+  const id = String(formData.get("id") ?? "");
+  const { error } = await createClient().from("site_guests").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidateSite();
+}
+
 // ──────────────────────────── Configurações ──────────────────────────────────
 
 export async function saveSiteConfig(formData: FormData) {

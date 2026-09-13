@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
-  DEFAULT_CONFIG, DEFAULT_PLANS, DEFAULT_PROGRAMS, DEFAULT_TESTIMONIALS,
-  initials, toConfig, toPlan, toProgram, toTestimonial,
+  DEFAULT_CONFIG, DEFAULT_GUESTS, DEFAULT_PLANS, DEFAULT_PROGRAMS, DEFAULT_TESTIMONIALS,
+  initials, toConfig, toGuest, toPlan, toProgram, toTestimonial,
 } from "@/lib/site/content";
 
 describe("normalização das linhas do CMS", () => {
@@ -99,5 +99,29 @@ describe("imagem do Sobre e card de compartilhamento", () => {
     });
     expect(config.aboutImageUrl).toBe("https://cdn.exemplo/sobre.webp");
     expect(config.ogImageUrl).toBe("https://cdn.exemplo/card.jpg");
+  });
+});
+
+describe("convidados — prova social factual", () => {
+  it("não tem placeholder: inventar quem gravou no estúdio seria fabricar credencial", () => {
+    expect(DEFAULT_GUESTS).toEqual([]);
+  });
+
+  it("toGuest aceita convidado sem foto e sem descrição", () => {
+    const guest = toGuest({ id: "1", name: "Letícia Andrade" });
+    expect(guest.name).toBe("Letícia Andrade");
+    expect(guest.photoUrl).toBeNull();
+    expect(guest.role).toBeNull();
+    expect(guest.displayOrder).toBe(0);
+  });
+
+  it("toGuest mapeia snake_case", () => {
+    const guest = toGuest({
+      id: "1", name: "Ana", role: "convidada do Domo Cast",
+      photo_url: "https://cdn.exemplo/ana.webp", display_order: "3",
+    });
+    expect(guest.role).toBe("convidada do Domo Cast");
+    expect(guest.photoUrl).toBe("https://cdn.exemplo/ana.webp");
+    expect(guest.displayOrder).toBe(3);
   });
 });

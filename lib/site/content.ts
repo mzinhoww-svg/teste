@@ -52,6 +52,14 @@ export type Testimonial = {
   displayOrder: number;
 };
 
+export type Guest = {
+  id: string;
+  name: string;
+  role: string | null;
+  photoUrl: string | null;
+  displayOrder: number;
+};
+
 export type Program = {
   id: string;
   title: string;
@@ -175,6 +183,11 @@ export const DEFAULT_TESTIMONIALS: Testimonial[] = [
   },
 ];
 
+// Vazio de propósito: sem convidado publicado a seção não renderiza. Prova
+// social é o único conteúdo do site que NÃO tem placeholder — inventar quem
+// gravou no estúdio seria fabricar credencial.
+export const DEFAULT_GUESTS: Guest[] = [];
+
 export const DEFAULT_PROGRAMS: Program[] = [
   {
     id: "conversas-que-cooperam",
@@ -263,6 +276,16 @@ export function toTestimonial(row: Record<string, unknown>): Testimonial {
     role: String(row.role ?? ""),
     quote: String(row.quote ?? ""),
     avatarUrl: (row.avatar_url as string | null) ?? null,
+    displayOrder: Number(row.display_order ?? 0),
+  };
+}
+
+export function toGuest(row: Record<string, unknown>): Guest {
+  return {
+    id: String(row.id),
+    name: String(row.name ?? ""),
+    role: (row.role as string | null) ?? null,
+    photoUrl: (row.photo_url as string | null) ?? null,
     displayOrder: Number(row.display_order ?? 0),
   };
 }

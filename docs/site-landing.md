@@ -85,6 +85,23 @@ continua soberano para trocar sem deploy.
 extensões estáticas. Um formato fora dessa lista vira `307 /login` para o
 visitante anônimo — foi o que aconteceu com `.mp4` antes da correção.
 
+## Prova social: duas seções, dois níveis de afirmação
+
+| Seção | O que afirma | Exige |
+| --- | --- | --- |
+| **Convidados** (`site_guests`) | que a pessoa gravou no estúdio | foto e autorização de imagem |
+| **Depoimentos** (`site_testimonials`) | que a pessoa **recomenda** | a frase real que ela disse |
+
+A separação é deliberada. Colar um rosto real numa frase que a pessoa não disse
+fabrica um endosso — por isso "Convidados" não tem aspas, e por isso é a única
+seção do site **sem placeholder**: `DEFAULT_GUESTS` é vazio e a seção não
+renderiza enquanto ninguém estiver publicado. Inventar quem gravou no estúdio
+seria fabricar credencial.
+
+As duas usam o mesmo carrossel (`components/site/carousel.tsx`): rolagem nativa
+com scroll-snap, que funciona sem JS e com swipe; os botões são reforço e somem
+quando tudo cabe na tela. `scrollBy` respeita `prefers-reduced-motion`.
+
 ## Indexação — só o estúdio aparece em buscador
 
 A vitrine (`/` e `/portfolio`) é indexável. Todo o resto — CRM, portal do

@@ -152,3 +152,28 @@ test.describe("Drawer mobile", () => {
     await expect(drawer).toBeHidden();
   });
 });
+
+test.describe("carrossel", () => {
+  test("a lista é rolável e anunciada para leitor de tela", async ({ page }) => {
+    await page.goto("/");
+    const track = page.getByRole("list", { name: "Depoimentos de clientes" });
+    await expect(track).toBeVisible();
+    // Recebe foco: as setas do teclado rolam a lista sem depender dos botões.
+    await expect(track).toHaveAttribute("tabindex", "0");
+  });
+
+  test("com tudo cabendo na tela, os botões não aparecem", async ({ page }) => {
+    await page.goto("/");
+    // Três depoimentos cabem no desktop — botão sem função é ruído.
+    await expect(page.getByRole("button", { name: "Próximo" })).toBeHidden();
+  });
+});
+
+// A seção de convidados é prova social factual e não tem placeholder: sem
+// ninguém publicado, ela não existe na página.
+test.describe("convidados", () => {
+  test("oculta enquanto não houver convidado publicado", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: /Quem já gravou no estúdio/i })).toHaveCount(0);
+  });
+});
