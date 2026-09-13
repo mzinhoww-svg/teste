@@ -1,20 +1,25 @@
 # Fotos das convidadas
 
-Coloque aqui os retratos com **exatamente** estes nomes — o seed em
-`supabase/seed/site_guests.sql` já aponta para eles:
-
 | Arquivo | Pessoa |
 | --- | --- |
-| `catia-damasceno.jpg` | Cátia Damasceno |
-| `bruna-ghetti.jpg` | Bruna Ghetti |
-| `flavia-alessandra.jpg` | Flávia Alessandra |
+| `catia-damasceno.webp` | Cátia Damasceno |
+| `bruna-ghetti.webp` | Bruna Ghetti |
+| `flavia-alessandra.webp` | Flávia Alessandra |
 
-**Formato:** quadrado (1:1), 800×800 é o suficiente. `.jpg` ou `.webp` — se usar
-`.webp`, ajuste a extensão no seed também.
+800x800, WebP q82 — entre 29 e 43 KB cada. Os originais vieram em 1254x1254.
 
-**Como subir sem mexer em código:** no GitHub, abra esta pasta → *Add file* →
-*Upload files* → arraste os três → *Commit changes*. O Vercel publica no deploy
-seguinte, e a URL vira `/convidados/<arquivo>`.
+O seed em `supabase/seed/site_guests.sql` já aponta para estes caminhos.
 
-**Ordem importa:** suba os arquivos ANTES de publicar as convidadas no CMS.
-Publicar primeiro deixa a seção no ar com imagem quebrada.
+## Para adicionar mais alguém
+
+Retrato **quadrado**, 800x800, fundo escuro (a paleta do site e estes três
+retratos usam fundo quase preto — um fundo claro destoa no carrossel).
+Nomeie em minúsculas com hifens e cadastre em `/admin/site/convidados`
+apontando `photo_url` para `/convidados/<arquivo>.webp`.
+
+Redimensionar sem ImageMagick:
+
+```sh
+ffmpeg -i original.png -vf "scale=800:800:flags=lanczos" \
+  -c:v libwebp -quality 82 public/convidados/nome-sobrenome.webp
+```
