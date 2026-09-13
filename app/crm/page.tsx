@@ -1,3 +1,4 @@
+import { NOINDEX } from "@/lib/site/seo";
 import Link from "next/link";
 import {
   ArrowRight, Bot, FileSignature, Filter, Bell, BarChart3, Building2,
@@ -5,6 +6,8 @@ import {
 } from "lucide-react";
 
 export const metadata = {
+  // A landing do CRM é ferramenta interna, não vitrine: fica fora do índice.
+  ...NOINDEX,
   title: "CRM AI Studio — CRM multi-tenant operado por agentes de IA",
   description:
     "Funil inteligente, nove agentes de IA, contratos com assinatura digital, notificações acionáveis e relatórios. Para operações comerciais com execução diária.",

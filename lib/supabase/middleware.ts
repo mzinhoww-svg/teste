@@ -57,7 +57,17 @@ export async function updateSession(request: NextRequest) {
   const rawPath = url.pathname;
   let rewrote = false;
 
-  const isAsset = rawPath.startsWith("/api") || rawPath.startsWith("/_next") || rawPath.startsWith("/icon") || rawPath.startsWith("/favicon");
+  // Arquivos servidos como estão em QUALQUER host — nunca reescritos por
+  // subdomínio. robots.txt e sitemap.xml entram aqui porque são lidos por
+  // crawler anônimo: sem isso, o guard de sessão os mandava para /login e o
+  // buscador nunca via as regras de indexação.
+  const isAsset =
+    rawPath.startsWith("/api") ||
+    rawPath.startsWith("/_next") ||
+    rawPath.startsWith("/icon") ||
+    rawPath.startsWith("/favicon") ||
+    rawPath === "/robots.txt" ||
+    rawPath === "/sitemap.xml";
   // Rotas públicas de topo (login/convite/proposta/assinatura) são servidas como
   // estão em QUALQUER host — não podem ser reescritas para /app ou /portal, senão
   // os links profissionais (crm.<root>/convite, <root>/proposta) quebrariam.
@@ -106,7 +116,9 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/api/whatsapp/webhook") ||
     path.startsWith("/_next") ||
     path.startsWith("/favicon") ||
-    path.startsWith("/icon");
+    path.startsWith("/icon") ||
+    path === "/robots.txt" ||
+    path === "/sitemap.xml";
 
   const redirectTo = (pathname: string) => {
     const u = request.nextUrl.clone();

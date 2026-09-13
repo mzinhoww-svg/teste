@@ -119,14 +119,10 @@ export function FooterSection({
         </div>
       </div>
 
-      <div className="mx-auto mt-10 flex max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-site-border-muted/[0.06] pt-6">
+      <div className="mx-auto mt-10 max-w-6xl border-t border-site-border-muted/[0.06] pt-6">
         <p className="text-site-xs normal-case tracking-normal text-site-text-primary/55">
           © 2026 {siteName}. Todos os direitos reservados.
         </p>
-        {/* Ponte para o produto CRM: a landing do CRM agora mora em /crm. */}
-        <SiteLink href="/crm" variant="muted" className="text-site-sm">
-          CRM AI Studio
-        </SiteLink>
       </div>
     </footer>
   );

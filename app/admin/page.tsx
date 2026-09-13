@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { activeModel, activeProvider, hasLiveAI } from "@/lib/ai";
 import { Table, THead, TR, TH, TD } from "@/components/ui/table";
+import { NOINDEX } from "@/lib/site/seo";
 
-export const metadata = { title: "Admin da plataforma — CRM AI Studio" };
+export const metadata = { title: "Admin da plataforma — CRM AI Studio", ...NOINDEX };
 export const dynamic = "force-dynamic";
 
 // Admin da PLATAFORMA (≠ admin de tenant). Acesso: linha em platform_admins
