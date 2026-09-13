@@ -1,8 +1,8 @@
 {
-  "name": "crm-ai-studio",
+  "name": "reiners-media-site",
   "version": "0.1.0",
   "private": true,
-  "description": "CRM AI Studio — versão privada. Funis de vendas orquestrados por agentes de IA (Lead Scoring, Sales Copilot, Proposal, Activities).",
+  "description": "Site da Reiners Media — estúdio de podcast em Cuiabá/MT. Landing, portfólio e CMS próprio. Inclui, em subdomínio separado, ferramentas comerciais internas.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
