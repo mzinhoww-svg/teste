@@ -19,7 +19,7 @@
 
 insert into public.site_guests (name, role, photo_url, display_order, published)
 values
-  ('Catria Damasceno', null, null, 1, false),
+  ('Cátia Damasceno',  null, null, 1, false),
   ('Bruna Ghetti',     null, null, 2, false),
   ('Flávia Alessandra', null, null, 3, false)
 on conflict do nothing;
