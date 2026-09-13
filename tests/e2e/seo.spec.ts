@@ -69,3 +69,26 @@ test.describe("áreas privadas", () => {
     });
   }
 });
+
+// robots.txt vale por HOST. No apex a vitrine é liberada; em qualquer
+// subdomínio (crm., app.) a raiz É a área privada, então nada pode ser
+// rastreado. Sem ROOT_DOMAIN configurado (dev/CI) tudo cai no caso do apex,
+// por isso o teste do subdomínio só roda quando a raiz está definida.
+test.describe("robots.txt por host", () => {
+  test("no apex, libera a vitrine", async ({ request }) => {
+    const body = await (await request.get("/robots.txt")).text();
+    expect(body).toContain("Allow: /");
+    expect(body).toContain("Disallow: /crm");
+  });
+
+  test("em subdomínio privado, bloqueia a raiz inteira", async ({ request, baseURL }) => {
+    const root = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+    test.skip(!root, "sem NEXT_PUBLIC_ROOT_DOMAIN o roteamento é por path");
+
+    const res = await request.get("/robots.txt", { headers: { host: `crm.${root}` } });
+    const body = await res.text();
+    expect(body).toContain("Disallow: /");
+    expect(body).not.toContain("Allow: /");
+    expect(baseURL).toBeTruthy();
+  });
+});
