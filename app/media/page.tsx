@@ -22,6 +22,14 @@ export async function generateMetadata(): Promise<Metadata> {
       description: config.seoDescription ?? undefined,
       url: `${siteBaseUrl()}/`,
       type: "website",
+      // Sem isto o link compartilhado sai sem card no WhatsApp e no LinkedIn.
+      images: config.ogImageUrl ? [{ url: config.ogImageUrl, width: 1200, height: 630 }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: config.seoTitle ?? config.siteName,
+      description: config.seoDescription ?? undefined,
+      images: config.ogImageUrl ? [config.ogImageUrl] : undefined,
     },
   };
 }

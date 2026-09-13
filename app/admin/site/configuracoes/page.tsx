@@ -75,6 +75,25 @@ export default async function SiteAdminSettings() {
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
+            <SiteInput
+              id="about_image_url"
+              name="about_image_url"
+              label="Imagem da seção “Sobre”"
+              helper="4:3, sugerido 1200x900. Vazio = gradiente."
+              placeholder="Ex.: https://…/storage/v1/object/public/site/sobre.webp"
+              defaultValue={v("about_image_url")}
+            />
+            <SiteInput
+              id="og_image_url"
+              name="og_image_url"
+              label="Imagem de compartilhamento"
+              helper="1200x630. É o card que aparece no WhatsApp e no LinkedIn. Vazio = /og.jpg."
+              placeholder="Ex.: https://…/storage/v1/object/public/site/og.jpg"
+              defaultValue={v("og_image_url")}
+            />
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
             <SiteInput id="instagram_url" name="instagram_url" label="Instagram" helper="Vazio = ícone não aparece no rodapé." placeholder="Ex.: https://instagram.com/reinersmedia" defaultValue={v("instagram_url")} />
             <SiteInput id="linkedin_url" name="linkedin_url" label="LinkedIn" helper="Vazio = ícone não aparece no rodapé." placeholder="Ex.: https://linkedin.com/company/reinersmedia" defaultValue={v("linkedin_url")} />
             <SiteInput id="youtube_url" name="youtube_url" label="YouTube" helper="Vazio = ícone não aparece no rodapé." placeholder="Ex.: https://youtube.com/@reinersmedia" defaultValue={v("youtube_url")} />

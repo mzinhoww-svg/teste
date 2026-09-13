@@ -40,7 +40,7 @@ export async function SiteLanding() {
         <PlansSection plans={plans} whatsappNumber={config.whatsappNumber} />
         <PortfolioTeaserSection programs={programs} />
         <TestimonialsSection testimonials={testimonials} />
-        <AboutSection />
+        <AboutSection imageUrl={config.aboutImageUrl} />
         <FinalCtaSection
           whatsappNumber={config.whatsappNumber}
           location={config.location}

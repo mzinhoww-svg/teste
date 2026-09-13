@@ -181,6 +181,8 @@ export async function saveSiteConfig(formData: FormData) {
     // Só dígitos: o CMS aceita "+55 (65) 99920-7108" e o wa.me exige limpo.
     whatsapp_number: sanitizeWhatsappNumber(String(formData.get("whatsapp_number") ?? "")) || null,
     location: String(formData.get("location") ?? "").trim() || null,
+    about_image_url: String(formData.get("about_image_url") ?? "").trim() || null,
+    og_image_url: String(formData.get("og_image_url") ?? "").trim() || null,
     instagram_url: String(formData.get("instagram_url") ?? "").trim() || null,
     linkedin_url: String(formData.get("linkedin_url") ?? "").trim() || null,
     youtube_url: String(formData.get("youtube_url") ?? "").trim() || null,

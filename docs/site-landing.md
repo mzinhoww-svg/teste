@@ -56,6 +56,35 @@ nenhuma outra mudança é necessária.
 Todos os interativos cobrem default, hover, focus-visible, active, disabled e
 (onde faz sentido) loading e error; alvo de toque mínimo 44×44px.
 
+## Mídia do site
+
+Três arquivos vivem em `/public` e são servidos pelo próprio Vercel, sem
+depender do Supabase Storage. Cada um tem campo no CMS que o substitui:
+
+| Arquivo | Onde aparece | Campo no CMS | Sem valor no CMS |
+| --- | --- | --- | --- |
+| `hero.mp4` | Fundo do hero | Vídeo do hero | usa o arquivo |
+| `hero-poster.jpg` | Pôster do vídeo e `prefers-reduced-motion` | Imagem do hero | usa o arquivo |
+| `og.jpg` | Card no WhatsApp, LinkedIn, X | Imagem de compartilhamento | usa o arquivo |
+| — | Seção "Sobre" | Imagem da seção "Sobre" | desenha o gradiente |
+
+A seção "Sobre" é a única que aceita ficar sem imagem: o gradiente é um estado
+final legítimo, não um buraco. As outras três sempre têm arquivo, porque hero
+sem vídeo e link sem card são piores que o padrão.
+
+O favicon (`app/icon.svg`) é a onda de áudio em `text.inverse` sobre
+`surface.base` — legível a 16px.
+
+### Por que `/public` e não o Storage
+
+O hero deixa de depender de serviço externo e é versionado junto do código, o
+que também torna o preview de cada PR fiel ao que vai para produção. O CMS
+continua soberano para trocar sem deploy.
+
+**Atenção ao middleware:** `middleware.ts` exclui do guard de sessão as
+extensões estáticas. Um formato fora dessa lista vira `307 /login` para o
+visitante anônimo — foi o que aconteceu com `.mp4` antes da correção.
+
 ## Indexação — só o estúdio aparece em buscador
 
 A vitrine (`/` e `/portfolio`) é indexável. Todo o resto — CRM, portal do

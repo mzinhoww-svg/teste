@@ -80,3 +80,24 @@ describe("mídia do hero", () => {
     expect(config.heroVideoUrl).toBe("https://cdn.exemplo/novo.mp4");
   });
 });
+
+describe("imagem do Sobre e card de compartilhamento", () => {
+  it("o card tem arquivo padrão — link sem card é pior que card genérico", () => {
+    expect(DEFAULT_CONFIG.ogImageUrl).toBe("/og.jpg");
+    expect(toConfig({}).ogImageUrl).toBe("/og.jpg");
+  });
+
+  it("a seção Sobre aceita ficar sem imagem: o componente desenha o gradiente", () => {
+    expect(DEFAULT_CONFIG.aboutImageUrl).toBeNull();
+    expect(toConfig({ about_image_url: "   " }).aboutImageUrl).toBeNull();
+  });
+
+  it("o CMS substitui as duas", () => {
+    const config = toConfig({
+      about_image_url: "https://cdn.exemplo/sobre.webp",
+      og_image_url: "https://cdn.exemplo/card.jpg",
+    });
+    expect(config.aboutImageUrl).toBe("https://cdn.exemplo/sobre.webp");
+    expect(config.ogImageUrl).toBe("https://cdn.exemplo/card.jpg");
+  });
+});

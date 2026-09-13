@@ -14,6 +14,8 @@ export type SiteConfig = {
   tagline: string;
   heroVideoUrl: string | null;
   heroImageUrl: string | null;
+  aboutImageUrl: string | null;
+  ogImageUrl: string | null;
   ctaPrimaryText: string;
   ctaPrimaryUrl: string;
   ctaSecondaryText: string;
@@ -70,6 +72,11 @@ export const DEFAULT_CONFIG: SiteConfig = {
   // sobrescreve quando houver URL lá (ver toConfig).
   heroVideoUrl: "/hero.mp4",
   heroImageUrl: "/hero-poster.jpg",
+  // Sem imagem própria da seção "Sobre", o bloco cai no gradiente (ver
+  // AboutSection). Já a de compartilhamento tem arquivo padrão: link sem card
+  // é pior que card genérico.
+  aboutImageUrl: null,
+  ogImageUrl: "/og.jpg",
   ctaPrimaryText: "Ver planos",
   ctaPrimaryUrl: "#planos",
   ctaSecondaryText: "Ouvir programas",
@@ -291,6 +298,9 @@ export function toConfig(row: Record<string, unknown>): SiteConfig {
     // de fato preenchida no CMS substitui o arquivo versionado.
     heroVideoUrl: nullable("hero_video_url") ?? DEFAULT_CONFIG.heroVideoUrl,
     heroImageUrl: nullable("hero_image_url") ?? DEFAULT_CONFIG.heroImageUrl,
+    // Sobre: null é resposta válida — o componente desenha o gradiente.
+    aboutImageUrl: nullable("about_image_url"),
+    ogImageUrl: nullable("og_image_url") ?? DEFAULT_CONFIG.ogImageUrl,
     ctaPrimaryText: str("cta_primary_text", DEFAULT_CONFIG.ctaPrimaryText),
     ctaPrimaryUrl: str("cta_primary_url", DEFAULT_CONFIG.ctaPrimaryUrl),
     ctaSecondaryText: str("cta_secondary_text", DEFAULT_CONFIG.ctaSecondaryText),
