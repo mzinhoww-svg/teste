@@ -1,4 +1,7 @@
-import { NOINDEX } from "@/lib/site/seo";
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
+import { NOINDEX, crmLandingIsHidden } from "@/lib/site/seo";
+import { subdomainFor } from "@/lib/supabase/middleware";
 import Link from "next/link";
 import {
   ArrowRight, Bot, FileSignature, Filter, Bell, BarChart3, Building2,
@@ -61,7 +64,14 @@ function KanbanPreview() {
   );
 }
 
+// Lê o host a cada request para decidir se esta rota existe neste domínio.
+export const dynamic = "force-dynamic";
+
 export default function LandingPage() {
+  // No apex, esta página não existe: a landing do CRM mora em crm.<root>.
+  const sub = subdomainFor(headers().get("host"), process.env.NEXT_PUBLIC_ROOT_DOMAIN);
+  if (crmLandingIsHidden(sub, process.env.NEXT_PUBLIC_ROOT_DOMAIN)) notFound();
+
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="sticky top-0 z-20 border-b border-slate-100 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">

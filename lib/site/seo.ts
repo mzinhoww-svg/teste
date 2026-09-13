@@ -46,3 +46,16 @@ export const NOINDEX: Metadata = {
     googleBot: { index: false, follow: false, noimageindex: true },
   },
 };
+
+/**
+ * A landing do CRM é ferramenta interna: existe só em `crm.<root>`. No apex ela
+ * responde 404 — quem não sabe o subdomínio não chega nela.
+ *
+ * Só vale quando há raiz configurada. Em localhost e preview (sem
+ * NEXT_PUBLIC_ROOT_DOMAIN) o roteamento é por PATH e `/crm` precisa continuar
+ * servindo, senão dev e E2E quebram.
+ */
+export function crmLandingIsHidden(sub: string | null, root: string | null | undefined): boolean {
+  if (!root) return false;
+  return sub === null; // apex e www
+}
