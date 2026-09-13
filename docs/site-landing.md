@@ -137,6 +137,16 @@ As duas usam o mesmo carrossel (`components/site/carousel.tsx`): rolagem nativa
 com scroll-snap, que funciona sem JS e com swipe; os botões são reforço e somem
 quando tudo cabe na tela. `scrollBy` respeita `prefers-reduced-motion`.
 
+### Como subir as fotos
+
+Os campos de foto (`site_guests.photo_url`, `site_testimonials.avatar_url`,
+`site_config.about_image_url`) guardam **URL**, não arquivo — o host é livre.
+O caminho curto é Storage → bucket `site` → upload → *Copy URL* → colar no CMS.
+
+`supabase/seed/site_guests.sql` já tem as convidadas cadastradas com
+`published = false` e os campos de foto vazios, para preencher e rodar. A
+seção só aparece quando a primeira linha virar `published = true`.
+
 ## Indexação — só o estúdio aparece em buscador
 
 A vitrine (`/` e `/portfolio`) é indexável. Todo o resto — CRM, portal do
