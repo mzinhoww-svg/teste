@@ -3,8 +3,9 @@ import { ShieldAlert, Bot } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { resolveAllAgents } from "@/lib/agents/resolve";
 import { PlatformAgentEditor } from "@/components/PlatformAgentEditor";
+import { NOINDEX } from "@/lib/site/seo";
 
-export const metadata = { title: "Agentes da plataforma — CRM AI Studio" };
+export const metadata = { title: "Agentes da plataforma — CRM AI Studio", ...NOINDEX };
 export const dynamic = "force-dynamic";
 
 async function isPlatformAdmin(): Promise<{ ok: boolean; email: string }> {

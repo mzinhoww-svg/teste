@@ -2,8 +2,9 @@ import Link from "next/link";
 import { CheckCircle2, FileSignature, ShieldAlert, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { brl } from "@/lib/format";
+import { NOINDEX } from "@/lib/site/seo";
 
-export const metadata = { title: "Assinatura de contrato — CRM AI Studio" };
+export const metadata = { title: "Assinatura de contrato — CRM AI Studio", ...NOINDEX };
 export const dynamic = "force-dynamic";
 
 type Peek = {

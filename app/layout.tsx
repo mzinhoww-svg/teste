@@ -1,12 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { Toaster } from "@/components/ui/toaster";
+import { siteBaseUrl } from "@/lib/site/seo";
 import "./globals.css";
 
+// O apex é a vitrine do estúdio, então o padrão do documento é a marca
+// Reiners Media. As áreas privadas (CRM, portal, admin) sobrescrevem título e
+// descrição nos próprios layouts — e saem do índice por lá. Ver lib/site/seo.ts.
 export const metadata: Metadata = {
-  title: "CRM AI Studio",
+  metadataBase: new URL(siteBaseUrl()),
+  title: "Reiners Media — Estúdio de podcast em Cuiabá/MT",
   description:
-    "CRM privado orquestrado por agentes de IA — do lead ao pós-venda, com funil, propostas, contratos e automações.",
+    "Estúdio de podcast em Cuiabá/MT: gravação, edição, mixagem, identidade visual e distribuição. Também gravamos na sua sede.",
 };
 
 export const viewport: Viewport = {

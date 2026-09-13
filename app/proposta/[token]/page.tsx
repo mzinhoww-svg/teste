@@ -3,8 +3,9 @@ import { FileText, ShieldAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { brl } from "@/lib/format";
 import { Download } from "lucide-react";
+import { NOINDEX } from "@/lib/site/seo";
 
-export const metadata = { title: "Proposta comercial — CRM AI Studio" };
+export const metadata = { title: "Proposta comercial — CRM AI Studio", ...NOINDEX };
 export const dynamic = "force-dynamic";
 
 type Peek = {

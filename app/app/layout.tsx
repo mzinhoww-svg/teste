@@ -5,6 +5,7 @@ import { TenantBadge, UserMenu } from "@/components/UserMenu";
 import { NotificationBell } from "@/components/NotificationBell";
 import { SidebarNav } from "@/components/SidebarNav";
 import { MobileSidebar } from "@/components/MobileSidebar";
+import { NOINDEX } from "@/lib/site/seo";
 
 // Shell do CRM: sidebar agrupada (uma vez) + topbar, envolvendo todas as páginas
 // de /app/*. Substitui o antigo <Nav> por página. O realce do item ativo é feito
@@ -57,3 +58,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+
+// Área logada do CRM: fora de buscador. Ver lib/site/seo.ts.
+export const metadata = {
+  title: { default: "CRM AI Studio", template: "%s" },
+  ...NOINDEX,
+};

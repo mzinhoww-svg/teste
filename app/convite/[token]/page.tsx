@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import { MailCheck, ShieldAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { acceptInviteAction } from "@/app/actions";
+import { NOINDEX } from "@/lib/site/seo";
 
-export const metadata = { title: "Convite — CRM AI Studio" };
+export const metadata = { title: "Convite — CRM AI Studio", ...NOINDEX };
 export const dynamic = "force-dynamic";
 
 export default async function InvitePage({ params }: { params: { token: string } }) {

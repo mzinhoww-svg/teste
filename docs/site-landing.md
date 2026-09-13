@@ -56,6 +56,39 @@ nenhuma outra mudança é necessária.
 Todos os interativos cobrem default, hover, focus-visible, active, disabled e
 (onde faz sentido) loading e error; alvo de toque mínimo 44×44px.
 
+## Indexação — só o estúdio aparece em buscador
+
+A vitrine (`/` e `/portfolio`) é indexável. Todo o resto — CRM, portal do
+cliente, admin, login e as páginas por token — fica fora de buscador, em três
+camadas, porque nenhuma sozinha basta:
+
+| Camada | Arquivo | O que faz |
+| --- | --- | --- |
+| `robots.txt` | `app/robots.ts` | Pede que o crawler nem visite as áreas privadas |
+| `meta robots` | `lib/site/seo.ts` (`NOINDEX`) | `noindex, nofollow, nocache` em cada área privada |
+| Ausência de link | `components/site/sections/footer.tsx` | O rodapé do site não aponta mais para `/crm` |
+
+**Por que as três:** `robots.txt` sozinho não desindexa. Uma URL bloqueada mas
+linkada de fora ainda aparece no índice como resultado "sem descrição" — é o
+`noindex` que efetivamente remove. E o `noindex` só é lido se o crawler puder
+buscar a página, então as áreas que exigem login (`/app`, `/admin`, `/portal`)
+se defendem pelo redirect do middleware, não pela meta tag.
+
+`/robots.txt` e `/sitemap.xml` são lidos por crawler **anônimo** — por isso
+entram na lista de assets do middleware (`lib/supabase/middleware.ts`). Sem
+isso o guard de sessão os mandava para `/login` e o buscador nunca via as
+regras.
+
+O sitemap lista apenas `/` e `/portfolio`. Cobertura em `tests/e2e/seo.spec.ts`
+(robots servido, sitemap sem rota privada, páginas públicas sem menção ao CRM,
+áreas privadas com `noindex`) e `tests/unit/seo.test.ts`.
+
+### Se alguma URL do CRM já foi indexada
+
+O `noindex` faz a remoção acontecer na próxima visita do crawler, o que pode
+levar dias. Para acelerar, use a **Remoção de URLs** no Google Search Console
+apontando para o prefixo (`reiners.agency/crm`, `/app`, `/admin`, `/portal`).
+
 ## Acessibilidade — o que é garantido
 
 - Skip link (`Pular para conteúdo principal`) como primeiro focável.

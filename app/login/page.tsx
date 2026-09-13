@@ -1,7 +1,8 @@
 import { login, signup } from "./actions";
 import { Input } from "@/components/ui/input";
+import { NOINDEX } from "@/lib/site/seo";
 
-export const metadata = { title: "Entrar — CRM AI Studio" };
+export const metadata = { title: "Entrar — CRM AI Studio", ...NOINDEX };
 
 export default function LoginPage({
   searchParams,
