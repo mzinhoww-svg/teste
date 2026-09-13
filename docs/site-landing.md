@@ -1,14 +1,14 @@
 # Site público — Reiners Media (landing + portfólio)
 
-O apex `reiners.agency` serve o **site do estúdio de podcast**; o CRM AI Studio
-continua no mesmo deploy, agora em `/crm` e em `crm.reiners.agency`
+O apex `reiners.agency` serve o **site do estúdio de podcast**. As ferramentas
+comerciais internas vivem em subdomínio próprio, sem página pública
 (ver `docs/vercel-domain.md`).
 
 | Rota | O que é | Renderização |
 | --- | --- | --- |
 | `/` | Landing da Reiners Media | estática, `revalidate = 300` |
 | `/portfolio` | Grade de programas, âncora por `#slug` | estática, `revalidate = 300` |
-| `/crm` | Landing do CRM AI Studio (o que era o apex) | estática |
+| `/media` | Mesma landing de `/`, endereço alternativo (canônica: `/`) | estática, `revalidate = 300` |
 | `/admin/site` | CMS da landing (dashboard, planos, depoimentos, programas, config) | dinâmica |
 | `/api/site/leads` | Formulário "Agendar sessão" | POST anônimo |
 | `/api/site/events` | Coleta de `page_view`, `cta_click`, `form_submit` | POST anônimo |
@@ -64,9 +64,9 @@ camadas, porque nenhuma sozinha basta:
 
 | Camada | Arquivo | O que faz |
 | --- | --- | --- |
-| `robots.txt` | `app/robots.ts` | Pede que o crawler nem visite as áreas privadas |
+| `robots.txt` | `app/robots.ts` | Por host: no apex bloqueia as áreas privadas; em subdomínio, `Disallow: /` |
 | `meta robots` | `lib/site/seo.ts` (`NOINDEX`) | `noindex, nofollow, nocache` em cada área privada |
-| Ausência de link | `components/site/sections/footer.tsx` | O rodapé do site não aponta mais para `/crm` |
+| Remoção | — | A landing do CRM foi **apagada**: `/crm` não existe em host nenhum |
 
 **Por que as três:** `robots.txt` sozinho não desindexa. Uma URL bloqueada mas
 linkada de fora ainda aparece no índice como resultado "sem descrição" — é o
@@ -88,6 +88,12 @@ O sitemap lista apenas `/` e `/portfolio`. Cobertura em `tests/e2e/seo.spec.ts`
 O `noindex` faz a remoção acontecer na próxima visita do crawler, o que pode
 levar dias. Para acelerar, use a **Remoção de URLs** no Google Search Console
 apontando para o prefixo (`reiners.agency/crm`, `/app`, `/admin`, `/portal`).
+
+### Ferramentas que ignoram robots.txt
+
+`robots.txt` e `noindex` são pedidos, honrados por buscador. Rastreadores de
+GTM e de LLM os ignoram. Foi por isso que a landing do CRM não foi apenas
+escondida: ela foi **removida**. Enquanto uma página é servida, ela é lida.
 
 ## Acessibilidade — o que é garantido
 

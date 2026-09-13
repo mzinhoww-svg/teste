@@ -56,7 +56,7 @@ plano Hobby só permite cron diário. As cadências de hora em hora rodam pelo
 `pg_cron` no Supabase (jobs `crm-cadence-sweep` e `crm-sla-sweep`). Em um plano
 pago, é possível aumentar a frequência do cron da Vercel.
 
-## Roteamento por subdomínio — CRM, Portal e Landing
+## Roteamento por subdomínio
 
 O app serve três experiências no mesmo deploy, roteadas por **host** no
 middleware (`lib/supabase/middleware.ts`, `subdomainFor`):
@@ -65,15 +65,15 @@ middleware (`lib/supabase/middleware.ts`, `subdomainFor`):
 | --- | --- | --- | --- |
 | `reiners.agency` (apex) e `www.` | `/` | — | Landing da **Reiners Media** (estúdio de podcast) |
 | `reiners.agency` | `/portfolio` | — | Portfólio de programas |
-| `reiners.agency` | `/crm` | — | Landing do **CRM AI Studio** |
-| `crm.reiners.agency` | `/` | `/crm` | Landing do CRM |
-| `crm.reiners.agency` | `/contatos`, `/relatorios`… | `/app…` | CRM interno (área logada da agência) |
-| `crm.reiners.agency` | `/app…`, `/crm`, `/admin…` | — | Passam direto (`isCrmPassthrough`) |
+| `reiners.agency` | `/media` | — | Mesma landing, endereço alternativo |
+| `crm.reiners.agency` | `/` | `/app` | Área logada (anônimo → `/login`) |
+| `crm.reiners.agency` | `/contatos`, `/relatorios`… | `/app…` | Área logada da agência |
+| `crm.reiners.agency` | `/app…`, `/admin…` | — | Passam direto (`isCrmPassthrough`) |
 | `app.reiners.agency` | qualquer | `/portal…` | Portal do cliente (`/portal/[cliente]/…`) |
 
-O apex deixou de servir a landing do CRM: ela mora em **`/crm`** e é o que
-`crm.reiners.agency/` mostra na raiz. Isso libera o apex para o site do estúdio
-(landing + `/portfolio`) — ver `docs/site-landing.md`.
+A landing do CRM foi **removida do repositório**: `/crm` não existe em host
+nenhum, e `crm.reiners.agency/` cai direto na área logada. As ferramentas
+internas não têm página pública — ver `docs/site-landing.md`.
 
 Defina **`NEXT_PUBLIC_ROOT_DOMAIN=reiners.agency`** nas env vars. Em
 localhost/preview (sem esse subdomínio) o roteamento cai para **path**: `/app`,

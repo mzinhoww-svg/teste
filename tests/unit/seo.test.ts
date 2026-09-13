@@ -1,13 +1,17 @@
 import { describe, it, expect } from "vitest";
-import { NOINDEX, PRIVATE_PATHS, PUBLIC_PATHS, crmLandingIsHidden, siteBaseUrl } from "@/lib/site/seo";
+import { NOINDEX, PRIVATE_PATHS, PUBLIC_PATHS, siteBaseUrl } from "@/lib/site/seo";
 
 describe("separação entre vitrine e áreas privadas", () => {
   it("só a vitrine do estúdio é pública", () => {
     expect([...PUBLIC_PATHS]).toEqual(["/", "/portfolio"]);
   });
 
-  it("toda área do CRM, portal e admin está na lista privada", () => {
-    for (const path of ["/crm", "/app", "/admin", "/portal", "/login"]) {
+  it("a landing do CRM não existe mais, nem como rota bloqueada", () => {
+    expect(PRIVATE_PATHS).not.toContain("/crm");
+  });
+
+  it("toda área logada, portal e admin está na lista privada", () => {
+    for (const path of ["/app", "/admin", "/portal", "/login"]) {
       expect(PRIVATE_PATHS).toContain(path);
     }
   });
@@ -46,27 +50,5 @@ describe("siteBaseUrl", () => {
     const base = siteBaseUrl();
     expect(base).toMatch(/^https:\/\//);
     expect(base.endsWith("/")).toBe(false);
-  });
-});
-
-describe("crmLandingIsHidden", () => {
-  const root = "reiners.agency";
-
-  it("no apex e no www a landing do CRM não existe", () => {
-    expect(crmLandingIsHidden(null, root)).toBe(true);
-  });
-
-  it("no subdomínio do CRM ela é servida", () => {
-    expect(crmLandingIsHidden("crm", root)).toBe(false);
-  });
-
-  it("em qualquer outro subdomínio também é servida (não é o apex)", () => {
-    expect(crmLandingIsHidden("app", root)).toBe(false);
-  });
-
-  it("sem raiz configurada nada é escondido — dev e E2E roteiam por path", () => {
-    expect(crmLandingIsHidden(null, undefined)).toBe(false);
-    expect(crmLandingIsHidden(null, "")).toBe(false);
-    expect(crmLandingIsHidden("crm", null)).toBe(false);
   });
 });
