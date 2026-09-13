@@ -15,10 +15,20 @@ export function subdomainFor(host: string | null | undefined, root: string | nul
 }
 
 // Caminhos que, no host `crm.<root>`, são servidos como estão — não recebem o
-// prefixo `/app`. `/app…` já é a área logada; `/crm` é a landing do produto;
-// `/admin` é o admin da plataforma (vive fora de /app). Pura e determinística.
+// prefixo `/app`. `/app…` já é a área logada; `/admin` é o admin da plataforma
+// (vive fora de /app). Pura e determinística.
 export function isCrmPassthrough(path: string): boolean {
-  return ["/app", "/crm", "/admin"].some((p) => path === p || path.startsWith(`${p}/`));
+  return ["/app", "/admin"].some((p) => path === p || path.startsWith(`${p}/`));
+}
+
+// Rotas que EXISTIRAM e foram removidas de propósito. Respondem 410 Gone, não
+// 404: para o buscador, 410 é o sinal mais forte de remoção definitiva — 404
+// pode ser erro temporário, 410 diz "não volte". Sem isto, o guard de sessão
+// mandaria /crm para /login, sugerindo que a página existe e só está protegida.
+const GONE_PATHS = ["/crm"] as const;
+
+export function isGone(path: string): boolean {
+  return GONE_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
 }
 
 function copyCookies(target: NextResponse, from: NextResponse): NextResponse {
@@ -79,11 +89,11 @@ export async function updateSession(request: NextRequest) {
     rawPath.startsWith("/portal/convite");
   if (!isAsset && !isPublicTop) {
     if (sub === "crm") {
-      // crm.<root> serve o PRODUTO CRM: a raiz é a landing do CRM (/crm) e o
-      // resto entra na área logada (/app…). `/crm` e `/admin` passam direto —
-      // sem isso, `crm.<root>/admin` viraria `/app/admin` (404).
+      // crm.<root> é ferramenta interna e NÃO tem página pública: a raiz cai
+      // direto na área logada, que manda o anônimo para /login. `/admin` passa
+      // direto — sem isso, `crm.<root>/admin` viraria `/app/admin` (404).
       if (rawPath === "/") {
-        url.pathname = "/crm";
+        url.pathname = "/app";
         rewrote = true;
       } else if (!isCrmPassthrough(rawPath)) {
         url.pathname = `/app${rawPath}`;
@@ -93,8 +103,17 @@ export async function updateSession(request: NextRequest) {
       url.pathname = rawPath === "/" ? "/portal" : `/portal${rawPath}`;
       rewrote = true;
     }
-    // apex/www (sub === null) → site público (landing + /portfolio + /crm):
+    // apex/www (sub === null) → site público (landing, /media, /portfolio):
     // nada a reescrever.
+  }
+
+  // A landing do CRM foi removida: responde 410 em qualquer host, antes de
+  // qualquer guard de sessão.
+  if (isGone(rawPath)) {
+    return copyCookies(
+      new NextResponse("Gone", { status: 410, headers: { "content-type": "text/plain; charset=utf-8" } }),
+      response,
+    );
   }
 
   // Caminho "lógico" (pós-rewrite) usado pelos guards.
@@ -103,8 +122,8 @@ export async function updateSession(request: NextRequest) {
   const isPublic =
     path === "/" ||
     path === "/login" ||
-    path === "/crm" ||
     path.startsWith("/portfolio") ||
+    path.startsWith("/media") ||
     path.startsWith("/convite") ||
     path.startsWith("/portal/convite") ||
     path.startsWith("/sign") ||

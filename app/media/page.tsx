@@ -3,12 +3,12 @@ import { getSiteConfig } from "@/lib/site/data";
 import { SiteLanding } from "@/components/site/landing";
 import { siteBaseUrl } from "@/lib/site/seo";
 
-// Landing pública da Reiners Media (apex: reiners.agency). Esta é a rota
-// CANÔNICA do site; `/media` serve a mesma composição como endereço
-// alternativo. A composição vive em components/site/landing.tsx.
+// Endereço alternativo da landing, para ferramentas externas que pedem uma URL
+// específica em vez do domínio. Serve exatamente a mesma composição de `/`.
 //
-// Revalida a cada 5 min: o conteúdo vem do CMS (/admin/site) mas a página
-// continua estática entre revalidações.
+// O `canonical` aponta para `/`: para o buscador isto não é conteúdo duplicado,
+// é a mesma página com dois endereços, e os sinais consolidam na raiz. Por isso
+// `/media` também fica FORA do sitemap — sitemap lista canônicas.
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -26,6 +26,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function LandingPage() {
+export default function MediaLandingPage() {
   return <SiteLanding />;
 }

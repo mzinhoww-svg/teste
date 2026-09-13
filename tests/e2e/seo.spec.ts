@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 // O site público é a vitrine do estúdio. CRM, portal e admin não podem ser
 // indexados nem alcançáveis por link a partir dela.
 
-const PRIVATE = ["/crm", "/app", "/admin", "/portal", "/login", "/api"];
+const PRIVATE = ["/app", "/admin", "/portal", "/login", "/api"];
 
 test.describe("robots.txt", () => {
   test("é servido ao crawler anônimo (não redireciona para /login)", async ({ request }) => {
@@ -52,7 +52,7 @@ test.describe("páginas públicas", () => {
 });
 
 test.describe("áreas privadas", () => {
-  for (const path of ["/crm", "/login", "/proposta/token-invalido", "/convite/token-invalido"]) {
+  for (const path of ["/login", "/proposta/token-invalido", "/convite/token-invalido"]) {
     test(`${path} pede noindex`, async ({ page }) => {
       await page.goto(path);
       const content = await page.locator('meta[name="robots"]').first().getAttribute("content");
@@ -78,7 +78,7 @@ test.describe("robots.txt por host", () => {
   test("no apex, libera a vitrine", async ({ request }) => {
     const body = await (await request.get("/robots.txt")).text();
     expect(body).toContain("Allow: /");
-    expect(body).toContain("Disallow: /crm");
+    expect(body).toContain("Disallow: /app");
   });
 
   test("em subdomínio privado, bloqueia a raiz inteira", async ({ request, baseURL }) => {
@@ -90,5 +90,41 @@ test.describe("robots.txt por host", () => {
     expect(body).toContain("Disallow: /");
     expect(body).not.toContain("Allow: /");
     expect(baseURL).toBeTruthy();
+  });
+});
+
+// A landing do CRM foi REMOVIDA do repositório — não é mais uma rota escondida,
+// simplesmente não existe. É o que tira a descrição de "CRM" do alcance de
+// ferramentas de GTM, que ignoram robots.txt e noindex.
+test.describe("a landing do CRM não existe", () => {
+  test("/crm responde 410 Gone — removida de propósito, não protegida", async ({ request }) => {
+    expect((await request.get("/crm", { maxRedirects: 0 })).status()).toBe(410);
+  });
+
+  test("nenhuma página pública cita o CRM", async ({ page }) => {
+    for (const path of ["/", "/media", "/portfolio"]) {
+      await page.goto(path);
+      expect(await page.content()).not.toContain("CRM");
+    }
+  });
+});
+
+// /media replica a home para ferramentas externas que pedem uma URL específica.
+test.describe("/media", () => {
+  test("serve o mesmo conteúdo de / e aponta a canônica para a raiz", async ({ page, baseURL }) => {
+    await page.goto("/media");
+    await expect(
+      page.getByRole("heading", { level: 1, name: /produção de nível internacional/i }),
+    ).toBeVisible();
+
+    const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
+    expect(canonical).toBeTruthy();
+    expect(canonical).not.toContain("/media");
+    expect(baseURL).toBeTruthy();
+  });
+
+  test("fica fora do sitemap (sitemap lista canônicas)", async ({ request }) => {
+    const xml = await (await request.get("/sitemap.xml")).text();
+    expect(xml).not.toContain("/media");
   });
 });

@@ -13,6 +13,7 @@ Auth, RLS)**. Deploy na **Vercel**.
 | --- | --- |
 | `reiners.agency` | Landing do estúdio |
 | `reiners.agency/portfolio` | Portfólio de programas |
+| `reiners.agency/media` | Mesma landing, endereço alternativo (canônica: `/`) |
 | `reiners.agency/admin/site` | CMS da landing (login obrigatório) |
 
 Roteamento por host em [`docs/vercel-domain.md`](docs/vercel-domain.md); design
@@ -88,19 +89,13 @@ roteamento por host.
 
 ## Ferramentas internas
 
-O mesmo deploy hospeda ferramentas comerciais **internas da agência**. Elas não
-fazem parte do site: vivem em subdomínio próprio, exigem login e estão fora de
-buscador — `reiners.agency/crm` não existe, e `crm.reiners.agency/robots.txt`
-responde `Disallow: /`.
+O mesmo deploy hospeda ferramentas comerciais **internas da agência** — funil,
+propostas e contratos com assinatura digital, isolados por organização via RLS.
+Não fazem parte do site: vivem em `crm.reiners.agency` e `app.reiners.agency`,
+**não têm página pública**, exigem login e estão fora de buscador.
 
-| Host | O que é |
-| --- | --- |
-| `crm.reiners.agency` | CRM comercial da agência (área logada) |
-| `app.reiners.agency` | Portal do cliente |
-
-São um funil com automações, agentes de IA de apoio comercial, propostas e
-contratos com assinatura digital, isolados por organização via RLS. Detalhes em
-[`docs/agents.md`](docs/agents.md), [`docs/admin.md`](docs/admin.md),
+Documentação em [`docs/agents.md`](docs/agents.md),
+[`docs/admin.md`](docs/admin.md),
 [`docs/contracts-signature.md`](docs/contracts-signature.md),
 [`docs/opensign.md`](docs/opensign.md),
 [`docs/notifications.md`](docs/notifications.md),
