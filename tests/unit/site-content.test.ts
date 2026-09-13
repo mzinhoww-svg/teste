@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
-  DEFAULT_CONFIG, DEFAULT_PLANS, DEFAULT_PROGRAMS, DEFAULT_TESTIMONIALS,
-  initials, toConfig, toPlan, toProgram, toTestimonial,
+  DEFAULT_CONFIG, DEFAULT_GUESTS, DEFAULT_PLANS, DEFAULT_PROGRAMS, DEFAULT_SERVICES,
+  DEFAULT_TESTIMONIALS,
+  initials, toConfig, toGuest, toPlan, toProgram, toService, toTestimonial,
 } from "@/lib/site/content";
 
 describe("normalização das linhas do CMS", () => {
@@ -78,5 +79,100 @@ describe("mídia do hero", () => {
   it("uma URL de fato preenchida no CMS substitui o arquivo", () => {
     const config = toConfig({ hero_video_url: "https://cdn.exemplo/novo.mp4" });
     expect(config.heroVideoUrl).toBe("https://cdn.exemplo/novo.mp4");
+  });
+});
+
+describe("imagem do Sobre e card de compartilhamento", () => {
+  it("o card tem arquivo padrão — link sem card é pior que card genérico", () => {
+    expect(DEFAULT_CONFIG.ogImageUrl).toBe("/og.jpg");
+    expect(toConfig({}).ogImageUrl).toBe("/og.jpg");
+  });
+
+  it("a seção Sobre aceita ficar sem imagem: o componente desenha o gradiente", () => {
+    expect(DEFAULT_CONFIG.aboutImageUrl).toBeNull();
+    expect(toConfig({ about_image_url: "   " }).aboutImageUrl).toBeNull();
+  });
+
+  it("o CMS substitui as duas", () => {
+    const config = toConfig({
+      about_image_url: "https://cdn.exemplo/sobre.webp",
+      og_image_url: "https://cdn.exemplo/card.jpg",
+    });
+    expect(config.aboutImageUrl).toBe("https://cdn.exemplo/sobre.webp");
+    expect(config.ogImageUrl).toBe("https://cdn.exemplo/card.jpg");
+  });
+});
+
+describe("convidados — prova social factual", () => {
+  it("não tem placeholder: inventar quem gravou no estúdio seria fabricar credencial", () => {
+    expect(DEFAULT_GUESTS).toEqual([]);
+  });
+
+  it("toGuest aceita convidado sem foto e sem descrição", () => {
+    const guest = toGuest({ id: "1", name: "Letícia Andrade" });
+    expect(guest.name).toBe("Letícia Andrade");
+    expect(guest.photoUrl).toBeNull();
+    expect(guest.role).toBeNull();
+    expect(guest.displayOrder).toBe(0);
+  });
+
+  it("toGuest mapeia snake_case", () => {
+    const guest = toGuest({
+      id: "1", name: "Ana", role: "convidada do Domo Cast",
+      photo_url: "https://cdn.exemplo/ana.webp", display_order: "3",
+    });
+    expect(guest.role).toBe("convidada do Domo Cast");
+    expect(guest.photoUrl).toBe("https://cdn.exemplo/ana.webp");
+    expect(guest.displayOrder).toBe(3);
+  });
+});
+
+describe("o que fazemos", () => {
+  it("as seis frentes vêm no código: a landing não pode abrir sem oferta", () => {
+    expect(DEFAULT_SERVICES).toHaveLength(6);
+    for (const service of DEFAULT_SERVICES) {
+      expect(service.title).not.toBe("");
+      expect(service.description).toBeTruthy();
+    }
+  });
+
+  it("a ordem é única e sequencial — ela vira a numeração 01..06 na tela", () => {
+    const orders = DEFAULT_SERVICES.map((s) => s.displayOrder);
+    expect(orders).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+
+  it("nenhuma nasce com mídia: os vídeos entram pelo CMS depois", () => {
+    for (const service of DEFAULT_SERVICES) {
+      expect(service.videoUrl).toBeNull();
+      expect(service.images).toEqual([]);
+    }
+  });
+
+  it("toService corta em 3 imagens e descarta lixo da coluna jsonb", () => {
+    const service = toService({
+      id: "1", title: "Estúdio",
+      images: ["a.webp", 42, "  ", "b.webp", "c.webp", "d.webp"],
+    });
+    expect(service.images).toEqual(["a.webp", "b.webp", "c.webp"]);
+  });
+
+  it("toService tolera images não-array", () => {
+    expect(toService({ id: "1", title: "X", images: "oops" }).images).toEqual([]);
+  });
+
+  it("campo em branco no CMS conta como ausente, não como texto vazio", () => {
+    const service = toService({ id: "1", title: "X", badge: "   ", footnote: "" });
+    expect(service.badge).toBeNull();
+    expect(service.footnote).toBeNull();
+  });
+
+  it("toService mapeia snake_case", () => {
+    const service = toService({
+      id: "1", title: "Cobertura de evento", video_url: "https://cdn/e.mp4",
+      poster_url: "https://cdn/e.jpg", display_order: "2",
+    });
+    expect(service.videoUrl).toBe("https://cdn/e.mp4");
+    expect(service.posterUrl).toBe("https://cdn/e.jpg");
+    expect(service.displayOrder).toBe(2);
   });
 });

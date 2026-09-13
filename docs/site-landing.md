@@ -56,6 +56,97 @@ nenhuma outra mudança é necessária.
 Todos os interativos cobrem default, hover, focus-visible, active, disabled e
 (onde faz sentido) loading e error; alvo de toque mínimo 44×44px.
 
+## Mídia do site
+
+Três arquivos vivem em `/public` e são servidos pelo próprio Vercel, sem
+depender do Supabase Storage. Cada um tem campo no CMS que o substitui:
+
+| Arquivo | Onde aparece | Campo no CMS | Sem valor no CMS |
+| --- | --- | --- | --- |
+| `hero.mp4` | Fundo do hero | Vídeo do hero | usa o arquivo |
+| `hero-poster.jpg` | Pôster do vídeo e `prefers-reduced-motion` | Imagem do hero | usa o arquivo |
+| `og.jpg` | Card no WhatsApp, LinkedIn, X | Imagem de compartilhamento | usa o arquivo |
+| — | Seção "Sobre" | Imagem da seção "Sobre" | desenha o gradiente |
+
+A seção "Sobre" é a única que aceita ficar sem imagem: o gradiente é um estado
+final legítimo, não um buraco. As outras três sempre têm arquivo, porque hero
+sem vídeo e link sem card são piores que o padrão.
+
+O favicon (`app/icon.svg`) é a onda de áudio em `text.inverse` sobre
+`surface.base` — legível a 16px.
+
+### Por que `/public` e não o Storage
+
+O hero deixa de depender de serviço externo e é versionado junto do código, o
+que também torna o preview de cada PR fiel ao que vai para produção. O CMS
+continua soberano para trocar sem deploy.
+
+**Atenção ao middleware:** `middleware.ts` exclui do guard de sessão as
+extensões estáticas. Um formato fora dessa lista vira `307 /login` para o
+visitante anônimo — foi o que aconteceu com `.mp4` antes da correção.
+
+## "O que fazemos" — as frentes do estúdio
+
+`site_services` responde **o que dá para contratar**; `site_plans` responde
+**quanto custa**. São perguntas diferentes, e por isso tabelas diferentes: o
+plano é o desdobramento comercial da frente, não o mesmo dado com outro nome.
+
+A seção é o padrão **tabs** da APG, não uma lista de links:
+
+- um único painel no DOM por vez;
+- **tabindex rotativo** — a lista inteira ocupa uma parada de `Tab`, não seis;
+- setas trocam a aba, com ativação automática (o painel é barato de montar);
+- aceita os dois eixos (`←→` e `↑↓`) porque a lista é horizontal no mobile e
+  vertical a partir de `lg`. Mesmo DOM nos dois casos — nada é duplicado.
+
+### Mídia: vídeo **ou** até três imagens
+
+| `video_url` | `images` | Resultado |
+| --- | --- | --- |
+| preenchido | qualquer | `<video controls>` com `poster_url` |
+| vazio | 1–3 URLs | grade de imagens |
+| vazio | vazio | **nenhuma moldura** — só título, descrição e fecho |
+
+O terceiro caso é o estado inicial e é deliberado: reservar uma caixa preta
+esperando arquivo deixa a seção parecendo quebrada. `toService` corta em 3 e
+descarta o que não for string, porque `images` é `jsonb` e pode ser editada na
+mão.
+
+O campo `footnote` aceita **só** `**negrito**`. O parser é intencionalmente
+burro (`components/site/sections/services.tsx`): quem escreve ali não edita
+código, e um campo que aceitasse HTML seria injeção.
+
+> As descrições em `DEFAULT_SERVICES` são um rascunho escrito a partir do que o
+> resto do site já afirma (Cuiabá, in loco, domo geodésico, 48h). Confira contra
+> o que o estúdio de fato vende antes de considerar como texto final.
+
+## Prova social: duas seções, dois níveis de afirmação
+
+| Seção | O que afirma | Exige |
+| --- | --- | --- |
+| **Convidados** (`site_guests`) | que a pessoa gravou no estúdio | foto e autorização de imagem |
+| **Depoimentos** (`site_testimonials`) | que a pessoa **recomenda** | a frase real que ela disse |
+
+A separação é deliberada. Colar um rosto real numa frase que a pessoa não disse
+fabrica um endosso — por isso "Convidados" não tem aspas, e por isso é a única
+seção do site **sem placeholder**: `DEFAULT_GUESTS` é vazio e a seção não
+renderiza enquanto ninguém estiver publicado. Inventar quem gravou no estúdio
+seria fabricar credencial.
+
+As duas usam o mesmo carrossel (`components/site/carousel.tsx`): rolagem nativa
+com scroll-snap, que funciona sem JS e com swipe; os botões são reforço e somem
+quando tudo cabe na tela. `scrollBy` respeita `prefers-reduced-motion`.
+
+### Como subir as fotos
+
+Os campos de foto (`site_guests.photo_url`, `site_testimonials.avatar_url`,
+`site_config.about_image_url`) guardam **URL**, não arquivo — o host é livre.
+O caminho curto é Storage → bucket `site` → upload → *Copy URL* → colar no CMS.
+
+`supabase/seed/site_guests.sql` já tem as convidadas cadastradas com
+`published = false` e os campos de foto vazios, para preencher e rodar. A
+seção só aparece quando a primeira linha virar `published = true`.
+
 ## Indexação — só o estúdio aparece em buscador
 
 A vitrine (`/` e `/portfolio`) é indexável. Todo o resto — CRM, portal do
@@ -132,7 +223,7 @@ arbitrário injetado em todas as páginas é vetor de exfiltração.
 | `Plan` | `site_plans` |
 | `Testimonial` | `site_testimonials` |
 | `AdminUser` | `site_admins` (`ADMIN` \| `EDITOR`) |
-| — (novo) | `site_programs`, `site_events`, `site_leads` |
+| — (novo) | `site_programs`, `site_events`, `site_leads`, `site_services`, `site_guests` |
 
 **Por que não Prisma:** o repositório já tem uma camada Supabase completa
 (migrations SQL versionadas, RLS por policy, `@supabase/ssr` no server e no
@@ -158,8 +249,9 @@ migration aplicada ou a rede falha. É por isso que o E2E roda sem segredos.
 ## CMS (`/admin/site`)
 
 Sidebar fixa de 240px, mesmos tokens do site. Seções: Dashboard (KPIs de 14 dias
-+ gráfico Recharts), Planos (CRUD + reordenar + destaque), Depoimentos (CRUD),
-Programas (CRUD, controla o teaser e o `/portfolio`) e Configurações
++ gráfico Recharts), O que fazemos (CRUD das frentes e da mídia de cada aba),
+Planos (CRUD + reordenar + destaque), Depoimentos (CRUD), Programas (CRUD,
+controla o teaser e o `/portfolio`), Convidados (CRUD) e Configurações
 (identidade, hero, CTAs, SEO).
 
 Acesso: linha em `site_admins` casada por `user_id` **ou** e-mail (permite

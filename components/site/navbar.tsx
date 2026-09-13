@@ -14,6 +14,7 @@ import { trackSiteEvent } from "@/lib/site/track";
 // trap de foco e Escape (ver use-dismissable).
 
 const LINKS = [
+  { href: "/#o-que-fazemos", label: "O que fazemos" },
   { href: "/#planos", label: "Planos" },
   { href: "/portfolio", label: "Programas" },
   { href: "/#sobre", label: "Sobre" },

@@ -10,7 +10,7 @@ const DIFFERENTIALS = [
   { icon: Radio, label: "Distribuição em todas as plataformas", desc: "Spotify, YouTube, Apple Podcasts e feeds próprios." },
 ];
 
-export function AboutSection() {
+export function AboutSection({ imageUrl }: { imageUrl: string | null }) {
   return (
     <section id="sobre" className="bg-site-surface-base px-6 py-24" aria-labelledby="sobre-title">
       <div className="mx-auto grid max-w-6xl items-center gap-16 lg:grid-cols-2">
@@ -33,10 +33,21 @@ export function AboutSection() {
           </ul>
         </div>
 
+        {/* Sem imagem no CMS, o bloco mantém o gradiente — nunca um vazio. */}
         <div
-          aria-hidden="true"
+          aria-hidden={imageUrl ? undefined : "true"}
           className="aspect-[4/3] overflow-hidden rounded-site-lg border border-site-border-muted/[0.06] bg-site-surface-raised bg-[radial-gradient(circle_at_70%_30%,rgb(var(--site-text-inverse)/0.16),transparent_60%)]"
-        />
+        >
+          {imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element -- URL vinda do CMS (host livre)
+            <img
+              src={imageUrl}
+              alt="Equipe da Reiners Media gravando no estúdio"
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+          )}
+        </div>
       </div>
     </section>
   );

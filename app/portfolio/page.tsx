@@ -13,10 +13,22 @@ import { WhatsappFab } from "@/components/site/whatsapp-fab";
 // landing; cada programa tem âncora própria (#slug) usada pelos posters.
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Portfólio — Reiners Media",
-  description: "Programas de podcast produzidos pelo estúdio da Reiners Media.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getSiteConfig();
+  const title = "Portfólio — Reiners Media";
+  const description = "Programas de podcast produzidos pelo estúdio da Reiners Media.";
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: config.ogImageUrl ? [{ url: config.ogImageUrl, width: 1200, height: 630 }] : undefined,
+    },
+    twitter: { card: "summary_large_image", title, description, images: config.ogImageUrl ? [config.ogImageUrl] : undefined },
+  };
+}
 
 export default async function PortfolioPage() {
   const [config, programs] = await Promise.all([getSiteConfig(), getPrograms()]);

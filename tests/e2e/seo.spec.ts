@@ -128,3 +128,26 @@ test.describe("/media", () => {
     expect(xml).not.toContain("/media");
   });
 });
+
+// Link compartilhado sem card (og:image) é o default do Next quando ninguém
+// declara a tag — e é o que acontecia antes.
+test.describe("card de compartilhamento", () => {
+  for (const path of ["/", "/media", "/portfolio"]) {
+    test(`${path} declara og:image e twitter card`, async ({ page }) => {
+      await page.goto(path);
+      const og = await page.locator('meta[property="og:image"]').first().getAttribute("content");
+      expect(og).toBeTruthy();
+      expect(og).toContain("/og.jpg");
+      await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+        "content",
+        "summary_large_image",
+      );
+    });
+  }
+
+  test("a imagem do card é servida de verdade", async ({ request }) => {
+    const res = await request.get("/og.jpg");
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("image");
+  });
+});

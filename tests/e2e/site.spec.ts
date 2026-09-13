@@ -17,6 +17,7 @@ test.describe("Landing Reiners Media (/)", () => {
   test("todas as seções aparecem", async ({ page }) => {
     await page.goto("/");
     for (const heading of [
+      /Diga o que você precisa gravar/i,
       /Escolha o formato ideal/i,
       /Programas que criamos/i,
       /O que dizem nossos clientes/i,
@@ -150,5 +151,71 @@ test.describe("Drawer mobile", () => {
 
     await page.keyboard.press("Escape");
     await expect(drawer).toBeHidden();
+  });
+});
+
+test.describe("carrossel", () => {
+  test("a lista é rolável e anunciada para leitor de tela", async ({ page }) => {
+    await page.goto("/");
+    const track = page.getByRole("list", { name: "Depoimentos de clientes" });
+    await expect(track).toBeVisible();
+    // Recebe foco: as setas do teclado rolam a lista sem depender dos botões.
+    await expect(track).toHaveAttribute("tabindex", "0");
+  });
+
+  test("com tudo cabendo na tela, os botões não aparecem", async ({ page }) => {
+    await page.goto("/");
+    // Três depoimentos cabem no desktop — botão sem função é ruído.
+    await expect(page.getByRole("button", { name: "Próximo" })).toBeHidden();
+  });
+});
+
+// A seção de convidados é prova social factual e não tem placeholder: sem
+// ninguém publicado, ela não existe na página.
+test.describe("convidados", () => {
+  test("oculta enquanto não houver convidado publicado", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: /Quem já gravou no estúdio/i })).toHaveCount(0);
+  });
+});
+
+// "O que fazemos" é o padrão TABS da APG, não uma lista de links: uma parada
+// de Tab para a lista inteira e as setas trocam de painel.
+test.describe("o que fazemos", () => {
+  test("as seis frentes são abas, com a primeira selecionada", async ({ page }) => {
+    await page.goto("/");
+    const tabs = page.getByRole("tab");
+    await expect(tabs).toHaveCount(6);
+    await expect(tabs.first()).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByRole("tabpanel")).toHaveCount(1);
+  });
+
+  test("a seta troca o painel e o painel corresponde à aba", async ({ page }) => {
+    await page.goto("/");
+    const primeira = page.getByRole("tab", { name: /Podcast/ });
+    await primeira.focus();
+    await page.keyboard.press("ArrowDown");
+
+    const segunda = page.getByRole("tab", { name: /Cobertura de evento/ });
+    await expect(segunda).toHaveAttribute("aria-selected", "true");
+    await expect(primeira).toHaveAttribute("aria-selected", "false");
+    await expect(
+      page.getByRole("tabpanel", { name: /Cobertura de evento/ }),
+    ).toBeVisible();
+  });
+
+  test("a lista inteira ocupa uma parada de Tab (tabindex rotativo)", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("tab", { name: /Podcast/ })).toHaveAttribute("tabindex", "0");
+    await expect(page.getByRole("tab", { name: /Projeto especial/ })).toHaveAttribute("tabindex", "-1");
+  });
+
+  test("sem vídeo nem imagem, nenhuma moldura vazia é desenhada", async ({ page }) => {
+    await page.goto("/");
+    const painel = page.getByRole("tabpanel");
+    await expect(painel.locator("video")).toHaveCount(0);
+    await expect(painel.locator("img")).toHaveCount(0);
+    // O painel segue completo: título, descrição e fecho.
+    await expect(painel.getByText(/entrega em 48h/i)).toBeVisible();
   });
 });

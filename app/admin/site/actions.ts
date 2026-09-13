@@ -163,6 +163,83 @@ export async function deleteProgram(formData: FormData) {
   revalidateSite();
 }
 
+// ────────────────────────────── Convidados ───────────────────────────────────
+
+export async function saveGuest(formData: FormData) {
+  await requireSiteEditor();
+  const db = createClient();
+
+  const id = String(formData.get("id") ?? "").trim();
+  const row = {
+    name: String(formData.get("name") ?? "").trim(),
+    role: String(formData.get("role") ?? "").trim() || null,
+    photo_url: String(formData.get("photo_url") ?? "").trim() || null,
+    display_order: Number(formData.get("display_order") ?? 0),
+    published: formData.get("published") === "on",
+    updated_at: new Date().toISOString(),
+  };
+
+  if (!row.name) throw new Error("Nome é obrigatório.");
+
+  const { error } = id
+    ? await db.from("site_guests").update(row).eq("id", id)
+    : await db.from("site_guests").insert(row);
+  if (error) throw new Error(error.message);
+
+  revalidateSite();
+}
+
+export async function deleteGuest(formData: FormData) {
+  await requireSiteEditor();
+  const id = String(formData.get("id") ?? "");
+  const { error } = await createClient().from("site_guests").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidateSite();
+}
+
+// ──────────────────────────── O que fazemos ──────────────────────────────────
+
+/** Uma URL por linha, no máximo 3 — o painel só tem espaço para três. */
+function parseImages(raw: string): string[] {
+  return raw.split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 3);
+}
+
+export async function saveService(formData: FormData) {
+  await requireSiteEditor();
+  const db = createClient();
+
+  const id = String(formData.get("id") ?? "").trim();
+  const row = {
+    title: String(formData.get("title") ?? "").trim(),
+    badge: String(formData.get("badge") ?? "").trim() || null,
+    description: String(formData.get("description") ?? "").trim() || null,
+    footnote: String(formData.get("footnote") ?? "").trim() || null,
+    video_url: String(formData.get("video_url") ?? "").trim() || null,
+    poster_url: String(formData.get("poster_url") ?? "").trim() || null,
+    images: parseImages(String(formData.get("images") ?? "")),
+    display_order: Number(formData.get("display_order") ?? 0),
+    published: formData.get("published") === "on",
+    updated_at: new Date().toISOString(),
+  };
+
+  if (!row.title) throw new Error("Título é obrigatório.");
+
+  const { error } = id
+    ? await db.from("site_services").update(row).eq("id", id)
+    : await db.from("site_services").insert(row);
+  if (error) throw new Error(error.message);
+
+  revalidateSite();
+}
+
+export async function deleteService(formData: FormData) {
+  await requireSiteEditor();
+  const id = String(formData.get("id") ?? "");
+  const { error } = await createClient().from("site_services").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidateSite();
+}
+
 // ──────────────────────────── Configurações ──────────────────────────────────
 
 export async function saveSiteConfig(formData: FormData) {
@@ -181,6 +258,8 @@ export async function saveSiteConfig(formData: FormData) {
     // Só dígitos: o CMS aceita "+55 (65) 99920-7108" e o wa.me exige limpo.
     whatsapp_number: sanitizeWhatsappNumber(String(formData.get("whatsapp_number") ?? "")) || null,
     location: String(formData.get("location") ?? "").trim() || null,
+    about_image_url: String(formData.get("about_image_url") ?? "").trim() || null,
+    og_image_url: String(formData.get("og_image_url") ?? "").trim() || null,
     instagram_url: String(formData.get("instagram_url") ?? "").trim() || null,
     linkedin_url: String(formData.get("linkedin_url") ?? "").trim() || null,
     youtube_url: String(formData.get("youtube_url") ?? "").trim() || null,
