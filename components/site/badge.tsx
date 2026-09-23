@@ -7,16 +7,21 @@ import { cn } from "@/lib/utils";
 //  - eyebrow: rótulo de seção (uppercase, tracking 0.12em, text.inverse)
 //  - info: badge informativo (text.tertiary)
 
-const siteBadgeVariants = cva("inline-flex items-center gap-s7 font-medium uppercase", {
+const siteBadgeVariants = cva("inline-flex items-center gap-s7 uppercase", {
   variants: {
     variant: {
-      accent: "rounded-site-step7 bg-site-text-inverse/[0.12] px-3 py-1 font-borna text-site-xs text-site-text-inverse",
+      accent: "rounded-site-step7 bg-site-text-inverse/[0.12] px-3 py-1 font-borna font-medium text-site-xs text-site-text-inverse",
       // Kicker: o padrão "01 — Título" repetido no topo de cada seção do
       // manual de marca — mono, tracking largo. Único variant em DM Mono; os
       // outros (pill) seguem em DM Sans (font-borna), mais legível em texto
       // corrido curto.
-      eyebrow: "font-manual-mono text-site-xs tracking-[0.14em] text-site-text-inverse",
-      info: "rounded-site-step7 bg-site-text-tertiary/20 px-3 py-1 font-borna text-site-xs text-site-text-primary",
+      //
+      // 11px + semibold (não o antigo text-site-xs/8.75px + medium): no
+      // token original essa etiqueta já nascia pequena, e mono fino em tom
+      // dourado mais escuro (ajuste de contraste, ver globals.css) ficou
+      // discreto demais nesse tamanho — apontado como ilegível.
+      eyebrow: "font-manual-mono text-[11px] font-semibold leading-none tracking-[0.16em] text-site-text-inverse",
+      info: "rounded-site-step7 bg-site-text-tertiary/20 px-3 py-1 font-borna font-medium text-site-xs text-site-text-primary",
     },
   },
   defaultVariants: { variant: "eyebrow" },
