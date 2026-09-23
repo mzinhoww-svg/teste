@@ -1,6 +1,4 @@
-import { cn } from "@/lib/utils";
 import { SitePageView } from "@/components/site/page-view";
-import { cormorantGaramond, dmSans, dmMono } from "./fonts";
 import { ReinersMarkDefs } from "./mark";
 import { BrandManualSmoothScroll } from "./smooth-scroll";
 import { BrandManualNav } from "./nav";
@@ -22,16 +20,12 @@ import { ManifestoSection } from "./sections/manifesto";
 // tema PodFactory (site-*) do resto do site: é um documento de marca, não uma
 // página do site público. Ver app/globals.css (`.manual-marca`) e
 // tailwind.config.ts (`colors.manual`, `fontFamily["manual-*"]`).
+//
+// As fontes (cormorantGaramond/dmSans/dmMono) já são carregadas uma vez no
+// <html> por app/layout.tsx — não precisam ser reaplicadas aqui.
 export function BrandManual() {
   return (
-    <div
-      className={cn(
-        cormorantGaramond.variable,
-        dmSans.variable,
-        dmMono.variable,
-        "manual-marca bg-manual-creme font-manual-sans text-manual-tinta",
-      )}
-    >
+    <div className="manual-marca bg-manual-creme font-manual-sans text-manual-tinta">
       <ReinersMarkDefs />
       <BrandManualSmoothScroll />
       <BrandManualNav />

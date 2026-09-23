@@ -34,23 +34,26 @@ export function SitePoster({ program, className }: { program: Program; className
         />
       )}
 
-      {/* Gradiente de leitura: garante contraste do título sobre qualquer capa */}
+      {/* Gradiente de leitura: garante contraste do título sobre qualquer capa.
+          Escuro de propósito, mesmo no tema claro — a capa é foto arbitrária do
+          CMS, e texto claro sobre scrim escuro é o único par que continua
+          legível não importa o brilho da foto por baixo. */}
       <span
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-site-surface-base/95 via-site-surface-base/60 to-transparent"
+        className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-manual-navy/95 via-manual-navy/60 to-transparent"
       />
 
       <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-4">
         {program.category && (
-          <span className="text-site-xs font-medium uppercase text-site-text-inverse">
+          <span className="text-site-xs font-medium uppercase text-manual-ouro-claro">
             {program.category}
           </span>
         )}
-        <span className="line-clamp-2 text-site-lg font-medium text-site-text-primary [text-shadow:var(--site-shadow-1)]">
+        <span className="line-clamp-2 text-site-lg font-medium text-manual-creme [text-shadow:var(--site-shadow-1)]">
           {program.title}
         </span>
         {program.client && (
-          <span className="line-clamp-1 text-site-sm text-site-text-primary/60">{program.client}</span>
+          <span className="line-clamp-1 text-site-sm text-manual-claro">{program.client}</span>
         )}
       </span>
     </Link>

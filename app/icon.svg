@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Reiners Media">
-  <rect width="64" height="64" rx="14" fill="#000000"/>
-  <g fill="#d87dff">
-    <rect x="15" y="26" width="6" height="12" rx="3"/>
-    <rect x="26" y="16" width="6" height="32" rx="3"/>
-    <rect x="37" y="21" width="6" height="22" rx="3"/>
-    <rect x="48" y="29" width="4" height="6" rx="2" opacity="0.6"/>
+  <rect width="64" height="64" rx="14" fill="#14243E"/>
+  <g fill="none" stroke="#C4A15A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="26" y="13" width="12" height="20" rx="6" fill="#C4A15A" stroke="none"/>
+    <path d="M20 29 Q20 42 32 42 Q44 42 44 29"/>
+    <line x1="32" y1="42" x2="32" y2="48"/>
+    <line x1="24" y1="48" x2="40" y2="48"/>
   </g>
 </svg>

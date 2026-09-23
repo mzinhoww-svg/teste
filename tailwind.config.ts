@@ -57,11 +57,12 @@ const config: Config = {
           danger: "rgb(var(--site-danger) / <alpha-value>)",
         },
 
-        // ── Manual de marca (Reiners Media DS 2026) ────────────────────────
-        // Identidade própria do manual de identidade visual (`/manual-marca`),
-        // isolada do tema PodFactory acima — mesmo tratamento de token
-        // semântico (canais RGB p/ opacidade), escopado pela classe
-        // `.manual-marca`. Ver app/globals.css.
+        // ── Reiners Media DS 2026 — primitivos de marca ─────────────────────
+        // Navy/Ouro/Creme cru, globais (app/globals.css `:root`). Usados
+        // diretamente por components/brand-manual/ (o manual em si) e, no
+        // site público acima, para grafismos decorativos pontuais (texturas,
+        // fios, molduras) onde a regra de contraste de `site-text-inverse`
+        // não se aplica — texto/interativo do site usa sempre `site-*`.
         manual: {
           navy: "rgb(var(--manual-navy) / <alpha-value>)",
           tinta: "rgb(var(--manual-tinta) / <alpha-value>)",
@@ -77,10 +78,22 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        // Borna é licenciada (não está no Google Fonts). Se os arquivos forem
-        // self-hosted em /public/fonts, `--font-borna` assume; senão cai no
-        // Geist Sans já instalado. Ver docs/site-design-system.md.
-        borna: ["var(--font-borna)", "var(--font-geist-sans)", "system-ui", "sans-serif"],
+        // `borna` era o nome do slot para a fonte licenciada Borna (nunca
+        // instalada — sempre caiu no Geist Sans). Agora aponta para DM Sans,
+        // a fonte de texto/interface do Reiners Media DS 2026: repontar aqui
+        // é o que reestiliza TODO texto do site (font-borna está em quase
+        // todo componente) sem precisar trocar classe em cada um. Mantido o
+        // nome `borna` para não gerar um diff gigante trocando classe por
+        // classe — é só um identificador interno agora.
+        borna: ["var(--font-manual-sans)", "var(--font-geist-sans)", "system-ui", "sans-serif"],
+        // Cormorant Garamond — display/títulos do site público (h1/h2) e do
+        // manual. Sobrescreve o `font-serif` padrão do Tailwind de propósito
+        // (nada no resto do app usa `font-serif` hoje).
+        serif: ["var(--font-manual-serif)", "Georgia", "serif"],
+        // NÃO sobrescrever `mono`: o CRM usa font-mono para dado/código
+        // (referências, env vars, IDs) — precisa do monospace utilitário
+        // padrão, não do DM Mono decorativo. Kickers do site público usam
+        // `font-manual-mono` explicitamente (ver components/site/badge.tsx).
         "manual-serif": ["var(--font-manual-serif)", "Georgia", "serif"],
         "manual-sans": ["var(--font-manual-sans)", "system-ui", "sans-serif"],
         "manual-mono": ["var(--font-manual-mono)", "SFMono-Regular", "monospace"],

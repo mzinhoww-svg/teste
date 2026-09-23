@@ -45,7 +45,7 @@ export default async function PortfolioPage() {
         <section className="bg-site-surface-base px-6 pb-16 pt-24" aria-labelledby="portfolio-title">
           <div className="mx-auto max-w-6xl">
             <SiteBadge>Portfólio</SiteBadge>
-            <h1 id="portfolio-title" className="mt-4 text-site-display font-medium text-site-text-primary">
+            <h1 id="portfolio-title" className="mt-4 font-serif text-site-display font-normal text-site-text-primary">
               Programas que criamos
             </h1>
             <p className="mt-6 max-w-[520px] text-site-base text-site-text-primary/70">

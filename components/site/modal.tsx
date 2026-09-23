@@ -28,7 +28,7 @@ export function SiteModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-site-surface-base/85 p-4 backdrop-blur-[12px] sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-manual-navy/70 p-4 backdrop-blur-[12px] sm:items-center"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

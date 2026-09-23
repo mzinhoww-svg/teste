@@ -12,7 +12,7 @@ export function PortfolioTeaserSection({ programs }: { programs: Program[] }) {
     <section className="bg-site-surface-base px-6 py-24" aria-labelledby="portfolio-title">
       <div className="mx-auto max-w-6xl">
         <SiteBadge>Portfólio</SiteBadge>
-        <h2 id="portfolio-title" className="mt-4 text-site-h2 font-medium text-site-text-primary">
+        <h2 id="portfolio-title" className="mt-4 font-serif text-site-h2 font-semibold text-site-text-primary">
           Programas que criamos
         </h2>
         <p className="mt-3 max-w-[520px] text-site-base text-site-text-primary/70">
