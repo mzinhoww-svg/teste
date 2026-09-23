@@ -15,7 +15,7 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
   return (
     <section className="bg-site-surface-raised px-6 py-24" aria-labelledby="depoimentos-title">
       <div className="mx-auto max-w-6xl">
-        <h2 id="depoimentos-title" className="text-site-h2 font-medium text-site-text-primary">
+        <h2 id="depoimentos-title" className="font-serif text-site-h2 font-semibold text-site-text-primary">
           O que dizem sobre o estúdio
         </h2>
 

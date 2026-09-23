@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { SiteBadge } from "../badge";
 import { SiteCard, SiteCardEmpty } from "../card";
 import { BookingTrigger } from "../booking-trigger";
+import { Emphasized } from "../emphasized";
 import type { Plan } from "@/lib/site/content";
 
 // Seção 2 — Planos. 3 cards (1 coluna no mobile). O card em destaque ganha
@@ -12,7 +13,7 @@ export function PlansSection({ plans, whatsappNumber }: { plans: Plan[]; whatsap
     <section id="planos" className="bg-site-surface-raised px-6 py-24" aria-labelledby="planos-title">
       <div className="mx-auto max-w-6xl">
         <SiteBadge>Planos</SiteBadge>
-        <h2 id="planos-title" className="mt-4 max-w-[640px] text-site-h2 font-medium text-site-text-primary">
+        <h2 id="planos-title" className="mt-4 max-w-[640px] font-serif text-site-h2 font-semibold text-site-text-primary">
           Escolha o formato ideal para o seu projeto
         </h2>
 
@@ -42,7 +43,9 @@ export function PlansSection({ plans, whatsappNumber }: { plans: Plan[]; whatsap
                 </p>
 
                 {plan.description && (
-                  <p className="mt-3 text-site-base text-site-text-primary/75">{plan.description}</p>
+                  <p className="mt-3 text-site-base text-site-text-primary/75">
+                    <Emphasized text={plan.description} />
+                  </p>
                 )}
 
                 <ul className="mt-6 flex flex-col gap-s7">

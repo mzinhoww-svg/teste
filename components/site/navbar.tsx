@@ -8,6 +8,7 @@ import { SiteLink } from "./link";
 import { BookingModal } from "./booking-modal";
 import { useDismissable } from "./use-dismissable";
 import { trackSiteEvent } from "@/lib/site/track";
+import { ReinersMark, ReinersMarkDefs } from "@/components/brand-manual/mark";
 
 // Navbar sticky (64px) com blur. Estado `scrolled` acende a borda inferior.
 // Mobile: drawer lateral com aria-expanded/aria-controls, role="dialog",
@@ -44,6 +45,7 @@ export function SiteNavbar({ siteName, whatsappNumber }: { siteName: string; wha
 
   return (
     <>
+      <ReinersMarkDefs />
       <header
         className={cn(
           "sticky top-0 z-40 h-16 border-b bg-site-surface-base/85 backdrop-blur-[16px] transition-colors duration-fast",
@@ -56,8 +58,9 @@ export function SiteNavbar({ siteName, whatsappNumber }: { siteName: string; wha
         >
           <Link
             href="/"
-            className="text-site-4xl font-medium text-site-text-primary transition-colors duration-fast hover:text-site-text-inverse"
+            className="group flex items-center gap-2.5 font-serif text-site-4xl font-bold tracking-[0.02em] text-site-text-primary transition-colors duration-fast hover:text-site-text-inverse"
           >
+            <ReinersMark theme="light" size={28} className="shrink-0 transition-transform duration-fast group-hover:scale-105" />
             {siteName}
           </Link>
 
@@ -103,7 +106,7 @@ export function SiteNavbar({ siteName, whatsappNumber }: { siteName: string; wha
 
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-50 bg-site-surface-base/85 backdrop-blur-[12px] md:hidden"
+          className="fixed inset-0 z-50 bg-manual-navy/70 backdrop-blur-[12px] md:hidden"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) closeDrawer();
           }}
@@ -117,7 +120,10 @@ export function SiteNavbar({ siteName, whatsappNumber }: { siteName: string; wha
             className="ml-auto flex h-full w-[min(320px,85vw)] animate-site-drawer-in flex-col gap-2 border-l border-site-border-muted/10 bg-site-surface-raised p-6 shadow-site-2"
           >
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-site-4xl font-medium">{siteName}</span>
+              <span className="flex items-center gap-2.5 font-serif text-site-4xl font-bold tracking-[0.02em]">
+                <ReinersMark theme="light" size={26} className="shrink-0" />
+                {siteName}
+              </span>
               <button
                 type="button"
                 onClick={closeDrawer}

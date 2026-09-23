@@ -3,6 +3,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { SiteBadge } from "../badge";
+import { Emphasized } from "../emphasized";
 import type { Service } from "@/lib/site/content";
 
 // Seção "O que fazemos" — as frentes do estúdio, uma aba cada.
@@ -54,7 +55,7 @@ export function ServicesSection({ services }: { services: Service[] }) {
     <section id="o-que-fazemos" className="bg-site-surface-base px-6 py-24" aria-labelledby="servicos-title">
       <div className="mx-auto max-w-6xl">
         <SiteBadge>O que fazemos</SiteBadge>
-        <h2 id="servicos-title" className="mt-4 max-w-[640px] text-site-h2 font-medium text-site-text-primary">
+        <h2 id="servicos-title" className="mt-4 max-w-[640px] font-serif text-site-h2 font-semibold text-site-text-primary">
           Diga o que você precisa gravar.
         </h2>
         <p className="mt-3 max-w-[520px] text-site-base text-site-text-primary/70">
@@ -201,24 +202,5 @@ function ServiceMedia({ service }: { service: Service }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-/**
- * Só `**negrito**`. O fecho é escrito no CMS por quem não edita código, e um
- * campo que aceitasse HTML seria injeção — então o parser é intencionalmente
- * burro e o resto do texto sai literal.
- */
-function Emphasized({ text }: { text: string }) {
-  return (
-    <>
-      {text.split(/\*\*(.+?)\*\*/g).map((chunk, i) =>
-        i % 2 === 1 ? (
-          <strong key={i} className="font-medium text-site-text-primary">{chunk}</strong>
-        ) : (
-          <React.Fragment key={i}>{chunk}</React.Fragment>
-        ),
-      )}
-    </>
   );
 }

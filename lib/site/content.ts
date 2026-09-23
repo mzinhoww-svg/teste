@@ -120,10 +120,12 @@ export const DEFAULT_PLANS: Plan[] = [
   {
     id: "hora-de-estudio",
     name: "Hora de Estúdio",
-    price: "R$ 890",
-    period: "/hora",
-    description: "Para quem já tem pauta e equipe: use nossa estrutura por hora.",
+    price: "R$ 1.390",
+    period: "/2h",
+    description:
+      "Para quem já tem pauta e equipe: **2 horas de gravação** inclusas, com toda a estrutura do nosso estúdio.",
     features: [
+      "2 horas de gravação incluídas",
       "Estúdio com tratamento acústico",
       "Até 3 câmeras 4K",
       "Operador de áudio incluso",

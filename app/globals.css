@@ -11,36 +11,59 @@ body {
 }
 
 /* ==========================================================================
-   Design tokens — PodFactory (site público: landing e portfólio)
+   Design tokens — Reiners Media DS 2026 (site público: landing e portfólio)
    ÚNICA fonte de valores crus do site. Componentes consomem os tokens
    semânticos expostos no tailwind.config.ts (`site-*`) — nunca hex direto.
-   Ver docs/site-design-system.md.
+   Ver docs/site-landing.md.
+
+   Retonado do dark/orchid "PodFactory" original para a identidade Navy/Ouro/
+   Creme do manual de marca (/manual-marca) — mesmos NOMES de token, valores
+   novos, então nenhum componente do site precisou mudar de classe. `--site-
+   text-inverse` usa um ouro mais escuro que o Ouro puro da marca (#9A7B35):
+   é o mesmo ajuste de contraste já calculado em reiners-media/src/lib/
+   tokens.ts (gold.700, 6.43:1 sobre creme — Ouro puro dá só 3.74:1, reprova
+   AA de texto). Ouro puro/ouro-claro seguem disponíveis via `manual-*` para
+   uso decorativo (traços, texturas, ícones grandes) onde a regra de
+   contraste de texto não se aplica.
    ========================================================================== */
 :root {
   /* Cores em canais RGB (habilita `bg-site-surface-base/70`) */
-  --site-surface-base: 0 0 0;         /* #000000 — fundo da página */
-  --site-surface-raised: 20 16 28;    /* #14101c — cards, painéis, modais */
-  --site-surface-strong: 34 34 34;    /* #222222 — inputs, botões secundários */
-  --site-text-primary: 252 252 252;   /* #fcfcfc — títulos e corpo */
-  --site-text-inverse: 216 125 255;   /* #d87dff — accent, CTA, glow */
-  --site-text-tertiary: 0 0 238;      /* #0000ee — links padrão, badges info */
-  --site-border-muted: 255 255 255;   /* #ffffff — bordas sutis (usar /10) */
+  --site-surface-base: 250 247 242;   /* #FAF7F2 Creme — fundo da página */
+  --site-surface-raised: 255 255 255; /* #FFFFFF — cards, painéis, modais */
+  --site-surface-strong: 240 235 225; /* #F0EBE1 Pergaminho — inputs, botões secundários */
+  --site-text-primary: 20 36 62;      /* #14243E Navy — títulos e corpo */
+  --site-text-inverse: 110 87 38;     /* #6E5726 Ouro (escurecido p/ AA) — accent, CTA, glow */
+  --site-text-tertiary: 44 74 114;    /* #2C4A72 Aço — links padrão, badges info */
+  --site-border-muted: 20 36 62;      /* #14243E Navy — bordas sutis (usar /10) */
   --site-danger: 255 68 68;           /* #ff4444 — erro de formulário */
 
-  /* Sombras */
-  --site-shadow-1: rgba(0, 0, 0, 0.35) 0px 4px 24px 0px;
-  --site-shadow-2: rgba(0, 0, 0, 0.64) 0px 0px 87.5px 17.5px;
-  --site-shadow-3: rgba(216, 125, 255, 0.22) 0px 8px 32px 0px;
-  --site-shadow-4: rgba(0, 0, 0, 0.09) 0px 4px 9px 0px;
+  /* Sombras — pretas funcionam nos dois temas; mantidas do PodFactory. */
+  --site-shadow-1: rgba(20, 36, 62, 0.12) 0px 4px 24px 0px;
+  --site-shadow-2: rgba(20, 36, 62, 0.22) 0px 0px 87.5px 17.5px;
+  --site-shadow-3: rgba(110, 87, 38, 0.25) 0px 8px 32px 0px;
+  --site-shadow-4: rgba(20, 36, 62, 0.09) 0px 4px 9px 0px;
 
-  /* Tipografia: Borna é licenciada e não está no Google Fonts. Se os .woff2
-     forem colocados em /public/fonts e declarados via @font-face, esta família
-     assume; caso contrário o stack cai no Geist Sans (já instalado). */
-  --font-borna: "Borna";
+  /* Reiners Media DS 2026 — primitivos de marca, globais (usados tanto pelos
+     tokens semânticos `site-*` acima quanto por components/brand-manual/). */
+  --manual-navy: 20 36 62;            /* #14243E */
+  --manual-tinta: 26 21 16;           /* #1A1510 */
+  --manual-pergaminho: 240 235 225;   /* #F0EBE1 */
+  --manual-creme: 250 247 242;        /* #FAF7F2 */
+  --manual-aco: 44 74 114;            /* #2C4A72 */
+  --manual-medio: 94 85 73;           /* #5E5549 */
+  --manual-claro: 158 146 135;        /* #9E9287 */
+  --manual-ouro: 154 123 53;          /* #9A7B35 */
+  --manual-ouro-claro: 196 161 90;    /* #C4A15A */
+  --manual-ouro-palido: 232 217 181;  /* #E8D9B5 */
 }
 
-/* O site público é sempre escuro, independente do tema do CRM: a raiz pinta o
-   documento inteiro para não vazar o `bg-slate-50` do body no overscroll. */
+.site-root ::selection {
+  background: rgb(var(--site-text-inverse) / 0.22);
+  color: rgb(var(--site-text-primary));
+}
+
+/* A raiz pinta o documento inteiro de Creme para não vazar o `bg-slate-50`
+   do CRM no overscroll — independente do tema (claro/escuro) do CRM. */
 html:has(.site-root),
 body:has(.site-root) {
   background-color: rgb(var(--site-surface-base));
@@ -71,6 +94,14 @@ body:has(.site-root) {
   --tw-ring-shadow: 0 0 #0000;
   --tw-ring-offset-shadow: 0 0 #0000;
   box-shadow: none;
+}
+
+/* ::selection do manual de marca (`/manual-marca`) — os tokens `--manual-*`
+   agora são globais (ver bloco :root acima), então só a regra de seleção
+   de texto continua escopada por classe. */
+.manual-marca ::selection {
+  background: rgb(var(--manual-ouro-palido));
+  color: rgb(var(--manual-tinta));
 }
 
 /* Respeita usuários que preferem menos movimento */

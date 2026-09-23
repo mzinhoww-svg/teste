@@ -17,7 +17,7 @@ export function GuestsSection({ guests }: { guests: Guest[] }) {
     <section className="bg-site-surface-base px-6 py-24" aria-labelledby="convidados-title">
       <div className="mx-auto max-w-6xl">
         <SiteBadge>Convidados</SiteBadge>
-        <h2 id="convidados-title" className="mt-4 text-site-h2 font-medium text-site-text-primary">
+        <h2 id="convidados-title" className="mt-4 font-serif text-site-h2 font-semibold text-site-text-primary">
           Quem já gravou no estúdio
         </h2>
 

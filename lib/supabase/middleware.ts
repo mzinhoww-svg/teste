@@ -124,6 +124,7 @@ export async function updateSession(request: NextRequest) {
     path === "/login" ||
     path.startsWith("/portfolio") ||
     path.startsWith("/media") ||
+    path.startsWith("/manual-marca") ||
     path.startsWith("/convite") ||
     path.startsWith("/portal/convite") ||
     path.startsWith("/sign") ||

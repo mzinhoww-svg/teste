@@ -16,7 +16,7 @@ export function AboutSection({ imageUrl }: { imageUrl: string | null }) {
       <div className="mx-auto grid max-w-6xl items-center gap-16 lg:grid-cols-2">
         <div>
           <SiteBadge>Sobre</SiteBadge>
-          <h2 id="sobre-title" className="mt-4 text-site-h2 font-medium text-site-text-primary">
+          <h2 id="sobre-title" className="mt-4 font-serif text-site-h2 font-semibold text-site-text-primary">
             Por que a Reiners Media?
           </h2>
 
@@ -36,7 +36,7 @@ export function AboutSection({ imageUrl }: { imageUrl: string | null }) {
         {/* Sem imagem no CMS, o bloco mantém o gradiente — nunca um vazio. */}
         <div
           aria-hidden={imageUrl ? undefined : "true"}
-          className="aspect-[4/3] overflow-hidden rounded-site-lg border border-site-border-muted/[0.06] bg-site-surface-raised bg-[radial-gradient(circle_at_70%_30%,rgb(var(--site-text-inverse)/0.16),transparent_60%)]"
+          className="relative aspect-[4/3] overflow-hidden rounded-site-lg border border-site-border-muted/[0.06] bg-site-surface-raised bg-[radial-gradient(circle_at_70%_30%,rgb(var(--site-text-inverse)/0.16),transparent_60%)]"
         >
           {imageUrl && (
             // eslint-disable-next-line @next/next/no-img-element -- URL vinda do CMS (host livre)
@@ -47,6 +47,9 @@ export function AboutSection({ imageUrl }: { imageUrl: string | null }) {
               loading="lazy"
             />
           )}
+          {/* Moldura de cantos dourados — motivo do manual de marca (seção Padrões). */}
+          <span aria-hidden="true" className="pointer-events-none absolute left-3 top-3 h-8 w-8 border-l-2 border-t-2 border-manual-ouro" />
+          <span aria-hidden="true" className="pointer-events-none absolute bottom-3 right-3 h-8 w-8 border-b-2 border-r-2 border-manual-ouro" />
         </div>
       </div>
     </section>

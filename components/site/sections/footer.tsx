@@ -3,8 +3,16 @@ import { WhatsappGlyph } from "../whatsapp-icon";
 import { SiteLink } from "../link";
 import { FLOATING_WHATSAPP_MESSAGE, formatWhatsappNumber, whatsappUrl } from "@/lib/site/whatsapp";
 import type { Program, SiteConfig } from "@/lib/site/content";
+// O <symbol> do símbolo já é definido uma vez por <ReinersMarkDefs> na navbar
+// (presente em toda página pública) — aqui só o <use>, via <ReinersMark>.
+import { ReinersMark } from "@/components/brand-manual/mark";
 
 // Seção 7 — Footer. 4 colunas no desktop, 1 no mobile.
+//
+// Banda escura de propósito — Tinta, não Navy: mesma distinção do manual de
+// marca (Manifesto em Navy, Footer em Tinta). Por isso os overrides
+// manual-* em cada texto abaixo, em vez dos tokens site-* (que agora são a
+// versão CLARA do site).
 
 const NAV = [
   { href: "/#planos", label: "Planos" },
@@ -35,11 +43,14 @@ export function FooterSection({
   const social = socialLinks(config);
 
   return (
-    <footer className="border-t border-site-border-muted/[0.06] bg-site-surface-base px-6 py-12">
+    <footer className="border-t border-manual-ouro/10 bg-manual-tinta px-6 py-12">
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-4">
         <div>
-          <p className="text-site-4xl font-medium text-site-text-primary">{siteName}</p>
-          <p className="mt-2 max-w-[220px] text-site-sm text-site-text-primary/50">
+          <p className="flex items-center gap-2.5 font-serif text-site-4xl font-bold tracking-[0.02em] text-manual-creme">
+            <ReinersMark theme="dark" size={26} className="shrink-0" />
+            {siteName}
+          </p>
+          <p className="mt-2 max-w-[220px] text-site-sm text-manual-claro">
             Estúdio de podcast premium em {location}.
           </p>
           {waHref && (
@@ -47,7 +58,7 @@ export function FooterSection({
               href={waHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex min-h-[44px] items-center gap-2 text-site-sm font-medium text-site-text-inverse hover:brightness-110"
+              className="mt-4 inline-flex min-h-[44px] items-center gap-2 text-site-sm font-medium text-manual-ouro-claro hover:brightness-110"
             >
               <WhatsappGlyph className="h-4 w-4" />
               {formatWhatsappNumber(whatsappNumber)}
@@ -56,11 +67,16 @@ export function FooterSection({
         </div>
 
         <nav aria-label="Rodapé">
-          <h2 className="text-site-xs font-medium uppercase text-site-text-inverse">Navegar</h2>
+          <h2 className="font-manual-mono text-site-xs font-medium uppercase tracking-[0.14em] text-manual-ouro-claro">Navegar</h2>
           <ul className="mt-4 flex flex-col">
             {NAV.map((l) => (
               <li key={l.href}>
-                <SiteLink href={l.href} variant="muted" touch className="flex text-site-sm">
+                <SiteLink
+                  href={l.href}
+                  variant="muted"
+                  touch
+                  className="flex text-site-sm text-manual-claro hover:text-manual-ouro-claro"
+                >
                   {l.label}
                 </SiteLink>
               </li>
@@ -69,7 +85,7 @@ export function FooterSection({
         </nav>
 
         <nav aria-label="Programas">
-          <h2 className="text-site-xs font-medium uppercase text-site-text-inverse">Programas</h2>
+          <h2 className="font-manual-mono text-site-xs font-medium uppercase tracking-[0.14em] text-manual-ouro-claro">Programas</h2>
           <ul className="mt-4 flex flex-col">
             {programs.slice(0, 5).map((p) => (
               <li key={p.id}>
@@ -77,7 +93,7 @@ export function FooterSection({
                   href={`/portfolio#${p.slug}`}
                   variant="muted"
                   touch
-                  className="flex text-site-sm"
+                  className="flex text-site-sm text-manual-claro hover:text-manual-ouro-claro"
                 >
                   {p.title}
                 </SiteLink>
@@ -87,7 +103,7 @@ export function FooterSection({
         </nav>
 
         <div className={waHref || social.length ? "" : "hidden"}>
-          <h2 className="text-site-xs font-medium uppercase text-site-text-inverse">Social</h2>
+          <h2 className="font-manual-mono text-site-xs font-medium uppercase tracking-[0.14em] text-manual-ouro-claro">Social</h2>
           <ul className="mt-4 flex gap-2">
             {waHref && (
               <li>
@@ -96,7 +112,7 @@ export function FooterSection({
                   aria-label="WhatsApp"
                   rel="noopener noreferrer"
                   target="_blank"
-                  className="grid h-11 w-11 place-items-center rounded-site-md text-site-text-inverse transition-colors duration-fast hover:brightness-110"
+                  className="grid h-11 w-11 place-items-center rounded-site-md text-manual-ouro-claro transition-colors duration-fast hover:brightness-110"
                 >
                   <WhatsappGlyph />
                 </a>
@@ -109,7 +125,7 @@ export function FooterSection({
                   aria-label={label}
                   rel="noopener noreferrer"
                   target="_blank"
-                  className="grid h-11 w-11 place-items-center rounded-site-md text-site-text-primary/40 transition-colors duration-fast hover:text-site-text-inverse"
+                  className="grid h-11 w-11 place-items-center rounded-site-md text-manual-claro/60 transition-colors duration-fast hover:text-manual-ouro-claro"
                 >
                   <Icon />
                 </a>
@@ -119,8 +135,8 @@ export function FooterSection({
         </div>
       </div>
 
-      <div className="mx-auto mt-10 max-w-6xl border-t border-site-border-muted/[0.06] pt-6">
-        <p className="text-site-xs normal-case tracking-normal text-site-text-primary/55">
+      <div className="mx-auto mt-10 max-w-6xl border-t border-manual-ouro/10 pt-6">
+        <p className="text-site-xs normal-case tracking-normal text-manual-claro/80">
           © 2026 {siteName}. Todos os direitos reservados.
         </p>
       </div>
