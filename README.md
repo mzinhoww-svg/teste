@@ -14,6 +14,7 @@ Auth, RLS)**. Deploy na **Vercel**.
 | `reiners.agency` | Landing do estúdio |
 | `reiners.agency/portfolio` | Portfólio de programas |
 | `reiners.agency/media` | Mesma landing, endereço alternativo (canônica: `/`) |
+| `reiners.agency/manual-marca` | Manual de identidade visual da marca |
 | `reiners.agency/admin/site` | CMS da landing (login obrigatório) |
 
 Roteamento por host em [`docs/vercel-domain.md`](docs/vercel-domain.md); design

@@ -56,6 +56,24 @@ const config: Config = {
           },
           danger: "rgb(var(--site-danger) / <alpha-value>)",
         },
+
+        // ── Manual de marca (Reiners Media DS 2026) ────────────────────────
+        // Identidade própria do manual de identidade visual (`/manual-marca`),
+        // isolada do tema PodFactory acima — mesmo tratamento de token
+        // semântico (canais RGB p/ opacidade), escopado pela classe
+        // `.manual-marca`. Ver app/globals.css.
+        manual: {
+          navy: "rgb(var(--manual-navy) / <alpha-value>)",
+          tinta: "rgb(var(--manual-tinta) / <alpha-value>)",
+          pergaminho: "rgb(var(--manual-pergaminho) / <alpha-value>)",
+          creme: "rgb(var(--manual-creme) / <alpha-value>)",
+          aco: "rgb(var(--manual-aco) / <alpha-value>)",
+          medio: "rgb(var(--manual-medio) / <alpha-value>)",
+          claro: "rgb(var(--manual-claro) / <alpha-value>)",
+          ouro: "rgb(var(--manual-ouro) / <alpha-value>)",
+          "ouro-claro": "rgb(var(--manual-ouro-claro) / <alpha-value>)",
+          "ouro-palido": "rgb(var(--manual-ouro-palido) / <alpha-value>)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
@@ -63,6 +81,9 @@ const config: Config = {
         // self-hosted em /public/fonts, `--font-borna` assume; senão cai no
         // Geist Sans já instalado. Ver docs/site-design-system.md.
         borna: ["var(--font-borna)", "var(--font-geist-sans)", "system-ui", "sans-serif"],
+        "manual-serif": ["var(--font-manual-serif)", "Georgia", "serif"],
+        "manual-sans": ["var(--font-manual-sans)", "system-ui", "sans-serif"],
+        "manual-mono": ["var(--font-manual-mono)", "SFMono-Regular", "monospace"],
       },
       fontSize: {
         // Escala PodFactory (px exatos do design). `site-base` é o corpo.

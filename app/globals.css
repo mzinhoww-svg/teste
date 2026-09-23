@@ -73,6 +73,32 @@ body:has(.site-root) {
   box-shadow: none;
 }
 
+/* ==========================================================================
+   Design tokens — Manual de marca (Reiners Media DS 2026)
+   Identidade própria do manual de identidade visual (`/manual-marca`) — Navy/
+   Ouro/Creme, tipografia serifada. Isolada do tema PodFactory acima: nenhum
+   componente do manual consome `site-*`, nenhum componente do site consome
+   `manual-*`. Escopo: classe `.manual-marca` na raiz da página. Ver
+   tailwind.config.ts (mapeamento `colors.manual`) e components/brand-manual/.
+   ========================================================================== */
+.manual-marca {
+  --manual-navy: 20 36 62;            /* #14243E */
+  --manual-tinta: 26 21 16;           /* #1A1510 */
+  --manual-pergaminho: 240 235 225;   /* #F0EBE1 */
+  --manual-creme: 250 247 242;        /* #FAF7F2 */
+  --manual-aco: 44 74 114;            /* #2C4A72 */
+  --manual-medio: 94 85 73;           /* #5E5549 */
+  --manual-claro: 158 146 135;        /* #9E9287 */
+  --manual-ouro: 154 123 53;          /* #9A7B35 */
+  --manual-ouro-claro: 196 161 90;    /* #C4A15A */
+  --manual-ouro-palido: 232 217 181;  /* #E8D9B5 */
+}
+
+.manual-marca ::selection {
+  background: rgb(var(--manual-ouro-palido));
+  color: rgb(var(--manual-tinta));
+}
+
 /* Respeita usuários que preferem menos movimento */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

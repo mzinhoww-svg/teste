@@ -9,6 +9,7 @@ comerciais internas vivem em subdomínio próprio, sem página pública
 | `/` | Landing da Reiners Media | estática, `revalidate = 300` |
 | `/portfolio` | Grade de programas, âncora por `#slug` | estática, `revalidate = 300` |
 | `/media` | Mesma landing de `/`, endereço alternativo (canônica: `/`) | estática, `revalidate = 300` |
+| `/manual-marca` | Manual de identidade visual da marca (Navy/Ouro/Creme, tipografia própria) | estática |
 | `/admin/site` | CMS da landing (dashboard, planos, depoimentos, programas, config) | dinâmica |
 | `/api/site/leads` | Formulário "Agendar sessão" | POST anônimo |
 | `/api/site/events` | Coleta de `page_view`, `cta_click`, `form_submit` | POST anônimo |
@@ -55,6 +56,38 @@ nenhuma outra mudança é necessária.
 
 Todos os interativos cobrem default, hover, focus-visible, active, disabled e
 (onde faz sentido) loading e error; alvo de toque mínimo 44×44px.
+
+## Manual de marca (`/manual-marca`)
+
+Página única e autocontida com o manual de identidade visual da Reiners Media
+— essência, logo, paleta, tipografia, ícones, padrões gráficos, aplicações,
+especificações técnicas e manifesto. Migrado de um protótipo de design
+(`design_handoff_reiners_brand_manual/`) para componentes de produção.
+
+**De propósito, tem sistema de tokens próprio, isolado do PodFactory acima**:
+é um documento de marca (Navy `#14243E` / Ouro `#9A7B35` / Creme `#FAF7F2`),
+não uma página do site. Tokens crus em `app/globals.css` (bloco
+`.manual-marca`) e mapeados em `tailwind.config.ts` (`colors.manual`,
+`fontFamily["manual-serif|sans|mono"]`) — mesmo padrão de token semântico do
+`site-*`, namespace `manual-*`. Tipografia (Cormorant Garamond, DM Sans, DM
+Mono) carregada via `next/font/google` só nessa rota
+(`components/brand-manual/fonts.ts`), sem custo para o resto do site.
+
+Componentes em `components/brand-manual/`: uma seção por arquivo em
+`sections/` (mesmo padrão de `components/site/sections/`), símbolo da marca
+reutilizável via `<symbol>`/`<use>` em `mark.tsx`, grade "efeito tabela" em
+`table-grid.tsx`, cabeçalho de seção (kicker + fio + H2) em
+`section-heading.tsx`.
+
+A capa usa uma textura de pontos em CSS (`radial-gradient`), não vídeo — o
+próprio handoff de design confirma que o protótipo nunca teve vídeo de fundo
+ali.
+
+Como `/media`, é pública mas fica **fora do sitemap** (`lib/site/seo.ts`,
+`app/sitemap.ts`) — decisão reversível, não editorial; some para não indexar
+antes que o time decida se o manual deve aparecer em busca. Está no allowlist
+de `isPublic` em `lib/supabase/middleware.ts`, senão o guard de sessão manda
+o visitante anônimo para `/login`.
 
 ## Mídia do site
 
