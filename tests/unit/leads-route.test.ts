@@ -4,8 +4,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 // O provider é trocado por um falso — nenhum teste faz rede nem grava em banco.
 
 const send = vi.fn();
+let providerName = "brevo";
 vi.mock("@/lib/email/provider", () => ({
-  getEmailProvider: () => ({ name: "brevo", configured: true, send }),
+  getEmailProvider: () => ({ name: providerName, configured: true, send }),
 }));
 
 // Módulo novo a cada teste: os limites (por IP, repetição) vivem na memória do módulo.
@@ -44,6 +45,7 @@ const LEAD = {
 };
 
 beforeEach(() => {
+  providerName = "brevo";
   send.mockReset();
   send.mockResolvedValue({ provider: "brevo", ok: true, messageId: "m1" });
   vi.stubEnv("LEADS_NOTIFY_EMAIL", "equipe@reiners.agency");
@@ -156,6 +158,26 @@ describe("POST /api/site/leads", () => {
     // Não ficou marcado como "já avisado": a nova tentativa envia de fato.
     expect((await POST(req(LEAD))).status).toBe(202);
     expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it("em produção sem BREVO_API_KEY (provider mock): 503 em vez de fingir que avisou", async () => {
+    providerName = "mock";
+    vi.stubEnv("NODE_ENV", "production");
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const POST = await loadPost();
+    const res = await POST(req(LEAD));
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ ok: false, notified: false });
+    expect(send).not.toHaveBeenCalled();
+    expect(error.mock.calls.join(" ")).toContain("BREVO_API_KEY");
+  });
+
+  it("em dev/CI o provider mock é aceito (não faz rede, o fluxo segue)", async () => {
+    providerName = "mock";
+    vi.stubEnv("NODE_ENV", "test");
+    const POST = await loadPost();
+    expect((await POST(req(LEAD))).status).toBe(202);
+    expect(send).toHaveBeenCalledTimes(1);
   });
 
   it("sem nenhum destinatário configurado: 503 e nada é enviado", async () => {

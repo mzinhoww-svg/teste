@@ -74,8 +74,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, notified: false }, { status: 503 });
   }
 
+  // Sem BREVO_API_KEY o provider cai no "mock" (não faz rede) e diria "enviado".
+  // Em dev/CI isso é o desejado; em produção seria um lead perdido em silêncio.
+  const provider = getEmailProvider();
+  if (provider.name === "mock" && process.env.NODE_ENV === "production") {
+    console.error("[site-lead] Brevo não configurado (BREVO_API_KEY): o aviso não foi enviado.");
+    return NextResponse.json({ ok: false, notified: false }, { status: 503 });
+  }
+
   const { subject, html } = leadEmail(parsed.lead, { path: parsed.path });
-  const res = await getEmailProvider().send({
+  const res = await provider.send({
     to,
     subject,
     html,

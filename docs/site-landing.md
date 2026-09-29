@@ -221,7 +221,9 @@ Brevo é de 300/dia, dividida com o CRM): só aceita chamada da própria origem
 preenchido ⇒ finge sucesso e não envia), limite por IP (6 a cada 10 min) e geral
 (60 por hora), descarte do mesmo envio repetido em 10 min e corpo de até 8 KB. Os
 limites ficam na memória de cada instância (freio, não garantia). Falha da Brevo
-vira `502` e um log só com o motivo — nunca com nome, e-mail ou telefone.
+vira `502` e um log só com o motivo — nunca com nome, e-mail ou telefone. Sem
+`BREVO_API_KEY` o provider do CRM cai num *mock* que não faz rede: em dev/CI isso
+é aceito, mas **em produção a rota responde `503`** em vez de fingir que avisou.
 
 **Sem banco, mas com dado pessoal por e-mail:** o texto do modal avisa que os
 dados vão por e-mail à equipe. O site não guarda nada; o que chega à caixa de
