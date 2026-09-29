@@ -57,6 +57,18 @@ testar em previews) → **Redeploy**:
 | `BREVO_WEBHOOK_SECRET` | segredo próprio p/ validar o webhook. |
 | `NEXT_PUBLIC_APP_URL` | URL pública canônica (links dos e-mails). |
 
+### Erro 401 "unrecognised IP address" — desative o bloqueio de IP da Brevo
+Se a Brevo responder `401` com *"We have detected you are using an unrecognised IP
+address …"*, a conta tem **IPs autorizados** ligado
+(**Brevo → Security → Authorised IPs**, <https://app.brevo.com/security/authorised_ips>).
+A Vercel **não tem IP fixo** (as funções saem de endereços que mudam a cada
+execução), então nenhum e-mail sai do site — nem o aviso do formulário "Agendar
+sessão", nem convites, propostas e cadências do CRM. Correção: em *Authorised IPs*,
+clique em **Deactivate blocking**. A chave `BREVO_API_KEY` continua sendo o segredo
+que protege a conta; não precisa de novo deploy. Sintoma no site: o formulário abre
+o WhatsApp normalmente e a rota `/api/site/leads` responde `502` (log
+`[site-lead] falha ao avisar a equipe (brevo): Brevo 401 …` nos *Runtime Logs*).
+
 ## 3. Webhook de eventos (opcional)
 O webhook **não é necessário para enviar** — ele só atualiza o status de entrega/
 abertura em `messages`. Pode ser configurado depois.

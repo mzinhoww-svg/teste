@@ -225,6 +225,10 @@ vira `502` e um log só com o motivo — nunca com nome, e-mail ou telefone. Sem
 `BREVO_API_KEY` o provider do CRM cai num *mock* que não faz rede: em dev/CI isso
 é aceito, mas **em produção a rota responde `503`** em vez de fingir que avisou.
 
+**Pré-requisito do aviso:** o *bloqueio de IP* da Brevo precisa estar desligado (a Vercel não
+tem IP fixo) — ver "Erro 401 unrecognised IP address" em `docs/email-brevo.md`. Com ele ligado
+o WhatsApp abre do mesmo jeito, mas o e-mail não sai.
+
 **Sem banco, mas com dado pessoal por e-mail:** o texto do modal avisa que os
 dados vão por e-mail à equipe. O site não guarda nada; o que chega à caixa de
 entrada é responsabilidade de quem a administra. A tabela `site_leads` (0016) e
