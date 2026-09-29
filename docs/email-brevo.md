@@ -24,6 +24,12 @@ webhook casa por esse id e atualiza o status (`enviado` → `entregue` → `aber
   "E-mail" no painel de propostas do drawer do lead.
 - **Contrato** (`sendContractForSignature`): e-mail aos signatários com o link
   `/sign/contracts/[token]` (dispara junto do "Preparar assinatura").
+- **Contato do site** (`/api/site/leads`): quando alguém preenche o formulário "Agendar sessão" da
+  landing, o navegador abre o WhatsApp e, em segundo plano, esta rota manda um aviso para a
+  equipe (`LEADS_NOTIFY_EMAIL` → `BREVO_REPLY_TO` → `BREVO_SENDER_EMAIL`), com o Reply-To da
+  pessoa. **Não usa banco**: chama `getEmailProvider().send()` direto, sem passar por
+  `sendAndLogEmail` (que grava em `messages`). Ver "Formulário de agendamento" em
+  `docs/site-landing.md`.
 - **Cadências** (`/api/cron/cadences`): regras com `action = 'send_email'` mandam
   follow-up aos contatos de deals parados no estágio.
 - **Portal / Fatura**: builders `portalInviteEmail` / `invoiceEmail` prontos; o

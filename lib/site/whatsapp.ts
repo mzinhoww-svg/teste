@@ -2,7 +2,10 @@
 //
 // O manual comercial da Reiners define o WhatsApp pessoal como canal de
 // ativação ("conversa, não pitch"). Por isso o site trata o WhatsApp como o
-// caminho principal: o formulário grava o lead e leva a conversa pra lá.
+// caminho principal: o formulário abre a conversa direto, com a mensagem pronta
+// (e avisa a equipe por e-mail em segundo plano — lib/site/lead-notify.ts).
+
+import { LEAD_LIMITS } from "./lead-form";
 
 /** Número padrão da Reiners Media (formato internacional, só dígitos). */
 export const DEFAULT_WHATSAPP = "5565999207108";
@@ -33,6 +36,9 @@ export function whatsappUrl(raw: string | null | undefined, message?: string): s
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
+/** Teto do "Sobre o projeto" na mensagem pronta (o formulário também limita o campo). */
+export const BOOKING_PROJECT_MAX = LEAD_LIMITS.message;
+
 export type BookingMessageInput = {
   name?: string;
   email?: string;
@@ -48,7 +54,8 @@ export type BookingMessageInput = {
 export function bookingWhatsappMessage(input: BookingMessageInput = {}): string {
   const name = (input.name ?? "").trim();
   const email = (input.email ?? "").trim();
-  const project = (input.message ?? "").trim();
+  // O texto vira parâmetro de URL: sem teto, um projeto enorme quebra o link.
+  const project = (input.message ?? "").trim().slice(0, BOOKING_PROJECT_MAX);
 
   const lines: string[] = [
     name

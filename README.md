@@ -30,7 +30,8 @@ system, CMS e regras de indexação em
 - **Design system próprio** em tokens semânticos (nenhum hex cru nos
   componentes), escuro, acessível (WCAG 2.2 AA) e testado.
 - **WhatsApp como canal principal**: botão flutuante, contato no rodapé e o
-  formulário de agendamento que grava o lead e continua a conversa por lá.
+  formulário de agendamento, que **abre o WhatsApp direto com a mensagem pronta**
+  (`wa.me`) e avisa a equipe por e-mail pela Brevo — sem gravar em banco.
   **Instagram [@reinersmedia](https://instagram.com/reinersmedia)** é o segundo
   canal: ícone e @ no rodapé e uma linha na seção de contato.
 - **CMS em `/admin/site`**: planos, depoimentos, programas e configurações, com
