@@ -90,7 +90,7 @@ export default async function PortfolioPage() {
                         {program.title}
                       </h2>
                       {program.client && (
-                        <p className="mt-1 text-site-sm text-site-text-primary/50">{program.client}</p>
+                        <p className="mt-1 text-site-sm text-site-text-primary/70">{program.client}</p>
                       )}
                       {program.description && (
                         <p className="mt-4 text-site-base text-site-text-primary/75">

@@ -133,7 +133,7 @@ export function FooterSection({
       </div>
 
       <div className="mx-auto mt-10 max-w-6xl border-t border-manual-ouro/10 pt-6">
-        <p className="text-site-xs normal-case tracking-normal text-manual-claro/80">
+        <p className="text-site-sm normal-case tracking-normal text-manual-claro">
           © 2026 {siteName}. Todos os direitos reservados.
         </p>
       </div>

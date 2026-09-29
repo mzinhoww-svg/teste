@@ -30,7 +30,7 @@ export function AboutSection({ imageUrl }: { imageUrl: string | null }) {
                 <d.icon className="mt-1 h-5 w-5 shrink-0 text-site-text-inverse" aria-hidden />
                 <div>
                   <p className="text-site-base font-medium text-site-text-primary/80">{d.label}</p>
-                  <p className="mt-1 text-site-sm text-site-text-primary/50">{d.desc}</p>
+                  <p className="mt-1 text-site-xl text-site-text-primary/70">{d.desc}</p>
                 </div>
               </li>
             ))}
