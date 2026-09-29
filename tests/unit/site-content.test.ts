@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   DEFAULT_CONFIG, DEFAULT_GUESTS, DEFAULT_PLANS, DEFAULT_PROGRAMS, DEFAULT_SERVICES,
   DEFAULT_TESTIMONIALS,
-  initials, toConfig, toGuest, toPlan, toProgram, toService, toTestimonial,
+  initials, isAuthorialProgram, toConfig, toGuest, toPlan, toProgram, toService, toTestimonial,
 } from "@/lib/site/content";
 
 describe("normalização das linhas do CMS", () => {
@@ -55,6 +55,41 @@ describe("defaults da landing", () => {
   });
 });
 
+describe("planos: valores e descrições vigentes", () => {
+  const plan = (id: string) => DEFAULT_PLANS.find((p) => p.id === id)!;
+
+  it("Hora de Estúdio: R$ 1.350 por 2h, com as 2 horas de gravação em negrito", () => {
+    const hora = plan("hora-de-estudio");
+    expect(hora.price).toBe("R$ 1.350");
+    expect(hora.period).toBe("/2h");
+    expect(hora.description).toContain("**2 horas de gravação**");
+  });
+
+  it("BTS Recorrente: descrição explica a sigla (Build to Suit); preço não muda", () => {
+    const bts = plan("bts-recorrente");
+    expect(bts.description).toContain("**Build to Suit (BTS):**");
+    expect(bts.price).toBe("R$ 4.500");
+  });
+
+  it("nenhum plano ficou com o preço antigo", () => {
+    expect(DEFAULT_PLANS.map((p) => p.price)).not.toContain("R$ 1.390");
+  });
+});
+
+describe("programa autoral", () => {
+  it("só a categoria Autoral ganha a capa de marca", () => {
+    expect(isAuthorialProgram({ category: "Autoral" })).toBe(true);
+    expect(isAuthorialProgram({ category: "autoral" })).toBe(true);
+    expect(isAuthorialProgram({ category: "Corporativo" })).toBe(false);
+    expect(isAuthorialProgram({ category: null })).toBe(false);
+  });
+
+  it("'Presença que Posiciona' é o autoral dos programas padrão", () => {
+    const autorais = DEFAULT_PROGRAMS.filter(isAuthorialProgram);
+    expect(autorais.map((p) => p.title)).toEqual(["Presença que Posiciona"]);
+  });
+});
+
 describe("initials", () => {
   it("usa no máximo duas iniciais", () => {
     expect(initials("Ana Furtado")).toBe("AF");
@@ -87,9 +122,10 @@ describe("imagem do Sobre e card de compartilhamento", () => {
     expect(toConfig({}).ogImageUrl).toBe("/og.jpg");
   });
 
-  it("a seção Sobre aceita ficar sem imagem: o componente desenha o gradiente", () => {
-    expect(DEFAULT_CONFIG.aboutImageUrl).toBeNull();
-    expect(toConfig({ about_image_url: "   " }).aboutImageUrl).toBeNull();
+  it("a seção Sobre tem o retrato do estúdio por padrão e coluna vazia não o apaga", () => {
+    expect(DEFAULT_CONFIG.aboutImageUrl).toBe("/estudio/sobre-retrato.webp");
+    expect(toConfig({}).aboutImageUrl).toBe("/estudio/sobre-retrato.webp");
+    expect(toConfig({ about_image_url: "   " }).aboutImageUrl).toBe("/estudio/sobre-retrato.webp");
   });
 
   it("o CMS substitui as duas", () => {
@@ -99,6 +135,31 @@ describe("imagem do Sobre e card de compartilhamento", () => {
     });
     expect(config.aboutImageUrl).toBe("https://cdn.exemplo/sobre.webp");
     expect(config.ogImageUrl).toBe("https://cdn.exemplo/card.jpg");
+  });
+});
+
+describe("Instagram como canal de contato", () => {
+  it("@reinersmedia é o padrão do site", () => {
+    expect(DEFAULT_CONFIG.instagramUrl).toBe("https://instagram.com/reinersmedia");
+    expect(toConfig({}).instagramUrl).toBe("https://instagram.com/reinersmedia");
+  });
+
+  it("coluna vazia no banco não tira o Instagram do ar", () => {
+    expect(toConfig({ instagram_url: null }).instagramUrl).toBe(DEFAULT_CONFIG.instagramUrl);
+    expect(toConfig({ instagram_url: "   " }).instagramUrl).toBe(DEFAULT_CONFIG.instagramUrl);
+  });
+
+  it("o CMS substitui o perfil", () => {
+    expect(toConfig({ instagram_url: "https://instagram.com/outro.perfil" }).instagramUrl).toBe(
+      "https://instagram.com/outro.perfil",
+    );
+  });
+
+  it("as outras redes continuam só com URL no CMS (sem placeholder)", () => {
+    const config = toConfig({});
+    expect(config.linkedinUrl).toBeNull();
+    expect(config.youtubeUrl).toBeNull();
+    expect(config.spotifyUrl).toBeNull();
   });
 });
 

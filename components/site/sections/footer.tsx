@@ -2,12 +2,13 @@ import { CameraGlyph, CardGlyph, PlayGlyph, WavesGlyph } from "../social-icons";
 import { WhatsappGlyph } from "../whatsapp-icon";
 import { SiteLink } from "../link";
 import { FLOATING_WHATSAPP_MESSAGE, formatWhatsappNumber, whatsappUrl } from "@/lib/site/whatsapp";
+import { PORTFOLIO_ENABLED } from "@/lib/site/features";
+import { instagramHandle } from "@/lib/site/social";
 import type { Program, SiteConfig } from "@/lib/site/content";
-// O <symbol> do símbolo já é definido uma vez por <ReinersMarkDefs> na navbar
-// (presente em toda página pública) — aqui só o <use>, via <ReinersMark>.
-import { ReinersMark } from "@/components/brand-manual/mark";
+import { BrandLockup } from "../brand";
 
-// Seção 7 — Footer. 4 colunas no desktop, 1 no mobile.
+// Seção 7 — Footer. 3 colunas no desktop (4 quando o portfólio está no ar e há
+// programas para listar), 1 no mobile.
 //
 // Banda escura de propósito — Tinta, não Navy: mesma distinção do manual de
 // marca (Manifesto em Navy, Footer em Tinta). Por isso os overrides
@@ -16,7 +17,8 @@ import { ReinersMark } from "@/components/brand-manual/mark";
 
 const NAV = [
   { href: "/#planos", label: "Planos" },
-  { href: "/portfolio", label: "Portfólio" },
+  // Portfólio oculto: ver PORTFOLIO_ENABLED em lib/site/features.ts.
+  ...(PORTFOLIO_ENABLED ? [{ href: "/portfolio", label: "Portfólio" }] : []),
   { href: "/#sobre", label: "Sobre" },
   { href: "/#contato", label: "Contato" },
 ];
@@ -33,36 +35,63 @@ function socialLinks(config: SiteConfig) {
 
 export function FooterSection({
   config,
-  programs,
+  programs = [],
 }: {
   config: SiteConfig;
-  programs: Program[];
+  /** Só é listada com o portfólio no ar (PORTFOLIO_ENABLED) e ao menos um programa. */
+  programs?: Program[];
 }) {
   const { siteName, location, whatsappNumber } = config;
   const waHref = whatsappUrl(whatsappNumber, FLOATING_WHATSAPP_MESSAGE);
   const social = socialLinks(config);
+  const showPrograms = PORTFOLIO_ENABLED && programs.length > 0;
+  const instagram = config.instagramUrl;
+  const handle = instagramHandle(instagram);
 
+  // pb-24 no mobile: o botão flutuante do WhatsApp (fixo, canto inferior
+  // direito) cobria o fim da linha de copyright quando a página chegava ao final.
   return (
-    <footer className="border-t border-manual-ouro/10 bg-manual-tinta px-6 py-12">
-      <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-4">
+    <footer className="border-t border-manual-ouro/10 bg-manual-tinta px-6 pb-24 pt-12 md:pb-12">
+      <div className={`mx-auto grid max-w-6xl gap-10 ${showPrograms ? "md:grid-cols-4" : "md:grid-cols-3"}`}>
         <div>
-          <p className="flex items-center gap-2.5 font-serif text-site-4xl font-bold tracking-[0.02em] text-manual-creme">
-            <ReinersMark theme="dark" size={26} className="shrink-0" />
-            {siteName}
-          </p>
-          <p className="mt-2 max-w-[220px] text-site-sm text-manual-claro">
+          {/* Rodapé escuro (Tinta) → símbolo creme, 48px. Assinatura em 18px para
+              caber na coluna de ~246px; 16px entre símbolo e texto. */}
+          <BrandLockup onDark symbolHeight={48} signatureClassName="text-[18px]" />
+          <p className="mt-4 max-w-[220px] text-site-sm text-manual-claro">
             Estúdio de podcast premium em {location}.
           </p>
-          {waHref && (
-            <a
-              href={waHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex min-h-[44px] items-center gap-2 text-site-sm font-medium text-manual-ouro-claro hover:brightness-110"
-            >
-              <WhatsappGlyph className="h-4 w-4" />
-              {formatWhatsappNumber(whatsappNumber)}
-            </a>
+          {/* Canais de contato com texto visível: WhatsApp (número) e Instagram
+              (@usuário). Os ícones da coluna "Social" repetem os mesmos links. */}
+          {(waHref || (instagram && handle)) && (
+            <ul className="mt-4 flex flex-col">
+              {waHref && (
+                <li>
+                  <a
+                    href={waHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[44px] items-center gap-2 text-site-sm font-medium text-manual-ouro-claro hover:brightness-110"
+                  >
+                    <WhatsappGlyph className="h-4 w-4" />
+                    {formatWhatsappNumber(whatsappNumber)}
+                  </a>
+                </li>
+              )}
+              {instagram && handle && (
+                <li>
+                  <a
+                    href={instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[44px] items-center gap-2 text-site-sm font-medium text-manual-ouro-claro hover:brightness-110"
+                  >
+                    <CameraGlyph className="h-4 w-4" />
+                    <span className="sr-only">Instagram: </span>
+                    {handle}
+                  </a>
+                </li>
+              )}
+            </ul>
           )}
         </div>
 
@@ -84,23 +113,25 @@ export function FooterSection({
           </ul>
         </nav>
 
-        <nav aria-label="Programas">
-          <h2 className="font-manual-mono text-site-xs font-medium uppercase tracking-[0.14em] text-manual-ouro-claro">Programas</h2>
-          <ul className="mt-4 flex flex-col">
-            {programs.slice(0, 5).map((p) => (
-              <li key={p.id}>
-                <SiteLink
-                  href={`/portfolio#${p.slug}`}
-                  variant="muted"
-                  touch
-                  className="flex text-site-sm text-manual-claro hover:text-manual-ouro-claro"
-                >
-                  {p.title}
-                </SiteLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        {showPrograms && (
+          <nav aria-label="Programas">
+            <h2 className="font-manual-mono text-site-xs font-medium uppercase tracking-[0.14em] text-manual-ouro-claro">Programas</h2>
+            <ul className="mt-4 flex flex-col">
+              {programs.slice(0, 5).map((p) => (
+                <li key={p.id}>
+                  <SiteLink
+                    href={`/portfolio#${p.slug}`}
+                    variant="muted"
+                    touch
+                    className="flex text-site-sm text-manual-claro hover:text-manual-ouro-claro"
+                  >
+                    {p.title}
+                  </SiteLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
 
         <div className={waHref || social.length ? "" : "hidden"}>
           <h2 className="font-manual-mono text-site-xs font-medium uppercase tracking-[0.14em] text-manual-ouro-claro">Social</h2>
@@ -125,7 +156,7 @@ export function FooterSection({
                   aria-label={label}
                   rel="noopener noreferrer"
                   target="_blank"
-                  className="grid h-11 w-11 place-items-center rounded-site-md text-manual-claro/60 transition-colors duration-fast hover:text-manual-ouro-claro"
+                  className="grid h-11 w-11 place-items-center rounded-site-md text-manual-claro transition-colors duration-fast hover:text-manual-ouro-claro"
                 >
                   <Icon />
                 </a>
@@ -136,7 +167,7 @@ export function FooterSection({
       </div>
 
       <div className="mx-auto mt-10 max-w-6xl border-t border-manual-ouro/10 pt-6">
-        <p className="text-site-xs normal-case tracking-normal text-manual-claro/80">
+        <p className="text-site-sm normal-case tracking-normal text-manual-claro">
           © 2026 {siteName}. Todos os direitos reservados.
         </p>
       </div>

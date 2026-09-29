@@ -22,7 +22,7 @@ export function BrandManualCover() {
       </div>
 
       <div className="relative flex flex-col items-center justify-center gap-[30px] text-center">
-        <ReinersMark theme="dark" size={124} fill="rgba(196,161,90,0.07)" />
+        <ReinersMark theme="dark" size={124} />
         <div>
           <div className="pl-[0.2em] font-manual-serif text-[clamp(40px,7vw,84px)] font-bold leading-none tracking-[0.2em]">
             REINERS <span className="text-manual-ouro-claro">MEDIA</span>

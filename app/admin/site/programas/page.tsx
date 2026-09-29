@@ -3,6 +3,7 @@ import { SiteCard } from "@/components/site/card";
 import { SiteButton } from "@/components/site/button";
 import { SiteInput, SiteTextarea } from "@/components/site/input";
 import { SiteCheckbox } from "@/components/site/admin/checkbox";
+import { PORTFOLIO_ENABLED } from "@/lib/site/features";
 import { deleteProgram, saveProgram } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -67,6 +68,16 @@ export default async function SiteAdminPrograms() {
         <p className="mt-2 text-site-base text-site-text-primary/60">
           Alimentam o teaser da landing (marcados como “aparece na landing”) e a página /portfolio.
         </p>
+        {!PORTFOLIO_ENABLED && (
+          <p
+            role="note"
+            className="mt-4 rounded-site-md border border-site-border-muted/15 bg-site-surface-raised px-4 py-3 text-site-sm text-site-text-primary/70"
+          >
+            O portfólio está <strong className="font-medium">oculto no site</strong> por enquanto: dá para
+            cadastrar os programas agora, mas eles só aparecem publicamente quando a seção for ativada
+            (<code className="font-mono">PORTFOLIO_ENABLED</code> em <code className="font-mono">lib/site/features.ts</code>).
+          </p>
+        )}
       </div>
 
       {items.map((item) => (

@@ -1,6 +1,8 @@
 import { SiteBadge } from "../badge";
+import { BrandSymbol } from "../brand";
 import { SiteButtonLink } from "../button";
 import { HeroMedia } from "../hero-media";
+import { PORTFOLIO_ENABLED, isPortfolioHref } from "@/lib/site/features";
 import type { SiteConfig } from "@/lib/site/content";
 
 // Seção 1 — Hero. Ocupa a viewport (mín. 600px), mídia de fundo a 35% e dois
@@ -15,6 +17,12 @@ import type { SiteConfig } from "@/lib/site/content";
 // do site, junto com Final CTA e Footer.
 
 export function HeroSection({ config }: { config: SiteConfig }) {
+  // O CTA secundário padrão ("Ouvir programas") leva ao /portfolio. Com o
+  // portfólio oculto ele some, venha o destino do código ou do CMS — em vez de
+  // apontar para uma página que responde 404. Qualquer outro destino
+  // configurado no CMS continua aparecendo.
+  const showSecondaryCta = PORTFOLIO_ENABLED || !isPortfolioHref(config.ctaSecondaryUrl);
+
   return (
     <section className="relative flex min-h-[600px] items-center overflow-hidden bg-manual-navy lg:min-h-[calc(100vh-4rem)]">
       <HeroMedia videoUrl={config.heroVideoUrl} imageUrl={config.heroImageUrl} />
@@ -29,6 +37,9 @@ export function HeroSection({ config }: { config: SiteConfig }) {
       />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 py-24">
+        {/* Símbolo creme (fundo escuro), 40px, acima do kicker — nunca grande sobre
+            o vídeo. Entrada só com fade de 300ms (regra de marca: sem zoom/bounce). */}
+        <BrandSymbol tone="creme" height={40} className="mb-6 animate-site-fade-in" />
         <SiteBadge className="text-manual-ouro-claro">
           {config.tagline} · {config.location}
         </SiteBadge>
@@ -49,13 +60,15 @@ export function HeroSection({ config }: { config: SiteConfig }) {
           >
             {config.ctaPrimaryText}
           </SiteButtonLink>
-          <SiteButtonLink
-            href={config.ctaSecondaryUrl}
-            variant="secondary"
-            className="border-manual-creme/25 text-manual-creme hover:border-manual-ouro-claro hover:text-manual-ouro-claro"
-          >
-            {config.ctaSecondaryText}
-          </SiteButtonLink>
+          {showSecondaryCta && (
+            <SiteButtonLink
+              href={config.ctaSecondaryUrl}
+              variant="secondary"
+              className="border-manual-creme/25 text-manual-creme hover:border-manual-ouro-claro hover:text-manual-ouro-claro"
+            >
+              {config.ctaSecondaryText}
+            </SiteButtonLink>
+          )}
         </div>
       </div>
 

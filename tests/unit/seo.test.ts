@@ -1,9 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { NOINDEX, PRIVATE_PATHS, PUBLIC_PATHS, siteBaseUrl } from "@/lib/site/seo";
+import { NOINDEX, PRIVATE_PATHS, PUBLIC_PATHS, publicPaths, siteBaseUrl } from "@/lib/site/seo";
 
 describe("separação entre vitrine e áreas privadas", () => {
-  it("só a vitrine do estúdio é pública", () => {
-    expect([...PUBLIC_PATHS]).toEqual(["/", "/portfolio"]);
+  it("só a vitrine do estúdio é pública — hoje, só a raiz (portfólio oculto)", () => {
+    expect([...PUBLIC_PATHS]).toEqual(["/"]);
+  });
+
+  it("/portfolio volta ao sitemap junto com a chave do portfólio", () => {
+    expect([...publicPaths(false)]).toEqual(["/"]);
+    expect([...publicPaths(true)]).toEqual(["/", "/portfolio"]);
   });
 
   it("a landing do CRM não existe mais, nem como rota bloqueada", () => {
@@ -27,7 +32,8 @@ describe("separação entre vitrine e áreas privadas", () => {
     expect(blocked("/app/studio")).toBe(true);
     expect(blocked("/admin/site/planos")).toBe(true);
     expect(blocked("/portal/sicredi/contratos")).toBe(true);
-    // A vitrine continua liberada.
+    // A vitrine continua liberada — e /portfolio não é área privada: oculto
+    // ele responde 404, e quando voltar não precisa de mudança aqui.
     expect(blocked("/")).toBe(false);
     expect(blocked("/portfolio")).toBe(false);
   });

@@ -1,4 +1,6 @@
 import { BookingTrigger } from "../booking-trigger";
+import { CameraGlyph } from "../social-icons";
+import { instagramHandle } from "@/lib/site/social";
 
 // Seção 6 — CTA final. Um único botão (pill, radius step7).
 //
@@ -6,14 +8,21 @@ import { BookingTrigger } from "../booking-trigger";
 // landing com o mesmo gesto — fundo navy, textura de pontos, texto grande em
 // serifa leve. Ver Hero (mesma técnica) e Footer (fecho tinta) para as outras
 // bandas escuras do site.
+//
+// É também a seção "Contato" do menu: além do agendamento (que continua no
+// WhatsApp), lista o Instagram como segundo canal quando há perfil.
 
 export function FinalCtaSection({
   whatsappNumber,
   location,
+  instagramUrl,
 }: {
   whatsappNumber: string;
   location: string;
+  instagramUrl?: string | null;
 }) {
+  const handle = instagramHandle(instagramUrl);
+
   return (
     <section
       id="contato"
@@ -46,6 +55,21 @@ export function FinalCtaSection({
             Agendar sessão gratuita
           </BookingTrigger>
         </div>
+        {instagramUrl && handle && (
+          <p className="mt-6 flex flex-wrap items-center justify-center gap-x-2 text-site-xl text-manual-creme/75">
+            <span>Prefere o Instagram?</span>
+            <a
+              href={instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-[44px] items-center gap-2 font-medium text-manual-ouro-claro hover:brightness-110"
+            >
+              <CameraGlyph className="h-4 w-4" />
+              <span className="sr-only">Instagram: </span>
+              {handle}
+            </a>
+          </p>
+        )}
       </div>
     </section>
   );

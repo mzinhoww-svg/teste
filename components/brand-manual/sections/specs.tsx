@@ -26,7 +26,7 @@ const SPEC_TABLES = [
       ["Área de proteção", "1x símbolo"],
       ["Mínimo digital", "24px"],
       ["Mínimo impresso", "12mm"],
-      ["Malha de construção", "11 un."],
+      ["Proporção do símbolo", "700 : 628"],
     ],
   },
   {

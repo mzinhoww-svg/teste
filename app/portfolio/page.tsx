@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getPrograms, getSiteConfig } from "@/lib/site/data";
+import { isAuthorialProgram } from "@/lib/site/content";
+import { PORTFOLIO_ENABLED } from "@/lib/site/features";
+import { BrandCover } from "@/components/site/brand";
 import { SiteNavbar } from "@/components/site/navbar";
 import { SitePageView } from "@/components/site/page-view";
 import { SiteBadge } from "@/components/site/badge";
@@ -11,9 +15,14 @@ import { WhatsappFab } from "@/components/site/whatsapp-fab";
 
 // Portfólio completo (reiners.agency/portfolio). Mesmo design system da
 // landing; cada programa tem âncora própria (#slug) usada pelos posters.
+//
+// OCULTO por enquanto: ainda não existe portfólio para mostrar. Enquanto
+// `PORTFOLIO_ENABLED` (lib/site/features.ts) for false a rota responde 404 e
+// sai do sitemap — o código fica aqui para voltar com uma troca de chave.
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
+  if (!PORTFOLIO_ENABLED) return {};
   const config = await getSiteConfig();
   const title = "Portfólio — Reiners Media";
   const description = "Programas de podcast produzidos pelo estúdio da Reiners Media.";
@@ -31,6 +40,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PortfolioPage() {
+  if (!PORTFOLIO_ENABLED) notFound();
+
   const [config, programs] = await Promise.all([getSiteConfig(), getPrograms()]);
 
   return (
@@ -66,9 +77,9 @@ export default async function PortfolioPage() {
                     <SiteCard variant="plan" interactive className="flex h-full flex-col">
                       <div
                         aria-hidden="true"
-                        className="mb-6 aspect-[16/9] overflow-hidden rounded-site-sm border border-site-border-muted/[0.06] bg-site-surface-raised bg-[radial-gradient(circle_at_30%_20%,rgb(var(--site-text-inverse)/0.16),transparent_60%)]"
+                        className="relative mb-6 aspect-[16/9] overflow-hidden rounded-site-sm border border-site-border-muted/[0.06] bg-site-surface-raised bg-[radial-gradient(circle_at_30%_20%,rgb(var(--site-text-inverse)/0.16),transparent_60%)]"
                       >
-                        {program.posterUrl && (
+                        {program.posterUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element -- URL vinda do CMS (host livre)
                           <img
                             src={program.posterUrl}
@@ -76,6 +87,9 @@ export default async function PortfolioPage() {
                             className="h-full w-full object-cover"
                             loading="lazy"
                           />
+                        ) : (
+                          // Programa autoral sem pôster: capa de marca (navy + símbolo creme).
+                          isAuthorialProgram(program) && <BrandCover />
                         )}
                       </div>
 
@@ -85,7 +99,7 @@ export default async function PortfolioPage() {
                         {program.title}
                       </h2>
                       {program.client && (
-                        <p className="mt-1 text-site-sm text-site-text-primary/50">{program.client}</p>
+                        <p className="mt-1 text-site-sm text-site-text-primary/70">{program.client}</p>
                       )}
                       {program.description && (
                         <p className="mt-4 text-site-base text-site-text-primary/75">
@@ -111,6 +125,7 @@ export default async function PortfolioPage() {
         <FinalCtaSection
           whatsappNumber={config.whatsappNumber}
           location={config.location}
+          instagramUrl={config.instagramUrl}
         />
       </main>
 

@@ -45,7 +45,7 @@ export function TestimonialsSection({ testimonials }: { testimonials: Testimonia
                     )}
                     <span className="flex flex-col">
                       <span className="text-site-base font-medium text-site-text-primary">{t.name}</span>
-                      <span className="text-site-sm text-site-text-primary/50">{t.role}</span>
+                      <span className="text-site-sm text-site-text-primary/70">{t.role}</span>
                     </span>
                   </div>
                 </SiteCard>

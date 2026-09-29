@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import type { Program } from "@/lib/site/content";
+import { isAuthorialProgram, type Program } from "@/lib/site/content";
+import { BrandCover } from "./brand";
 
 // Poster 2:3 de um programa (teaser da landing e grade do /portfolio).
 // Hover: scale(1.04) + glow roxo; focus-visible herda o outline do site.
 // A imagem vem do CMS (host arbitrário) — por isso <img> e não next/image.
 
 export function SitePoster({ program, className }: { program: Program; className?: string }) {
+  // Autoral sem pôster: capa de marca (navy + símbolo creme). Sem o scrim de
+  // leitura por cima — o fundo já é navy e o símbolo não pode ser escurecido
+  // (regra de marca: nada de opacidade/sombra sobre o símbolo).
+  const brandCover = !program.posterUrl && isAuthorialProgram(program);
   return (
     <Link
       href={`/portfolio#${program.slug}`}
@@ -14,8 +19,12 @@ export function SitePoster({ program, className }: { program: Program; className
         "group relative block aspect-[2/3] overflow-hidden rounded-site-sm",
         "border border-site-border-muted/[0.06] bg-site-surface-raised",
         "transition-all duration-slow ease-out",
-        "hover:scale-[1.04] hover:border-site-text-inverse/20 hover:shadow-site-3",
-        "active:scale-[0.98] motion-reduce:hover:scale-100",
+        "hover:border-site-text-inverse/20 hover:shadow-site-3",
+        // A capa de marca não dá zoom no hover: o símbolo é filho do card e a
+        // regra de marca proíbe animação de zoom sobre ele.
+        brandCover
+          ? "hover:scale-100 active:scale-100"
+          : "hover:scale-[1.04] active:scale-[0.98] motion-reduce:hover:scale-100",
         className,
       )}
     >
@@ -27,6 +36,8 @@ export function SitePoster({ program, className }: { program: Program; className
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
         />
+      ) : brandCover ? (
+        <BrandCover placement="upper" />
       ) : (
         <span
           aria-hidden="true"
@@ -38,10 +49,12 @@ export function SitePoster({ program, className }: { program: Program; className
           Escuro de propósito, mesmo no tema claro — a capa é foto arbitrária do
           CMS, e texto claro sobre scrim escuro é o único par que continua
           legível não importa o brilho da foto por baixo. */}
-      <span
-        aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-manual-navy/95 via-manual-navy/60 to-transparent"
-      />
+      {!brandCover && (
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-manual-navy/95 via-manual-navy/60 to-transparent"
+        />
+      )}
 
       <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-4">
         {program.category && (

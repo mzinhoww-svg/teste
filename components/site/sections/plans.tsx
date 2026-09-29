@@ -39,7 +39,7 @@ export function PlansSection({ plans, whatsappNumber }: { plans: Plan[]; whatsap
 
                 <p className="mt-4 flex items-baseline gap-2">
                   <span className="text-site-h2 font-medium text-site-text-inverse">{plan.price}</span>
-                  <span className="text-site-sm text-site-text-primary/50">{plan.period}</span>
+                  <span className="text-site-sm text-site-text-primary/70">{plan.period}</span>
                 </p>
 
                 {plan.description && (

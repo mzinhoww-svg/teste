@@ -42,7 +42,7 @@ export function ManifestoSection() {
         </p>
 
         <div className="mt-16 flex flex-col items-center gap-6">
-          <ReinersMark size={72} theme="dark" fill="rgb(var(--manual-ouro-claro) / 0.07)" />
+          <ReinersMark size={72} theme="dark" />
           <div className="font-manual-serif text-[clamp(20px,3vw,30px)] italic text-manual-ouro-claro">
             Presença que posiciona.
           </div>

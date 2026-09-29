@@ -155,11 +155,17 @@ const config: Config = {
           from: { opacity: "0", transform: "scale(0.95)" },
           to: { opacity: "1", transform: "scale(1)" },
         },
+        // Só opacidade: a regra de marca proíbe zoom/rotação/bounce no símbolo.
+        "site-fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
       },
       animation: {
         "site-bounce-down": "site-bounce-down 2s ease-in-out infinite",
         "site-drawer-in": "site-drawer-in 300ms cubic-bezier(0.22, 1, 0.36, 1)",
         "site-modal-in": "site-modal-in 300ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "site-fade-in": "site-fade-in 300ms ease-out both",
       },
     },
   },

@@ -27,7 +27,9 @@ test.describe("sitemap.xml", () => {
     expect(res.status()).toBe(200);
 
     const xml = await res.text();
-    expect(xml).toContain("/portfolio");
+    // Portfólio oculto: rota que responde 404 não entra no sitemap.
+    expect(xml).not.toContain("/portfolio");
+    expect(xml).toMatch(/<loc>https?:\/\/[^<]+<\/loc>/);
     for (const path of PRIVATE) {
       expect(xml).not.toContain(`${path}<`);
       expect(xml).not.toContain(`${path}/`);
@@ -36,7 +38,7 @@ test.describe("sitemap.xml", () => {
 });
 
 test.describe("páginas públicas", () => {
-  for (const path of ["/", "/portfolio"]) {
+  for (const path of ["/"]) {
     test(`${path} é indexável e não cita o CRM`, async ({ page }) => {
       await page.goto(path);
 
@@ -102,7 +104,7 @@ test.describe("a landing do CRM não existe", () => {
   });
 
   test("nenhuma página pública cita o CRM", async ({ page }) => {
-    for (const path of ["/", "/media", "/portfolio"]) {
+    for (const path of ["/", "/media"]) {
       await page.goto(path);
       expect(await page.content()).not.toContain("CRM");
     }
@@ -132,7 +134,7 @@ test.describe("/media", () => {
 // Link compartilhado sem card (og:image) é o default do Next quando ninguém
 // declara a tag — e é o que acontecia antes.
 test.describe("card de compartilhamento", () => {
-  for (const path of ["/", "/media", "/portfolio"]) {
+  for (const path of ["/", "/media"]) {
     test(`${path} declara og:image e twitter card`, async ({ page }) => {
       await page.goto(path);
       const og = await page.locator('meta[property="og:image"]').first().getAttribute("content");

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { publicBaseUrl } from "@/lib/urls";
+import { PORTFOLIO_ENABLED } from "@/lib/site/features";
 
-// SEO do site público. Regra: SÓ a vitrine do estúdio é indexável
-// (`/` e `/portfolio`). Todo o resto — CRM, portal do cliente, admin, login e
-// as páginas por token — fica fora de buscador e sem link a partir do site.
+// SEO do site público. Regra: SÓ a vitrine do estúdio é indexável (hoje `/`;
+// `/portfolio` volta junto com PORTFOLIO_ENABLED). Todo o resto — CRM, portal
+// do cliente, admin, login e as páginas por token — fica fora de buscador e
+// sem link a partir do site.
 //
 // A defesa é em três camadas, porque nenhuma sozinha basta:
 //   1. robots.txt   → pede que o crawler nem visite (app/robots.ts);
@@ -29,8 +31,15 @@ export const PRIVATE_PATHS = [
   "/api",
 ] as const;
 
-/** Rotas públicas do estúdio — as únicas que entram no sitemap. */
-export const PUBLIC_PATHS = ["/", "/portfolio"] as const;
+/**
+ * Rotas públicas do estúdio — as únicas que entram no sitemap. `/portfolio`
+ * só entra com o portfólio no ar: uma rota que responde 404 não vai ao sitemap.
+ */
+export function publicPaths(portfolioEnabled: boolean = PORTFOLIO_ENABLED): readonly string[] {
+  return portfolioEnabled ? ["/", "/portfolio"] : ["/"];
+}
+
+export const PUBLIC_PATHS: readonly string[] = publicPaths();
 
 /**
  * Metadata de área privada. Além de noindex/nofollow, pede aos buscadores que
