@@ -1,5 +1,6 @@
 import { getConfigRow } from "@/lib/site/admin";
 import { DEFAULT_CONFIG } from "@/lib/site/content";
+import { PORTFOLIO_ENABLED } from "@/lib/site/features";
 import { SiteCard } from "@/components/site/card";
 import { SiteButton } from "@/components/site/button";
 import { SiteInput, SiteTextarea } from "@/components/site/input";
@@ -51,8 +52,15 @@ export default async function SiteAdminSettings() {
           <div className="grid gap-5 sm:grid-cols-2">
             <SiteInput id="cta_primary_text" name="cta_primary_text" label="CTA primário — texto" placeholder="Ex.: Ver planos" defaultValue={v("cta_primary_text", DEFAULT_CONFIG.ctaPrimaryText)} />
             <SiteInput id="cta_primary_url" name="cta_primary_url" label="CTA primário — destino" placeholder="Ex.: #planos" defaultValue={v("cta_primary_url", DEFAULT_CONFIG.ctaPrimaryUrl)} />
-            <SiteInput id="cta_secondary_text" name="cta_secondary_text" label="CTA secundário — texto" placeholder="Ex.: Ouvir programas" defaultValue={v("cta_secondary_text", DEFAULT_CONFIG.ctaSecondaryText)} />
-            <SiteInput id="cta_secondary_url" name="cta_secondary_url" label="CTA secundário — destino" placeholder="Ex.: /portfolio" defaultValue={v("cta_secondary_url", DEFAULT_CONFIG.ctaSecondaryUrl)} />
+            <SiteInput id="cta_secondary_text" name="cta_secondary_text" label="CTA secundário — texto" placeholder="Ex.: Conhecer o estúdio" defaultValue={v("cta_secondary_text", DEFAULT_CONFIG.ctaSecondaryText)} />
+            <SiteInput
+              id="cta_secondary_url"
+              name="cta_secondary_url"
+              label="CTA secundário — destino"
+              helper={PORTFOLIO_ENABLED ? undefined : "Com o portfólio oculto, o botão não aparece enquanto o destino for /portfolio. Use outro destino (ex.: #cenarios) para exibi-lo."}
+              placeholder="Ex.: #cenarios"
+              defaultValue={v("cta_secondary_url", DEFAULT_CONFIG.ctaSecondaryUrl)}
+            />
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
@@ -79,7 +87,7 @@ export default async function SiteAdminSettings() {
               id="about_image_url"
               name="about_image_url"
               label="Imagem da seção “Sobre”"
-              helper="4:3, sugerido 1200x900. Vazio = gradiente."
+              helper="4:3, sugerido 1200x900. Vazio = usa o retrato padrão do estúdio."
               placeholder="Ex.: https://…/storage/v1/object/public/site/sobre.webp"
               defaultValue={v("about_image_url")}
             />
@@ -94,7 +102,7 @@ export default async function SiteAdminSettings() {
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            <SiteInput id="instagram_url" name="instagram_url" label="Instagram" helper="Vazio = ícone não aparece no rodapé." placeholder="Ex.: https://instagram.com/reinersmedia" defaultValue={v("instagram_url")} />
+            <SiteInput id="instagram_url" name="instagram_url" label="Instagram" helper="Aparece no rodapé e no contato. Vazio = usa o padrão (@reinersmedia)." placeholder="Ex.: https://instagram.com/reinersmedia" defaultValue={v("instagram_url", DEFAULT_CONFIG.instagramUrl ?? "")} />
             <SiteInput id="linkedin_url" name="linkedin_url" label="LinkedIn" helper="Vazio = ícone não aparece no rodapé." placeholder="Ex.: https://linkedin.com/company/reinersmedia" defaultValue={v("linkedin_url")} />
             <SiteInput id="youtube_url" name="youtube_url" label="YouTube" helper="Vazio = ícone não aparece no rodapé." placeholder="Ex.: https://youtube.com/@reinersmedia" defaultValue={v("youtube_url")} />
             <SiteInput id="spotify_url" name="spotify_url" label="Spotify" helper="Vazio = ícone não aparece no rodapé." placeholder="Ex.: https://open.spotify.com/show/..." defaultValue={v("spotify_url")} />

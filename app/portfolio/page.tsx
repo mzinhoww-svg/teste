@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getPrograms, getSiteConfig } from "@/lib/site/data";
 import { isAuthorialProgram } from "@/lib/site/content";
+import { PORTFOLIO_ENABLED } from "@/lib/site/features";
 import { BrandCover } from "@/components/site/brand";
 import { SiteNavbar } from "@/components/site/navbar";
 import { SitePageView } from "@/components/site/page-view";
@@ -13,9 +15,14 @@ import { WhatsappFab } from "@/components/site/whatsapp-fab";
 
 // Portfólio completo (reiners.agency/portfolio). Mesmo design system da
 // landing; cada programa tem âncora própria (#slug) usada pelos posters.
+//
+// OCULTO por enquanto: ainda não existe portfólio para mostrar. Enquanto
+// `PORTFOLIO_ENABLED` (lib/site/features.ts) for false a rota responde 404 e
+// sai do sitemap — o código fica aqui para voltar com uma troca de chave.
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
+  if (!PORTFOLIO_ENABLED) return {};
   const config = await getSiteConfig();
   const title = "Portfólio — Reiners Media";
   const description = "Programas de podcast produzidos pelo estúdio da Reiners Media.";
@@ -33,6 +40,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PortfolioPage() {
+  if (!PORTFOLIO_ENABLED) notFound();
+
   const [config, programs] = await Promise.all([getSiteConfig(), getPrograms()]);
 
   return (
@@ -116,6 +125,7 @@ export default async function PortfolioPage() {
         <FinalCtaSection
           whatsappNumber={config.whatsappNumber}
           location={config.location}
+          instagramUrl={config.instagramUrl}
         />
       </main>
 

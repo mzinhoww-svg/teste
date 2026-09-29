@@ -64,7 +64,7 @@ middleware (`lib/supabase/middleware.ts`, `subdomainFor`):
 | Host | Caminho pedido | Reescreve para | Conteúdo |
 | --- | --- | --- | --- |
 | `reiners.agency` (apex) e `www.` | `/` | — | Landing da **Reiners Media** (estúdio de podcast) |
-| `reiners.agency` | `/portfolio` | — | Portfólio de programas |
+| `reiners.agency` | `/portfolio` | — | Portfólio de programas — **oculto**: 404 enquanto `PORTFOLIO_ENABLED = false` |
 | `reiners.agency` | `/media` | — | Mesma landing, endereço alternativo |
 | `crm.reiners.agency` | `/` | `/app` | Área logada (anônimo → `/login`) |
 | `crm.reiners.agency` | `/contatos`, `/relatorios`… | `/app…` | Área logada da agência |

@@ -134,7 +134,9 @@ export function BrandLockup({
 
 /**
  * Capa de marca: fundo navy + símbolo creme (regra: escuro → versão creme).
- * Usada pelo programa autoral quando não há pôster no CMS.
+ * Usada pelo programa autoral quando não há pôster no CMS — hoje dormente:
+ * só aparece no teaser da landing e no /portfolio, e o portfólio está oculto
+ * (PORTFOLIO_ENABLED em lib/site/features.ts).
  *
  *  - `center`: símbolo centralizado, ~40% da altura (capa 16:9 do /portfolio);
  *  - `upper`: sobe o símbolo para a faixa livre acima do texto sobreposto do

@@ -6,8 +6,8 @@ import { BACKSTAGE_PHOTOS } from "@/lib/site/gallery";
 // sem nome: quem aparece não é identificado no site. Prova social por
 // imagem, no mesmo carrossel nativo (scroll-snap) das demais seções.
 //
-// Fundo branco (surface-raised) para manter a alternância de fundos da
-// landing depois do teaser do portfólio, que é creme.
+// Fundo branco (surface-raised): separa os cenários (navy) das seções em creme
+// que vêm depois (convidados, sobre) — mantém a alternância de fundos da landing.
 
 export function BackstageSection() {
   return (

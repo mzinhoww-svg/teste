@@ -1,4 +1,4 @@
-# Site público — Reiners Media (landing + portfólio)
+# Site público — Reiners Media (landing; portfólio oculto)
 
 O apex `reiners.agency` serve o **site do estúdio de podcast**. As ferramentas
 comerciais internas vivem em subdomínio próprio, sem página pública
@@ -7,7 +7,7 @@ comerciais internas vivem em subdomínio próprio, sem página pública
 | Rota | O que é | Renderização |
 | --- | --- | --- |
 | `/` | Landing da Reiners Media | estática, `revalidate = 300` |
-| `/portfolio` | Grade de programas, âncora por `#slug` | estática, `revalidate = 300` |
+| `/portfolio` | Grade de programas, âncora por `#slug` — **oculta**: responde 404 (ver "Portfólio oculto") | estática, `revalidate = 300` |
 | `/media` | Mesma landing de `/`, endereço alternativo (canônica: `/`) | estática, `revalidate = 300` |
 | `/manual-marca` | Manual de identidade visual da marca (Navy/Ouro/Creme, tipografia própria) | estática |
 | `/admin/site` | CMS da landing (dashboard, planos, depoimentos, programas, config) | dinâmica |
@@ -141,7 +141,7 @@ relação entre as três versões.
 | Drawer mobile | navy | 28 px + assinatura |
 | Hero | creme | 40 px, acima do kicker, fade de 300 ms |
 | Rodapé (escuro) | creme | 48 px + assinatura, acima de "Estúdio de podcast premium…" |
-| Capa do programa autoral | creme sobre navy | ~36% da altura do poster / 40% da capa do `/portfolio` |
+| Capa do programa autoral | creme sobre navy | ~36% da altura do poster / 40% da capa do `/portfolio` (dormente enquanto o portfólio está oculto) |
 
 Os links inline do header só aparecem a partir de 1024 px (`lg`): com o lockup
 completo eles não cabem em 768–1023 px, faixa em que o header mostra lockup +
@@ -191,6 +191,53 @@ extensões estáticas. Um formato fora dessa lista vira `307 /login` para o
 visitante anônimo — foi o que aconteceu com `.mp4` antes da correção e seria o
 `.webmanifest` (o navegador busca o manifest sem cookie de sessão), que por
 isso está na lista. `tests/unit/brand-assets.test.ts` cobre o matcher.
+
+## Contato: WhatsApp e Instagram
+
+O WhatsApp é o canal principal (botão flutuante, número no rodapé, continuação
+do formulário de agendamento). O **Instagram [@reinersmedia](https://instagram.com/reinersmedia)**
+é o segundo canal, e aparece em três lugares:
+
+| Onde | Como |
+| --- | --- |
+| Rodapé, coluna 1 | `@reinersmedia` como texto, logo abaixo do número do WhatsApp (nome acessível: "Instagram: @reinersmedia") |
+| Rodapé, coluna "Social" | Ícone do Instagram ao lado do WhatsApp |
+| Seção de contato (CTA final) | "Prefere o Instagram? @reinersmedia" sob o botão de agendamento |
+
+O perfil é o **padrão do código** (`DEFAULT_INSTAGRAM_URL` em
+`lib/site/social.ts`). O CMS (`site_config.instagram_url`) só o sobrescreve
+quando houver outra URL lá: coluna vazia **não** tira o Instagram do ar — a
+mesma regra do hero e da foto do "Sobre". O texto `@…` é extraído da URL
+(`instagramHandle`), então trocar o perfil no CMS troca também o texto. As
+outras redes (LinkedIn, YouTube, Spotify) continuam sem padrão: só entram no
+rodapé quando o CMS tem a URL.
+
+Os ícones sociais do rodapé usam o tom cheio de `manual-claro` (≈ 6:1 sobre a
+Tinta) — a versão a 60% de opacidade dava ≈ 2,9:1, abaixo dos 3:1 exigidos de
+componente gráfico (WCAG 1.4.11).
+
+## Portfólio oculto
+
+O portfólio de programas **ainda não existe**, e os programas de exemplo em
+`DEFAULT_PROGRAMS` são só placeholders (com nomes de clientes). Por isso a seção
+inteira está fora do ar — mas **oculta, não apagada**: uma única chave,
+`PORTFOLIO_ENABLED` em `lib/site/features.ts` (hoje `false`), governa tudo.
+
+| Com a chave desligada | Onde |
+| --- | --- |
+| Seção "Portfólio" (teaser de posters) some da landing e a landing nem busca os programas | `components/site/landing.tsx` |
+| Item "Programas" sai do menu (header e drawer) | `components/site/navbar.tsx` |
+| Link "Portfólio" e coluna "Programas" saem do rodapé (3 colunas em vez de 4) | `components/site/sections/footer.tsx` |
+| CTA secundário do hero ("Ouvir programas") some **enquanto o destino for `/portfolio`** — vindo do código ou do CMS; qualquer outro destino configurado continua aparecendo | `components/site/sections/hero.tsx` (`isPortfolioHref`) |
+| `/portfolio` responde 404 (página de 404 da marca, em `app/not-found.tsx`) | `app/portfolio/page.tsx` |
+| `/portfolio` sai do sitemap | `lib/site/seo.ts` (`publicPaths`) |
+| Aviso no admin de Programas e no CTA secundário das Configurações | `app/admin/site/*` |
+
+**Para trazer o portfólio de volta:** cadastre os programas reais em
+`/admin/site/programas`, troque `PORTFOLIO_ENABLED` para `true` e ajuste os
+testes marcados com "Portfólio oculto" (`tests/e2e/site.spec.ts`,
+`tests/e2e/seo.spec.ts`, `tests/unit/seo.test.ts`, `tests/unit/site-features.test.ts`).
+O CMS de programas continua funcionando enquanto a seção está oculta.
 
 ## Planos: o banco manda, o código é o plano B
 
@@ -268,7 +315,7 @@ seção só aparece quando a primeira linha virar `published = true`.
 
 ## Indexação — só o estúdio aparece em buscador
 
-A vitrine (`/` e `/portfolio`) é indexável. Todo o resto — CRM, portal do
+A vitrine é indexável — hoje só `/` (`/portfolio` volta junto com o portfólio). Todo o resto — CRM, portal do
 cliente, admin, login e as páginas por token — fica fora de buscador, em três
 camadas, porque nenhuma sozinha basta:
 
@@ -289,7 +336,7 @@ entram na lista de assets do middleware (`lib/supabase/middleware.ts`). Sem
 isso o guard de sessão os mandava para `/login` e o buscador nunca via as
 regras.
 
-O sitemap lista apenas `/` e `/portfolio`. Cobertura em `tests/e2e/seo.spec.ts`
+O sitemap lista apenas `/` (e `/portfolio` quando o portfólio estiver no ar — `publicPaths()` em `lib/site/seo.ts`). Cobertura em `tests/e2e/seo.spec.ts`
 (robots servido, sitemap sem rota privada, páginas públicas sem menção ao CRM,
 áreas privadas com `noindex`) e `tests/unit/seo.test.ts`.
 
@@ -370,7 +417,7 @@ migration aplicada ou a rede falha. É por isso que o E2E roda sem segredos.
 Sidebar fixa de 240px, mesmos tokens do site. Seções: Dashboard (KPIs de 14 dias
 + gráfico Recharts), O que fazemos (CRUD das frentes e da mídia de cada aba),
 Planos (CRUD + reordenar + destaque), Depoimentos (CRUD), Programas (CRUD,
-controla o teaser e o `/portfolio`), Convidados (CRUD) e Configurações
+controla o teaser e o `/portfolio` — com o portfólio oculto, só cadastra), Convidados (CRUD) e Configurações
 (identidade, hero, CTAs, SEO).
 
 Acesso: linha em `site_admins` casada por `user_id` **ou** e-mail (permite

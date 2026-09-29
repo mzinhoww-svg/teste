@@ -8,6 +8,7 @@ import { SiteLink } from "./link";
 import { BookingModal } from "./booking-modal";
 import { useDismissable } from "./use-dismissable";
 import { trackSiteEvent } from "@/lib/site/track";
+import { PORTFOLIO_ENABLED } from "@/lib/site/features";
 import { BrandLockup } from "./brand";
 
 // Navbar sticky (64px) com blur. Estado `scrolled` acende a borda inferior.
@@ -23,7 +24,8 @@ import { BrandLockup } from "./brand";
 const LINKS = [
   { href: "/#o-que-fazemos", label: "O que fazemos" },
   { href: "/#planos", label: "Planos" },
-  { href: "/portfolio", label: "Programas" },
+  // Portfólio oculto: ver PORTFOLIO_ENABLED em lib/site/features.ts.
+  ...(PORTFOLIO_ENABLED ? [{ href: "/portfolio", label: "Programas" }] : []),
   { href: "/#sobre", label: "Sobre" },
   { href: "/#contato", label: "Contato" },
 ];

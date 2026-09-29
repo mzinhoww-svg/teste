@@ -1,4 +1,6 @@
 import { getGuests, getPlans, getPrograms, getServices, getSiteConfig, getTestimonials } from "@/lib/site/data";
+import { PORTFOLIO_ENABLED } from "@/lib/site/features";
+import type { Program } from "@/lib/site/content";
 import { SiteNavbar } from "@/components/site/navbar";
 import { SitePageView } from "@/components/site/page-view";
 import { HeroSection } from "@/components/site/sections/hero";
@@ -23,12 +25,16 @@ import { ApolloTracker } from "@/components/site/apollo-tracker";
 // uma seção nova entra uma vez só e as duas rotas acompanham.
 //
 // Quem é canônica é `/`: ver `alternates.canonical` em app/media/page.tsx.
+//
+// O portfólio está oculto (`PORTFOLIO_ENABLED` em lib/site/features.ts): sem a
+// chave ligada a landing nem busca os programas — o teaser e a coluna
+// "Programas" do rodapé só existem com ela.
 export async function SiteLanding() {
   const [config, services, plans, programs, testimonials, guests] = await Promise.all([
     getSiteConfig(),
     getServices(),
     getPlans(),
-    getPrograms({ featuredOnly: true }),
+    PORTFOLIO_ENABLED ? getPrograms({ featuredOnly: true }) : Promise.resolve<Program[]>([]),
     getTestimonials(),
     getGuests(),
   ]);
@@ -46,7 +52,7 @@ export async function SiteLanding() {
         <ServicesSection services={services} />
         <PlansSection plans={plans} whatsappNumber={config.whatsappNumber} />
         <ScenariosSection />
-        <PortfolioTeaserSection programs={programs} />
+        {PORTFOLIO_ENABLED && <PortfolioTeaserSection programs={programs} />}
         <BackstageSection />
         <GuestsSection guests={guests} />
         <TestimonialsSection testimonials={testimonials} />
@@ -54,6 +60,7 @@ export async function SiteLanding() {
         <FinalCtaSection
           whatsappNumber={config.whatsappNumber}
           location={config.location}
+          instagramUrl={config.instagramUrl}
         />
       </main>
 

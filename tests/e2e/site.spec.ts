@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-// Landing pública da Reiners Media (apex) + portfólio.
+// Landing pública da Reiners Media (apex). O portfólio está oculto — ver
+// "Portfólio oculto" abaixo.
 // Roda sem segredos: sem Supabase a página cai nos defaults de lib/site/content.
 
 test.describe("Landing Reiners Media (/)", () => {
@@ -11,7 +12,9 @@ test.describe("Landing Reiners Media (/)", () => {
       page.getByRole("heading", { level: 1, name: /produção de nível internacional/i }),
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "Ver planos" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Ouvir programas" })).toBeVisible();
+    // O CTA secundário padrão levava ao /portfolio, que está oculto: o hero
+    // fica só com o CTA primário em vez de apontar para um 404.
+    await expect(page.getByRole("link", { name: "Ouvir programas" })).toHaveCount(0);
   });
 
   test("todas as seções aparecem", async ({ page }) => {
@@ -19,7 +22,8 @@ test.describe("Landing Reiners Media (/)", () => {
     for (const heading of [
       /Diga o que você precisa gravar/i,
       /Escolha o formato ideal/i,
-      /Programas que criamos/i,
+      /Um estúdio, vários cenários/i,
+      /Por dentro de uma gravação/i,
       /Por que a Reiners Media/i,
       /Pronto para começar seu podcast/i,
     ]) {
@@ -115,24 +119,110 @@ test.describe("WhatsApp como canal principal", () => {
     expect(message).toContain("serie institucional mensal");
     expect(message).toContain("ana@sicredi.com.br");
   });
+});
 
-  test("o portfólio também tem o atalho de WhatsApp", async ({ page }) => {
-    await page.goto("/portfolio");
-    await expect(page.getByRole("link", { name: /Falar no WhatsApp/i })).toBeVisible();
+// Instagram (@reinersmedia) é o segundo canal de contato, depois do WhatsApp:
+// ícone + @ no rodapé e uma linha na seção de contato.
+test.describe("Instagram como canal de contato", () => {
+  const HREF = "https://instagram.com/reinersmedia";
+
+  test("rodapé: ícone da coluna Social aponta para o perfil e abre em outra aba", async ({ page }) => {
+    await page.goto("/");
+    const icon = page.getByRole("contentinfo").getByRole("link", { name: "Instagram", exact: true });
+    await expect(icon).toBeVisible();
+    await expect(icon).toHaveAttribute("href", HREF);
+    await expect(icon).toHaveAttribute("target", "_blank");
+    await expect(icon).toHaveAttribute("rel", /noopener/);
+  });
+
+  test("rodapé: o @reinersmedia aparece como texto, ao lado do número do WhatsApp", async ({ page }) => {
+    await page.goto("/");
+    const footer = page.getByRole("contentinfo");
+    const handle = footer.getByRole("link", { name: /@reinersmedia/ });
+    await expect(handle).toBeVisible();
+    await expect(handle).toHaveAttribute("href", HREF);
+    await expect(handle).toHaveAccessibleName("Instagram: @reinersmedia");
+
+    // WhatsApp acima, Instagram logo abaixo — mesma coluna.
+    const wa = await footer.getByText("+55 65 99920-7108").boundingBox();
+    const ig = await handle.boundingBox();
+    expect(ig!.y).toBeGreaterThan(wa!.y);
+    expect(Math.abs(ig!.x - wa!.x)).toBeLessThan(4);
+  });
+
+  test("seção de contato: 'Prefere o Instagram?' leva ao mesmo perfil", async ({ page }) => {
+    await page.goto("/");
+    const contato = page.locator("#contato");
+    await expect(contato.getByText("Prefere o Instagram?")).toBeVisible();
+    const link = contato.getByRole("link", { name: /@reinersmedia/ });
+    await expect(link).toHaveAttribute("href", HREF);
+    await expect(link).toHaveAttribute("rel", /noopener/);
+  });
+
+  test("todos os alvos de toque têm ao menos 44px de altura", async ({ page }) => {
+    await page.goto("/");
+    for (const link of [
+      page.getByRole("contentinfo").getByRole("link", { name: /@reinersmedia/ }),
+      page.locator("#contato").getByRole("link", { name: /@reinersmedia/ }),
+    ]) {
+      const box = await link.boundingBox();
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+    }
   });
 });
 
-test.describe("Portfólio (/portfolio)", () => {
-  test("lista os programas com âncora própria", async ({ page }) => {
-    await page.goto("/portfolio");
-    await expect(page.getByRole("heading", { level: 1, name: /Programas que criamos/i })).toBeVisible();
-    await expect(page.locator("#conversas-que-cooperam")).toBeVisible();
+// O portfólio ainda não existe: sai do site inteiro de uma vez (landing, menu,
+// rodapé, hero, rota e sitemap). O código continua no repositório e volta com
+// PORTFOLIO_ENABLED (lib/site/features.ts).
+test.describe("Portfólio oculto", () => {
+  test("/portfolio responde 404", async ({ request }) => {
+    const res = await request.get("/portfolio", { maxRedirects: 0 });
+    expect(res.status()).toBe(404);
   });
 
-  test("o teaser da landing leva ao portfólio", async ({ page }) => {
+  test("o 404 é a página da marca, em português e fora do índice", async ({ page }) => {
+    const res = await page.goto("/portfolio");
+    expect(res!.status()).toBe(404);
+    await expect(page.getByRole("heading", { level: 1, name: "Página não encontrada" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Voltar ao início" })).toHaveAttribute("href", "/");
+    await expect(page.getByRole("link", { name: "Reiners Media — início" })).toBeVisible();
+    // Quem abre um link antigo não cai numa tela branca em inglês.
+    await expect(page.getByText(/could not be found/i)).toHaveCount(0);
+    // O Next marca as páginas 404 com noindex.
+    await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute("content", /noindex/);
+  });
+
+  test("a landing não tem a seção nem os programas de exemplo", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: /Ver portfólio completo/i }).click();
-    await expect(page).toHaveURL(/\/portfolio$/);
+    await expect(page.getByRole("heading", { name: /Programas que criamos/i })).toHaveCount(0);
+    await expect(page.locator("#portfolio-title")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /Ver portfólio completo/i })).toHaveCount(0);
+    // Os programas de exemplo citavam clientes reais; sem portfólio, nada disso vai ao ar.
+    const html = await page.content();
+    for (const nome of ["Conversas que Cooperam", "Sicredi MT", "Indústria em Pauta", "Domo Cast"]) {
+      expect(html, nome).not.toContain(nome);
+    }
+  });
+
+  test("nenhum link do site aponta para /portfolio (menu, hero, seções, rodapé)", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('a[href*="/portfolio"]')).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Principal" }).getByRole("link", { name: /programas|portf/i })).toHaveCount(0);
+    await expect(page.getByRole("contentinfo").getByRole("link", { name: /programas|portf/i })).toHaveCount(0);
+  });
+
+  test("rodapé sem a coluna Programas: Navegar e Social, com a marca", async ({ page }) => {
+    await page.goto("/");
+    const footer = page.getByRole("contentinfo");
+    await expect(footer.getByRole("navigation", { name: "Programas" })).toHaveCount(0);
+    await expect(footer.getByRole("navigation", { name: "Rodapé" })).toBeVisible();
+    await expect(footer.getByRole("heading", { name: "Social" })).toBeVisible();
+  });
+
+  test("/media também não tem o portfólio", async ({ page }) => {
+    await page.goto("/media");
+    await expect(page.locator('a[href*="/portfolio"]')).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: /Programas que criamos/i })).toHaveCount(0);
   });
 });
 
@@ -150,6 +240,16 @@ test.describe("Drawer mobile", () => {
 
     await page.keyboard.press("Escape");
     await expect(drawer).toBeHidden();
+  });
+
+  test("o menu não lista Programas (portfólio oculto)", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Abrir menu" }).click();
+    const drawer = page.getByRole("dialog", { name: "Menu de navegação" });
+    for (const nome of ["O que fazemos", "Planos", "Sobre", "Contato"]) {
+      await expect(drawer.getByRole("link", { name: nome })).toBeVisible();
+    }
+    await expect(drawer.getByRole("link", { name: /programas|portf/i })).toHaveCount(0);
   });
 });
 
@@ -286,13 +386,6 @@ test.describe("marca: símbolo oficial", () => {
     const manifest = await (await request.get("/manifest.webmanifest")).json();
     expect(manifest.theme_color).toBe("#14243E");
     expect(manifest.background_color).toBe("#14243E");
-  });
-
-  test("/portfolio: mesmo header e a capa de marca do programa autoral", async ({ page }) => {
-    await page.goto("/portfolio");
-    await expect(page.locator("header").getByRole("link", { name: "Reiners Media — início" })).toBeVisible();
-    const cover = page.locator("#presenca-que-posiciona").locator('img[src="/brand/reinersmedia_symbol_creme.svg"]');
-    await expect(cover).toBeVisible();
   });
 
   test("tablet (820px): header não estoura a largura da tela", async ({ page }) => {

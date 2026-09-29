@@ -9,6 +9,7 @@
 
 import { DEFAULT_WHATSAPP, sanitizeWhatsappNumber } from "./whatsapp";
 import { ABOUT_PHOTO } from "./gallery";
+import { DEFAULT_INSTAGRAM_URL } from "./social";
 
 export type SiteConfig = {
   siteName: string;
@@ -115,8 +116,10 @@ export const DEFAULT_CONFIG: SiteConfig = {
   ctaSecondaryUrl: "/portfolio",
   whatsappNumber: DEFAULT_WHATSAPP,
   location: "Cuiabá/MT",
-  // Sem URL real, o ícone não é renderizado (ver FooterSection).
-  instagramUrl: null,
+  // Instagram é canal de contato oficial (@reinersmedia) e vem no código; o CMS
+  // sobrescreve (ver toConfig). As outras redes só aparecem com URL no CMS —
+  // sem URL real, o ícone não é renderizado (ver FooterSection).
+  instagramUrl: DEFAULT_INSTAGRAM_URL,
   linkedinUrl: null,
   youtubeUrl: null,
   spotifyUrl: null,
@@ -442,7 +445,8 @@ export function toConfig(row: Record<string, unknown>): SiteConfig {
     // Guarda só dígitos: o CMS aceita "+55 (65) 99920-7108" e o link exige limpo.
     whatsappNumber: sanitizeWhatsappNumber(str("whatsapp_number", DEFAULT_CONFIG.whatsappNumber)),
     location: str("location", DEFAULT_CONFIG.location),
-    instagramUrl: nullable("instagram_url"),
+    // Mesma regra do hero: coluna vazia não tira o Instagram do ar.
+    instagramUrl: nullable("instagram_url") ?? DEFAULT_CONFIG.instagramUrl,
     linkedinUrl: nullable("linkedin_url"),
     youtubeUrl: nullable("youtube_url"),
     spotifyUrl: nullable("spotify_url"),

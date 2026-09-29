@@ -138,6 +138,31 @@ describe("imagem do Sobre e card de compartilhamento", () => {
   });
 });
 
+describe("Instagram como canal de contato", () => {
+  it("@reinersmedia é o padrão do site", () => {
+    expect(DEFAULT_CONFIG.instagramUrl).toBe("https://instagram.com/reinersmedia");
+    expect(toConfig({}).instagramUrl).toBe("https://instagram.com/reinersmedia");
+  });
+
+  it("coluna vazia no banco não tira o Instagram do ar", () => {
+    expect(toConfig({ instagram_url: null }).instagramUrl).toBe(DEFAULT_CONFIG.instagramUrl);
+    expect(toConfig({ instagram_url: "   " }).instagramUrl).toBe(DEFAULT_CONFIG.instagramUrl);
+  });
+
+  it("o CMS substitui o perfil", () => {
+    expect(toConfig({ instagram_url: "https://instagram.com/outro.perfil" }).instagramUrl).toBe(
+      "https://instagram.com/outro.perfil",
+    );
+  });
+
+  it("as outras redes continuam só com URL no CMS (sem placeholder)", () => {
+    const config = toConfig({});
+    expect(config.linkedinUrl).toBeNull();
+    expect(config.youtubeUrl).toBeNull();
+    expect(config.spotifyUrl).toBeNull();
+  });
+});
+
 describe("prova social não tem placeholder", () => {
   it("depoimento sem frase real seria endosso fabricado — o default é vazio", () => {
     expect(DEFAULT_TESTIMONIALS).toEqual([]);

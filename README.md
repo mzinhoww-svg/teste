@@ -1,8 +1,9 @@
 # Reiners Media — site do estúdio
 
 Site público da **Reiners Media**, estúdio de podcast e comunicação estratégica
-institucional em Cuiabá/MT: landing, portfólio de programas e um CMS próprio
-para editar o conteúdo sem deploy.
+institucional em Cuiabá/MT: landing e um CMS próprio para editar o conteúdo
+sem deploy. (O portfólio de programas existe no código, mas está **oculto** até
+haver portfólio para mostrar — ver `lib/site/features.ts`.)
 
 Stack: **Next.js 14 (App Router) + TypeScript + Tailwind + Supabase (Postgres,
 Auth, RLS)**. Deploy na **Vercel**.
@@ -12,7 +13,7 @@ Auth, RLS)**. Deploy na **Vercel**.
 | URL | Conteúdo |
 | --- | --- |
 | `reiners.agency` | Landing do estúdio |
-| `reiners.agency/portfolio` | Portfólio de programas |
+| `reiners.agency/portfolio` | *Oculta:* responde 404 e fica fora do sitemap (`PORTFOLIO_ENABLED`) |
 | `reiners.agency/media` | Mesma landing, endereço alternativo (canônica: `/`) |
 | `reiners.agency/manual-marca` | Manual de identidade visual da marca |
 | `reiners.agency/admin/site` | CMS da landing (login obrigatório) |
@@ -23,13 +24,15 @@ system, CMS e regras de indexação em
 
 ## O site
 
-- **Landing** com hero, planos, teaser de portfólio, depoimentos e CTA — todo o
-  conteúdo vem do CMS, com defaults no código para a página nunca quebrar por
-  causa do banco.
+- **Landing** com hero, serviços, planos, fotos do estúdio (cenários e
+  bastidores), sobre e CTA — o conteúdo editável vem do CMS, com defaults no
+  código para a página nunca quebrar por causa do banco.
 - **Design system próprio** em tokens semânticos (nenhum hex cru nos
   componentes), escuro, acessível (WCAG 2.2 AA) e testado.
 - **WhatsApp como canal principal**: botão flutuante, contato no rodapé e o
   formulário de agendamento que grava o lead e continua a conversa por lá.
+  **Instagram [@reinersmedia](https://instagram.com/reinersmedia)** é o segundo
+  canal: ícone e @ no rodapé e uma linha na seção de contato.
 - **CMS em `/admin/site`**: planos, depoimentos, programas e configurações, com
   KPIs de visita e clique coletados sem cookie e sem terceiros.
 
@@ -58,7 +61,8 @@ de `lib/site/content.ts`.
 ```
 app/
   page.tsx              Landing do estúdio
-  portfolio/            Portfólio de programas
+  portfolio/            Portfólio de programas (oculto: 404 — PORTFOLIO_ENABLED)
+  not-found.tsx         404 da marca, em português
   admin/site/           CMS da landing
   api/site/             Formulário de agendamento e coleta de eventos
   robots.ts, sitemap.ts Indexação (só a vitrine entra)
@@ -67,6 +71,8 @@ lib/site/
   content.ts            Tipos e defaults do conteúdo (puro, testável)
   data.ts               Leitura pública (anônima, cacheável)
   seo.ts                Rotas privadas, noindex e domínio canônico
+  features.ts           Chaves de recurso (PORTFOLIO_ENABLED)
+  social.ts             Instagram padrão (@reinersmedia) e extração do @
   whatsapp.ts           Link click-to-chat e mensagem pré-preenchida
 supabase/migrations/    Schema versionado
 ```
