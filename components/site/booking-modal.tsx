@@ -35,12 +35,17 @@ function openWhatsapp(href: string) {
   window.location.assign(href);
 }
 
-/** Avisa a equipe em segundo plano (e-mail). `keepalive` sobrevive à navegação da mesma aba. */
+/**
+ * Avisa a equipe em segundo plano (e-mail). `keepalive` sobrevive à navegação da
+ * mesma aba. O cabeçalho `x-lead-notify` marca o cliente NOVO: a versão antiga do
+ * formulário (que gravava em banco) não o manda, e uma regra de roteamento da
+ * Vercel desvia só essas chamadas antigas enquanto houver página em cache.
+ */
 function notifyTeam(payload: Record<string, string>) {
   try {
     void fetch("/api/site/leads", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-lead-notify": "1" },
       body: JSON.stringify({ ...payload, path: window.location.pathname }),
       keepalive: true,
     }).catch(() => {});

@@ -145,8 +145,10 @@ test.describe("Formulário de agendamento (WhatsApp direto + aviso por e-mail)",
   test("Enviar abre o WhatsApp direto, com a mensagem pronta, e avisa a equipe em segundo plano", async ({ page }) => {
     await installWhatsappSpy(page);
     const avisos: unknown[] = [];
+    const cabecalhos: Record<string, string>[] = [];
     await page.route("**/api/site/leads", async (route) => {
       avisos.push(route.request().postDataJSON());
+      cabecalhos.push(route.request().headers());
       await route.fulfill({ status: 202, contentType: "application/json", body: JSON.stringify({ ok: true, notified: true }) });
     });
 
@@ -176,6 +178,9 @@ test.describe("Formulário de agendamento (WhatsApp direto + aviso por e-mail)",
       path: "/",
       website: "",
     });
+
+    // O cliente novo se identifica (a regra de roteamento que desvia o formulário antigo não o pega).
+    expect(cabecalhos[0]["x-lead-notify"]).toBe("1");
 
     // 3) Link de reserva no painel, com a mesma mensagem.
     const reserva = dialog.getByRole("link", { name: "Abrir o WhatsApp" });
