@@ -4,6 +4,10 @@ Fotos de gravações reais no estúdio, exibidas na seção **Bastidores** da
 landing (`components/site/sections/backstage.tsx`), sem legenda e sem nome:
 quem aparece não é identificado no site.
 
+A primeira foto do carrossel é a claquete do Estúdio Zura
+(`/estudio/zura-claquete.webp`, ver `public/estudio/README.md`); as oito
+abaixo vêm da pasta "Bastidores Clientes" do Drive.
+
 | Arquivo | Origem (Drive › Bastidores Clientes) |
 | --- | --- |
 | `bastidor-01.webp` | `_MG_2834.jpg` — set com duas cadeiras, refletor e monitor |

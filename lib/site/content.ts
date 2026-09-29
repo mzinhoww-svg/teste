@@ -8,7 +8,7 @@
 // Espelha as tabelas de supabase/migrations/0016_site_cms.sql.
 
 import { DEFAULT_WHATSAPP, sanitizeWhatsappNumber } from "./whatsapp";
-import { ZURA_PHOTO } from "./gallery";
+import { ABOUT_PHOTO } from "./gallery";
 
 export type SiteConfig = {
   siteName: string;
@@ -104,10 +104,10 @@ export const DEFAULT_CONFIG: SiteConfig = {
   heroVideoUrl: "/hero.mp4",
   heroImageUrl: "/hero-poster.jpg",
   // "Sobre" e o card de compartilhamento têm arquivo padrão versionado em
-  // /public: a foto do Estúdio Zura (claquete + mesa de gravação) e o /og.jpg.
-  // O CMS sobrescreve quando houver URL lá (ver toConfig). Link sem card é
-  // pior que card genérico; seção sem foto real é pior que a foto do estúdio.
-  aboutImageUrl: ZURA_PHOTO.src,
+  // /public: o retrato de quem comanda o estúdio, gravando no cenário Puff, e
+  // o /og.jpg. O CMS sobrescreve quando houver URL lá (ver toConfig). Link sem
+  // card é pior que card genérico; seção sem foto real é pior que o retrato.
+  aboutImageUrl: ABOUT_PHOTO.src,
   ogImageUrl: "/og.jpg",
   ctaPrimaryText: "Ver planos",
   ctaPrimaryUrl: "#planos",

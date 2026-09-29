@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { BACKSTAGE_PHOTOS, SCENARIOS, ZURA_PHOTO } from "@/lib/site/gallery";
+import { ABOUT_PHOTO, BACKSTAGE_PHOTOS, SCENARIOS, ZURA_PHOTO } from "@/lib/site/gallery";
 
 const PUBLIC = join(__dirname, "../../public");
-const ALL = [...SCENARIOS, ZURA_PHOTO, ...BACKSTAGE_PHOTOS];
+const ALL = [...SCENARIOS, ABOUT_PHOTO, ...BACKSTAGE_PHOTOS];
 
 describe("galeria do estúdio", () => {
   it("todo arquivo referenciado existe em /public e é leve (WebP < 200 KB)", () => {
@@ -37,7 +37,14 @@ describe("galeria do estúdio", () => {
     for (const photo of BACKSTAGE_PHOTOS) expect(photo.alt.startsWith("Bastidores:")).toBe(true);
   });
 
-  it("a foto do Zura é a padrão da seção Sobre", () => {
+  it("a claquete do Estúdio Zura abre os bastidores", () => {
+    expect(BACKSTAGE_PHOTOS[0]).toBe(ZURA_PHOTO);
     expect(ZURA_PHOTO.alt).toContain("Estúdio Zura");
+    expect(BACKSTAGE_PHOTOS).toHaveLength(9);
+  });
+
+  it("o retrato da seção Sobre é o padrão e tem recorte próprio (quadro 4:3, foto em pé)", () => {
+    expect(ABOUT_PHOTO.src).toBe("/estudio/sobre-retrato.webp");
+    expect(ABOUT_PHOTO.position).toMatch(/^\d+% \d+%$/);
   });
 });

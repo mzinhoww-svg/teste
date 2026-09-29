@@ -122,10 +122,10 @@ describe("imagem do Sobre e card de compartilhamento", () => {
     expect(toConfig({}).ogImageUrl).toBe("/og.jpg");
   });
 
-  it("a seção Sobre tem a foto do Estúdio Zura por padrão e coluna vazia não a apaga", () => {
-    expect(DEFAULT_CONFIG.aboutImageUrl).toBe("/estudio/zura-claquete.webp");
-    expect(toConfig({}).aboutImageUrl).toBe("/estudio/zura-claquete.webp");
-    expect(toConfig({ about_image_url: "   " }).aboutImageUrl).toBe("/estudio/zura-claquete.webp");
+  it("a seção Sobre tem o retrato do estúdio por padrão e coluna vazia não o apaga", () => {
+    expect(DEFAULT_CONFIG.aboutImageUrl).toBe("/estudio/sobre-retrato.webp");
+    expect(toConfig({}).aboutImageUrl).toBe("/estudio/sobre-retrato.webp");
+    expect(toConfig({ about_image_url: "   " }).aboutImageUrl).toBe("/estudio/sobre-retrato.webp");
   });
 
   it("o CMS substitui as duas", () => {

@@ -1,5 +1,6 @@
 import { Mic, Clock, Palette, Radio } from "lucide-react";
 import { SiteBadge } from "../badge";
+import { ABOUT_PHOTO } from "@/lib/site/gallery";
 
 // Seção 5 — Sobre / diferenciais. Duas colunas no desktop, empilha no mobile.
 
@@ -11,6 +12,9 @@ const DIFFERENTIALS = [
 ];
 
 export function AboutSection({ imageUrl }: { imageUrl: string | null }) {
+  // A foto padrão (retrato no cenário Puff) traz texto alternativo e recorte
+  // próprios; uma imagem trocada no CMS cai no genérico e no recorte central.
+  const isDefault = imageUrl === ABOUT_PHOTO.src;
   return (
     <section id="sobre" className="bg-site-surface-base px-6 py-24" aria-labelledby="sobre-title">
       <div className="mx-auto grid max-w-6xl items-center gap-16 lg:grid-cols-2">
@@ -42,8 +46,9 @@ export function AboutSection({ imageUrl }: { imageUrl: string | null }) {
             // eslint-disable-next-line @next/next/no-img-element -- URL vinda do CMS (host livre)
             <img
               src={imageUrl}
-              alt="Estúdio de gravação de podcast"
-              className="h-full w-full object-cover object-[50%_56%]"
+              alt={isDefault ? ABOUT_PHOTO.alt : "Estúdio de gravação de podcast"}
+              className="h-full w-full object-cover"
+              style={isDefault ? { objectPosition: ABOUT_PHOTO.position } : undefined}
               loading="lazy"
             />
           )}

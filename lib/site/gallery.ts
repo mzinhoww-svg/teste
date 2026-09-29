@@ -71,19 +71,37 @@ export const SCENARIOS: Scenario[] = [
 ];
 
 /**
+ * Retrato da seção Sobre (imagem padrão — o CMS pode trocar): foto de quem
+ * comanda o estúdio, gravando no cenário Puff. Vem do mesmo ensaio dos
+ * cenários. O quadro do Sobre é 4:3 e a foto é retrato, por isso o recorte
+ * (`position`) sobe a moldura até o rosto.
+ */
+export const ABOUT_PHOTO: GalleryPhoto = {
+  src: "/estudio/sobre-retrato.webp",
+  width: 1200,
+  height: 1800,
+  alt: "Gravação de podcast no cenário Puff do estúdio: sentada na poltrona de couro, ao microfone",
+  position: "50% 86%",
+};
+
+/**
  * Foto do Estúdio Zura: a claquete em primeiro plano, com a mesa de gravação
- * ao fundo. Entra na seção Sobre como imagem padrão (o CMS pode trocar).
+ * ao fundo. Abre o carrossel de bastidores.
  */
 export const ZURA_PHOTO: GalleryPhoto = {
   src: "/estudio/zura-claquete.webp",
   width: 1200,
   height: 1800,
-  alt: "Claquete do Estúdio Zura em primeiro plano, com a mesa de gravação de podcast ao fundo",
-  position: "50% 56%",
+  alt: "Bastidores: claquete do Estúdio Zura em primeiro plano, com a mesa de gravação de podcast ao fundo",
+  position: "50% 70%",
 };
 
-/** Bastidores de gravações com clientes. Só fotos: sem nomes nem legendas. */
+/**
+ * Bastidores de gravações com clientes, depois da claquete do Estúdio Zura.
+ * Só fotos: sem nomes nem legendas.
+ */
 export const BACKSTAGE_PHOTOS: GalleryPhoto[] = [
+  ZURA_PHOTO,
   {
     src: "/bastidores/bastidor-01.webp",
     width: 800,

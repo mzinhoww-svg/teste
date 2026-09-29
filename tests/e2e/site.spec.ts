@@ -332,20 +332,23 @@ test.describe("fotos do estúdio", () => {
     }
   });
 
-  test("bastidores: oito fotos com texto alternativo", async ({ page }) => {
+  test("bastidores: nove fotos com texto alternativo, a primeira é a claquete do Estúdio Zura", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { name: /Por dentro de uma gravação/i })).toBeVisible();
     const imgs = page.locator("#bastidores img");
-    await expect(imgs).toHaveCount(8);
+    await expect(imgs).toHaveCount(9);
     for (const img of await imgs.all()) {
       await expect(img).toHaveAttribute("alt", /^Bastidores:/);
     }
+    await expect(imgs.first()).toHaveAttribute("src", "/estudio/zura-claquete.webp");
+    await expect(imgs.first()).toHaveAttribute("alt", /Estúdio Zura/);
   });
 
-  test("Sobre usa a foto do Estúdio Zura por padrão", async ({ page }) => {
+  test("Sobre usa o retrato do estúdio por padrão, com texto alternativo próprio", async ({ page }) => {
     await page.goto("/");
     const img = page.locator("#sobre img").first();
-    await expect(img).toHaveAttribute("src", "/estudio/zura-claquete.webp");
+    await expect(img).toHaveAttribute("src", "/estudio/sobre-retrato.webp");
+    await expect(img).toHaveAttribute("alt", /cenário Puff/);
   });
 
   test("todas as fotos carregam (nenhuma imagem quebrada)", async ({ page }) => {

@@ -107,7 +107,7 @@ substitui:
 | `hero.mp4` | Fundo do hero | Vídeo do hero | usa o arquivo |
 | `hero-poster.jpg` | Pôster do vídeo e `prefers-reduced-motion` | Imagem do hero | usa o arquivo |
 | `og.jpg` | Card no WhatsApp, LinkedIn, X | Imagem de compartilhamento | usa o arquivo |
-| `estudio/zura-claquete.webp` | Seção "Sobre" | Imagem da seção "Sobre" | usa o arquivo |
+| `estudio/sobre-retrato.webp` | Seção "Sobre" | Imagem da seção "Sobre" | usa o arquivo |
 | `estudio/*.webp` | Cenários do estúdio | — (código: `lib/site/gallery.ts`) | — |
 | `bastidores/*.webp` | Bastidores com clientes | — (código: `lib/site/gallery.ts`) | — |
 
@@ -169,13 +169,16 @@ Três blocos, todos com arquivo versionado em `/public` (origem e tamanhos em
 - **Cenários** (`#cenarios`, banda navy): cinco fotos 2:3 — Puff, Escritório,
   Mesa de reunião, Sofá e Estante — com nome e uma linha sobre o formato de
   podcast de cada um. Carrossel nativo; no `md` os cinco cabem lado a lado.
-- **Foto do Estúdio Zura**: a claquete "ESTÚDIO ZURA" com a mesa de gravação ao
-  fundo, é a imagem padrão da seção Sobre.
-- **Bastidores** (`#bastidores`): oito fotos de gravações com clientes, sem
-  legenda e sem nome. Confirme a autorização de imagem de quem aparece.
+- **Sobre**: o retrato de quem comanda o estúdio, gravando no cenário Puff
+  (`ABOUT_PHOTO`), é a imagem padrão do quadro 4:3. A foto é em pé, então o
+  recorte (`position`) sobe a moldura até o rosto.
+- **Bastidores** (`#bastidores`): nove fotos — a claquete "ESTÚDIO ZURA" abre o
+  carrossel (`ZURA_PHOTO`) e oito fotos de gravações com clientes, sem legenda e
+  sem nome, seguem. Confirme a autorização de imagem de quem aparece.
 
-O CMS continua soberano para o Sobre (campo "Imagem da seção Sobre"); cenários
-e bastidores são editoriais e mudam por código (`lib/site/gallery.ts`).
+O CMS continua soberano para o Sobre (campo "Imagem da seção Sobre"; a foto
+trocada usa o texto alternativo genérico e o recorte central); cenários e
+bastidores são editoriais e mudam por código (`lib/site/gallery.ts`).
 
 ### Por que `/public` e não o Storage
 
