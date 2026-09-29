@@ -41,7 +41,7 @@ export function PadroesSection() {
               Moldura de cantos
             </div>
             <p className="mt-1 font-manual-sans text-[13px] leading-[1.6] text-manual-medio">
-              Cantos ativos dourados — cita a moldura do símbolo. Emoldura fotos e destaques.
+              Cantos ativos dourados. Emoldura fotos e destaques.
             </p>
           </div>
 

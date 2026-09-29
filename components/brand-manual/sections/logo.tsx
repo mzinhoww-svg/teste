@@ -6,25 +6,25 @@ import { TableGrid } from "../table-grid";
 const MISUSES = [
   {
     caption: "Não distorcer proporções",
-    render: () => <ReinersMark size={56} theme="light" fill="none" style={{ transform: "scaleX(1.7)" }} />,
+    render: () => <ReinersMark size={56} theme="light" style={{ transform: "scaleX(1.7)" }} />,
     bg: "bg-manual-creme border border-manual-ouro-palido",
     x: "text-[#B4472F]",
   },
   {
     caption: "Não usar sobre cores estranhas à paleta",
-    render: () => <ReinersMark size={56} theme="mono" fill="none" />,
+    render: () => <ReinersMark size={56} theme="mono" />,
     bg: "bg-[linear-gradient(135deg,#7a5fb0,#e0733a)]",
     x: "text-white",
   },
   {
     caption: "Não rotacionar o símbolo",
-    render: () => <ReinersMark size={56} theme="light" fill="none" style={{ transform: "rotate(22deg)" }} />,
+    render: () => <ReinersMark size={56} theme="light" style={{ transform: "rotate(22deg)" }} />,
     bg: "bg-manual-creme border border-manual-ouro-palido",
     x: "text-[#B4472F]",
   },
   {
     caption: "Não reduzir o contraste",
-    render: () => <ReinersMark size={56} theme="light" fill="none" style={{ filter: "grayscale(1)", opacity: 0.4 }} />,
+    render: () => <ReinersMark size={56} theme="light" style={{ filter: "grayscale(1)", opacity: 0.4 }} />,
     bg: "bg-manual-creme border border-manual-ouro-palido",
     x: "text-[#B4472F]",
   },
@@ -69,7 +69,7 @@ export function LogoSection() {
               Versão alternativa · fundo claro
             </div>
             <div className="text-center">
-              <ReinersMark size={96} theme="light" fill="rgba(154,123,53,0.06)" className="mx-auto" />
+              <ReinersMark size={96} theme="light" className="mx-auto" />
               <div className="mt-[22px] pl-[0.2em] font-manual-serif text-2xl font-bold tracking-[0.2em] text-manual-navy">
                 REINERS <span className="text-manual-ouro">MEDIA</span>
               </div>
@@ -81,7 +81,7 @@ export function LogoSection() {
           <div className="bg-manual-pergaminho px-[30px] py-[34px]">
             <FieldLabel>Área de proteção</FieldLabel>
             <div className="mt-[22px] flex h-[120px] items-center justify-center border border-dashed border-manual-ouro-claro">
-              <ReinersMark size={60} theme="light" fill="rgba(154,123,53,0.06)" />
+              <ReinersMark size={60} theme="light" />
             </div>
             <p className="mt-[18px] font-manual-sans text-[13px] leading-[1.6] text-manual-medio">
               Margem mínima equivalente à altura do símbolo (1x) em todos os lados.
@@ -92,11 +92,11 @@ export function LogoSection() {
             <FieldLabel>Tamanho mínimo</FieldLabel>
             <div className="mt-[22px] flex h-[120px] items-end justify-center gap-5">
               <div className="text-center">
-                <ReinersMark size={24} theme="light" fill="none" />
+                <ReinersMark size={24} theme="light" />
                 <div className="mt-2 font-manual-mono text-[9px] text-manual-claro">24px · digital</div>
               </div>
               <div className="text-center">
-                <ReinersMark size={52} theme="light" fill="none" />
+                <ReinersMark size={52} theme="light" />
                 <div className="mt-2 font-manual-mono text-[9px] text-manual-claro">12mm · impresso</div>
               </div>
             </div>
@@ -114,10 +114,10 @@ export function LogoSection() {
                 backgroundSize: "14px 14px",
               }}
             >
-              <ReinersMark size={88} theme="light" fill="rgba(154,123,53,0.06)" />
+              <ReinersMark size={88} theme="light" />
             </div>
             <p className="mt-[18px] font-manual-sans text-[13px] leading-[1.6] text-manual-medio">
-              Grade de moldura, microfone e onda sonora sobre malha modular de 11 unidades.
+              “R” geométrico sólido, com microfone inclinado recortado no bojo (grade de três linhas) e ponto dourado à direita da perna.
             </p>
           </div>
         </TableGrid>

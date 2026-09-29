@@ -26,7 +26,7 @@ export function AplicacoesSection() {
             style={{ ...DOT_GRID_10, backgroundSize: "24px 24px" }}
           >
             <div className="relative flex items-center gap-3">
-              <ReinersMark size={34} theme="dark" fill="none" />
+              <ReinersMark size={34} theme="dark" />
               <div className="font-manual-serif text-[15px] font-bold tracking-[0.16em] text-manual-creme">
                 REINERS <span className="text-manual-ouro-claro">MEDIA</span>
               </div>
@@ -65,7 +65,7 @@ export function AplicacoesSection() {
                 Autoridade se constrói com <span className="italic text-manual-ouro-claro">presença.</span>
               </div>
               <div className="relative flex items-center gap-2">
-                <ReinersMark size={22} theme="dark" fill="none" />
+                <ReinersMark size={22} theme="dark" />
                 <span className="font-manual-serif text-[11px] font-bold tracking-[0.14em] text-manual-creme">
                   REINERS MEDIA
                 </span>
@@ -92,7 +92,7 @@ export function AplicacoesSection() {
               >
                 <div className="font-manual-serif text-[17px] text-manual-creme">Cooperativa em campo</div>
                 <div className="mt-2 flex items-center gap-1.5">
-                  <ReinersMark size={16} theme="dark" fill="none" />
+                  <ReinersMark size={16} theme="dark" />
                   <span className="font-manual-mono text-[8px] tracking-[0.12em] text-manual-ouro-palido">
                     REINERS MEDIA
                   </span>
@@ -115,7 +115,7 @@ export function AplicacoesSection() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <ReinersMark size={20} theme="light" fill="none" />
+                <ReinersMark size={20} theme="light" />
                 <span className="font-manual-serif text-[11px] font-bold tracking-[0.14em] text-manual-navy">
                   REINERS MEDIA
                 </span>

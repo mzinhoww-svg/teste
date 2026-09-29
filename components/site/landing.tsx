@@ -4,7 +4,9 @@ import { SitePageView } from "@/components/site/page-view";
 import { HeroSection } from "@/components/site/sections/hero";
 import { ServicesSection } from "@/components/site/sections/services";
 import { PlansSection } from "@/components/site/sections/plans";
+import { ScenariosSection } from "@/components/site/sections/scenarios";
 import { PortfolioTeaserSection } from "@/components/site/sections/portfolio-teaser";
+import { BackstageSection } from "@/components/site/sections/backstage";
 import { TestimonialsSection } from "@/components/site/sections/testimonials";
 import { AboutSection } from "@/components/site/sections/about";
 import { GuestsSection } from "@/components/site/sections/guests";
@@ -43,7 +45,9 @@ export async function SiteLanding() {
         <HeroSection config={config} />
         <ServicesSection services={services} />
         <PlansSection plans={plans} whatsappNumber={config.whatsappNumber} />
+        <ScenariosSection />
         <PortfolioTeaserSection programs={programs} />
+        <BackstageSection />
         <GuestsSection guests={guests} />
         <TestimonialsSection testimonials={testimonials} />
         <AboutSection imageUrl={config.aboutImageUrl} />

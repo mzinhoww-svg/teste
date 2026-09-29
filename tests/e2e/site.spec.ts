@@ -165,9 +165,12 @@ test.describe("prova social sem dados", () => {
     await expect(page.getByText(/Depoimentos em breve/i)).toHaveCount(0);
   });
 
-  test("nenhum botão de carrossel órfão", async ({ page }) => {
+  test("nenhum carrossel de prova social órfão", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("button", { name: "Próximo" })).toHaveCount(0);
+    // Os carrosséis de fotos (cenários, bastidores) existem e podem ter botões;
+    // o que não pode existir é o de depoimentos/convidados sem conteúdo.
+    await expect(page.getByRole("list", { name: "Depoimentos sobre o estúdio" })).toHaveCount(0);
+    await expect(page.getByRole("list", { name: "Convidados que gravaram no estúdio" })).toHaveCount(0);
   });
 });
 
@@ -218,5 +221,160 @@ test.describe("o que fazemos", () => {
     await expect(painel.locator("img")).toHaveCount(0);
     // O painel segue completo: título, descrição e fecho.
     await expect(painel.getByText(/entrega em 48h/i)).toBeVisible();
+  });
+});
+
+// Identidade visual: o símbolo oficial em header, hero e rodapé, sempre com
+// altura fixa e largura automática (nunca esticado), na versão certa para o
+// fundo (navy no header claro, creme nas bandas escuras).
+test.describe("marca: símbolo oficial", () => {
+  const RATIO = 700 / 628;
+
+  test("header: link para a home com aria-label, símbolo navy 32px e assinatura", async ({ page }) => {
+    await page.goto("/");
+    const home = page.locator("header").getByRole("link", { name: "Reiners Media — início" });
+    await expect(home).toBeVisible();
+    await expect(home).toHaveAttribute("href", "/");
+
+    const img = home.locator("img");
+    await expect(img).toHaveAttribute("alt", "");
+    await expect(img).toHaveAttribute("src", "/brand/reinersmedia_symbol_navy.svg");
+    const box = await img.boundingBox();
+    expect(Math.round(box!.height)).toBe(32);
+    expect(box!.width / box!.height).toBeCloseTo(RATIO, 1);
+
+    await expect(home.getByText("Reiners")).toBeVisible();
+    await expect(home.getByText("Media")).toBeVisible();
+  });
+
+  test("hero: símbolo creme de 40px acima do kicker", async ({ page }) => {
+    await page.goto("/");
+    const img = page.locator('main img[src="/brand/reinersmedia_symbol_creme.svg"]').first();
+    await expect(img).toBeVisible();
+    const box = await img.boundingBox();
+    expect(Math.round(box!.height)).toBe(40);
+    expect(box!.width / box!.height).toBeCloseTo(RATIO, 1);
+  });
+
+  test("rodapé: símbolo creme de 48px + assinatura, acima da frase do estúdio", async ({ page }) => {
+    await page.goto("/");
+    const footer = page.getByRole("contentinfo");
+    const img = footer.locator('img[src="/brand/reinersmedia_symbol_creme.svg"]');
+    const box = await img.boundingBox();
+    expect(Math.round(box!.height)).toBe(48);
+    await expect(footer.getByText("Media", { exact: true }).first()).toBeVisible();
+
+    const tagline = await footer.getByText(/Estúdio de podcast premium em/).boundingBox();
+    expect(box!.y + box!.height).toBeLessThanOrEqual(tagline!.y);
+  });
+
+  test("<head>: favicon svg/ico, apple-touch-icon, manifest e theme-color navy", async ({ page }) => {
+    await page.goto("/");
+    const href = (sel: string) => page.locator(sel).first().getAttribute("href");
+    expect(await href('link[rel="icon"][type="image/svg+xml"]')).toBe("/favicon.svg");
+    expect(await href('link[rel="icon"][sizes="any"]')).toBe("/favicon.ico");
+    expect(await href('link[rel="apple-touch-icon"]')).toBe("/apple-touch-icon.png");
+    expect(await href('link[rel="manifest"]')).toBe("/manifest.webmanifest");
+    await expect(page.locator('meta[name="theme-color"]').first()).toHaveAttribute("content", "#14243E");
+  });
+
+  test("manifest, favicons e og.jpg respondem sem login", async ({ request }) => {
+    for (const path of ["/manifest.webmanifest", "/favicon.svg", "/favicon.ico", "/apple-touch-icon.png", "/icon-192.png", "/icon-512.png", "/og.jpg"]) {
+      const res = await request.get(path, { maxRedirects: 0 });
+      expect(res.status(), path).toBe(200);
+    }
+    const manifest = await (await request.get("/manifest.webmanifest")).json();
+    expect(manifest.theme_color).toBe("#14243E");
+    expect(manifest.background_color).toBe("#14243E");
+  });
+
+  test("/portfolio: mesmo header e a capa de marca do programa autoral", async ({ page }) => {
+    await page.goto("/portfolio");
+    await expect(page.locator("header").getByRole("link", { name: "Reiners Media — início" })).toBeVisible();
+    const cover = page.locator("#presenca-que-posiciona").locator('img[src="/brand/reinersmedia_symbol_creme.svg"]');
+    await expect(cover).toBeVisible();
+  });
+
+  test("tablet (820px): header não estoura a largura da tela", async ({ page }) => {
+    await page.setViewportSize({ width: 820, height: 1000 });
+    await page.goto("/");
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
+    await expect(page.locator("header").getByRole("link", { name: "Reiners Media — início" })).toBeVisible();
+  });
+});
+
+test.describe("marca: mobile", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("header mostra só o símbolo (28px), sem a assinatura", async ({ page }) => {
+    await page.goto("/");
+    const home = page.locator("header").getByRole("link", { name: "Reiners Media — início" });
+    const box = await home.locator("img").boundingBox();
+    expect(Math.round(box!.height)).toBe(28);
+    await expect(home.getByText("Media")).toBeHidden();
+  });
+});
+
+// Fotos reais do estúdio: cenários (com legenda), foto do Zura na seção Sobre
+// e bastidores com clientes. Estáticas, versionadas em /public.
+test.describe("fotos do estúdio", () => {
+  test("cinco cenários com nome e descrição", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: /Um estúdio, vários cenários/i })).toBeVisible();
+    const section = page.locator("#cenarios");
+    await expect(section.locator("figure")).toHaveCount(5);
+    for (const nome of ["Puff", "Escritório", "Mesa de reunião", "Sofá", "Estante"]) {
+      await expect(section.getByText(nome, { exact: false }).first()).toBeAttached();
+    }
+    for (const img of await section.locator("img").all()) {
+      await expect(img).toHaveAttribute("alt", /Cenário/);
+    }
+  });
+
+  test("bastidores: oito fotos com texto alternativo", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: /Por dentro de uma gravação/i })).toBeVisible();
+    const imgs = page.locator("#bastidores img");
+    await expect(imgs).toHaveCount(8);
+    for (const img of await imgs.all()) {
+      await expect(img).toHaveAttribute("alt", /^Bastidores:/);
+    }
+  });
+
+  test("Sobre usa a foto do Estúdio Zura por padrão", async ({ page }) => {
+    await page.goto("/");
+    const img = page.locator("#sobre img").first();
+    await expect(img).toHaveAttribute("src", "/estudio/zura-claquete.webp");
+  });
+
+  test("todas as fotos carregam (nenhuma imagem quebrada)", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(async () => {
+      // As fotos são lazy: rola a página inteira para disparar o carregamento.
+      for (let y = 0; y < document.body.scrollHeight; y += 600) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 60));
+      }
+    });
+    await page.waitForLoadState("networkidle");
+    const broken = await page.evaluate(() =>
+      Array.from(document.images)
+        .filter((i) => i.complete && i.naturalWidth === 0)
+        .map((i) => i.getAttribute("src")),
+    );
+    expect(broken).toEqual([]);
+  });
+});
+
+// Preços vigentes dos planos (defaults de lib/site/content — o E2E roda sem banco).
+test.describe("planos", () => {
+  test("Hora de Estúdio custa R$ 1.350 (2h) e o BTS explica a sigla", async ({ page }) => {
+    await page.goto("/");
+    const planos = page.locator("#planos");
+    await expect(planos.getByText("R$ 1.350")).toBeVisible();
+    await expect(planos.getByText("R$ 1.390")).toHaveCount(0);
+    await expect(planos.getByText("2 horas de gravação", { exact: false }).first()).toBeVisible();
+    await expect(planos.getByText("Build to Suit (BTS):")).toBeVisible();
   });
 });

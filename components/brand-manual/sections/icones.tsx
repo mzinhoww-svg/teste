@@ -31,8 +31,7 @@ export function IconesSection() {
           }
         />
         <p className="mb-12 max-w-[52ch] font-manual-sans text-base leading-[1.7] text-manual-medio">
-          Ícones lineares de 1,5px, cantos levemente arredondados, sobre grade de 24px. Mesmo peso visual do símbolo
-          da marca.
+          Ícones lineares de 1,5px, cantos levemente arredondados, sobre grade de 24px.
         </p>
 
         <TableGrid className="grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">

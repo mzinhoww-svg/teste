@@ -3,9 +3,7 @@ import { WhatsappGlyph } from "../whatsapp-icon";
 import { SiteLink } from "../link";
 import { FLOATING_WHATSAPP_MESSAGE, formatWhatsappNumber, whatsappUrl } from "@/lib/site/whatsapp";
 import type { Program, SiteConfig } from "@/lib/site/content";
-// O <symbol> do símbolo já é definido uma vez por <ReinersMarkDefs> na navbar
-// (presente em toda página pública) — aqui só o <use>, via <ReinersMark>.
-import { ReinersMark } from "@/components/brand-manual/mark";
+import { BrandLockup } from "../brand";
 
 // Seção 7 — Footer. 4 colunas no desktop, 1 no mobile.
 //
@@ -46,11 +44,10 @@ export function FooterSection({
     <footer className="border-t border-manual-ouro/10 bg-manual-tinta px-6 py-12">
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-4">
         <div>
-          <p className="flex items-center gap-2.5 font-serif text-site-4xl font-bold tracking-[0.02em] text-manual-creme">
-            <ReinersMark theme="dark" size={26} className="shrink-0" />
-            {siteName}
-          </p>
-          <p className="mt-2 max-w-[220px] text-site-sm text-manual-claro">
+          {/* Rodapé escuro (Tinta) → símbolo creme, 48px. Assinatura em 18px para
+              caber na coluna de ~246px; 16px entre símbolo e texto. */}
+          <BrandLockup onDark symbolHeight={48} signatureClassName="text-[18px]" />
+          <p className="mt-4 max-w-[220px] text-site-sm text-manual-claro">
             Estúdio de podcast premium em {location}.
           </p>
           {waHref && (

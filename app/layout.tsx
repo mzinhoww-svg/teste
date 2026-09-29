@@ -19,6 +19,17 @@ export const metadata: Metadata = {
   title: "Reiners Media — Estúdio de podcast em Cuiabá/MT",
   description:
     "Estúdio de podcast em Cuiabá/MT: gravação, edição, mixagem, identidade visual e distribuição. Também gravamos na sua sede.",
+  // Ícones do símbolo oficial (arquivos em /public, gerados a partir de
+  // /public/brand). O SVG é o principal; o .ico cobre navegadores antigos e o
+  // apple-touch-icon é o ícone de "adicionar à tela de início" do iOS.
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {

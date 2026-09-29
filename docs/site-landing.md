@@ -22,13 +22,13 @@ vivem em dois lugares: `app/globals.css` (variáveis CSS) e `tailwind.config.ts`
 
 | Token | Classe Tailwind | Valor |
 | --- | --- | --- |
-| surface.base | `bg-site-surface-base` | `#000000` |
-| surface.raised | `bg-site-surface-raised` | `#14101c` |
-| surface.strong | `bg-site-surface-strong` | `#222222` |
-| text.primary | `text-site-text-primary` | `#fcfcfc` |
-| text.inverse | `text-site-text-inverse` | `#d87dff` |
-| text.tertiary | `text-site-text-tertiary` | `#0000ee` |
-| border.muted | `border-site-border-muted/10` | `#ffffff` a 10% |
+| surface.base | `bg-site-surface-base` | `#FAF7F2` (Creme) |
+| surface.raised | `bg-site-surface-raised` | `#FFFFFF` |
+| surface.strong | `bg-site-surface-strong` | `#F0EBE1` |
+| text.primary | `text-site-text-primary` | `#14243E` (Navy) |
+| text.inverse | `text-site-text-inverse` | `#6E5726` (ouro escuro — AA sobre o creme) |
+| text.tertiary | `text-site-text-tertiary` | `#2C4A72` |
+| border.muted | `border-site-border-muted/10` | `#14243E` a 10% |
 | shadow.1–4 | `shadow-site-1` … `shadow-site-4` | ver `--site-shadow-*` |
 | radius xs…2xl, step7, step8 | `rounded-site-xs` … `rounded-site-step8` | 5/8/10/12/14/18/70/100px |
 | motion instant/fast/normal/slow | `duration-instant` … `duration-slow` | 100/180/200/300ms |
@@ -37,22 +37,27 @@ vivem em dois lugares: `app/globals.css` (variáveis CSS) e `tailwind.config.ts`
 | display / h2 | `text-site-display`, `text-site-h2`, `text-site-h2-lg` | `clamp()` do 4xl |
 
 O escopo é a classe `.site-root` na raiz de cada página do site: ela pinta o
-documento de preto (o `body` do CRM é claro), aplica a família Borna e troca o
-anel de foco do CRM pelo `outline: 2px text.inverse; outline-offset: 2px`.
+documento de creme, aplica a família do corpo e troca o anel de foco do CRM
+pelo `outline: 2px text.inverse; outline-offset: 2px`.
 
-### Fonte Borna
+As bandas escuras (hero, cenários, CTA final e rodapé) não usam estes tokens:
+usam os primitivos `manual-*` (`bg-manual-navy`, `text-manual-creme`,
+`text-manual-ouro-claro`…), porque `site-*` é a versão **clara** do site.
 
-Borna é licenciada (Nootype) e **não está no Google Fonts**, então não pode ser
-versionada aqui. A pilha é `var(--font-borna) → Geist Sans → system-ui`: hoje
-renderiza em Geist Sans. Para ativar a Borna de verdade, coloque os `.woff2` em
-`public/fonts/` e declare o `@font-face` (family `Borna`) em `app/globals.css` —
-nenhuma outra mudança é necessária.
+### Fontes
+
+Cormorant Garamond (títulos e assinatura da marca), DM Sans (corpo) e DM Mono
+(etiquetas), carregadas por `next/font/google` em `app/layout.tsx`. A classe
+`font-borna` (nome herdado do design original) aponta para a DM Sans; `font-serif`,
+para a Cormorant. O `font-mono` do Tailwind **não** foi alterado — o CRM usa
+para código e dados; as etiquetas do site usam `font-manual-mono`.
 
 ### Componentes
 
 `components/site/`: `button`, `card`, `input` (+ textarea), `link`, `badge`,
 `poster`, `navbar` (com drawer), `modal`, `booking-modal`, `booking-trigger`,
-`hero-media`, `social-icons`. Seções em `components/site/sections/`.
+`hero-media`, `social-icons`, `brand` (símbolo, assinatura, capa de marca).
+Seções em `components/site/sections/`.
 
 Todos os interativos cobrem default, hover, focus-visible, active, disabled e
 (onde faz sentido) loading e error; alvo de toque mínimo 44×44px.
@@ -74,10 +79,12 @@ Mono) carregada via `next/font/google` só nessa rota
 (`components/brand-manual/fonts.ts`), sem custo para o resto do site.
 
 Componentes em `components/brand-manual/`: uma seção por arquivo em
-`sections/` (mesmo padrão de `components/site/sections/`), símbolo da marca
-reutilizável via `<symbol>`/`<use>` em `mark.tsx`, grade "efeito tabela" em
-`table-grid.tsx`, cabeçalho de seção (kicker + fio + H2) em
-`section-heading.tsx`.
+`sections/` (mesmo padrão de `components/site/sections/`), grade "efeito
+tabela" em `table-grid.tsx`, cabeçalho de seção (kicker + fio + H2) em
+`section-heading.tsx`. O símbolo é o **mesmo arquivo oficial do site**
+(`/public/brand`): `mark.tsx` só traduz `dark`/`light`/`mono` para a versão
+creme/navy/mono. Os cards de "Usos incorretos" distorcem o símbolo de
+propósito, para mostrar o que não fazer.
 
 A capa usa uma textura de pontos em CSS (`radial-gradient`), não vídeo — o
 próprio handoff de design confirma que o protótipo nunca teve vídeo de fundo
@@ -91,22 +98,84 @@ o visitante anônimo para `/login`.
 
 ## Mídia do site
 
-Três arquivos vivem em `/public` e são servidos pelo próprio Vercel, sem
-depender do Supabase Storage. Cada um tem campo no CMS que o substitui:
+Estes arquivos vivem em `/public` e são servidos pelo próprio Vercel, sem
+depender do Supabase Storage. Os quatro primeiros têm campo no CMS que os
+substitui:
 
 | Arquivo | Onde aparece | Campo no CMS | Sem valor no CMS |
 | --- | --- | --- | --- |
 | `hero.mp4` | Fundo do hero | Vídeo do hero | usa o arquivo |
 | `hero-poster.jpg` | Pôster do vídeo e `prefers-reduced-motion` | Imagem do hero | usa o arquivo |
 | `og.jpg` | Card no WhatsApp, LinkedIn, X | Imagem de compartilhamento | usa o arquivo |
-| — | Seção "Sobre" | Imagem da seção "Sobre" | desenha o gradiente |
+| `estudio/zura-claquete.webp` | Seção "Sobre" | Imagem da seção "Sobre" | usa o arquivo |
+| `estudio/*.webp` | Cenários do estúdio | — (código: `lib/site/gallery.ts`) | — |
+| `bastidores/*.webp` | Bastidores com clientes | — (código: `lib/site/gallery.ts`) | — |
 
-A seção "Sobre" é a única que aceita ficar sem imagem: o gradiente é um estado
-final legítimo, não um buraco. As outras três sempre têm arquivo, porque hero
-sem vídeo e link sem card são piores que o padrão.
+Hero sem vídeo, link sem card e "Sobre" sem foto são piores que o padrão, por
+isso os quatro sempre têm arquivo e uma coluna vazia no CMS **não** apaga a foto
+(mesma regra do hero, ver `toConfig`).
 
-O favicon (`app/icon.svg`) é a onda de áudio em `text.inverse` sobre
-`surface.base` — legível a 16px.
+## Marca: símbolo, favicon e card de compartilhamento
+
+O símbolo oficial (o "R" geométrico com microfone recortado e ponto dourado)
+existe **só como arquivo**, em `/public/brand`, em três versões:
+
+| Arquivo | Usar sobre |
+| --- | --- |
+| `reinersmedia_symbol_creme.svg` | fundo escuro (navy, tinta, hero) |
+| `reinersmedia_symbol_navy.svg` | fundo claro (header, cards) |
+| `reinersmedia_symbol_mono.svg` | uso em uma cor só (reserva) |
+
+Regras de marca (não negociáveis, ver `components/site/brand.tsx`): nunca
+redesenhar, distorcer, girar ou recolorir; sem sombra, brilho, contorno nem
+opacidade; sem zoom/rotação/bounce (entrada, no máximo, um fade de 300 ms);
+altura fixa e largura automática; mínimo de 24 px (favicon: 16 px);
+assinatura "REINERS MEDIA" em Cormorant 700, caixa alta, tracking 0,2em, com
+"MEDIA" em Ouro (fundo claro) ou Ouro Claro (fundo escuro).
+`tests/unit/brand-assets.test.ts` trava o peso (< 5 KB), o viewBox, a paleta e a
+relação entre as três versões.
+
+| Onde | Versão | Tamanho |
+| --- | --- | --- |
+| Header (claro) | navy | 28 px no mobile (só o símbolo), 32 px + assinatura a partir de 768 px |
+| Drawer mobile | navy | 28 px + assinatura |
+| Hero | creme | 40 px, acima do kicker, fade de 300 ms |
+| Rodapé (escuro) | creme | 48 px + assinatura, acima de "Estúdio de podcast premium…" |
+| Capa do programa autoral | creme sobre navy | ~36% da altura do poster / 40% da capa do `/portfolio` |
+
+Os links inline do header só aparecem a partir de 1024 px (`lg`): com o lockup
+completo eles não cabem em 768–1023 px, faixa em que o header mostra lockup +
+"Agendar sessão" + botão de menu (os links ficam no drawer).
+
+**Ícones** (todos gerados do símbolo creme sobre um quadrado navy `#14243E`,
+símbolo com 64% da largura): `favicon.svg` (principal, cantos levemente
+arredondados), `favicon.ico` (16 e 32 px), `apple-touch-icon.png` (180),
+`icon-192.png` e `icon-512.png` (quadrados sem transparência — iOS e Android
+aplicam a própria máscara) e `manifest.webmanifest` (`theme_color` e
+`background_color` `#14243E`). As tags saem de `metadata.icons` e
+`metadata.manifest` em `app/layout.tsx`.
+
+**`og.jpg`** (1200×630): navy com textura de pontos (1 px, `#C4A15A` a 13%, grade
+de 32 px), símbolo creme de 220 px à esquerda e, à direita, "REINERS MEDIA"
+(Cormorant 700, tracking 0,2em) e "ESTÚDIO DE PODCAST PREMIUM · CUIABÁ/MT" em
+DM Mono `#E8D9B5`. Foi renderizado em Chromium a partir do SVG oficial — para
+refazer, repita a composição com o símbolo de `/public/brand`.
+
+## Fotos do estúdio
+
+Três blocos, todos com arquivo versionado em `/public` (origem e tamanhos em
+`public/estudio/README.md` e `public/bastidores/README.md`):
+
+- **Cenários** (`#cenarios`, banda navy): cinco fotos 2:3 — Puff, Escritório,
+  Mesa de reunião, Sofá e Estante — com nome e uma linha sobre o formato de
+  podcast de cada um. Carrossel nativo; no `md` os cinco cabem lado a lado.
+- **Foto do Estúdio Zura**: a claquete "ESTÚDIO ZURA" com a mesa de gravação ao
+  fundo, é a imagem padrão da seção Sobre.
+- **Bastidores** (`#bastidores`): oito fotos de gravações com clientes, sem
+  legenda e sem nome. Confirme a autorização de imagem de quem aparece.
+
+O CMS continua soberano para o Sobre (campo "Imagem da seção Sobre"); cenários
+e bastidores são editoriais e mudam por código (`lib/site/gallery.ts`).
 
 ### Por que `/public` e não o Storage
 
@@ -116,7 +185,21 @@ continua soberano para trocar sem deploy.
 
 **Atenção ao middleware:** `middleware.ts` exclui do guard de sessão as
 extensões estáticas. Um formato fora dessa lista vira `307 /login` para o
-visitante anônimo — foi o que aconteceu com `.mp4` antes da correção.
+visitante anônimo — foi o que aconteceu com `.mp4` antes da correção e seria o
+`.webmanifest` (o navegador busca o manifest sem cookie de sessão), que por
+isso está na lista. `tests/unit/brand-assets.test.ts` cobre o matcher.
+
+## Planos: o banco manda, o código é o plano B
+
+Os valores de `DEFAULT_PLANS` (`lib/site/content.ts`) só aparecem quando o banco
+não responde. Em produção, **o que está em `site_plans` prevalece** — e as
+migrations do repositório **não são aplicadas sozinhas**. Mudou preço ou texto
+de plano? Além do código, aplique a migration no Supabase.
+
+Vigente: Hora de Estúdio **R$ 1.350** (`/2h`, com "2 horas de gravação" em
+negrito) e BTS Recorrente com a sigla explicada (**Build to Suit**, o produto
+sob medida da Reiners). A migration `0022_update_hora_de_estudio_price_and_bts.sql`
+faz as duas atualizações por nome de plano.
 
 ## "O que fazemos" — as frentes do estúdio
 

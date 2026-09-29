@@ -42,8 +42,8 @@ export function AboutSection({ imageUrl }: { imageUrl: string | null }) {
             // eslint-disable-next-line @next/next/no-img-element -- URL vinda do CMS (host livre)
             <img
               src={imageUrl}
-              alt="Equipe da Reiners Media gravando no estúdio"
-              className="h-full w-full object-cover"
+              alt="Estúdio de gravação de podcast"
+              className="h-full w-full object-cover object-[50%_56%]"
               loading="lazy"
             />
           )}

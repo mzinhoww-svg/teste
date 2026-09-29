@@ -8,11 +8,17 @@ import { SiteLink } from "./link";
 import { BookingModal } from "./booking-modal";
 import { useDismissable } from "./use-dismissable";
 import { trackSiteEvent } from "@/lib/site/track";
-import { ReinersMark, ReinersMarkDefs } from "@/components/brand-manual/mark";
+import { BrandLockup } from "./brand";
 
 // Navbar sticky (64px) com blur. Estado `scrolled` acende a borda inferior.
 // Mobile: drawer lateral com aria-expanded/aria-controls, role="dialog",
 // trap de foco e Escape (ver use-dismissable).
+//
+// Breakpoints: os links inline só cabem com o lockup completo (símbolo 32px +
+// assinatura) a partir de 1024px. Entre 768 e 1023px o header mostra lockup +
+// "Agendar sessão" + botão de menu (os links ficam no drawer); abaixo de 768px
+// só o símbolo + menu. Antes, a 768px os itens somavam ~840px e o header
+// estourava a largura da tela.
 
 const LINKS = [
   { href: "/#o-que-fazemos", label: "O que fazemos" },
@@ -45,7 +51,6 @@ export function SiteNavbar({ siteName, whatsappNumber }: { siteName: string; wha
 
   return (
     <>
-      <ReinersMarkDefs />
       <header
         className={cn(
           "sticky top-0 z-40 h-16 border-b bg-site-surface-base/85 backdrop-blur-[16px] transition-colors duration-fast",
@@ -56,15 +61,13 @@ export function SiteNavbar({ siteName, whatsappNumber }: { siteName: string; wha
           aria-label="Principal"
           className="mx-auto flex h-full max-w-6xl items-center justify-between gap-6 px-6"
         >
-          <Link
-            href="/"
-            className="group flex items-center gap-2.5 font-serif text-site-4xl font-bold tracking-[0.02em] text-site-text-primary transition-colors duration-fast hover:text-site-text-inverse"
-          >
-            <ReinersMark theme="light" size={28} className="shrink-0 transition-transform duration-fast group-hover:scale-105" />
-            {siteName}
+          {/* Header claro → símbolo navy. Mobile: só o símbolo (28px); a partir de
+              768px, símbolo 32px + assinatura. Sem hover de zoom (regra de marca). */}
+          <Link href="/" aria-label={`${siteName} — início`} className="flex shrink-0 items-center rounded-site-sm">
+            <BrandLockup symbolHeight={28} symbolHeightMd={32} hideSignatureBelow="md" signatureClassName="text-[17px]" />
           </Link>
 
-          <ul className="hidden items-center gap-8 md:flex">
+          <ul className="hidden items-center gap-8 lg:flex">
             {LINKS.map((l) => (
               <li key={l.href}>
                 <SiteLink href={l.href} variant="nav" className="text-site-xl">
@@ -86,7 +89,7 @@ export function SiteNavbar({ siteName, whatsappNumber }: { siteName: string; wha
 
             <button
               type="button"
-              className="grid h-11 w-11 place-items-center rounded-site-md text-site-text-primary transition-colors duration-fast hover:text-site-text-inverse md:hidden"
+              className="grid h-11 w-11 place-items-center rounded-site-md text-site-text-primary transition-colors duration-fast hover:text-site-text-inverse lg:hidden"
               aria-expanded={drawerOpen}
               aria-controls="site-drawer"
               aria-label={drawerOpen ? "Fechar menu" : "Abrir menu"}
@@ -106,7 +109,7 @@ export function SiteNavbar({ siteName, whatsappNumber }: { siteName: string; wha
 
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-50 bg-manual-navy/70 backdrop-blur-[12px] md:hidden"
+          className="fixed inset-0 z-50 bg-manual-navy/70 backdrop-blur-[12px] lg:hidden"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) closeDrawer();
           }}
@@ -120,10 +123,7 @@ export function SiteNavbar({ siteName, whatsappNumber }: { siteName: string; wha
             className="ml-auto flex h-full w-[min(320px,85vw)] animate-site-drawer-in flex-col gap-2 border-l border-site-border-muted/10 bg-site-surface-raised p-6 shadow-site-2"
           >
             <div className="mb-4 flex items-center justify-between">
-              <span className="flex items-center gap-2.5 font-serif text-site-4xl font-bold tracking-[0.02em]">
-                <ReinersMark theme="light" size={26} className="shrink-0" />
-                {siteName}
-              </span>
+              <BrandLockup symbolHeight={28} signatureClassName="text-[16px]" />
               <button
                 type="button"
                 onClick={closeDrawer}

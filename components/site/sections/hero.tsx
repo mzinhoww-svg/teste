@@ -1,4 +1,5 @@
 import { SiteBadge } from "../badge";
+import { BrandSymbol } from "../brand";
 import { SiteButtonLink } from "../button";
 import { HeroMedia } from "../hero-media";
 import type { SiteConfig } from "@/lib/site/content";
@@ -29,6 +30,9 @@ export function HeroSection({ config }: { config: SiteConfig }) {
       />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 py-24">
+        {/* Símbolo creme (fundo escuro), 40px, acima do kicker — nunca grande sobre
+            o vídeo. Entrada só com fade de 300ms (regra de marca: sem zoom/bounce). */}
+        <BrandSymbol tone="creme" height={40} className="mb-6 animate-site-fade-in" />
         <SiteBadge className="text-manual-ouro-claro">
           {config.tagline} · {config.location}
         </SiteBadge>

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   DEFAULT_CONFIG, DEFAULT_GUESTS, DEFAULT_PLANS, DEFAULT_PROGRAMS, DEFAULT_SERVICES,
   DEFAULT_TESTIMONIALS,
-  initials, toConfig, toGuest, toPlan, toProgram, toService, toTestimonial,
+  initials, isAuthorialProgram, toConfig, toGuest, toPlan, toProgram, toService, toTestimonial,
 } from "@/lib/site/content";
 
 describe("normalização das linhas do CMS", () => {
@@ -55,6 +55,41 @@ describe("defaults da landing", () => {
   });
 });
 
+describe("planos: valores e descrições vigentes", () => {
+  const plan = (id: string) => DEFAULT_PLANS.find((p) => p.id === id)!;
+
+  it("Hora de Estúdio: R$ 1.350 por 2h, com as 2 horas de gravação em negrito", () => {
+    const hora = plan("hora-de-estudio");
+    expect(hora.price).toBe("R$ 1.350");
+    expect(hora.period).toBe("/2h");
+    expect(hora.description).toContain("**2 horas de gravação**");
+  });
+
+  it("BTS Recorrente: descrição explica a sigla (Build to Suit); preço não muda", () => {
+    const bts = plan("bts-recorrente");
+    expect(bts.description).toContain("**Build to Suit (BTS):**");
+    expect(bts.price).toBe("R$ 4.500");
+  });
+
+  it("nenhum plano ficou com o preço antigo", () => {
+    expect(DEFAULT_PLANS.map((p) => p.price)).not.toContain("R$ 1.390");
+  });
+});
+
+describe("programa autoral", () => {
+  it("só a categoria Autoral ganha a capa de marca", () => {
+    expect(isAuthorialProgram({ category: "Autoral" })).toBe(true);
+    expect(isAuthorialProgram({ category: "autoral" })).toBe(true);
+    expect(isAuthorialProgram({ category: "Corporativo" })).toBe(false);
+    expect(isAuthorialProgram({ category: null })).toBe(false);
+  });
+
+  it("'Presença que Posiciona' é o autoral dos programas padrão", () => {
+    const autorais = DEFAULT_PROGRAMS.filter(isAuthorialProgram);
+    expect(autorais.map((p) => p.title)).toEqual(["Presença que Posiciona"]);
+  });
+});
+
 describe("initials", () => {
   it("usa no máximo duas iniciais", () => {
     expect(initials("Ana Furtado")).toBe("AF");
@@ -87,9 +122,10 @@ describe("imagem do Sobre e card de compartilhamento", () => {
     expect(toConfig({}).ogImageUrl).toBe("/og.jpg");
   });
 
-  it("a seção Sobre aceita ficar sem imagem: o componente desenha o gradiente", () => {
-    expect(DEFAULT_CONFIG.aboutImageUrl).toBeNull();
-    expect(toConfig({ about_image_url: "   " }).aboutImageUrl).toBeNull();
+  it("a seção Sobre tem a foto do Estúdio Zura por padrão e coluna vazia não a apaga", () => {
+    expect(DEFAULT_CONFIG.aboutImageUrl).toBe("/estudio/zura-claquete.webp");
+    expect(toConfig({}).aboutImageUrl).toBe("/estudio/zura-claquete.webp");
+    expect(toConfig({ about_image_url: "   " }).aboutImageUrl).toBe("/estudio/zura-claquete.webp");
   });
 
   it("o CMS substitui as duas", () => {

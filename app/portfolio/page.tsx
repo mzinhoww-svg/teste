@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { getPrograms, getSiteConfig } from "@/lib/site/data";
+import { isAuthorialProgram } from "@/lib/site/content";
+import { BrandCover } from "@/components/site/brand";
 import { SiteNavbar } from "@/components/site/navbar";
 import { SitePageView } from "@/components/site/page-view";
 import { SiteBadge } from "@/components/site/badge";
@@ -66,9 +68,9 @@ export default async function PortfolioPage() {
                     <SiteCard variant="plan" interactive className="flex h-full flex-col">
                       <div
                         aria-hidden="true"
-                        className="mb-6 aspect-[16/9] overflow-hidden rounded-site-sm border border-site-border-muted/[0.06] bg-site-surface-raised bg-[radial-gradient(circle_at_30%_20%,rgb(var(--site-text-inverse)/0.16),transparent_60%)]"
+                        className="relative mb-6 aspect-[16/9] overflow-hidden rounded-site-sm border border-site-border-muted/[0.06] bg-site-surface-raised bg-[radial-gradient(circle_at_30%_20%,rgb(var(--site-text-inverse)/0.16),transparent_60%)]"
                       >
-                        {program.posterUrl && (
+                        {program.posterUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element -- URL vinda do CMS (host livre)
                           <img
                             src={program.posterUrl}
@@ -76,6 +78,9 @@ export default async function PortfolioPage() {
                             className="h-full w-full object-cover"
                             loading="lazy"
                           />
+                        ) : (
+                          // Programa autoral sem pôster: capa de marca (navy + símbolo creme).
+                          isAuthorialProgram(program) && <BrandCover />
                         )}
                       </div>
 

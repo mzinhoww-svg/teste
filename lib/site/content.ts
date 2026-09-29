@@ -8,6 +8,7 @@
 // Espelha as tabelas de supabase/migrations/0016_site_cms.sql.
 
 import { DEFAULT_WHATSAPP, sanitizeWhatsappNumber } from "./whatsapp";
+import { ZURA_PHOTO } from "./gallery";
 
 export type SiteConfig = {
   siteName: string;
@@ -86,6 +87,15 @@ export type Program = {
   displayOrder: number;
 };
 
+/**
+ * Programa autoral da casa (categoria "Autoral", ex.: "Presença que
+ * Posiciona"). Sem pôster no CMS, a capa é a de marca: fundo navy com o
+ * símbolo — ver <BrandCover>.
+ */
+export function isAuthorialProgram(program: Pick<Program, "category">): boolean {
+  return /autoral/i.test(program.category ?? "");
+}
+
 export const DEFAULT_CONFIG: SiteConfig = {
   siteName: "Reiners Media",
   tagline: "Estúdio de Podcast Premium",
@@ -93,10 +103,11 @@ export const DEFAULT_CONFIG: SiteConfig = {
   // sobrescreve quando houver URL lá (ver toConfig).
   heroVideoUrl: "/hero.mp4",
   heroImageUrl: "/hero-poster.jpg",
-  // Sem imagem própria da seção "Sobre", o bloco cai no gradiente (ver
-  // AboutSection). Já a de compartilhamento tem arquivo padrão: link sem card
-  // é pior que card genérico.
-  aboutImageUrl: null,
+  // "Sobre" e o card de compartilhamento têm arquivo padrão versionado em
+  // /public: a foto do Estúdio Zura (claquete + mesa de gravação) e o /og.jpg.
+  // O CMS sobrescreve quando houver URL lá (ver toConfig). Link sem card é
+  // pior que card genérico; seção sem foto real é pior que a foto do estúdio.
+  aboutImageUrl: ZURA_PHOTO.src,
   ogImageUrl: "/og.jpg",
   ctaPrimaryText: "Ver planos",
   ctaPrimaryUrl: "#planos",
@@ -120,7 +131,7 @@ export const DEFAULT_PLANS: Plan[] = [
   {
     id: "hora-de-estudio",
     name: "Hora de Estúdio",
-    price: "R$ 1.390",
+    price: "R$ 1.350",
     period: "/2h",
     description:
       "Para quem já tem pauta e equipe: **2 horas de gravação** inclusas, com toda a estrutura do nosso estúdio.",
@@ -155,7 +166,8 @@ export const DEFAULT_PLANS: Plan[] = [
     name: "BTS Recorrente",
     price: "R$ 4.500",
     period: "/mês",
-    description: "Presença institucional contínua: pauta, gravação e distribuição todo mês.",
+    description:
+      "**Build to Suit (BTS):** presença institucional contínua, desenhada sob medida para a sua marca — pauta, gravação e distribuição todo mês.",
     features: [
       "2 episódios por mês",
       "10 cortes verticais",
@@ -420,8 +432,8 @@ export function toConfig(row: Record<string, unknown>): SiteConfig {
     // de fato preenchida no CMS substitui o arquivo versionado.
     heroVideoUrl: nullable("hero_video_url") ?? DEFAULT_CONFIG.heroVideoUrl,
     heroImageUrl: nullable("hero_image_url") ?? DEFAULT_CONFIG.heroImageUrl,
-    // Sobre: null é resposta válida — o componente desenha o gradiente.
-    aboutImageUrl: nullable("about_image_url"),
+    // Mesma regra do hero: coluna vazia não apaga a foto padrão do estúdio.
+    aboutImageUrl: nullable("about_image_url") ?? DEFAULT_CONFIG.aboutImageUrl,
     ogImageUrl: nullable("og_image_url") ?? DEFAULT_CONFIG.ogImageUrl,
     ctaPrimaryText: str("cta_primary_text", DEFAULT_CONFIG.ctaPrimaryText),
     ctaPrimaryUrl: str("cta_primary_url", DEFAULT_CONFIG.ctaPrimaryUrl),

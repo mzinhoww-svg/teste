@@ -1,5 +1,4 @@
 import { SitePageView } from "@/components/site/page-view";
-import { ReinersMarkDefs } from "./mark";
 import { BrandManualSmoothScroll } from "./smooth-scroll";
 import { BrandManualNav } from "./nav";
 import { BrandManualCover } from "./cover";
@@ -26,7 +25,6 @@ import { ManifestoSection } from "./sections/manifesto";
 export function BrandManual() {
   return (
     <div className="manual-marca bg-manual-creme font-manual-sans text-manual-tinta">
-      <ReinersMarkDefs />
       <BrandManualSmoothScroll />
       <BrandManualNav />
       <BrandManualCover />
