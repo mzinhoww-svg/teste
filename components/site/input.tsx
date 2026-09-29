@@ -2,6 +2,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 // Input / Textarea do site público.
+// Helper e erro em 12px e a 70% (AA sobre o creme/branco): a 8,75px e 55% eram
+// as linhas de apoio do formulário de agendamento — pequenas e fracas demais.
 // Anatomia: label → controle → helper (ou erro). Estados: default, hover,
 // focus, focus-visible, error, disabled. Placeholder é INSTRUTIVO (nunca
 // repete o label) — regra de conteúdo do design system.
@@ -32,14 +34,14 @@ function FieldShell({ id, label, helper, error, children }: FieldShellProps) {
       </label>
       {children}
       {error ? (
-        <p id={`${id}-msg`} role="alert" className="flex items-center gap-s7 text-site-xs normal-case tracking-normal text-site-danger">
+        <p id={`${id}-msg`} role="alert" className="flex items-center gap-s7 text-site-sm normal-case tracking-normal text-site-danger">
           <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0" fill="currentColor" aria-hidden="true">
             <path d="M8 1.5 15 14H1L8 1.5Zm0 4.5v4m0 2.2v.1" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" />
           </svg>
           {error}
         </p>
       ) : helper ? (
-        <p id={`${id}-msg`} className="text-site-xs normal-case tracking-normal text-site-text-primary/55">
+        <p id={`${id}-msg`} className="text-site-sm normal-case tracking-normal text-site-text-primary/70">
           {helper}
         </p>
       ) : null}

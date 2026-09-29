@@ -24,6 +24,12 @@ webhook casa por esse id e atualiza o status (`enviado` → `entregue` → `aber
   "E-mail" no painel de propostas do drawer do lead.
 - **Contrato** (`sendContractForSignature`): e-mail aos signatários com o link
   `/sign/contracts/[token]` (dispara junto do "Preparar assinatura").
+- **Contato do site** (`/api/site/leads`): quando alguém preenche o formulário "Agendar sessão" da
+  landing, o navegador abre o WhatsApp e, em segundo plano, esta rota manda um aviso para a
+  equipe (`LEADS_NOTIFY_EMAIL` → `BREVO_REPLY_TO` → `BREVO_SENDER_EMAIL`), com o Reply-To da
+  pessoa. **Não usa banco**: chama `getEmailProvider().send()` direto, sem passar por
+  `sendAndLogEmail` (que grava em `messages`). Ver "Formulário de agendamento" em
+  `docs/site-landing.md`.
 - **Cadências** (`/api/cron/cadences`): regras com `action = 'send_email'` mandam
   follow-up aos contatos de deals parados no estágio.
 - **Portal / Fatura**: builders `portalInviteEmail` / `invoiceEmail` prontos; o
@@ -50,6 +56,18 @@ testar em previews) → **Redeploy**:
 | `BREVO_REPLY_TO` | e-mail de resposta (opcional). |
 | `BREVO_WEBHOOK_SECRET` | segredo próprio p/ validar o webhook. |
 | `NEXT_PUBLIC_APP_URL` | URL pública canônica (links dos e-mails). |
+
+### Erro 401 "unrecognised IP address" — desative o bloqueio de IP da Brevo
+Se a Brevo responder `401` com *"We have detected you are using an unrecognised IP
+address …"*, a conta tem **IPs autorizados** ligado
+(**Brevo → Security → Authorised IPs**, <https://app.brevo.com/security/authorised_ips>).
+A Vercel **não tem IP fixo** (as funções saem de endereços que mudam a cada
+execução), então nenhum e-mail sai do site — nem o aviso do formulário "Agendar
+sessão", nem convites, propostas e cadências do CRM. Correção: em *Authorised IPs*,
+clique em **Deactivate blocking**. A chave `BREVO_API_KEY` continua sendo o segredo
+que protege a conta; não precisa de novo deploy. Sintoma no site: o formulário abre
+o WhatsApp normalmente e a rota `/api/site/leads` responde `502` (log
+`[site-lead] falha ao avisar a equipe (brevo): Brevo 401 …` nos *Runtime Logs*).
 
 ## 3. Webhook de eventos (opcional)
 O webhook **não é necessário para enviar** — ele só atualiza o status de entrega/

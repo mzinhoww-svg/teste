@@ -1,4 +1,19 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+// O formulário de agendamento abre o WhatsApp com `window.open`. Nos testes o
+// `window.open` vira um espião: nada abre de verdade (nem precisa de rede) e dá
+// para conferir a URL do wa.me e quantas vezes abriu.
+async function installWhatsappSpy(page: Page) {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __wa: string[] };
+    w.__wa = [];
+    window.open = (url?: string | URL) => {
+      w.__wa.push(String(url));
+      return {} as Window; // truthy: "abriu a aba"
+    };
+  });
+}
+const openedUrls = (page: Page) => page.evaluate(() => (window as unknown as { __wa: string[] }).__wa);
 
 // Landing pública da Reiners Media (apex). O portfólio está oculto — ver
 // "Portfólio oculto" abaixo.
@@ -61,16 +76,24 @@ test.describe("Landing Reiners Media (/)", () => {
     await expect(dialog).toBeHidden();
   });
 
-  test("formulário exige e-mail válido", async ({ page }) => {
+  test("formulário: só o nome é obrigatório e o e-mail só é conferido se preenchido", async ({ page }) => {
+    await installWhatsappSpy(page);
     await page.goto("/");
     await page.getByRole("button", { name: "Agendar sessão gratuita" }).click();
 
     const dialog = page.getByRole("dialog");
+    const enviar = dialog.getByRole("button", { name: /Enviar e continuar no WhatsApp/i });
+
+    // Sem nome: erro, e o WhatsApp não abre.
+    await enviar.click();
+    await expect(dialog.getByText("Informe seu nome.")).toBeVisible();
+
+    // Nome + e-mail malformado: erro no e-mail, e o WhatsApp continua fechado.
     await dialog.getByLabel("Nome").fill("Ana Furtado");
     await dialog.getByLabel("E-mail").fill("nao-e-email");
-    await dialog.getByRole("button", { name: /Enviar e continuar no WhatsApp/i }).click();
-
-    await expect(dialog.getByText(/e-mail válido/i)).toBeVisible();
+    await enviar.click();
+    await expect(dialog.getByText(/Confira o e-mail/i)).toBeVisible();
+    expect(await openedUrls(page)).toEqual([]);
   });
 
   test("não gera erro de runtime no console", async ({ page }) => {
@@ -99,25 +122,153 @@ test.describe("WhatsApp como canal principal", () => {
     await expect(link).toBeVisible();
   });
 
-  test("formulário enviado leva a conversa para o WhatsApp com os dados", async ({ page }) => {
+});
+
+// O formulário NÃO usa banco. Enviar abre o WhatsApp na hora, com a mensagem
+// pronta, e avisa a equipe por e-mail (Brevo) em segundo plano. O aviso é a rede
+// de segurança de quem fechar o WhatsApp sem enviar — e nunca atrapalha o fluxo.
+test.describe("Formulário de agendamento (WhatsApp direto + aviso por e-mail)", () => {
+  const NUMBER = "5565999207108";
+  const WA = new RegExp(`^https://wa\\.me/${NUMBER}\\?text=`);
+
+  async function preencher(page: Page, campos: { nome: string; email?: string; projeto?: string; telefone?: string }) {
     await page.goto("/");
     await page.getByRole("button", { name: "Agendar sessão gratuita" }).click();
-
     const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("Nome").fill("Ana Furtado");
-    await dialog.getByLabel("E-mail").fill("ana@sicredi.com.br");
-    await dialog.getByLabel("Sobre o projeto").fill("serie institucional mensal");
+    await dialog.getByLabel("Nome").fill(campos.nome);
+    if (campos.email) await dialog.getByLabel("E-mail").fill(campos.email);
+    if (campos.telefone) await dialog.getByLabel("WhatsApp").fill(campos.telefone);
+    if (campos.projeto) await dialog.getByLabel("Sobre o projeto").fill(campos.projeto);
+    return dialog;
+  }
+
+  test("Enviar abre o WhatsApp direto, com a mensagem pronta, e avisa a equipe em segundo plano", async ({ page }) => {
+    await installWhatsappSpy(page);
+    const avisos: unknown[] = [];
+    const cabecalhos: Record<string, string>[] = [];
+    await page.route("**/api/site/leads", async (route) => {
+      avisos.push(route.request().postDataJSON());
+      cabecalhos.push(route.request().headers());
+      await route.fulfill({ status: 202, contentType: "application/json", body: JSON.stringify({ ok: true, notified: true }) });
+    });
+
+    const dialog = await preencher(page, {
+      nome: "Ana Furtado",
+      email: "ana@sicredi.com.br",
+      projeto: "serie institucional mensal",
+    });
     await dialog.getByRole("button", { name: /Enviar e continuar no WhatsApp/i }).click();
 
-    const cta = dialog.getByRole("link", { name: /Continuar no WhatsApp/i });
-    await expect(cta).toBeVisible();
-
-    const href = await cta.getAttribute("href");
-    expect(href).toContain(`https://wa.me/${NUMBER}?text=`);
-    const message = decodeURIComponent(href!.split("?text=")[1]);
+    // 1) O WhatsApp abriu NO CLIQUE, uma única vez, com a mensagem pronta.
+    await expect(dialog.getByRole("heading", { name: "Abrimos o WhatsApp" })).toBeVisible();
+    const abertos = await openedUrls(page);
+    expect(abertos).toHaveLength(1);
+    expect(abertos[0]).toMatch(WA);
+    const message = decodeURIComponent(abertos[0].split("?text=")[1]);
     expect(message).toContain("Ana Furtado");
     expect(message).toContain("serie institucional mensal");
     expect(message).toContain("ana@sicredi.com.br");
+
+    // 2) Aviso à equipe: uma chamada, com o que foi digitado e a página de origem.
+    await expect.poll(() => avisos.length).toBe(1);
+    expect(avisos[0]).toMatchObject({
+      name: "Ana Furtado",
+      email: "ana@sicredi.com.br",
+      message: "serie institucional mensal",
+      path: "/",
+      website: "",
+    });
+
+    // O cliente novo se identifica (a regra de roteamento que desvia o formulário antigo não o pega).
+    expect(cabecalhos[0]["x-lead-notify"]).toBe("1");
+
+    // 3) Link de reserva no painel, com a mesma mensagem.
+    const reserva = dialog.getByRole("link", { name: "Abrir o WhatsApp" });
+    await expect(reserva).toHaveAttribute("href", abertos[0]);
+    await expect(reserva).toHaveAttribute("rel", /noopener/);
+
+    // 4) Nada foi "registrado" em lugar nenhum — o texto não pode dizer que foi.
+    await expect(dialog.getByText(/registrado|Recebemos seu contato/i)).toHaveCount(0);
+  });
+
+  test("só com o nome já dá: abre o WhatsApp e avisa a equipe", async ({ page }) => {
+    await installWhatsappSpy(page);
+    let aviso: Record<string, string> | undefined;
+    await page.route("**/api/site/leads", async (route) => {
+      aviso = route.request().postDataJSON();
+      await route.fulfill({ status: 202, body: "{}" });
+    });
+
+    const dialog = await preencher(page, { nome: "Bruno" });
+    await dialog.getByRole("button", { name: /Enviar e continuar no WhatsApp/i }).click();
+
+    await expect(dialog.getByRole("heading", { name: "Abrimos o WhatsApp" })).toBeVisible();
+    const [url] = await openedUrls(page);
+    expect(url).toMatch(WA);
+    expect(decodeURIComponent(url.split("?text=")[1])).toBe("Olá! Aqui é Bruno. Quero agendar uma sessão no estúdio.");
+    await expect.poll(() => aviso?.name).toBe("Bruno");
+  });
+
+  test("se o aviso por e-mail falhar, o WhatsApp abre do mesmo jeito", async ({ page }) => {
+    await installWhatsappSpy(page);
+    await page.route("**/api/site/leads", (route) => route.abort());
+
+    const dialog = await preencher(page, { nome: "Ana Furtado", projeto: "podcast mensal" });
+    await dialog.getByRole("button", { name: /Enviar e continuar no WhatsApp/i }).click();
+
+    await expect(dialog.getByRole("heading", { name: "Abrimos o WhatsApp" })).toBeVisible();
+    expect(await openedUrls(page)).toHaveLength(1);
+    // Nenhuma mensagem de erro para quem está indo conversar.
+    await expect(dialog.getByRole("alert")).toHaveCount(0);
+  });
+
+  test("sem nova aba (navegador embutido do Instagram, bloqueio), segue na mesma aba", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.open = () => null;
+    });
+    await page.route("https://wa.me/**", (route) =>
+      route.fulfill({ status: 200, contentType: "text/html", body: "<title>wa.me</title>" }),
+    );
+    await page.route("**/api/site/leads", (route) => route.fulfill({ status: 202, body: "{}" }));
+
+    const dialog = await preencher(page, { nome: "Ana Furtado" });
+    await dialog.getByRole("button", { name: /Enviar e continuar no WhatsApp/i }).click();
+
+    await page.waitForURL(WA);
+  });
+
+  test("campo-isca anti-spam: fora da tela, fora da leitura de tela e vazio para gente", async ({ page }) => {
+    await installWhatsappSpy(page);
+    let aviso: Record<string, string> | undefined;
+    await page.route("**/api/site/leads", async (route) => {
+      aviso = route.request().postDataJSON();
+      await route.fulfill({ status: 202, body: "{}" });
+    });
+
+    const dialog = await preencher(page, { nome: "Ana Furtado" });
+    const isca = dialog.locator('input[name="website"]');
+    await expect(isca).toHaveAttribute("tabindex", "-1");
+    await expect(isca).toHaveAttribute("autocomplete", "off");
+    await expect(dialog.locator('[aria-hidden="true"]:has(input[name="website"])')).toHaveCount(1);
+    const box = await isca.boundingBox();
+    expect(box!.x).toBeLessThan(-1000);
+
+    await dialog.getByRole("button", { name: /Enviar e continuar no WhatsApp/i }).click();
+    await expect.poll(() => aviso?.website).toBe("");
+  });
+
+  test("o texto avisa o que acontece ao enviar (WhatsApp + e-mail para a equipe)", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Agendar sessão gratuita" }).click();
+    await expect(
+      page.getByRole("dialog").getByText(/abrimos o WhatsApp com a sua mensagem pronta e avisamos nossa equipe por e-mail/i),
+    ).toBeVisible();
+  });
+
+  test("a rota de aviso recusa chamada sem Origin (robô, curl) antes de enviar qualquer e-mail", async ({ request }) => {
+    // Sem Origin (curl, robô): a rota recusa antes de qualquer envio.
+    const res = await request.post("/api/site/leads", { data: { name: "Ana", email: "a@x.com" } });
+    expect(res.status()).toBe(403);
   });
 });
 

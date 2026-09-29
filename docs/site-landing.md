@@ -11,7 +11,7 @@ comerciais internas vivem em subdomínio próprio, sem página pública
 | `/media` | Mesma landing de `/`, endereço alternativo (canônica: `/`) | estática, `revalidate = 300` |
 | `/manual-marca` | Manual de identidade visual da marca (Navy/Ouro/Creme, tipografia própria) | estática |
 | `/admin/site` | CMS da landing (dashboard, planos, depoimentos, programas, config) | dinâmica |
-| `/api/site/leads` | Formulário "Agendar sessão" | POST anônimo |
+| `/api/site/leads` | Aviso por e-mail (Brevo) do formulário "Agendar sessão" — não grava em banco | POST anônimo, só da própria origem |
 | `/api/site/events` | Coleta de `page_view`, `cta_click`, `form_submit` | POST anônimo |
 
 ## Design system (PodFactory)
@@ -191,6 +191,52 @@ extensões estáticas. Um formato fora dessa lista vira `307 /login` para o
 visitante anônimo — foi o que aconteceu com `.mp4` antes da correção e seria o
 `.webmanifest` (o navegador busca o manifest sem cookie de sessão), que por
 isso está na lista. `tests/unit/brand-assets.test.ts` cobre o matcher.
+
+## Formulário de agendamento (WhatsApp direto + aviso por e-mail)
+
+O formulário "Agendar sessão" **não usa banco**. Ao enviar:
+
+1. **O navegador abre o WhatsApp na hora**, com a mensagem pronta
+   (`wa.me/<número>?text=…`, montada por `bookingWhatsappMessage`). A abertura é
+   *síncrona dentro do clique* — antes de qualquer espera de rede —, então
+   bloqueador de pop-up não engole. Se o navegador não deixa abrir nova aba
+   (navegador embutido do Instagram, por exemplo), segue na mesma aba. O painel
+   "Abrimos o WhatsApp" traz um botão de reserva com o mesmo link.
+2. **Em segundo plano, a equipe é avisada por e-mail** (`POST /api/site/leads` →
+   Brevo, o mesmo provider do CRM: `lib/email/provider.ts`). Quem recebe:
+   `LEADS_NOTIFY_EMAIL` (vários, separados por vírgula) → `BREVO_REPLY_TO` →
+   `BREVO_SENDER_EMAIL`. O Reply-To é o e-mail da pessoa, então responder o aviso
+   já fala com ela; se ela deixou WhatsApp, o botão do e-mail abre a conversa.
+   O aviso é a **rede de segurança de quem fechar o WhatsApp sem enviar**: a
+   mensagem no WhatsApp é só um rascunho até a pessoa apertar enviar.
+
+Só o **nome** é obrigatório; e-mail e WhatsApp são opcionais (o e-mail só é
+conferido se preenchido) e o texto do projeto vai até 600 caracteres (o limite do
+link do wa.me). Regras compartilhadas em `lib/site/lead-form.ts`; o servidor
+limpa e revalida tudo em `lib/site/lead-notify.ts`.
+
+**Proteção da rota pública** (cada chamada vira um e-mail; a cota gratuita da
+Brevo é de 300/dia, dividida com o CRM): só aceita chamada da própria origem
+(`Origin` = `Host`), campo-isca `website` (invisível, fora da leitura de tela;
+preenchido ⇒ finge sucesso e não envia), limite por IP (6 a cada 10 min) e geral
+(60 por hora), descarte do mesmo envio repetido em 10 min e corpo de até 8 KB. Os
+limites ficam na memória de cada instância (freio, não garantia). Falha da Brevo
+vira `502` e um log só com o motivo — nunca com nome, e-mail ou telefone. Sem
+`BREVO_API_KEY` o provider do CRM cai num *mock* que não faz rede: em dev/CI isso
+é aceito, mas **em produção a rota responde `503`** em vez de fingir que avisou.
+
+**Pré-requisito do aviso:** o *bloqueio de IP* da Brevo precisa estar desligado (a Vercel não
+tem IP fixo) — ver "Erro 401 unrecognised IP address" em `docs/email-brevo.md`. Com ele ligado
+o WhatsApp abre do mesmo jeito, mas o e-mail não sai.
+
+**Sem banco, mas com dado pessoal por e-mail:** o texto do modal avisa que os
+dados vão por e-mail à equipe. O site não guarda nada; o que chega à caixa de
+entrada é responsabilidade de quem a administra. A tabela `site_leads` (0016) e
+as linhas antigas continuam no banco, sem uso.
+
+**Mesmo com o Supabase pausado o formulário funciona**: WhatsApp e e-mail não
+dependem dele. O número vem do CMS quando o banco responde e do código
+(`DEFAULT_WHATSAPP`) quando não.
 
 ## Contato: WhatsApp e Instagram
 
@@ -403,7 +449,8 @@ acima são as mesmas do briefing, em snake_case — se o Prisma for adotado depo
 - Leitura pública (anônima) do que está `published` — a landing é pública.
 - Escrita só para quem está em `site_admins` (`is_site_editor()`); a lista de
   editores só o `ADMIN` mexe (`is_site_admin()`).
-- `site_events` e `site_leads` aceitam INSERT anônimo (é o visitante que grava)
+- `site_events` aceita INSERT anônimo (é o visitante que grava); `site_leads` também tem a policy,
+  mas o site **parou de gravar** ali (o formulário agora é WhatsApp + e-mail) — a tabela e o histórico ficam
   mas a **leitura** é restrita a editores.
 
 ### A landing nunca cai por causa do banco
