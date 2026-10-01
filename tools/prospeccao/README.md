@@ -30,6 +30,23 @@ No WhatsApp, o toque 1 vai com uma foto do cenário que mais combina com o lead,
 
 No card, dá para trocar a foto por qualquer outra das 12, e a linha do cenário muda junto. O botão **Salvar foto** baixa a imagem; depois é abrir o WhatsApp (a mensagem já vai escrita), mandar a foto pelo + e, em seguida, a mensagem.
 
+## Estrutura e enriquecimento do lead
+
+Cada lead tem, além do contato da pesquisa inicial:
+
+- **Empresa**: CNPJ (com dígito verificado), razão social, porte, CNAE, ano de abertura e situação, pela Receita via BrasilAPI.
+- **Sócios**: o quadro de sócios e administradores da Receita.
+- **Quem lidera**: nome, cargo, LinkedIn, fonte e confiança. Em entidades, o presidente da gestão atual.
+- **Contatos por papel**: decisor, comunicação, secretaria, comercial, geral ou setor, com telefone, se tem WhatsApp, e-mail, fonte e confiança.
+- **Sinais** para a conversa (ex.: já tem canal no YouTube) e **alertas** (notícia de risco, mostrada à parte como "Cuidado na abordagem").
+- **Status**: completo (CNPJ, quem lidera e contato direto), parcial ou sem enriquecimento, e o **contato sugerido**, que é o WhatsApp de quem decide ou da comunicação antes de telefone, e telefone antes de e-mail.
+
+As pesquisas gravam um JSON por segmento em `dados/enriq_brutos/` (formato em `msg/enriquecimento.py`). `python3 -m msg.enriquecimento dados/enriq_brutos/*.json` valida tudo: descarta CNPJ com dígito errado, telefone sem DDD e qualquer dado sem fonte, e grava `dados/enriquecimento.json`. Lead que só tinha e-mail e ganha o WhatsApp de quem decide passa a ser lead de WhatsApp, com saudação pelo primeiro nome.
+
+Na central, a seção **Leads** mostra tudo isso e tem dois botões. **Usar na cadência** manda as próximas mensagens para o contato escolhido, com a saudação pelo nome dele. **Adicionar contato** registra à mão um contato com a fonte.
+
+Regra: só entra contato publicado pela própria empresa ou pela pessoa para fins profissionais (site, Instagram, LinkedIn), com o link de onde veio. Nada de lista vazada nem e-mail deduzido.
+
 ## O pós-venda
 
 Segue o pipeline Produção e Entrega da Reiners (`docs/reiners-media-seed.md`) e o agente de Onboarding (`lib/agents/catalog.ts`). Cada etapa tem uma mensagem da Letícia, montada na hora com o produto e as datas do cliente.
@@ -61,6 +78,7 @@ O cliente entra no pós-venda pelo botão **Fechou negócio** de um lead do aque
 | Caminho | Conteúdo |
 |---|---|
 | `msg/copy_v1.py` | Copy v1 dos três toques, bloco do que fazemos por ICP, assuntos e assinatura do e-mail |
+| `msg/enriquecimento.py` | Estrutura do lead enriquecido, validação, status e contato sugerido |
 | `msg/fotos.py` | Catálogo rotulado das 31 fotos, regras de foto por segmento e a linha do cenário |
 | `central/fotos/` | As 12 fotos curadas, publicadas junto da central |
 | `msg/copy_posvenda.py` | Copy das sete etapas do pós-venda, entregáveis e local por produto (vai para `config/posvenda`) |
@@ -81,6 +99,7 @@ Python 3 com `openpyxl` e `pytest`. Rodar dentro desta pasta.
 python3 -m pytest -q                                      # testes
 python3 -m msg.prep dados/brutos/*.json --out dados/leads.json
 python3 -m msg.personal_v1                                # regrava msg/personal.json
+python3 -m msg.enriquecimento dados/enriq_brutos/*.json   # valida o enriquecimento
 python3 -m msg.gerar --planilha dados/Reiners_Leads_Cuiaba.xlsx   # precisa dar "0 erros"
 python3 central/seed.py                                   # lotes em central/lotes/
 ```
@@ -89,7 +108,7 @@ python3 central/seed.py                                   # lotes em central/lot
 
 ## A central
 
-Um seletor no topo troca entre **Aquecimento** e **Pós-venda**, cada um com placar e abas próprios.
+Um seletor no topo troca entre **Aquecimento**, **Pós-venda** e **Leads**, cada um com placar e abas próprios.
 
 - Aquecimento: cada lead é um documento em `leads` com os três toques prontos. A página só escreve `etapa`, `enviado1..3` e `situacao` (`ativo`, `respondeu`, `fechou` ou `sair`). As abas são Para hoje, Aguardando (com a data do próximo toque), Responderam, Fecharam, Sem resposta, Saíram e Todos.
 - Pós-venda: cada cliente é um documento em `clientes` (o id é o do lead, ou `C…` no cadastro manual). A página escreve `etapa`, `pvEnviado1..7`, `pvConcluido1..7`, `dataKickoff`, `dataGravacao` e `situacao` (`ativo`, `pausado` ou `concluido`). As abas são Para hoje, Em andamento, Pausados, Concluídos e Todos.

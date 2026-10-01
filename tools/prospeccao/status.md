@@ -22,7 +22,11 @@ Atualizado em 01/10/2026.
 | Copy v2 | Parágrafos separados por linha em branco; toque 1 do WhatsApp com a linha do cenário da foto. Maior mensagem com 685 caracteres (a legenda de foto aceita 1024) |
 | Fotos | 31 normalizadas e rotuladas (`dados/fotos_rotuladas/` com `rotulos.csv`), 12 curadas na central. Distribuição: Mesa com pessoa 42, Sofá aberto 17, Estante 13, Mesa pronta 12, Sofá com pessoa 8, Escritório 9, Puff 4; os 22 leads de e-mail ficam sem foto |
 | Atualização do banco | Só `toques`, `foto` e `versaoCopy` de cada lead, cada escrita presa à versão lida; o envio do Charles (R0002, toque 1 às 23:00 UTC) ficou como estava |
-| Testes | 75 passando (`python3 -m pytest -q` em `tools/prospeccao/`) |
+| Enriquecimento | 128 leads pesquisados. CNPJ confirmado na Receita em 104, quem lidera em 123, contato direto (decisor ou comunicação) em 36: 19 por WhatsApp, 8 por telefone e 9 por e-mail. Status: completo 36, parcial 87, sem enriquecimento 5 |
+| Por segmento (completos / contato direto) | Saúde 3/3 · Jurídico e contábil 14/14 · Entidades 7/7 · Mentores e imobiliário 11/11 · Médio porte 1/1 |
+| WhatsApp do decisor | Nos 19 leads com WhatsApp direto, o número que já estava na cadência é o do próprio decisor (advogados, médicos, corretores); a mensagem já chega a quem decide |
+| Alertas | 2 leads com notícia de risco separada dos sinais (Colégio São Gonçalo e Colégio Isaac Newton); a TMF tem a nota na observação |
+| Testes | 83 passando (`python3 -m pytest -q` em `tools/prospeccao/`) |
 
 ## Pontos para a Letícia olhar
 
@@ -39,6 +43,11 @@ Atualizado em 01/10/2026.
 
 - **Charles (Handell):** o toque 1 saiu antes da foto e caiu no atendimento automático do escritório. Se quiser, mande agora a foto da Mesa de reunião pelo card dele (Salvar foto) com uma linha curta; o toque 2 continua marcado para 05/10.
 
+- **Saúde e médio porte**: quase todos ficaram parciais, porque clínicas, colégios e empresas só publicam canais gerais (recepção, SAC, secretaria). Nesses, o caminho é pedir na primeira resposta o contato de quem cuida da comunicação, ou buscar no LinkedIn com uma ferramenta paga.
+- **12 escritórios de jurídico e contábil sem CNPJ**: a pesquisa bateu no limite de 200 buscas. Estão nas pendências de cada lead; dá para completar numa segunda rodada.
+- **Gestões de entidades**: FIEMT, CDL, ACCuiabá, Aprosoja e Aprofir têm mandato terminando em 2026. Vale conferir o presidente antes do toque.
+- **Já têm podcast**: Aprosoja (Apro360) e Acrismat. A conversa ali é de produção ou parceria, não de "criar um podcast".
+
 ## Bloqueios
 
 - Nenhum. O Apify e o Tavily estão sem crédito, então a lista foi montada por busca na web e conferida no site de cada lead.
@@ -49,6 +58,7 @@ Atualizado em 01/10/2026.
 
 ## Log
 
+- 01/10/2026 23:45: enriquecimento dos 128 leads (cinco pesquisas por segmento, BrasilAPI e sites), seção Leads na central, alertas de risco separados, saudação do R0100 corrigida; banco atualizado sem mexer nos envios do R0002 e do R0003.
 - 01/10/2026 23:30: fotos do Drive normalizadas e rotuladas, foto por lead no toque 1, mensagens em parágrafos (copy v2); banco atualizado sem mexer nos envios.
 - 01/10/2026 23:10: funil de pós-venda (7 etapas), botão Fechou negócio e formulário Novo cliente; config/posvenda semeado e verificado.
 - 01/10/2026: cinco pesquisas em paralelo (uma por segmento), 128 leads, módulos e testes, central publicada, 127 frases únicas, 0 erros na checagem, banco semeado e verificado.
