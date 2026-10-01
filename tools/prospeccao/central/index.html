@@ -549,7 +549,8 @@
       l.faixa ? el("span", { class: "chip", text: "Faixa " + l.faixa }) : null,
       el("span", { class: "chip", text: l.canal || "" }),
       l.bairro ? el("span", { class: "chip", text: l.bairro }) : null
-    ].concat((l.flags || []).map(function (f) { return el("span", { class: "chip flag", text: f }); })));
+    ].concat((l.flags || []).map(function (f) { return el("span", { class: "chip flag", text: f }); }))
+     .concat((l.alertas || []).length ? [el("span", { class: "chip flag", text: "Cuidado: ver alertas em Leads" })] : []));
 
     var rotulo = { hoje: "Toque " + n + " hoje", aguardando: "Aguardando", respondeu: "Respondeu", fechou: "Fechou",
                    encerrado: "Sem resposta", sair: "Saiu" }[g];
@@ -783,6 +784,11 @@
     if ((l.sinais || []).length) {
       corpo.push(el("div", { class: "grupo" }, [el("h3", { text: "Sinais para a conversa" })].concat(l.sinais.map(function (s) {
         return el("div", { class: "fonte" }, [s.texto + " · ", linkFonte(s.fonte)]);
+      }))));
+    }
+    if ((l.alertas || []).length) {
+      corpo.push(el("div", { class: "grupo" }, [el("h3", { text: "Cuidado na abordagem" })].concat(l.alertas.map(function (s) {
+        return el("div", { class: "aviso" }, [s.texto + (s.fonte ? " · " : ""), linkFonte(s.fonte)]);
       }))));
     }
     var pend = (l.pendencias || []).concat(enr.observacao ? [enr.observacao] : []);

@@ -14,10 +14,12 @@ ROTULO_PAPEL = {"decisor": "Decisor", "comunicacao": "Comunicação", "secretari
                 "comercial": "Comercial", "geral": "Geral", "setor": "Setor"}
 CONFIANCAS = ("alta", "media", "baixa")
 WHATS = ("sim", "nao", "?")
+RISCO = re.compile(r"(?i)^aten[çc][ãa]o|acus|propina|denúncia|denuncia|investiga|assédio|assedio|processo judicial|"
+                   r"propaganda enganosa|fraude|improbidade|operação policial|operacao policial")
 
 REGISTRO = {
     "id": "", "empresa": {}, "socios": [], "decisores": [], "contatos": [], "redes": {},
-    "sinais": [], "pendencias": [], "observacao": "",
+    "sinais": [], "alertas": [], "pendencias": [], "observacao": "",
 }
 
 
@@ -108,11 +110,20 @@ def normalizar(reg: dict) -> tuple[dict, list[str]]:
         })
 
     redes = {k: _txt((reg.get("redes") or {}).get(k)) for k in ("instagram", "linkedinEmpresa", "youtube")}
-    sinais = [{"texto": _txt(s.get("texto")), "fonte": _txt(s.get("fonte"))}
-              for s in reg.get("sinais") or [] if isinstance(s, dict) and _txt(s.get("texto")) and _txt(s.get("fonte"))]
+    sinais, alertas = [], []
+    for s_ in reg.get("sinais") or []:
+        if not (isinstance(s_, dict) and _txt(s_.get("texto"))):
+            continue
+        item = {"texto": re.sub(r"(?i)^aten[çc][ãa]o:\s*", "", _txt(s_.get("texto"))), "fonte": _txt(s_.get("fonte"))}
+        # Notícia de risco não é gancho de conversa: vai para os alertas, que a central mostra à parte.
+        if RISCO.search(_txt(s_.get("texto"))):
+            alertas.append(item)
+        elif item["fonte"]:
+            sinais.append(item)
     pend = [_txt(p) for p in reg.get("pendencias") or [] if _txt(p)]
     limpo = {"id": rid, "empresa": empresa, "socios": socios, "decisores": decisores, "contatos": contatos,
-             "redes": redes, "sinais": sinais, "pendencias": pend, "observacao": _txt(reg.get("observacao"))}
+             "redes": redes, "sinais": sinais, "alertas": alertas, "pendencias": pend,
+             "observacao": _txt(reg.get("observacao"))}
     return limpo, avisos
 
 
@@ -148,7 +159,7 @@ def doc_lead(reg: dict, hoje_iso: str) -> dict:
     direto = contato_direto(reg)
     return {
         "empresa": reg["empresa"], "socios": reg["socios"], "decisores": reg["decisores"],
-        "contatos": reg["contatos"], "redes": reg["redes"], "sinais": reg["sinais"],
+        "contatos": reg["contatos"], "redes": reg["redes"], "sinais": reg["sinais"], "alertas": reg.get("alertas", []),
         "pendencias": reg["pendencias"],
         "enriquecimento": {"status": status(reg), "atualizadoEm": hoje_iso, "observacao": reg["observacao"],
                            "contatoSugerido": direto["id"] if direto else None},

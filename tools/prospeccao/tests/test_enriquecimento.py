@@ -64,3 +64,15 @@ def test_doc_lead_leva_status_e_sugestao():
     d = doc_lead(limpo, "2026-10-02T00:00:00Z")
     assert d["enriquecimento"]["status"] == "completo"
     assert d["enriquecimento"]["contatoSugerido"] == "k2"
+
+
+def test_noticia_de_risco_vai_para_alertas_e_nao_para_sinais():
+    limpo, _ = normalizar(_reg(sinais=[
+        {"texto": "Canal no YouTube com entrevistas", "fonte": "https://youtube.com/x"},
+        {"texto": "Atenção: professores acusaram a direção de assédio moral", "fonte": "https://noticia"},
+        {"texto": "Sócio citado em suspeita de propina", "fonte": "https://noticia2"},
+    ]))
+    assert [x["texto"] for x in limpo["sinais"]] == ["Canal no YouTube com entrevistas"]
+    assert [x["texto"] for x in limpo["alertas"]] == ["professores acusaram a direção de assédio moral",
+                                                      "Sócio citado em suspeita de propina"]
+    assert doc_lead(limpo, "x")["alertas"] == limpo["alertas"]
