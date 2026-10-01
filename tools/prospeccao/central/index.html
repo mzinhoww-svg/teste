@@ -1,0 +1,513 @@
+<title>Reiners · Central de disparo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: uma coluna de cards de lead sob um placar fixo; a cadência de 3 toques aparece como trilho em cada card. */
+  :root {
+    --navy: #14243E;
+    --creme: #FAF7F2;
+    --papel: #FFFFFF;
+    --pergaminho: #F0EBE1;
+    --linha: #E2DACB;
+    --suave: #5E5549;
+    --ouro: #9A7B35;
+    --ouro-texto: #6E5726;
+    --ouro-fundo: #F3EAD3;
+    --ok: #1F6B45;
+    --ok-fundo: #E3F0E8;
+    --alerta: #9B2C2C;
+    --alerta-fundo: #F7E4E1;
+    --btn: #14243E;
+    --btn-texto: #FAF7F2;
+    --display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+    --sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --navy: #F0EBE1; --creme: #0E1726; --papel: #16223A; --pergaminho: #1E2C47; --linha: #2B3B5A;
+      --suave: #A9B2C3; --ouro: #C4A15A; --ouro-texto: #E0C27F; --ouro-fundo: #33291A;
+      --ok: #85D3A6; --ok-fundo: #173325; --alerta: #F2A49A; --alerta-fundo: #3B1D1A;
+      --btn: #E8D9B5; --btn-texto: #14243E;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --navy: #F0EBE1; --creme: #0E1726; --papel: #16223A; --pergaminho: #1E2C47; --linha: #2B3B5A;
+    --suave: #A9B2C3; --ouro: #C4A15A; --ouro-texto: #E0C27F; --ouro-fundo: #33291A;
+    --ok: #85D3A6; --ok-fundo: #173325; --alerta: #F2A49A; --alerta-fundo: #3B1D1A;
+    --btn: #E8D9B5; --btn-texto: #14243E;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--creme); color: var(--navy); font: 15px/1.5 var(--sans); }
+  .wrap { max-width: 740px; margin: 0 auto; padding-inline: 16px; padding-block: 0 48px; }
+  button, select, a.btn { font: inherit; }
+  :focus-visible { outline: 2px solid var(--ouro); outline-offset: 2px; }
+
+  header.topo {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: var(--creme); padding-block: 14px 12px; border-bottom: 1px solid var(--linha);
+    display: grid; gap: 10px;
+  }
+  .marca { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .marca h1 { margin: 0; font: 600 30px/1 var(--display); letter-spacing: 0.01em; }
+  .marca h1 small { font: 500 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ouro-texto); margin-left: 8px; }
+  .conexao { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--suave); }
+  .conexao.on { color: var(--ok); }
+  .placar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; font-variant-numeric: tabular-nums; }
+  .placar div { display: grid; gap: 2px; }
+  .placar b { font: 600 26px/1 var(--display); }
+  .placar span { font: 500 10.5px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--suave); }
+  .barra { height: 3px; background: var(--linha); border-radius: 2px; overflow: hidden; }
+  .barra i { display: block; height: 100%; width: 100%; background: var(--ouro); transform: scaleX(0); transform-origin: left; transition: transform .3s; }
+  @media (prefers-reduced-motion: reduce) { .barra i { transition: none; } }
+
+  .aviso { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: var(--alerta-fundo); color: var(--alerta); font-size: 14px; }
+
+  .filtros { display: grid; gap: 8px; margin-block: 14px; }
+  .abas { display: flex; gap: 6px; flex-wrap: wrap; }
+  .abas button { border: 1px solid var(--linha); background: var(--papel); color: var(--navy);
+                 border-radius: 999px; padding: 6px 12px; font-size: 14px; cursor: pointer; }
+  .abas button[aria-pressed="true"] { background: var(--navy); color: var(--creme); border-color: var(--navy); }
+  .abas .n { font-variant-numeric: tabular-nums; opacity: .7; margin-left: 4px; }
+  .selects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .selects label { display: grid; gap: 3px; font: 500 10.5px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--suave); }
+  .selects select { width: 100%; padding: 7px 8px; border: 1px solid var(--linha); border-radius: 8px;
+                    background: var(--papel); color: var(--navy); font: 14px var(--sans); }
+
+  #lista { display: grid; gap: 12px; }
+  .card { background: var(--papel); border: 1px solid var(--linha); border-radius: 10px; padding: 14px;
+          display: grid; gap: 10px; min-width: 0; }
+  .card.teste { border-style: dashed; }
+  .card.apagado { opacity: .62; }
+  .cab { display: flex; justify-content: space-between; gap: 10px; align-items: start; }
+  .cab > div { min-width: 0; }
+  .cab h2 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.25; text-wrap: balance; }
+  .meta { font: 12px/1.4 var(--mono); color: var(--suave); margin-top: 3px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--pergaminho); white-space: nowrap; }
+  .chip.flag { background: var(--ouro-fundo); color: var(--ouro-texto); font-weight: 500; }
+  .estado { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase;
+            padding: 5px 8px; border-radius: 6px; white-space: nowrap; }
+  .estado.hoje { background: var(--ouro-fundo); color: var(--ouro-texto); }
+  .estado.aguardando { background: var(--pergaminho); color: var(--suave); }
+  .estado.respondeu { background: var(--ok-fundo); color: var(--ok); }
+  .estado.encerrado, .estado.sair { background: var(--pergaminho); color: var(--alerta); }
+
+  /* Trilho da cadência: visita, diagnóstico, piloto */
+  .trilho { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .passo { border-top: 3px solid var(--linha); padding-top: 6px; display: grid; gap: 1px; min-width: 0; }
+  .passo b { font: 500 10.5px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--suave); }
+  .passo span { font-size: 12.5px; color: var(--suave); font-variant-numeric: tabular-nums; }
+  .passo.feito { border-color: var(--ouro); }
+  .passo.feito b { color: var(--ouro-texto); }
+  .passo.agora { border-color: var(--navy); }
+  .passo.agora b, .passo.agora span { color: var(--navy); }
+
+  .frase { margin: 0; font: 500 20px/1.3 var(--display); }
+  details summary { cursor: pointer; font-size: 13px; color: var(--suave); }
+  .msg { white-space: pre-wrap; font-size: 14px; background: var(--creme); border-radius: 8px;
+         padding: 10px 12px; margin: 8px 0 0; overflow-wrap: anywhere; }
+  .destino { font: 13px var(--mono); color: var(--suave); overflow-wrap: anywhere; user-select: all; }
+  .acoes { display: flex; flex-wrap: wrap; gap: 6px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px;
+         padding: 8px 14px; border-radius: 8px; border: 1px solid var(--linha); background: var(--papel);
+         color: var(--navy); text-decoration: none; cursor: pointer; font-size: 14px; }
+  .btn.principal { background: var(--btn); color: var(--btn-texto); border-color: var(--btn); font-weight: 500; }
+  .btn.ok { color: var(--ok); }
+  .btn.sair { color: var(--alerta); margin-left: auto; }
+  .btn[aria-disabled="true"], .btn:disabled { opacity: .45; pointer-events: none; }
+  .vazio { text-align: center; color: var(--suave); padding: 40px 12px; }
+  .vazio b { display: block; font: 600 24px/1.2 var(--display); color: var(--navy); margin-bottom: 6px; }
+  #toast { position: fixed; left: 50%; transform: translateX(-50%);
+           bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--navy); color: var(--creme);
+           padding: 8px 14px; border-radius: 8px; font-size: 14px; z-index: 10; }
+  @media (max-width: 460px) {
+    .placar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .selects { grid-template-columns: 1fr 1fr; }
+    .btn.sair { margin-left: 0; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="topo">
+    <div class="marca">
+      <h1>Reiners Media<small>Central de disparo</small></h1>
+      <span id="conexao" class="conexao">Conectando</span>
+    </div>
+    <div class="placar">
+      <div><b id="p-hoje">0</b><span>Para hoje</span></div>
+      <div><b id="p-enviados">0</b><span>Toques hoje / <i id="p-meta" style="font-style:normal">20</i></span></div>
+      <div><b id="p-cadencia">0</b><span>Em cadência</span></div>
+      <div><b id="p-responderam">0</b><span>Responderam</span></div>
+    </div>
+    <div class="barra" aria-hidden="true"><i id="barra"></i></div>
+  </header>
+
+  <div id="aviso" class="aviso" hidden></div>
+
+  <nav class="filtros" aria-label="Filtros">
+    <div class="abas" id="abas">
+      <button type="button" data-grupo="hoje" aria-pressed="true">Para hoje<span class="n"></span></button>
+      <button type="button" data-grupo="aguardando" aria-pressed="false">Aguardando<span class="n"></span></button>
+      <button type="button" data-grupo="respondeu" aria-pressed="false">Responderam<span class="n"></span></button>
+      <button type="button" data-grupo="encerrado" aria-pressed="false">Sem resposta<span class="n"></span></button>
+      <button type="button" data-grupo="sair" aria-pressed="false">Saíram<span class="n"></span></button>
+      <button type="button" data-grupo="todos" aria-pressed="false">Todos<span class="n"></span></button>
+    </div>
+    <div class="selects">
+      <label for="f-segmento">Segmento<select id="f-segmento"><option value="">Todos</option></select></label>
+      <label for="f-faixa">Faixa<select id="f-faixa"><option value="">Todas</option></select></label>
+      <label for="f-canal">Canal<select id="f-canal"><option value="">Todos</option></select></label>
+    </div>
+  </nav>
+
+  <main id="lista" aria-live="polite">
+    <div class="vazio"><b>Carregando a fila</b>Conectando ao banco da central.</div>
+  </main>
+</div>
+<div id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  var NOMES_TOQUE = { 1: "Visita", 2: "Diagnóstico", 3: "Piloto" };
+  var DIA = 86400000;
+  var estado = {
+    leads: {},
+    meta: { metaDiaria: 20, esperaDias: { "1": 0, "2": 4, "3": 6 } },
+    db: null,
+    podeMarcar: false,
+    gravando: {},
+    carregado: false,
+    filtro: { grupo: "hoje", segmento: "", faixa: "", canal: "" }
+  };
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------- utilidades ----------
+  function el(tag, attrs, filhos) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === "text") n.textContent = attrs[k];
+      else if (k === "class") n.className = attrs[k];
+      else if (k.slice(0, 2) === "on") n.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] !== null && attrs[k] !== undefined && attrs[k] !== false) n.setAttribute(k, attrs[k]);
+    });
+    (filhos || []).forEach(function (f) { if (f) n.appendChild(typeof f === "string" ? document.createTextNode(f) : f); });
+    return n;
+  }
+  function inicioDoDia(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+  function mesmoDia(iso, ref) { return iso && inicioDoDia(iso).getTime() === inicioDoDia(ref).getTime(); }
+  function dataCurta(d) {
+    var x = new Date(d);
+    if (isNaN(x)) return "";
+    return x.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  }
+  var toastTimer;
+  function toast(txt) {
+    var t = $("toast");
+    t.textContent = txt; t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, 2400);
+  }
+  function copiar(texto, rotulo) {
+    function reserva() {
+      var ta = el("textarea", { readonly: "", "aria-hidden": "true" });
+      ta.value = texto;
+      ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      toast(ok ? rotulo + " copiado" : "Não deu para copiar. Abra a mensagem e selecione o texto.");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texto).then(function () { toast(rotulo + " copiado"); }, reserva);
+    } else { reserva(); }
+  }
+
+  // ---------- cadência ----------
+  function etapa(l) { return Number(l.etapa) || 0; }
+  function espera(n) { var e = estado.meta.esperaDias || {}; return Number(e[String(n)]) || 0; }
+  function vencimento(l) {
+    var e = etapa(l);
+    if (e >= 3) return null;
+    if (e === 0) return inicioDoDia(new Date(0));
+    var ultimo = l["enviado" + e];
+    if (!ultimo) return inicioDoDia(new Date(0));
+    return new Date(inicioDoDia(ultimo).getTime() + espera(e + 1) * DIA);
+  }
+  function grupo(l) {
+    if (l.situacao === "respondeu") return "respondeu";
+    if (l.situacao === "sair") return "sair";
+    if (etapa(l) >= 3) return "encerrado";
+    var v = vencimento(l);
+    return v && v.getTime() <= inicioDoDia(new Date()).getTime() ? "hoje" : "aguardando";
+  }
+  function toqueAtual(l) {
+    var n = Math.min(etapa(l) + 1, 3);
+    return (l.toques || []).filter(function (t) { return Number(t.n) === n; })[0] || {};
+  }
+  function mailto(l, t) {
+    return "mailto:" + encodeURIComponent(l.email || "") + "?subject=" + encodeURIComponent(t.assunto || "") +
+      "&body=" + encodeURIComponent(t.corpo || "");
+  }
+
+  // ---------- escrita: só etapa, enviadoN e situacao ----------
+  function gravar(id, dados, msg) {
+    if (!estado.podeMarcar || estado.gravando[id]) return;
+    estado.gravando[id] = true;
+    render();
+    estado.db.doc("leads/" + id).update(dados).then(function () { toast(msg); }, function (e) {
+      var code = e && e.code;
+      if (code === "revoked" || code === "not_granted" || code === "capability_disabled" || code === "capability_removed") {
+        desligar("A conexão com o banco caiu. Copiar e abrir mensagens continua funcionando; a marcação foi desativada.");
+      } else if (code === "invalid_argument") {
+        desligar("Sua conta pode ver a central, mas não pode marcar envios. Copiar e abrir mensagens continua funcionando.");
+      } else {
+        toast("Não foi possível salvar. Tente de novo em instantes.");
+      }
+    }).then(function () { delete estado.gravando[id]; render(); });
+  }
+  function marcarToque(l, n) {
+    var dados = { etapa: n };
+    dados["enviado" + n] = new Date().toISOString();
+    gravar(l.id, dados, "Toque " + n + " marcado como enviado");
+  }
+  function desfazerToque(l) {
+    var e = etapa(l);
+    if (e < 1) return;
+    var dados = { etapa: e - 1 };
+    dados["enviado" + e] = null;
+    gravar(l.id, dados, "Toque " + e + " desfeito");
+  }
+  function situacao(l, s, msg) { gravar(l.id, { situacao: s }, msg); }
+  function desligar(msg) {
+    estado.podeMarcar = false;
+    $("aviso").textContent = msg;
+    $("aviso").hidden = false;
+    $("conexao").className = "conexao";
+    $("conexao").textContent = "Sem banco";
+    render();
+  }
+
+  // ---------- render ----------
+  function lista() { return Object.keys(estado.leads).map(function (k) { return estado.leads[k]; }); }
+  function ordenar(a, b) {
+    if (a.id === "TESTE") return -1;
+    if (b.id === "TESTE") return 1;
+    // Follow-up vencido vem antes de primeiro contato; depois, a ordem da fila.
+    var ea = etapa(a) > 0 ? 0 : 1, eb = etapa(b) > 0 ? 0 : 1;
+    if (estado.filtro.grupo === "hoje" && ea !== eb) return ea - eb;
+    if (estado.filtro.grupo === "aguardando") {
+      var va = vencimento(a), vb = vencimento(b);
+      if (va && vb && va.getTime() !== vb.getTime()) return va - vb;
+    }
+    return (a.ordem || 9999) - (b.ordem || 9999);
+  }
+  function preencherSelect(id, valores) {
+    var s = $(id), atual = s.value, chave = valores.join("|");
+    if (s.dataset.chave === chave) return;
+    s.dataset.chave = chave;
+    while (s.options.length > 1) s.remove(1);
+    valores.forEach(function (v) { s.add(new Option(v, v)); });
+    s.value = valores.indexOf(atual) >= 0 ? atual : "";
+  }
+  function unicos(campo) {
+    var vs = {};
+    lista().forEach(function (l) { if (l.id !== "TESTE" && l[campo]) vs[l[campo]] = 1; });
+    return Object.keys(vs).sort();
+  }
+
+  function trilho(l) {
+    var e = etapa(l), g = grupo(l), v = vencimento(l);
+    return el("div", { class: "trilho", "aria-label": "Cadência" }, [1, 2, 3].map(function (n) {
+      var feito = n <= e, agora = !feito && n === e + 1 && (g === "hoje" || g === "aguardando");
+      var sub = feito ? "Enviado " + dataCurta(l["enviado" + n]) :
+        agora ? (g === "hoje" ? "Enviar hoje" : "A partir de " + dataCurta(v)) : "";
+      return el("div", { class: "passo" + (feito ? " feito" : "") + (agora ? " agora" : "") }, [
+        el("b", { text: n + " · " + NOMES_TOQUE[n] }), el("span", { text: sub || " " })
+      ]);
+    }));
+  }
+
+  function card(l) {
+    var g = grupo(l), e = etapa(l);
+    var ativo = g === "hoje" || g === "aguardando";
+    var semMarca = !estado.podeMarcar || !!estado.gravando[l.id];
+    var email = l.canal === "E-mail";
+    var t = toqueAtual(l), n = Math.min(e + 1, 3);
+
+    var chips = el("div", { class: "chips" }, [
+      l.segmento ? el("span", { class: "chip", text: l.segmento }) : null,
+      l.faixa ? el("span", { class: "chip", text: "Faixa " + l.faixa }) : null,
+      el("span", { class: "chip", text: l.canal || "" }),
+      l.bairro ? el("span", { class: "chip", text: l.bairro }) : null
+    ].concat((l.flags || []).map(function (f) { return el("span", { class: "chip flag", text: f }); })));
+
+    var rotulo = { hoje: "Toque " + n + " hoje", aguardando: "Aguardando", respondeu: "Respondeu",
+                   encerrado: "Sem resposta", sair: "Saiu" }[g];
+    var cab = el("div", { class: "cab" }, [
+      el("div", null, [
+        el("h2", { text: l.id === "TESTE" ? "Card de teste" : (l.nome || l.id) }),
+        el("div", { class: "meta", text: l.id === "TESTE" ? "Manda as mensagens para o WhatsApp da própria Reiners." :
+          [l.id, l.categoria, l.score != null ? "score " + l.score : ""].filter(Boolean).join(" · ") })
+      ]),
+      el("span", { class: "estado " + g, text: rotulo })
+    ]);
+
+    var verToque = ativo ? n : e || 1;
+    var tv = (l.toques || []).filter(function (x) { return Number(x.n) === verToque; })[0] || {};
+    var texto = email ? ("Assunto: " + (tv.assunto || "") + "\n\n" + (tv.corpo || "")) : (tv.mensagem || "");
+    var detalhes = el("details", null, [
+      el("summary", { text: "Toque " + verToque + " · " + NOMES_TOQUE[verToque] + (email ? " · e-mail completo" : " · mensagem completa") }),
+      el("p", { class: "msg", text: texto })
+    ]);
+
+    var acoes = [];
+    if (ativo) {
+      var podeHoje = g === "hoje";
+      if (email) {
+        acoes.push(el("a", { class: "btn principal", href: mailto(l, t), target: "_blank", rel: "noopener",
+          "aria-disabled": podeHoje ? null : "true" }, ["Abrir e-mail " + n]));
+        acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.assunto || "", "Assunto"); } }, ["Copiar assunto"]));
+        acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.corpo || "", "Corpo"); } }, ["Copiar corpo"]));
+        acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca || !podeHoje,
+          onclick: function () { marcarToque(l, n); } }, ["Marcar toque " + n + " enviado"]));
+      } else {
+        acoes.push(el("a", { class: "btn principal", href: t.waLink || "#", target: "_blank", rel: "noopener",
+          "aria-disabled": (podeHoje && t.waLink) ? null : "true",
+          onclick: function () { if (!semMarca) marcarToque(l, n); } }, ["Abrir WhatsApp · toque " + n]));
+        acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.mensagem || "", "Mensagem"); } }, ["Copiar"]));
+      }
+    }
+    if (e > 0 && (ativo || g === "encerrado")) {
+      acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { desfazerToque(l); } }, ["Desfazer toque " + e]));
+    }
+    if (ativo || g === "encerrado") {
+      acoes.push(el("button", { type: "button", class: "btn ok", disabled: semMarca,
+        onclick: function () { situacao(l, "respondeu", "Marcado como respondeu"); } }, ["Respondeu"]));
+      acoes.push(el("button", { type: "button", class: "btn sair", disabled: semMarca,
+        onclick: function () { situacao(l, "sair", "Não contatar de novo"); } }, ["Pediu para sair"]));
+    } else {
+      acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca,
+        onclick: function () { situacao(l, "ativo", "De volta à cadência"); } }, ["Voltar para a cadência"]));
+    }
+
+    var destino = email ? l.email : (l.telefone ? "+" + l.telefone : "");
+    return el("article", { class: "card" + (l.id === "TESTE" ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : "") }, [
+      cab, chips, trilho(l),
+      l.fraseUnica ? el("p", { class: "frase", text: l.fraseUnica }) : null,
+      detalhes,
+      destino ? el("div", { class: "destino", text: destino }) : null,
+      el("div", { class: "acoes" }, acoes)
+    ]);
+  }
+
+  function render() {
+    var todos = lista().sort(ordenar);
+    var reais = todos.filter(function (l) { return l.id !== "TESTE"; });
+    var agora = new Date();
+    var cont = { hoje: 0, aguardando: 0, respondeu: 0, encerrado: 0, sair: 0, todos: reais.length };
+    var toquesHoje = 0;
+    reais.forEach(function (l) {
+      cont[grupo(l)]++;
+      [1, 2, 3].forEach(function (n) { if (mesmoDia(l["enviado" + n], agora)) toquesHoje++; });
+    });
+    var meta = Number(estado.meta.metaDiaria) || 20;
+    $("p-hoje").textContent = cont.hoje;
+    $("p-enviados").textContent = toquesHoje;
+    $("p-meta").textContent = meta;
+    $("p-cadencia").textContent = cont.hoje + cont.aguardando;
+    $("p-responderam").textContent = cont.respondeu;
+    $("barra").style.transform = "scaleX(" + Math.min(1, toquesHoje / meta) + ")";
+
+    Array.prototype.forEach.call($("abas").querySelectorAll("button"), function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.grupo === estado.filtro.grupo));
+      b.querySelector(".n").textContent = cont[b.dataset.grupo];
+    });
+    preencherSelect("f-segmento", unicos("segmento"));
+    preencherSelect("f-faixa", unicos("faixa"));
+    preencherSelect("f-canal", unicos("canal"));
+
+    var f = estado.filtro;
+    var visiveis = todos.filter(function (l) {
+      if (l.id === "TESTE") return f.grupo === "hoje" || f.grupo === "todos" || grupo(l) === f.grupo;
+      if (f.grupo !== "todos" && grupo(l) !== f.grupo) return false;
+      if (f.segmento && l.segmento !== f.segmento) return false;
+      if (f.faixa && l.faixa !== f.faixa) return false;
+      if (f.canal && l.canal !== f.canal) return false;
+      return true;
+    });
+
+    var alvo = $("lista");
+    alvo.textContent = "";
+    if (!estado.carregado) {
+      alvo.appendChild(el("div", { class: "vazio" }, [el("b", { text: "Carregando a fila" }), "Conectando ao banco da central."]));
+      return;
+    }
+    if (!todos.length) {
+      alvo.appendChild(el("div", { class: "vazio" }, [el("b", { text: "Nenhum lead na fila" }), "Quando o Claude semear a central, os cards aparecem aqui."]));
+      return;
+    }
+    visiveis.forEach(function (l) { alvo.appendChild(card(l)); });
+    if (!visiveis.some(function (l) { return l.id !== "TESTE"; })) {
+      var vazio = f.grupo === "hoje" ? ["Nada para hoje", "Os próximos toques aparecem na aba Aguardando, com a data de cada um."] :
+        ["Nada neste filtro", "Troque a aba ou limpe os filtros."];
+      alvo.appendChild(el("div", { class: "vazio" }, [el("b", { text: vazio[0] }), vazio[1]]));
+    }
+  }
+
+  // ---------- filtros ----------
+  $("abas").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    estado.filtro.grupo = b.dataset.grupo;
+    render();
+  });
+  ["segmento", "faixa", "canal"].forEach(function (k) {
+    $("f-" + k).addEventListener("change", function (e) { estado.filtro[k] = e.target.value; render(); });
+  });
+  // Vira o dia com a página aberta: recalcula o que vence hoje.
+  setInterval(function () { if (estado.carregado) render(); }, 10 * 60 * 1000);
+
+  // ---------- banco ----------
+  function iniciar(db) {
+    if (!db) {
+      estado.carregado = true;
+      desligar("O banco da central não respondeu. Entre com a sua conta para ver a fila e marcar os envios.");
+      return;
+    }
+    estado.db = db;
+    estado.podeMarcar = true;
+    $("conexao").className = "conexao on";
+    $("conexao").textContent = "Ao vivo";
+    db.collection("leads").onSnapshot(function (snap) {
+      var novo = {};
+      snap.docs.forEach(function (d) {
+        if (!d.exists) return;
+        var dados = Object.assign({}, d.data());
+        dados.id = d.id;
+        novo[d.id] = dados;
+      });
+      estado.leads = novo;
+      estado.carregado = true;
+      render();
+    }, function () {
+      estado.carregado = true;
+      desligar("A conexão com o banco caiu. Recarregue a página para tentar de novo.");
+    });
+    db.doc("config/meta").onSnapshot(function (d) {
+      if (d.exists) { estado.meta = Object.assign({}, estado.meta, d.data()); render(); }
+    }, function () {});
+  }
+
+  render();
+  var usar = window.claude && typeof window.claude.use === "function" ? window.claude.use("db") : Promise.resolve(null);
+  Promise.resolve(usar).then(iniciar, function () { iniciar(null); });
+})();
+</script>

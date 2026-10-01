@@ -1,0 +1,891 @@
+[
+ {
+  "id": "R0001",
+  "saudacao": "Antônio",
+  "nome_curto": "Espósito Advocacia",
+  "frase": "Um escritório que vai de família e sucessões a direito eleitoral conversa com públicos muito diferentes.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0002",
+  "saudacao": "Charles",
+  "nome_curto": "Handell Advocacia",
+  "frase": "Recuperação judicial e questão fundiária são temas que o empresário precisa ouvir traduzidos.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0003",
+  "saudacao": "Celso",
+  "nome_curto": "Sindicato Rural de Cuiabá",
+  "frase": "Quem organiza a Expoagro já reúne o produtor rural, e cada edição rende conversa para o ano inteiro.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0004",
+  "saudacao": "Claudio",
+  "nome_curto": "Sinduscon-MT",
+  "frase": "O sindicato da construção tem pauta de sobra sobre o que está mudando nas obras de Mato Grosso.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0005",
+  "saudacao": "Alessandro",
+  "nome_curto": "Style Brokers",
+  "frase": "Imóvel de alto padrão se vende com conversa, e as três lojas da Style Brokers têm assunto de sobra.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0006",
+  "saudacao": "Irmã Rose",
+  "nome_curto": "Colégio Coração de Jesus",
+  "frase": "Um colégio salesiano tem tradição e valores que as famílias gostam de ouvir explicados de perto.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0007",
+  "saudacao": "Dr. Marcus",
+  "nome_curto": "FAIPE",
+  "frase": "Uma faculdade com Odontologia, Direito e Marketing tem professor para muita conversa boa.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0008",
+  "saudacao": "Davi",
+  "nome_curto": "Olimpo Engenharia",
+  "frase": "Obra industrial e pré-moldado são temas que o cliente entende melhor quando o engenheiro explica.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0009",
+  "saudacao": "Dra. Mara",
+  "nome_curto": "Betoni Odontologia",
+  "frase": "Uma clínica que atende desde 1992, em duas unidades, tem muita história de paciente para contar.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0010",
+  "saudacao": "Dra. Graciela",
+  "nome_curto": "Clínica IDEA",
+  "frase": "Laser, tricologia e dermatologia cirúrgica geram dúvida que o paciente gostaria de ouvir explicada com calma.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0011",
+  "saudacao": "pessoal da Royal Face",
+  "nome_curto": "Royal Face",
+  "frase": "Harmonização facial é procedimento que o paciente pesquisa muito antes de marcar, e quer ouvir de quem faz.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0012",
+  "saudacao": "pessoal da Verbene",
+  "nome_curto": "Verbene Oftalmologia",
+  "frase": "Catarata, cirurgia refrativa e glaucoma são temas que o paciente entende melhor numa conversa do que num folheto.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0013",
+  "saudacao": "pessoal da AGA",
+  "nome_curto": "AGA Advocacia",
+  "frase": "Crédito rural e recuperação judicial no agro são temas que o produtor quer entender antes de precisar.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0014",
+  "saudacao": "Bruno",
+  "nome_curto": "Ferreira Alegria",
+  "frase": "Direito ambiental e minerário para produtor rural é assunto técnico que ganha muito quando vira conversa.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0015",
+  "saudacao": "pessoal da MTCONT",
+  "nome_curto": "MTCONT",
+  "frase": "Planejamento tributário é o tipo de tema que o empresário só entende de verdade quando alguém explica com calma.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0016",
+  "saudacao": "Marco Aurélio",
+  "nome_curto": "Mestre Medeiros",
+  "frase": "Recuperação judicial e agronegócio são áreas em que a confiança no escritório começa antes da primeira reunião.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0017",
+  "saudacao": "pessoal da Lopes",
+  "nome_curto": "Lopes Cuiabá",
+  "frase": "Vocês já mantêm um canal no YouTube, e um set de estúdio dá mais peso a cada imóvel apresentado.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0018",
+  "saudacao": "pessoal da Aços Cuiabá",
+  "nome_curto": "Aços Cuiabá",
+  "frase": "NR-12 e manutenção industrial são assuntos técnicos que o cliente da indústria quer ouvir explicados.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0019",
+  "saudacao": "pessoal do Bom Jesus",
+  "nome_curto": "Bom Jesus Supermercado",
+  "frase": "Uma rede de supermercados de Cuiabá conhece o cliente da cidade como poucas empresas conhecem.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0020",
+  "saudacao": "pessoal do Colégio Maxi",
+  "nome_curto": "Colégio Maxi",
+  "frase": "Do fundamental ao pré-vestibular, o colégio acompanha anos de decisão das famílias.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0021",
+  "saudacao": "pessoal do São Gonçalo",
+  "nome_curto": "Colégio São Gonçalo",
+  "frase": "Um colégio que educa em Cuiabá desde 1894 tem uma história que a cidade inteira gostaria de ouvir.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0022",
+  "saudacao": "pessoal do São Mateus",
+  "nome_curto": "Colégio São Mateus",
+  "frase": "Educar do berçário ao ensino médio desde 1980 dá ao colégio muita história de família para contar.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0023",
+  "saudacao": "pessoal da Construcel",
+  "nome_curto": "Construcel",
+  "frase": "Quem vende acabamento ajuda o cliente a decidir a cara da casa, e essa conversa rende muito.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0024",
+  "saudacao": "pessoal da Cuiabá Formas",
+  "nome_curto": "Cuiabá Formas",
+  "frase": "Mais de 2.000 unidades em parede de concreto é um método que vale ser explicado por quem executa.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0025",
+  "saudacao": "pessoal da Ginco",
+  "nome_curto": "Ginco Urbanismo",
+  "frase": "Condomínio de alto padrão se vende com a história do projeto, e essa história cabe numa boa conversa.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0026",
+  "saudacao": "pessoal do Grupo Moinho",
+  "nome_curto": "Grupo Moinho",
+  "frase": "Uma rede de materiais de construção com 33 anos tem cliente e história em todas as lojas.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0027",
+  "saudacao": "pessoal da IMEPP",
+  "nome_curto": "IMEPP",
+  "frase": "Quem fabrica poste e padrão de energia está por trás de cada ligação nova, e pouca gente sabe disso.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0028",
+  "saudacao": "pessoal da Intelecto",
+  "nome_curto": "Intelecto Sistemas",
+  "frase": "Mais de 30 anos desenvolvendo sistema de gestão em Mato Grosso é uma trajetória que merece ser contada.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0029",
+  "saudacao": "pessoal da Mika",
+  "nome_curto": "Mika Alimentos",
+  "frase": "Uma indústria cuiabana desde 1993, com a Bebela na prateleira, tem história que o cliente da cidade adora.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0030",
+  "saudacao": "pessoal da Solidez",
+  "nome_curto": "Solidez Transportes",
+  "frase": "Uma transportadora 100% mato-grossense com filiais em três estados tem muita estrada para contar.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0031",
+  "saudacao": "pessoal da TMF",
+  "nome_curto": "TMF Engenharia",
+  "frase": "Uma construtora em Cuiabá desde 1992 já ergueu parte da cidade, e isso rende uma série de conversas.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0032",
+  "saudacao": "Dr. Cassio",
+  "nome_curto": "Clínica Genus",
+  "frase": "Ortopedia por subespecialidade é um diferencial que fica claro quando o próprio médico explica.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0033",
+  "saudacao": "Dra. Daiane",
+  "nome_curto": "Clínica Venésse",
+  "frase": "Estética facial e odontologia na mesma casa rendem conversa boa sobre como os dois cuidados se encontram.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0034",
+  "saudacao": "pessoal do IOME",
+  "nome_curto": "IOME",
+  "frase": "Medicina do esporte é assunto que atleta amador e profissional consomem com gosto quando vem de quem trata.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0035",
+  "saudacao": "pessoal da Alfa",
+  "nome_curto": "Alfa Contabilidade",
+  "frase": "Holding rural é um assunto que o produtor ouve falar muito e entende pouco, e vocês sabem explicar.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0036",
+  "saudacao": "Samuel",
+  "nome_curto": "CF Contabilidade",
+  "frase": "Contabilidade consultiva é um serviço que se vende melhor quando o cliente ouve como vocês pensam.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0037",
+  "saudacao": "pessoal da Contabilist",
+  "nome_curto": "Contabilist",
+  "frase": "Recuperação tributária para agro e saúde é um tema que costuma surpreender quem ouve pela primeira vez.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0038",
+  "saudacao": "pessoal da Exatus",
+  "nome_curto": "Exatus",
+  "frase": "Vocês já têm canal no YouTube, e um set de estúdio pode levar esse conteúdo a outro patamar.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0039",
+  "saudacao": "pessoal da FAF",
+  "nome_curto": "FAF Advogados",
+  "frase": "Recuperação judicial com foco no agro é assunto em que o produtor quer ouvir quem faz isso desde 2006.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0040",
+  "saudacao": "pessoal da AMPA",
+  "nome_curto": "AMPA",
+  "frase": "O algodão de Mato Grosso tem uma história que o produtor conhece e que o resto do país ainda escuta pouco.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0041",
+  "saudacao": "pessoal da CID",
+  "nome_curto": "CID Imóveis",
+  "frase": "Uma imobiliária de Cuiabá desde 1977, que já mantém um blog, tem história e conteúdo para muita conversa.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0042",
+  "saudacao": "pessoal da Imóveli",
+  "nome_curto": "Imóveli",
+  "frase": "Primeira moradia e Minha Casa Minha Vida geram muita dúvida, e vocês sabem responder cada uma.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0043",
+  "saudacao": "pessoal da UNIFACC",
+  "nome_curto": "UNIFACC-MT",
+  "frase": "Uma faculdade com especialização em oratória sabe o valor de uma boa conversa gravada.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0044",
+  "saudacao": "pessoal da Lotufo",
+  "nome_curto": "Lotufo Engenharia",
+  "frase": "Pavimentação e energia desde 1996 é infraestrutura que a cidade usa todo dia sem saber quem fez.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0045",
+  "saudacao": "Dr. Álvaro",
+  "nome_curto": "Clínica Saúde dos Olhos",
+  "frase": "Oftalmologia pediátrica é tema em que pai e mãe confiam mais quando ouvem o médico falar.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0046",
+  "saudacao": "Dra. Lara",
+  "nome_curto": "Dra. Lara Tavares",
+  "frase": "Quem já presidiu a SBD-MT tem autoridade para explicar dermatologia de um jeito que o paciente leva a sério.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0047",
+  "saudacao": "Dra. Mariana",
+  "nome_curto": "Dra. Mariana Barros",
+  "frase": "Oncologia cutânea é um tema sério, e ouvir a especialista explicar tranquiliza o paciente antes da consulta.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0048",
+  "saudacao": "Luana",
+  "nome_curto": "Luana Pinatti",
+  "frase": "Vi o seu trabalho no Instagram, e procedimentos como os fios PDO pedem uma explicação mais longa do que um vídeo curto.",
+  "fonte": "Instagram"
+ },
+ {
+  "id": "R0049",
+  "saudacao": "Dr. Andrey",
+  "nome_curto": "Odonto Alfa",
+  "frase": "Lentes, facetas e Invisalign são escolhas que o paciente faz melhor depois de ouvir o dentista explicar.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0050",
+  "saudacao": "Dra. Regianne",
+  "nome_curto": "Rosa Limão Estética",
+  "frase": "Bioestimulador e toxina ainda geram muita dúvida, e conversa gravada responde antes da primeira consulta.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0051",
+  "saudacao": "pessoal do VIVER CIN",
+  "nome_curto": "VIVER CIN",
+  "frase": "Um centro de oftalmologia com quatro médicos tem quatro olhares diferentes para levar a uma mesma conversa.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0052",
+  "saudacao": "Silvana",
+  "nome_curto": "Alves & Souza",
+  "frase": "Direito trabalhista e previdenciário geram as dúvidas que mais aparecem na conversa do dia a dia do cliente.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0053",
+  "saudacao": "Ana Paula",
+  "nome_curto": "Ana Paula Costa",
+  "frase": "Um escritório 100% tributário tem profundidade para explicar execução fiscal sem juridiquês.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0054",
+  "saudacao": "Fernando",
+  "nome_curto": "FZanin Advocacia",
+  "frase": "Tributário, ambiental e agrário juntos é uma combinação rara, e rende conversa com o produtor rural.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0055",
+  "saudacao": "Marta",
+  "nome_curto": "Marta Oliveira Advocacia",
+  "frase": "Previdência e família são áreas em que o cliente chega inseguro, e ouvir a advogada antes ajuda muito.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0056",
+  "saudacao": "Vagner",
+  "nome_curto": "ZAHI Contábil",
+  "frase": "Gestão tributária e societária é assunto que o empresário adia, e uma boa conversa ajuda a destravar.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0057",
+  "saudacao": "pessoal da Fecomércio",
+  "nome_curto": "Fecomércio-MT",
+  "frase": "Comércio, serviços e turismo juntos dão uma pauta que interessa a quase todo empresário do estado.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0058",
+  "saudacao": "pessoal do IMAC",
+  "nome_curto": "IMAC",
+  "frase": "Promover a carne de Mato Grosso é contar a história de quem produz, e essa história rende em áudio e vídeo.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0059",
+  "saudacao": "pessoal da FIEMT",
+  "nome_curto": "FIEMT",
+  "frase": "Uma federação que representa 37 sindicatos industriais tem um banco de vozes enorme para entrevistar.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0060",
+  "saudacao": "Luiz",
+  "nome_curto": "Cuiabá Imóveis",
+  "frase": "Compra e locação em Cuiabá geram as mesmas perguntas todo mês, e cada resposta pode virar um episódio.",
+  "fonte": "Neutra"
+ },
+ {
+  "id": "R0061",
+  "saudacao": "Joéverton",
+  "nome_curto": "DNA Compliance",
+  "frase": "Compliance e governança são temas densos, e quem é mentor e professor sabe que eles rendem em conversa.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0062",
+  "saudacao": "Esmarilda",
+  "nome_curto": "MB Inteligência Imobiliária",
+  "frase": "Financiamento é a parte que mais assusta quem compra imóvel, e vocês explicam isso desde 2013.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0063",
+  "saudacao": "pessoal da Farma Fácil",
+  "nome_curto": "Farma Fácil",
+  "frase": "Uma rede de farmácias com cinco unidades conversa com o bairro todo dia, e isso é presença institucional.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0064",
+  "saudacao": "Dra. Aline",
+  "nome_curto": "Dra. Aline Dalávia",
+  "frase": "Harmonização feita por médica é um diferencial que fica claro quando você mesma explica.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0065",
+  "saudacao": "Dra. Cintia",
+  "nome_curto": "Dra. Cintia Procopio",
+  "frase": "Tratamento capilar e laser são assuntos que a paciente pesquisa muito antes de chegar ao consultório.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0066",
+  "saudacao": "Dra. Marielli",
+  "nome_curto": "Dra. Marielli Pichini",
+  "frase": "Tricologia ainda é pouco conhecida, e é o tipo de tema que rende uma série de conversas.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0067",
+  "saudacao": "Dr. Thiago",
+  "nome_curto": "Oral Unic",
+  "frase": "Implante e alinhador são decisões grandes, e o paciente decide melhor depois de ouvir quem trata.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0068",
+  "saudacao": "José",
+  "nome_curto": "Advocacia Lacerda",
+  "frase": "Mais de 40 anos em direito agrário e ambiental é uma história que merece ser contada em conversa.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0069",
+  "saudacao": "Carlos",
+  "nome_curto": "Ghiorzi Advocacia",
+  "frase": "Um escritório tributário que atende 100% online já vive de conteúdo, e conversa gravada reforça essa confiança.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0070",
+  "saudacao": "pessoal da Master Assessoria",
+  "nome_curto": "Master Assessoria",
+  "frase": "Departamento pessoal e planejamento tributário são as dúvidas que o pequeno empresário mais traz para o contador.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0071",
+  "saudacao": "pessoal da AEAM",
+  "nome_curto": "AEAM-MT",
+  "frase": "Engenharia ambiental está no centro do debate em Mato Grosso, e quem entende do assunto merece ser ouvido.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0072",
+  "saudacao": "pessoal da CDL",
+  "nome_curto": "CDL Cuiabá",
+  "frase": "Uma entidade que representa os lojistas de Cuiabá tem pauta toda semana sobre o comércio da cidade.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0073",
+  "saudacao": "pessoal da MT Leite",
+  "nome_curto": "MT Leite",
+  "frase": "O produtor de leite tem desafios que pouca gente fora do campo conhece, e isso dá boa conversa.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0074",
+  "saudacao": "pessoal da AB3",
+  "nome_curto": "AB3",
+  "frase": "Imobiliária e construtora juntas acompanham o imóvel da obra até a entrega das chaves.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0075",
+  "saudacao": "pessoal da Bueno",
+  "nome_curto": "Bueno Negócios Imobiliários",
+  "frase": "Regularização de imóvel é um assunto que quase ninguém explica bem e todo comprador precisa entender.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0076",
+  "saudacao": "pessoal da CVL",
+  "nome_curto": "CVL Imóveis",
+  "frase": "Vocês já usam o YouTube, e uma conversa em estúdio aproxima o cliente antes da visita ao imóvel.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0077",
+  "saudacao": "pessoal da Cleide Imóveis",
+  "nome_curto": "Cleide Imóveis",
+  "frase": "Consultoria de financiamento é onde o comprador mais precisa de alguém explicando com paciência.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0078",
+  "saudacao": "pessoal da Coach'tigo",
+  "nome_curto": "Coach'tigo",
+  "frase": "Quem dá palestra e treinamento de liderança já pensa em formato de conversa, só falta o set.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0079",
+  "saudacao": "pessoal da D3",
+  "nome_curto": "D3 Imobiliária",
+  "frase": "Venda, locação e financiamento em Várzea Grande são temas em que o cliente confia em quem conhece a região.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0080",
+  "saudacao": "Gladistone",
+  "nome_curto": "Evolua Mentoria",
+  "frase": "Vocês já ensinam empreendedores no YouTube e no TikTok, e um estúdio dá outra cara a esse conteúdo.",
+  "fonte": "Instagram"
+ },
+ {
+  "id": "R0081",
+  "saudacao": "pessoal da Gerencial",
+  "nome_curto": "Gerencial Construtora",
+  "frase": "Mais de 40 anos construindo em Cuiabá é história suficiente para apresentar cada empreendimento em conversa.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0082",
+  "saudacao": "Patricia",
+  "nome_curto": "Hota Imóveis",
+  "frase": "Corretagem em Cuiabá e Várzea Grande gera dúvida de comprador e de inquilino toda semana.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0083",
+  "saudacao": "pessoal da Prudente",
+  "nome_curto": "Imobiliária Prudente",
+  "frase": "Vocês já têm canal no YouTube e no TikTok, e crédito imobiliário é tema que rende episódio longo.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0084",
+  "saudacao": "pessoal da Império",
+  "nome_curto": "Império Imóveis de Luxo",
+  "frase": "Imóvel de luxo pede apresentação à altura, e conversa bem gravada passa essa sensação.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0085",
+  "saudacao": "pessoal da Yassin",
+  "nome_curto": "Yassin Imobiliária",
+  "frase": "Mais de 30 anos entre Cuiabá e Chapada é uma bagagem que o cliente gosta de ouvir de perto.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0086",
+  "saudacao": "pessoal da Zinger",
+  "nome_curto": "Zinger Skills",
+  "frase": "Uma escola de oratória ensina a falar bem, e um podcast gravado em estúdio mostra isso na prática.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0087",
+  "saudacao": "pessoal da DAC",
+  "nome_curto": "DAC Distribuidora",
+  "frase": "Uma distribuidora que atende Mato Grosso, Pará e Rondônia tem logística e gente para muitas histórias.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0088",
+  "saudacao": "pessoal da Direção",
+  "nome_curto": "Direção Transportes",
+  "frase": "Armazenagem e cross docking são o bastidor que o cliente final nunca vê, e isso é pauta boa.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0089",
+  "saudacao": "pessoal da SE Distribuidora",
+  "nome_curto": "SE Distribuidora",
+  "frase": "Uma distribuidora com frota própria conhece o varejo de Mato Grosso de ponta a ponta.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0090",
+  "saudacao": "pessoal do Grupo Crepaldi",
+  "nome_curto": "Grupo Crepaldi",
+  "frase": "Uma clínica com cinco dermatologistas reúne especialidade suficiente para uma conversa por mês.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0091",
+  "saudacao": "Anderson",
+  "nome_curto": "Anderson Gadelha",
+  "frase": "Nota 5 em 35 avaliações no Google mostra cliente satisfeito com a defesa tributária de vocês.",
+  "fonte": "Reputação"
+ },
+ {
+  "id": "R0092",
+  "saudacao": "Isabelly",
+  "nome_curto": "Furtunato Advocacia",
+  "frase": "Um escritório que cobre empresarial, tributário e família fala com o empresário e com a família dele.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0093",
+  "saudacao": "Marcos",
+  "nome_curto": "Lima Contabilidade",
+  "frase": "Perícia e planejamento tributário para construção e saúde são temas específicos que pouca gente explica bem.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0094",
+  "saudacao": "Nayara",
+  "nome_curto": "Portocarrero Advogados",
+  "frase": "Advocacia trabalhista é das áreas em que o empresário mais precisa de orientação clara e preventiva.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0095",
+  "saudacao": "pessoal da ACCuiabá",
+  "nome_curto": "ACCuiabá",
+  "frase": "Uma associação que reúne os empresários de Cuiabá tem histórias de negócio para muitos episódios.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0096",
+  "saudacao": "pessoal da Aprosoja",
+  "nome_curto": "Aprosoja MT",
+  "frase": "Soja e milho movem Mato Grosso, e o produtor quer ouvir quem representa o setor falando com profundidade.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0097",
+  "saudacao": "pessoal da Iguaçu Máquinas",
+  "nome_curto": "Iguaçu Máquinas",
+  "frase": "Agricultura de precisão é um tema que o produtor quer ver explicado por quem entrega e dá assistência.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0098",
+  "saudacao": "pessoal da UNEM",
+  "nome_curto": "UNEM",
+  "frase": "O etanol de milho cresceu rápido em Mato Grosso, e ainda tem muita gente querendo entender como funciona.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0099",
+  "saudacao": "Cândida",
+  "nome_curto": "Horas Imóveis",
+  "frase": "Uma imobiliária que leva o seu nome promete atendimento pessoal, e conversa gravada mostra isso.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0100",
+  "saudacao": "Jordano",
+  "nome_curto": "Oratória Sem Limites",
+  "frase": "Quem ensina oratória e persuasão tem o melhor material para um podcast: a própria voz.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0101",
+  "saudacao": "pessoal do CIN",
+  "nome_curto": "Colégio Isaac Newton",
+  "frase": "Robótica e preparatório para ITA e Medicina são temas que as famílias querem ouvir de quem ensina.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0102",
+  "saudacao": "pessoal da Yanagawa",
+  "nome_curto": "Construtora Yanagawa",
+  "frase": "Mais de 40 obras em Mato Grosso desde 2010 é um portfólio que fica ainda melhor contado por quem construiu.",
+  "fonte": "Trajetória"
+ },
+ {
+  "id": "R0103",
+  "saudacao": "pessoal da Santa Júlia",
+  "nome_curto": "Clínica Santa Júlia",
+  "frase": "Mapeamento corporal e dermatologia oncológica salvam vidas, e falar disso com calma faz diferença.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0104",
+  "saudacao": "Dr. Elson",
+  "nome_curto": "Dr. Elson Adorno",
+  "frase": "Cirurgia de contorno corporal é decisão que a paciente amadurece ouvindo o cirurgião, muito antes da consulta.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0105",
+  "saudacao": "Mauricio",
+  "nome_curto": "Bios do Direito",
+  "frase": "Trabalhista e tributário juntos com consultoria empresarial é o dia a dia de quem tem empresa em Cuiabá.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0106",
+  "saudacao": "pessoal da Borralho e Rabaneda",
+  "nome_curto": "Borralho e Rabaneda",
+  "frase": "Planejamento sucessório e mediação são conversas delicadas que as famílias adiam por falta de informação.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0107",
+  "saudacao": "pessoal da CBS",
+  "nome_curto": "CBS Contábil",
+  "frase": "Assessoria fiscal e trabalhista para pequena e média empresa responde as mesmas dúvidas toda semana.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0108",
+  "saudacao": "pessoal da Acrimat",
+  "nome_curto": "Acrimat",
+  "frase": "A pecuária de corte tem um peso enorme em Mato Grosso, e o pecuarista gosta de ouvir quem o representa.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0109",
+  "saudacao": "pessoal da Agro Amazônia",
+  "nome_curto": "Agro Amazônia",
+  "frase": "Quem distribui insumos conversa com o produtor sobre a safra o tempo todo, e essa conversa pode ser gravada.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0110",
+  "saudacao": "pessoal da Amaggi",
+  "nome_curto": "Amaggi",
+  "frase": "Grãos, logística e energia numa empresa com matriz em Cuiabá é uma história que merece formato longo.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0111",
+  "saudacao": "pessoal da OCB/MT",
+  "nome_curto": "Sistema OCB/MT",
+  "frase": "O cooperativismo de Mato Grosso tem muita história de cooperado para contar em conversa.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0112",
+  "saudacao": "pessoal da Vox2you",
+  "nome_curto": "Vox2you Cuiabá",
+  "frase": "Uma escola de comunicação mostra o resultado dos alunos melhor ainda quando eles falam no microfone.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0113",
+  "saudacao": "pessoal da Coelho & Almeida",
+  "nome_curto": "Coelho & Almeida",
+  "frase": "Recuperação judicial e direito bancário são temas em que o empresário precisa confiar em quem fala.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0114",
+  "saudacao": "pessoal da Acrismat",
+  "nome_curto": "Acrismat",
+  "frase": "A suinocultura de Mato Grosso tem uma cadeia que o consumidor conhece pouco, e isso é pauta boa.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0115",
+  "saudacao": "pessoal da Ferro Tractor",
+  "nome_curto": "Ferro Tractor",
+  "frase": "Quem vende peça de trator e colheitadeira conhece a rotina do produtor como pouca gente conhece.",
+  "fonte": "Neutra"
+ },
+ {
+  "id": "R0116",
+  "saudacao": "pessoal da Cliniprev",
+  "nome_curto": "Cliniprev",
+  "frase": "Estética e implantes no mesmo lugar dão assunto para conversar sobre autoestima de um jeito sério.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0117",
+  "saudacao": "pessoal da Fisio Ativa",
+  "nome_curto": "Fisio Ativa",
+  "frase": "Reabilitação vestibular é pouco conhecida, e quem tem tontura procura exatamente esse tipo de explicação.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0118",
+  "saudacao": "pessoal da FisioMove",
+  "nome_curto": "FisioMove",
+  "frase": "Fisioterapia é das áreas em que o paciente mais pergunta, e cada resposta pode virar um episódio.",
+  "fonte": "Neutra"
+ },
+ {
+  "id": "R0119",
+  "saudacao": "pessoal da Aprofir",
+  "nome_curto": "Aprofir-MT",
+  "frase": "Feijão, pulses e irrigação são culturas que pouca gente fora do campo entende, e vocês têm o que explicar.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0120",
+  "saudacao": "pessoal da Famato",
+  "nome_curto": "Sistema Famato",
+  "frase": "Uma federação que representa os sindicatos rurais do estado tem voz em quase todo assunto do campo.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0121",
+  "saudacao": "pessoal da FBR",
+  "nome_curto": "FBR Consultoria",
+  "frase": "Mentoria executiva é feita de conversa, e conversa bem gravada vira prova do método.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0122",
+  "saudacao": "Silvio",
+  "nome_curto": "Bioind-MT",
+  "frase": "Bioenergia é dos setores que mais cresceram em Mato Grosso, e ainda há pouca conversa séria sobre ele.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0123",
+  "saudacao": "Wilmar",
+  "nome_curto": "SIAMT",
+  "frase": "A indústria da alimentação de Mato Grosso tem uma história que o consumidor da própria cidade não conhece.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0124",
+  "saudacao": "Lázaro",
+  "nome_curto": "Sindarroz-MT",
+  "frase": "O arroz de Mato Grosso tem uma indústria por trás que merece ser apresentada com calma.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0125",
+  "saudacao": "Carlos",
+  "nome_curto": "Sindenergia",
+  "frase": "Geração e transmissão de energia são assuntos técnicos que a sociedade precisa ouvir de quem é do setor.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0126",
+  "saudacao": "Tadeu",
+  "nome_curto": "Sindifrigo",
+  "frase": "A indústria frigorífica de Mato Grosso e Rondônia tem números e histórias que pouca gente conhece.",
+  "fonte": "Especialidade"
+ },
+ {
+  "id": "R0127",
+  "saudacao": "Antônio",
+  "nome_curto": "Sindilat-MT",
+  "frase": "A indústria de laticínios do estado tem uma cadeia inteira de produtores para mostrar em conversa.",
+  "fonte": "Especialidade"
+ }
+]
