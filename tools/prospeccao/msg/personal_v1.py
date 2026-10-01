@@ -118,7 +118,7 @@ PERSONAL = {
     "R0085": ("pessoal da Yassin", "Yassin Imobiliária", "Mais de 30 anos entre Cuiabá e Chapada é uma bagagem que o cliente gosta de ouvir de perto.", T),
     "R0086": ("pessoal da Zinger", "Zinger Skills", "Uma escola de oratória ensina a falar bem, e um podcast gravado em estúdio mostra isso na prática.", E),
     "R0099": ("Cândida", "Horas Imóveis", "Uma imobiliária que leva o seu nome promete atendimento pessoal, e conversa gravada mostra isso.", E),
-    "R0100": ("Jordano", "Oratória Sem Limites", "Quem ensina oratória e persuasão tem o melhor material para um podcast: a própria voz.", E),
+    "R0100": ("pessoal da Oratória Sem Limites", "Oratória Sem Limites", "Quem ensina oratória e persuasão tem o melhor material para um podcast: a própria voz.", E),
     "R0112": ("pessoal da Vox2you", "Vox2you Cuiabá", "Uma escola de comunicação mostra o resultado dos alunos melhor ainda quando eles falam no microfone.", E),
     "R0121": ("pessoal da FBR", "FBR Consultoria", "Mentoria executiva é feita de conversa, e conversa bem gravada vira prova do método.", E),
 
