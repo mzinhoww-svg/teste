@@ -10,7 +10,25 @@ Dois funis numa central de disparo só: o aquecimento, com uma cadência de trê
 | 2 · Diagnóstico | 4 dias depois do toque 1 | Diagnóstico de Presença Institucional por nossa conta |
 | 3 · Piloto | 6 dias depois do toque 2 | Um episódio piloto gravado e entregue editado, por nossa conta |
 
-Quem responde ou pede para sair sai da cadência na hora, pelos botões da central. O toque 1 leva uma frase única por lead, escrita a partir do que a pesquisa achou sobre ele. Os toques 2 e 3 usam o nome curto.
+Cada bloco vira um parágrafo, com linha em branco entre eles, para a mensagem não chegar como um bloco só. Quem responde ou pede para sair sai da cadência na hora, pelos botões da central. O toque 1 leva uma frase única por lead, escrita a partir do que a pesquisa achou sobre ele. Os toques 2 e 3 usam o nome curto.
+
+## A foto do toque 1
+
+No WhatsApp, o toque 1 vai com uma foto do cenário que mais combina com o lead, e a mensagem ganha uma linha que apresenta esse cenário ("Te mandei uma foto do nosso cenário Mesa de reunião, para bate-papo com até quatro pessoas."). As fotos vêm da pasta "Fotos Cenários" do Drive da Letícia: as 31 foram normalizadas (JPEG sRGB, 1600 px no lado maior, sem EXIF), renomeadas por cenário e rotuladas em `msg/fotos.py`. As 12 marcadas para prospecção ficam em `central/fotos/`; as com a claquete "Estúdio Zura" ficam de fora.
+
+| Segmento | Foto sugerida |
+|---|---|
+| Saúde · estética, dermatologia, harmonização | Estante |
+| Saúde · demais | Sofá (entrevista em dupla) |
+| Jurídico e contábil | Mesa de reunião, com pessoa |
+| Empresas, agro e entidades | Mesa de reunião pronta, com quatro microfones |
+| Mentores · escolas e cursos | Escritório (aulas) |
+| Mentores · imobiliário e construtoras | Sofá, plano aberto |
+| Mentores · mentoria e consultoria | Puff (conversa pessoal) |
+| Médio porte · colégios e faculdades | Escritório |
+| Médio porte · demais | Mesa de reunião, com pessoa |
+
+No card, dá para trocar a foto por qualquer outra das 12, e a linha do cenário muda junto. O botão **Salvar foto** baixa a imagem; depois é abrir o WhatsApp (a mensagem já vai escrita), mandar a foto pelo + e, em seguida, a mensagem.
 
 ## O pós-venda
 
@@ -43,6 +61,8 @@ O cliente entra no pós-venda pelo botão **Fechou negócio** de um lead do aque
 | Caminho | Conteúdo |
 |---|---|
 | `msg/copy_v1.py` | Copy v1 dos três toques, bloco do que fazemos por ICP, assuntos e assinatura do e-mail |
+| `msg/fotos.py` | Catálogo rotulado das 31 fotos, regras de foto por segmento e a linha do cenário |
+| `central/fotos/` | As 12 fotos curadas, publicadas junto da central |
 | `msg/copy_posvenda.py` | Copy das sete etapas do pós-venda, entregáveis e local por produto (vai para `config/posvenda`) |
 | `msg/prep.py` | Junta as listas de pesquisa, normaliza telefone, define canal e flags, deduplica, pontua e numera (R0001…) |
 | `msg/compose.py` | WhatsApp, link wa.me e e-mail de cada toque |

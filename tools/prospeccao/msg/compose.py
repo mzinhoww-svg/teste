@@ -1,12 +1,14 @@
 """Montagem das mensagens de WhatsApp, do link wa.me e dos e-mails dos três toques."""
 import urllib.parse
 
-from msg.copy_v1 import ASSINATURA_EMAIL, ASSUNTOS, SAIDA_EMAIL, blocos
+from msg.copy_v1 import ASSINATURA_EMAIL, ASSUNTOS, SAIDA_EMAIL, SEPARADOR, blocos
 
 
-def compose_whatsapp(toque: int, icp: str, saudacao: str, nome_curto: str, frase: str) -> str:
-    return "\n".join(b.format(saudacao=saudacao, nome_curto=nome_curto, frase=frase)
-                     for b in blocos(toque, icp))
+def compose_whatsapp(toque: int, icp: str, saudacao: str, nome_curto: str, frase: str,
+                     linha_foto: str = "") -> str:
+    """Mensagem com um parágrafo por bloco. `linha_foto` entra no toque 1 quando vai foto junto."""
+    return SEPARADOR.join(b.format(saudacao=saudacao, nome_curto=nome_curto, frase=frase, linha_foto=linha_foto)
+                          for b in blocos(toque, icp, foto=bool(linha_foto)))
 
 
 def wa_link(telefone: str, texto: str) -> str:

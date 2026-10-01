@@ -15,6 +15,10 @@ def test_gerar_monta_tres_toques_por_canal(arquivos):
     assert [t["n"] for t in whats["toques"]] == [1, 2, 3]
     assert all(t["waLink"] and not t["corpo"] for t in whats["toques"])
     assert all(t["assunto"] and t["corpo"] and not t["waLink"] for t in email["toques"])
+    # Foto só no WhatsApp do toque 1
+    assert whats["foto"] == "mesa-pessoa-02" and "Te mandei uma foto" in whats["toques"][0]["mensagem"]
+    assert "foto" not in whats["toques"][1]["mensagem"]
+    assert email["foto"] == "" and "foto" not in email["toques"][0]["corpo"]
 
 
 def test_gerar_acusa_lead_sem_personal(arquivos, tmp_path):
@@ -51,4 +55,4 @@ def test_planilha_tem_leads_e_copy(arquivos, tmp_path):
 def test_base_semeia_config_do_pos_venda():
     from central.seed import base
     ids = [w["doc_id"] for w in base()]
-    assert ids == ["TESTE", "meta", "posvenda"]
+    assert ids == ["TESTE", "meta", "posvenda", "fotos"]

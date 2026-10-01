@@ -4,13 +4,22 @@ from msg.compose import compose_email, compose_whatsapp, wa_link
 from msg.copy_v1 import ASSINATURA_EMAIL, O_QUE_FAZEMOS
 
 
-def test_toque_1_tem_frase_e_bloco_do_icp():
+def test_toque_1_tem_frase_e_bloco_do_icp_em_paragrafos():
     t = compose_whatsapp(1, "ICP3", "pessoal da Aprosoja", "Aprosoja", "Frase única.")
-    linhas = t.split("\n")
-    assert linhas[0].startswith("Oi, pessoal da Aprosoja, tudo bem? Aqui é a Letícia")
-    assert linhas[1] == "Frase única."
-    assert linhas[2] == O_QUE_FAZEMOS["ICP3"]
+    paragrafos = t.split("\n\n")
+    assert paragrafos[0].startswith("Oi, pessoal da Aprosoja, tudo bem? Aqui é a Letícia")
+    assert paragrafos[1] == "Frase única."
+    assert paragrafos[2] == O_QUE_FAZEMOS["ICP3"]
     assert "conhecer o estúdio" in t
+    assert "\n" not in "".join(paragrafos)  # cada bloco é um parágrafo só
+
+
+def test_toque_1_com_foto_apresenta_o_cenario_antes_do_convite():
+    t = compose_whatsapp(1, "ICP2", "Charles", "Handell", "Frase.", "Te mandei uma foto do nosso cenário X, y.")
+    paragrafos = t.split("\n\n")
+    assert paragrafos[3] == "Te mandei uma foto do nosso cenário X, y."
+    assert paragrafos[4].startswith("Queria te convidar")
+    assert "foto" not in compose_whatsapp(1, "ICP2", "Charles", "Handell", "Frase.")
 
 
 def test_toques_2_e_3_sao_iguais_para_todos_e_nao_repetem_a_frase():

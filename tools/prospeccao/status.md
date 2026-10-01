@@ -19,7 +19,10 @@ Atualizado em 01/10/2026.
 | Verificação | No nível de quem usa a página: marcar o toque 1 no `TESTE`, ler de volta (`etapa` 1 com a data) e desfazer |
 | Pós-venda | Funil de 7 etapas na mesma central, textos em `config/posvenda`. Nenhum cliente cadastrado ainda: entram por "Fechou negócio" ou "Novo cliente" |
 | Verificação do pós-venda | No nível de quem usa a página: criar um cliente de teste, ler de volta e apagar. Texto montado pela página igual ao do Python nas 35 combinações de etapa e produto |
-| Testes | 62 passando (`python3 -m pytest -q` em `tools/prospeccao/`) |
+| Copy v2 | Parágrafos separados por linha em branco; toque 1 do WhatsApp com a linha do cenário da foto. Maior mensagem com 685 caracteres (a legenda de foto aceita 1024) |
+| Fotos | 31 normalizadas e rotuladas (`dados/fotos_rotuladas/` com `rotulos.csv`), 12 curadas na central. Distribuição: Mesa com pessoa 42, Sofá aberto 17, Estante 13, Mesa pronta 12, Sofá com pessoa 8, Escritório 9, Puff 4; os 22 leads de e-mail ficam sem foto |
+| Atualização do banco | Só `toques`, `foto` e `versaoCopy` de cada lead, cada escrita presa à versão lida; o envio do Charles (R0002, toque 1 às 23:00 UTC) ficou como estava |
+| Testes | 75 passando (`python3 -m pytest -q` em `tools/prospeccao/`) |
 
 ## Pontos para a Letícia olhar
 
@@ -34,6 +37,8 @@ Atualizado em 01/10/2026.
 - **Clientes que já compraram:** cadastre pelo botão "Novo cliente" no pós-venda (nome, saudação, WhatsApp ou e-mail e produto). Se preferir, me passe a lista que eu semeio no banco.
 - **Etapa 6 (Entrega):** pede uma frase do cliente para o site. Ela só vai ao ar com autorização, como manda o código do site (depoimento real ou nenhum).
 
+- **Charles (Handell):** o toque 1 saiu antes da foto e caiu no atendimento automático do escritório. Se quiser, mande agora a foto da Mesa de reunião pelo card dele (Salvar foto) com uma linha curta; o toque 2 continua marcado para 05/10.
+
 ## Bloqueios
 
 - Nenhum. O Apify e o Tavily estão sem crédito, então a lista foi montada por busca na web e conferida no site de cada lead.
@@ -44,5 +49,6 @@ Atualizado em 01/10/2026.
 
 ## Log
 
+- 01/10/2026 23:30: fotos do Drive normalizadas e rotuladas, foto por lead no toque 1, mensagens em parágrafos (copy v2); banco atualizado sem mexer nos envios.
 - 01/10/2026 23:10: funil de pós-venda (7 etapas), botão Fechou negócio e formulário Novo cliente; config/posvenda semeado e verificado.
 - 01/10/2026: cinco pesquisas em paralelo (uma por segmento), 128 leads, módulos e testes, central publicada, 127 frases únicas, 0 erros na checagem, banco semeado e verificado.

@@ -6,7 +6,9 @@ do 2, oferece um episódio piloto gravado e entregue pela Reiners. Quem assina �
 a Letícia Reiners. Tom: conversa, não pitch (lib/agents/reiners-context.ts).
 """
 
-VERSAO = "v1"
+VERSAO = "v2"
+# Um bloco por parágrafo, com linha em branco entre eles: no WhatsApp a mensagem respira.
+SEPARADOR = "\n\n"
 WHATS_LETICIA = "5565999207108"
 WHATS_LETICIA_FMT = "+55 65 99920-7108"
 INSTAGRAM = "instagram.com/reinersmedia"
@@ -75,10 +77,14 @@ TERMOS_PROIBIDOS = ("posts", "viralizar", "viral", "feed bonito", "pacote de pos
                     "stories", "gestão de redes", "métricas", "engajamento", "alcance")
 
 
-def blocos(toque: int, icp: str) -> list[str]:
-    """Blocos fixos do toque, com {saudacao}, {frase} e {nome_curto} ainda por preencher."""
+def blocos(toque: int, icp: str, foto: bool = False) -> list[str]:
+    """Blocos fixos do toque, com {saudacao}, {frase}, {nome_curto} e {linha_foto} por preencher.
+
+    Com foto (WhatsApp do toque 1), entra a linha que apresenta o cenário da foto enviada junto.
+    """
     if toque == 1:
-        return [T1_ABERTURA, "{frase}", O_QUE_FAZEMOS[icp], T1_CONVITE, T1_FECHO]
+        fixo = [T1_ABERTURA, "{frase}", O_QUE_FAZEMOS[icp]]
+        return fixo + (["{linha_foto}"] if foto else []) + [T1_CONVITE, T1_FECHO]
     if toque == 2:
         return [T2_ABERTURA, T2_GANCHO, T2_OFERTA, T2_FECHO]
     if toque == 3:
@@ -92,7 +98,7 @@ def linhas_copy() -> list[tuple[str, str, str]]:
     for t in TOQUES:
         espera = ESPERA_DIAS[t]
         rotulo = f"Toque {t}" + (f" (+{espera} dias)" if espera else "")
-        for i, b in enumerate(blocos(t, "ICP1"), start=1):
+        for i, b in enumerate(blocos(t, "ICP1", foto=True), start=1):
             if b == O_QUE_FAZEMOS["ICP1"]:
                 for icp, texto in O_QUE_FAZEMOS.items():
                     linhas.append((f"{rotulo} · bloco {i}", icp, texto))

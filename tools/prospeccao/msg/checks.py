@@ -4,11 +4,11 @@ import unicodedata
 import urllib.parse
 from dataclasses import dataclass
 
-from msg.copy_v1 import O_QUE_FAZEMOS, TERMOS_PROIBIDOS, blocos
+from msg.copy_v1 import O_QUE_FAZEMOS, SEPARADOR, TERMOS_PROIBIDOS, blocos
 from msg.prep import Lead
 
 FONTES = ("Especialidade", "Instagram", "Reputação", "Trajetória", "Neutra")
-LIMITE_WHATS = 650
+LIMITE_WHATS = 800  # vai como legenda da foto, que aceita até 1024
 LIMITE_FRASE = 150
 PRECO = re.compile(r"R\$|\breais\b|\bgrátis\b|\bgratuit[oa]\b|\bdesconto\b", re.IGNORECASE)
 SUPERLATIVOS = ("incrível", "incrivel", "revolucionári", "melhor do mercado", "sensacional")
@@ -95,7 +95,7 @@ def check_personal(l: Lead, p: Personal) -> list[str]:
     return erros
 
 
-def check_toque(l: Lead, p: Personal, toque: int, texto: str, link: str) -> list[str]:
+def check_toque(l: Lead, p: Personal, toque: int, texto: str, link: str, linha_foto: str = "") -> list[str]:
     erros: list[str] = []
     e = lambda msg: erros.append(f"{l.id} toque {toque}: {msg}")  # noqa: E731
     if "—" in texto:
@@ -110,10 +110,12 @@ def check_toque(l: Lead, p: Personal, toque: int, texto: str, link: str) -> list
     if "{" in texto or "}" in texto:
         e("placeholder sem preencher")
 
-    esperado = [b.format(saudacao=p.saudacao, nome_curto=p.nome_curto, frase=p.frase)
-                for b in blocos(toque, l.icp)]
-    if texto.split("\n") != esperado:
+    esperado = [b.format(saudacao=p.saudacao, nome_curto=p.nome_curto, frase=p.frase, linha_foto=linha_foto)
+                for b in blocos(toque, l.icp, foto=bool(linha_foto))]
+    if texto.split(SEPARADOR) != esperado:
         e("mensagem difere dos blocos da copy")
+    if "\n\n\n" in texto:
+        e("linha em branco dupla")
     if toque == 1 and O_QUE_FAZEMOS.get(l.icp, "") not in texto:
         e(f"ICP sem bloco do que fazemos: {l.icp!r}")
 

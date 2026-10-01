@@ -130,6 +130,15 @@
   .esteira .rotulo span { color: var(--suave); font-variant-numeric: tabular-nums; }
 
   .frase { margin: 0; font: 500 20px/1.3 var(--display); }
+
+  /* Foto do cenário que vai junto do toque 1 */
+  .foto { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; align-items: start;
+          background: var(--creme); border-radius: 8px; padding: 8px; margin: 0; }
+  .foto a.img { display: block; aspect-ratio: 2 / 3; border-radius: 6px; overflow: hidden; background: var(--pergaminho); }
+  .foto img { width: 100%; height: 100%; object-fit: cover; display: block; max-width: 100%; }
+  .foto figcaption { display: grid; gap: 8px; min-width: 0; font-size: 13px; color: var(--suave); }
+  .foto figcaption b { font: 500 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--navy); }
+  .foto ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
   details summary { cursor: pointer; font-size: 13px; color: var(--suave); }
   .msg { white-space: pre-wrap; font-size: 14px; background: var(--creme); border-radius: 8px;
          padding: 10px 12px; margin: 8px 0 0; overflow-wrap: anywhere; }
@@ -216,6 +225,8 @@
     clientes: {},
     meta: { metaDiaria: 20, esperaDias: { "1": 0, "2": 4, "3": 6 } },
     pv: null,
+    fotos: null,
+    downloads: null,
     db: null,
     podeMarcar: false,
     gravando: {},
@@ -402,6 +413,66 @@
     ]);
   }
 
+  // ---------- foto do toque 1 ----------
+  function fotoDe(l) {
+    var cat = estado.fotos || {};
+    var id = l.fotoEscolhida && cat[l.fotoEscolhida] ? l.fotoEscolhida : l.foto;
+    return id && cat[id] ? { id: id, dados: cat[id] } : null;
+  }
+  // Mensagem do toque 1 com a linha do cenário da foto escolhida no lugar da padrão.
+  function mensagemToque(l, t) {
+    var msg = t.mensagem || "";
+    var cat = estado.fotos || {}, f = fotoDe(l);
+    if (Number(t.n) === 1 && f && l.foto && f.id !== l.foto && cat[l.foto]) {
+      msg = msg.replace(cat[l.foto].linha, f.dados.linha);
+    }
+    return msg;
+  }
+  function linkToque(l, t) {
+    var msg = mensagemToque(l, t);
+    return msg === t.mensagem ? t.waLink : (l.telefone ? waLink(l.telefone, msg) : "");
+  }
+  function salvarFoto(f) {
+    if (!estado.downloads) return;
+    fetch(f.dados.arquivo).then(function (r) { if (!r.ok) throw new Error("foto"); return r.blob(); })
+      .then(function (blob) {
+        return estado.downloads.save({ filename: "reiners-" + f.id + ".jpg", data: blob });
+      })
+      .then(function () { toast("Foto salva"); }, function (e) {
+        var code = e && e.code;
+        if (code === "declined") return;
+        if (code === "rate_limited") { toast("Já tem um download aberto. Confirme ou feche e tente de novo."); return; }
+        toast("Não deu para salvar por aqui. Toque e segure a foto para salvar.");
+      });
+  }
+  function blocoFoto(l, semMarca) {
+    var f = fotoDe(l), cat = estado.fotos || {};
+    if (!f) return null;
+    var opcoes = Object.keys(cat).sort(function (a, b) { return cat[a].cenario.localeCompare(cat[b].cenario) || a.localeCompare(b); });
+    var sel = el("select", { id: "foto-" + l.id, disabled: semMarca,
+      onchange: function (ev) { gravar("leads/" + l.id, { fotoEscolhida: ev.target.value === l.foto ? null : ev.target.value }, "Foto trocada"); } },
+      opcoes.map(function (k) {
+        return el("option", { value: k, text: cat[k].cenario + " · " + cat[k].descricao + (k === l.foto ? " (sugerida)" : "") });
+      }));
+    sel.value = f.id;
+    var passos = el("ol", null, [
+      el("li", { text: estado.downloads ? "Salve a foto (ou toque e segure a imagem)." : "Toque e segure a imagem para salvar." }),
+      el("li", { text: "Abra o WhatsApp: a mensagem já vai escrita." }),
+      el("li", { text: "Envie a foto pelo + e, em seguida, a mensagem." })
+    ]);
+    return el("figure", { class: "foto" }, [
+      el("a", { class: "img", href: f.dados.arquivo, target: "_blank", rel: "noopener", "aria-label": "Abrir a foto em tamanho cheio" }, [
+        el("img", { src: f.dados.arquivo, alt: f.dados.descricao, loading: "lazy", width: "1067", height: "1600" })
+      ]),
+      el("figcaption", null, [
+        el("b", { text: "Foto do cenário " + f.dados.cenario }),
+        el("label", { class: "campo", for: sel.id }, ["Trocar foto", sel]),
+        passos,
+        estado.downloads ? el("button", { type: "button", class: "btn", onclick: function () { salvarFoto(f); } }, ["Salvar foto"]) : null
+      ])
+    ]);
+  }
+
   function cardLead(l) {
     var g = grupo(l), e = etapa(l);
     var ativo = g === "hoje" || g === "aguardando";
@@ -429,7 +500,8 @@
 
     var verToque = ativo ? n : e || 1;
     var tv = toque(l, verToque);
-    var texto = email ? ("Assunto: " + (tv.assunto || "") + "\n\n" + (tv.corpo || "")) : (tv.mensagem || "");
+    var texto = email ? ("Assunto: " + (tv.assunto || "") + "\n\n" + (tv.corpo || "")) : mensagemToque(l, tv);
+    var comFoto = !email && ativo && n === 1;
     var detalhes = el("details", null, [
       el("summary", { text: "Toque " + verToque + " · " + NOMES_TOQUE[verToque] + (email ? " · e-mail completo" : " · mensagem completa") }),
       el("p", { class: "msg", text: texto })
@@ -446,10 +518,11 @@
         acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca || !podeHoje,
           onclick: function () { marcarToque(l, n); } }, ["Marcar toque " + n + " enviado"]));
       } else {
-        acoes.push(el("a", { class: "btn principal", href: t.waLink || "#", target: "_blank", rel: "noopener",
-          "aria-disabled": (podeHoje && t.waLink) ? null : "true",
+        var link = linkToque(l, t);
+        acoes.push(el("a", { class: "btn principal", href: link || "#", target: "_blank", rel: "noopener",
+          "aria-disabled": (podeHoje && link) ? null : "true",
           onclick: function () { if (!semMarca) marcarToque(l, n); } }, ["Abrir WhatsApp · toque " + n]));
-        acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.mensagem || "", "Mensagem"); } }, ["Copiar"]));
+        acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(mensagemToque(l, t), "Mensagem"); } }, ["Copiar"]));
       }
     }
     if (e > 0 && (ativo || g === "encerrado")) {
@@ -475,6 +548,7 @@
     return el("article", { class: "card" + (l.id === "TESTE" ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : "") }, [
       cab, chips, trilho(l),
       l.fraseUnica ? el("p", { class: "frase", text: l.fraseUnica }) : null,
+      comFoto ? blocoFoto(l, semMarca) : null,
       detalhes,
       destino ? el("div", { class: "destino", text: destino }) : null,
       el("div", { class: "acoes" }, acoes),
@@ -883,6 +957,10 @@
     db.doc("config/meta").onSnapshot(function (d) {
       if (d.exists) { estado.meta = Object.assign({}, estado.meta, d.data()); render(); }
     }, function () {});
+    db.doc("config/fotos").onSnapshot(function (d) {
+      estado.fotos = d.exists ? (d.data().fotos || null) : null;
+      render();
+    }, function () {});
     db.doc("config/posvenda").onSnapshot(function (d) {
       estado.pv = d.exists ? d.data() : null;
       render();
@@ -896,5 +974,7 @@
   render();
   var usar = window.claude && typeof window.claude.use === "function" ? window.claude.use("db") : Promise.resolve(null);
   Promise.resolve(usar).then(iniciar, function () { iniciar(null); });
+  var usarDownloads = window.claude && typeof window.claude.use === "function" ? window.claude.use("downloads") : Promise.resolve(null);
+  Promise.resolve(usarDownloads).then(function (d) { estado.downloads = d || null; render(); }, function () {});
 })();
 </script>

@@ -14,6 +14,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from msg.checks import Personal, check_lote, check_personal, check_toque
 from msg.compose import compose_email, compose_whatsapp, wa_link
 from msg.copy_posvenda import linhas_copy as linhas_copy_pv
+from msg.fotos import CATALOGO, foto_para, linha_foto
 from msg.copy_v1 import ICPS, TOQUES, VERSAO, linhas_copy
 from msg.prep import Lead, canal, carregar
 
@@ -25,10 +26,13 @@ def carregar_personal(caminho: str) -> dict[str, Personal]:
 
 def montar(l: Lead, p: Personal, ordem: int) -> dict:
     c = canal(l)
+    foto = foto_para(l.icp, l.nome, l.categoria, l.especialidade)
     toques = []
     for t in TOQUES:
-        texto = compose_whatsapp(t, l.icp, p.saudacao, p.nome_curto, p.frase)
-        item = {"n": t, "mensagem": "", "waLink": "", "assunto": "", "corpo": "", "_texto": texto}
+        # A foto vai junto só no WhatsApp do toque 1; o e-mail não leva anexo.
+        lf = linha_foto(foto) if (t == 1 and c == "WhatsApp") else ""
+        texto = compose_whatsapp(t, l.icp, p.saudacao, p.nome_curto, p.frase, lf)
+        item = {"n": t, "mensagem": "", "waLink": "", "assunto": "", "corpo": "", "_texto": texto, "_linha_foto": lf}
         if c == "WhatsApp":
             item["mensagem"] = texto
             item["waLink"] = wa_link(l.telefone, texto)
@@ -41,6 +45,7 @@ def montar(l: Lead, p: Personal, ordem: int) -> dict:
         "canal": c, "telefone": l.telefone, "email": l.email, "site": l.site,
         "instagram": l.instagram, "saudacao": p.saudacao, "nomeCurto": p.nome_curto,
         "fraseUnica": p.frase, "fonte": p.fonte, "flags": list(l.flags), "versaoCopy": VERSAO,
+        "foto": foto if c == "WhatsApp" else "",
         "toques": toques,
     }
 
@@ -58,7 +63,7 @@ def gerar(leads_path: str, personal_path: str) -> tuple[list[dict], list[str]]:
         erros += check_personal(l, p)
         linha = montar(l, p, ordem)
         for t in linha["toques"]:
-            erros += check_toque(l, p, t["n"], t.pop("_texto"), t["waLink"])
+            erros += check_toque(l, p, t["n"], t.pop("_texto"), t["waLink"], t.pop("_linha_foto"))
         linhas.append(linha)
         pares.append((l, p))
     erros += check_lote(pares)
@@ -74,7 +79,7 @@ COLUNAS = [
     ("Porte", "porte", 9), ("Score", "score", 7), ("Faixa", "faixa", 6), ("Flags", "flags", 16),
     ("Fonte do dado", "fonte", 30), ("Observação", "obs", 30),
     ("Saudação", "saudacao", 22), ("Nome curto", "nomeCurto", 18), ("Frase única", "fraseUnica", 50),
-    ("Toque 1", "t1", 60), ("Toque 2", "t2", 60), ("Toque 3", "t3", 60),
+    ("Foto do toque 1", "foto", 22), ("Toque 1", "t1", 60), ("Toque 2", "t2", 60), ("Toque 3", "t3", 60),
     ("Status", "status", 12),
 ]
 
@@ -98,7 +103,8 @@ def exportar_planilha(destino: str, leads: list[Lead], linhas: list[dict]) -> No
         d["flags"] = ", ".join(l.flags)
         x = por_id.get(l.id)
         if x:
-            d.update(saudacao=x["saudacao"], nomeCurto=x["nomeCurto"], fraseUnica=x["fraseUnica"])
+            d.update(saudacao=x["saudacao"], nomeCurto=x["nomeCurto"], fraseUnica=x["fraseUnica"],
+                     foto=f"{x['foto']}.jpg ({CATALOGO[x['foto']][0]})" if x["foto"] else "")
             for t in x["toques"]:
                 d[f"t{t['n']}"] = t["mensagem"] or f"Assunto: {t['assunto']}\n\n{t['corpo']}"
             d["status"] = "Pendente"
@@ -110,7 +116,7 @@ def exportar_planilha(destino: str, leads: list[Lead], linhas: list[dict]) -> No
     for row in ws.iter_rows(min_row=2):
         for c in row:
             c.font = corpo
-            c.alignment = Alignment(wrap_text=c.column_letter in ("O", "X", "Y", "Z", "AA"), vertical="top")
+            c.alignment = Alignment(wrap_text=c.column_letter in ("O", "X", "Z", "AA", "AB"), vertical="top")
     ws.freeze_panes = "E2"
 
     cp = wb.create_sheet("Copy")
