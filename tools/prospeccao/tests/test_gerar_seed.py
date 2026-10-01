@@ -45,10 +45,11 @@ def test_planilha_tem_leads_e_copy(arquivos, tmp_path):
     destino = tmp_path / "saida.xlsx"
     exportar_planilha(str(destino), carregar(lp), linhas)
     wb = load_workbook(destino)
-    assert wb.sheetnames == ["Leads", "Copy", "Copy pós-venda"]
+    assert wb.sheetnames == ["Leads", "Copy", "Enriquecimento", "Copy pós-venda"]
     ws = wb["Leads"]
     assert ws.max_row == 4
-    status = [ws.cell(r, ws.max_column).value for r in range(2, 5)]
+    col = [c.value for c in ws[1]].index("Status") + 1
+    status = [ws.cell(r, col).value for r in range(2, 5)]
     assert status == ["Pendente", "Pendente", "Sem canal"]
 
 
@@ -56,3 +57,20 @@ def test_base_semeia_config_do_pos_venda():
     from central.seed import base
     ids = [w["doc_id"] for w in base()]
     assert ids == ["TESTE", "meta", "posvenda", "fotos"]
+
+
+def test_email_que_ganhou_whatsapp_do_decisor_vira_whatsapp(arquivos, tmp_path):
+    import json
+    lp, pp = arquivos
+    enr = [{"id": "R0002", "empresa": {"cnpj": ""}, "socios": [], "decisores": [], "redes": {}, "sinais": [],
+            "pendencias": [], "observacao": "",
+            "contatos": [{"id": "k1", "papel": "decisor", "nome": "MARIANA SOUZA", "cargo": "Diretora",
+                          "telefone": "5565988887777", "whatsapp": "sim", "email": "", "fonte": "site", "confianca": "alta"}]}]
+    ep = tmp_path / "enr.json"
+    ep.write_text(json.dumps(enr), encoding="utf-8")
+    linhas, erros = gerar(lp, pp, str(ep))
+    assert erros == []
+    x = [l for l in linhas if l["id"] == "R0002"][0]
+    assert x["canal"] == "WhatsApp" and x["telefone"] == "5565988887777"
+    assert x["toques"][0]["mensagem"].startswith("Oi, Mariana, tudo bem?")
+    assert "WhatsApp do enriquecimento" in x["flags"]

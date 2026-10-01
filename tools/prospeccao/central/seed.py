@@ -69,7 +69,7 @@ def main() -> None:
     ap.add_argument("--out", default="central/lotes")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
-    linhas, erros = gerar(a.leads, a.personal)
+    linhas, erros = gerar(a.leads, a.personal, "dados/enriquecimento.json")
     if erros:
         sys.exit("\n".join(erros))
     lotes = [base()] + seed(linhas)

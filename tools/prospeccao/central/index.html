@@ -58,7 +58,7 @@
   .conexao { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--suave); }
   .conexao.on { color: var(--ok); }
 
-  .funis { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--navy); border-radius: 8px; overflow: hidden; }
+  .funis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--navy); border-radius: 8px; overflow: hidden; }
   .funis button { border: 0; background: var(--papel); color: var(--navy); padding: 8px 10px; cursor: pointer;
                   font-weight: 500; display: flex; justify-content: center; gap: 6px; align-items: baseline; }
   .funis button + button { border-left: 1px solid var(--navy); }
@@ -139,6 +139,27 @@
   .foto figcaption { display: grid; gap: 8px; min-width: 0; font-size: 13px; color: var(--suave); }
   .foto figcaption b { font: 500 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--navy); }
   .foto ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
+
+  /* Seção Leads: estrutura e enriquecimento */
+  .ficha { display: grid; gap: 4px; font-size: 13.5px; }
+  .ficha .linha { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--suave); }
+  .ficha .linha b { color: var(--navy); font-weight: 500; }
+  .grupo { display: grid; gap: 6px; }
+  .grupo > h3 { margin: 0; font: 500 10.5px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--suave); }
+  .pessoa { display: grid; gap: 2px; padding: 8px 10px; border: 1px solid var(--linha); border-radius: 8px; min-width: 0; }
+  .pessoa.ativo { border-color: var(--navy); box-shadow: inset 3px 0 0 var(--navy); }
+  .pessoa .topo { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .pessoa .nome { font-weight: 700; }
+  .pessoa .dado { font: 13px var(--mono); overflow-wrap: anywhere; }
+  .pessoa .fonte { font-size: 12px; color: var(--suave); overflow-wrap: anywhere; }
+  .pessoa .fonte a { color: inherit; }
+  .papel { font: 500 10.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; background: var(--pergaminho); white-space: nowrap; }
+  .papel.decisor, .papel.comunicacao { background: var(--ouro-fundo); color: var(--ouro-texto); }
+  .conf { font-size: 11.5px; color: var(--suave); }
+  .estado.completo { background: var(--ok-fundo); color: var(--ok); }
+  .estado.parcial { background: var(--ouro-fundo); color: var(--ouro-texto); }
+  .estado.bruto { background: var(--pergaminho); color: var(--alerta); }
+  .socios { margin: 0; padding-left: 18px; font-size: 13px; color: var(--suave); }
   details summary { cursor: pointer; font-size: 13px; color: var(--suave); }
   .msg { white-space: pre-wrap; font-size: 14px; background: var(--creme); border-radius: 8px;
          padding: 10px 12px; margin: 8px 0 0; overflow-wrap: anywhere; }
@@ -161,6 +182,7 @@
   @media (max-width: 460px) {
     .placar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .selects, .selects.dois { grid-template-columns: 1fr 1fr; }
+    .funis button { padding-inline: 4px; font-size: 14px; }
     .selects.dois .btn { grid-column: 1 / -1; }
     .grade { grid-template-columns: 1fr; }
     .btn.sair { margin-left: 0; }
@@ -176,6 +198,7 @@
     <div class="funis" role="group" aria-label="Funil">
       <button type="button" id="f-aq" data-funil="aq" aria-pressed="true">Aquecimento <span class="n" id="n-aq"></span></button>
       <button type="button" id="f-pv" data-funil="pv" aria-pressed="false">Pós-venda <span class="n" id="n-pv"></span></button>
+      <button type="button" id="f-ld" data-funil="ld" aria-pressed="false">Leads <span class="n" id="n-ld"></span></button>
     </div>
     <div class="placar">
       <div><b id="p1">0</b><span id="p1l">Para hoje</span></div>
@@ -194,6 +217,10 @@
       <label class="campo" for="f-segmento">Segmento<select id="f-segmento"><option value="">Todos</option></select></label>
       <label class="campo" for="f-faixa">Faixa<select id="f-faixa"><option value="">Todas</option></select></label>
       <label class="campo" for="f-canal">Canal<select id="f-canal"><option value="">Todos</option></select></label>
+    </div>
+    <div class="selects dois" id="sel-ld" hidden>
+      <label class="campo" for="f-ld-segmento">Segmento<select id="f-ld-segmento"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-ld-busca">Buscar<input id="f-ld-busca" type="search" placeholder="Empresa, pessoa ou CNPJ"></label>
     </div>
     <div class="selects dois" id="sel-pv" hidden>
       <label class="campo" for="f-etapa">Etapa<select id="f-etapa"><option value="">Todas</option></select></label>
@@ -217,8 +244,10 @@
   var ABAS = {
     aq: [["hoje", "Para hoje"], ["aguardando", "Aguardando"], ["respondeu", "Responderam"], ["fechou", "Fecharam"],
          ["encerrado", "Sem resposta"], ["sair", "Saíram"], ["todos", "Todos"]],
-    pv: [["hoje", "Para hoje"], ["andamento", "Em andamento"], ["pausado", "Pausados"], ["concluido", "Concluídos"], ["todos", "Todos"]]
+    pv: [["hoje", "Para hoje"], ["andamento", "Em andamento"], ["pausado", "Pausados"], ["concluido", "Concluídos"], ["todos", "Todos"]],
+    ld: [["todos", "Todos"], ["completo", "Completos"], ["parcial", "Parciais"], ["bruto", "Sem enriquecimento"], ["setor", "Contato de setor"]]
   };
+  var PAPEIS = { decisor: "Decisor", comunicacao: "Comunicação", secretaria: "Secretaria", comercial: "Comercial", geral: "Geral", setor: "Setor" };
   var estado = {
     funil: "aq",
     leads: {},
@@ -235,8 +264,11 @@
     novoCliente: false,
     filtro: {
       aq: { grupo: "hoje", segmento: "", faixa: "", canal: "" },
-      pv: { grupo: "hoje", etapa: "", produto: "" }
-    }
+      pv: { grupo: "hoje", etapa: "", produto: "" },
+      ld: { grupo: "todos", segmento: "", busca: "" }
+    },
+    novoContato: null,
+    rascunho: {}
   };
   var $ = function (id) { return document.getElementById(id); };
 
@@ -251,6 +283,8 @@
       else if (attrs[k] !== null && attrs[k] !== undefined && attrs[k] !== false) n.setAttribute(k, attrs[k]);
     });
     (filhos || []).forEach(function (f) { if (f) n.appendChild(typeof f === "string" ? document.createTextNode(f) : f); });
+    // Formulários sobrevivem ao redesenho: o que foi digitado volta do rascunho.
+    if (n.id && /^(nc|nk)-/.test(n.id) && estado.rascunho[n.id] != null) n.value = estado.rascunho[n.id];
     return n;
   }
   function inicioDoDia(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
@@ -301,6 +335,9 @@
     var d = String(v || "").replace(/\D/g, "").replace(/^0+/, "");
     if (d.length === 10 || d.length === 11) d = "55" + d;
     return /^55\d{10,11}$/.test(d) ? d : "";
+  }
+  function limparRascunho(prefixo) {
+    Object.keys(estado.rascunho).forEach(function (k) { if (k.indexOf(prefixo) === 0) delete estado.rascunho[k]; });
   }
   function preencherSelect(id, valores) {
     var s = $(id), atual = s.value, chave = valores.join("|");
@@ -413,6 +450,33 @@
     ]);
   }
 
+  // ---------- contato da cadência ----------
+  // Por padrão a cadência usa o telefone/e-mail do lead; "Usar na cadência" escolhe outro contato.
+  function contatoAtivo(l) {
+    if (!l.contatoAtivo) return null;
+    return (l.contatos || []).filter(function (c) { return c.id === l.contatoAtivo; })[0] || null;
+  }
+  function primeiroNome(nome) {
+    var partes = String(nome || "").trim().split(/\s+/);
+    if (!partes[0]) return "";
+    if (/^(dr|dra)\.?$/i.test(partes[0]) && partes[1]) return partes[0].replace(/\.?$/, ".") + " " + partes[1];
+    return partes[0].charAt(0).toUpperCase() + partes[0].slice(1).toLowerCase();
+  }
+  // Troca a saudação da mensagem pelo primeiro nome do contato escolhido.
+  function comSaudacao(l, msg) {
+    var c = contatoAtivo(l);
+    if (!c || !c.nome || !l.saudacao) return msg;
+    return msg.replace("Oi, " + l.saudacao + ",", "Oi, " + primeiroNome(c.nome) + ",");
+  }
+  function telefoneDestino(l) {
+    var c = contatoAtivo(l);
+    return c && c.telefone ? c.telefone : l.telefone;
+  }
+  function emailDestino(l) {
+    var c = contatoAtivo(l);
+    return c && c.email ? c.email : l.email;
+  }
+
   // ---------- foto do toque 1 ----------
   function fotoDe(l) {
     var cat = estado.fotos || {};
@@ -421,7 +485,7 @@
   }
   // Mensagem do toque 1 com a linha do cenário da foto escolhida no lugar da padrão.
   function mensagemToque(l, t) {
-    var msg = t.mensagem || "";
+    var msg = comSaudacao(l, t.mensagem || "");
     var cat = estado.fotos || {}, f = fotoDe(l);
     if (Number(t.n) === 1 && f && l.foto && f.id !== l.foto && cat[l.foto]) {
       msg = msg.replace(cat[l.foto].linha, f.dados.linha);
@@ -429,8 +493,8 @@
     return msg;
   }
   function linkToque(l, t) {
-    var msg = mensagemToque(l, t);
-    return msg === t.mensagem ? t.waLink : (l.telefone ? waLink(l.telefone, msg) : "");
+    var msg = mensagemToque(l, t), tel = telefoneDestino(l);
+    return (msg === t.mensagem && tel === l.telefone) ? t.waLink : (tel ? waLink(tel, msg) : "");
   }
   function salvarFoto(f) {
     if (!estado.downloads) return;
@@ -511,7 +575,7 @@
     if (ativo) {
       var podeHoje = g === "hoje";
       if (email) {
-        acoes.push(el("a", { class: "btn principal", href: mailto(l.email, t.assunto, t.corpo), target: "_blank", rel: "noopener",
+        acoes.push(el("a", { class: "btn principal", href: mailto(emailDestino(l), t.assunto, comSaudacao(l, t.corpo || "").replace("Olá, " + l.saudacao + ",", "Olá, " + (contatoAtivo(l) && contatoAtivo(l).nome ? primeiroNome(contatoAtivo(l).nome) : l.saudacao) + ",")), target: "_blank", rel: "noopener",
           "aria-disabled": podeHoje ? null : "true" }, ["Abrir e-mail " + n]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.assunto || "", "Assunto"); } }, ["Copiar assunto"]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.corpo || "", "Corpo"); } }, ["Copiar corpo"]));
@@ -544,7 +608,9 @@
         onclick: function () { situacao(l, "ativo", "De volta à cadência"); } }, ["Voltar para a cadência"]));
     }
 
-    var destino = email ? l.email : (l.telefone ? "+" + l.telefone : "");
+    var ca = contatoAtivo(l);
+    var destino = (email ? emailDestino(l) : (telefoneDestino(l) ? "+" + telefoneDestino(l) : "")) +
+      (ca ? " · " + [ca.nome, ca.cargo || PAPEIS[ca.papel]].filter(Boolean).join(", ") : "");
     return el("article", { class: "card" + (l.id === "TESTE" ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : "") }, [
       cab, chips, trilho(l),
       l.fraseUnica ? el("p", { class: "frase", text: l.fraseUnica }) : null,
@@ -610,6 +676,156 @@
       if (f.grupo === "hoje") vazio(alvo, "Nada para hoje", "Os próximos toques aparecem na aba Aguardando, com a data de cada um.");
       else vazio(alvo, "Nada neste filtro", "Troque a aba ou limpe os filtros.");
     }
+  }
+
+  // ================= LEADS: estrutura e enriquecimento =================
+  function statusLD(l) { return (l.enriquecimento && l.enriquecimento.status) || "bruto"; }
+  function deSetor(l) { return (l.flags || []).indexOf("número de setor") >= 0 && !l.contatoAtivo; }
+  function linkFonte(f) {
+    if (!f) return null;
+    return /^https?:\/\//.test(f) ? el("a", { href: f, target: "_blank", rel: "noopener", text: f.replace(/^https?:\/\/(www\.)?/, "").slice(0, 60) }) : document.createTextNode(f);
+  }
+  function blocoPessoa(l, c, ehContato) {
+    var ativo = ehContato && l.contatoAtivo === c.id;
+    var caminho = "leads/" + l.id, semMarca = !estado.podeMarcar || !!estado.gravando[caminho];
+    var dados = [];
+    if (c.telefone) dados.push(el("span", { class: "dado", text: "+" + c.telefone + (c.whatsapp === "sim" ? " · WhatsApp" : c.whatsapp === "nao" ? " · sem WhatsApp" : "") }));
+    if (c.email) dados.push(el("span", { class: "dado", text: c.email }));
+    if (c.linkedin) dados.push(el("a", { class: "dado", href: c.linkedin, target: "_blank", rel: "noopener", text: "LinkedIn" }));
+    var acoes = [];
+    if (ehContato && (c.telefone || c.email)) {
+      acoes.push(ativo ?
+        el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { gravar(caminho, { contatoAtivo: null }, "A cadência volta para o contato original"); } }, ["Voltar ao contato original"]) :
+        el("button", { type: "button", class: "btn ok", disabled: semMarca, onclick: function () { gravar(caminho, { contatoAtivo: c.id }, "Cadência vai para " + (c.nome || PAPEIS[c.papel])); } }, ["Usar na cadência"]));
+    }
+    return el("div", { class: "pessoa" + (ativo ? " ativo" : "") }, [
+      el("div", { class: "topo" }, [
+        el("span", { class: "nome", text: c.nome || (ehContato ? PAPEIS[c.papel] : "") }),
+        ehContato ? el("span", { class: "papel " + c.papel, text: PAPEIS[c.papel] || c.papel }) : null
+      ]),
+      c.cargo ? el("span", { text: c.cargo }) : null
+    ].concat(dados).concat([
+      el("span", { class: "fonte" }, ["Fonte: ", linkFonte(c.fonte), c.confianca ? el("span", { class: "conf", text: " · confiança " + c.confianca }) : null]),
+      acoes.length ? el("div", { class: "acoes" }, acoes) : null
+    ]));
+  }
+  function formContato(l) {
+    var id = l.id;
+    var campos = {
+      papel: el("select", { id: "nk-papel-" + id }, Object.keys(PAPEIS).map(function (k) { return el("option", { value: k, text: PAPEIS[k] }); })),
+      nome: el("input", { id: "nk-nome-" + id, placeholder: "Nome da pessoa" }),
+      cargo: el("input", { id: "nk-cargo-" + id, placeholder: "Ex.: Diretora de marketing" }),
+      telefone: el("input", { id: "nk-tel-" + id, inputmode: "tel", placeholder: "(65) 99999-0000" }),
+      whatsapp: el("select", { id: "nk-wa-" + id }, [["?", "Não sei"], ["sim", "Tem WhatsApp"], ["nao", "Sem WhatsApp"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); })),
+      email: el("input", { id: "nk-email-" + id, type: "email", placeholder: "nome@empresa.com.br" }),
+      fonte: el("input", { id: "nk-fonte-" + id, placeholder: "Onde achou: link, cartão, indicação…" })
+    };
+    var erro = el("p", { class: "erro", hidden: "" });
+    function campo(rot, k) { return el("label", { class: "campo", for: campos[k].id }, [rot, campos[k]]); }
+    function salvar() {
+      var tel = campos.telefone.value.trim() ? limparTelefone(campos.telefone.value) : "";
+      var email = campos.email.value.trim().toLowerCase();
+      var msg = (campos.telefone.value.trim() && !tel) ? "O telefone precisa ter DDD, como (65) 99999-0000." :
+        (!tel && !email) ? "Informe um telefone ou um e-mail." : !campos.fonte.value.trim() ? "Diga de onde veio o contato." : "";
+      if (msg) { erro.textContent = msg; erro.hidden = false; return; }
+      var lista = (l.contatos || []).slice();
+      var n = lista.reduce(function (m, c) { return Math.max(m, Number(String(c.id).slice(1)) || 0); }, 0) + 1;
+      lista.push({ id: "k" + n, papel: campos.papel.value, nome: campos.nome.value.trim(), cargo: campos.cargo.value.trim(),
+        telefone: tel, whatsapp: campos.whatsapp.value, email: email, fonte: campos.fonte.value.trim() + " (manual)", confianca: "alta" });
+      gravar("leads/" + id, { contatos: lista }, "Contato adicionado").then(function (ok) { if (ok) { estado.novoContato = null; limparRascunho("nk-"); render(); } });
+    }
+    return el("div", { class: "card form" }, [
+      el("div", { class: "grade" }, [campo("Papel", "papel"), campo("Nome", "nome"), campo("Cargo", "cargo"),
+        campo("Telefone", "telefone"), campo("WhatsApp", "whatsapp"), campo("E-mail", "email"), campo("Fonte", "fonte")]),
+      erro,
+      el("div", { class: "acoes" }, [
+        el("button", { type: "button", class: "btn principal", disabled: !estado.podeMarcar, onclick: salvar }, ["Salvar contato"]),
+        el("button", { type: "button", class: "btn", onclick: function () { estado.novoContato = null; limparRascunho("nk-"); render(); } }, ["Cancelar"])
+      ])
+    ]);
+  }
+  function cardEnriq(l) {
+    var st = statusLD(l), emp = l.empresa || {}, enr = l.enriquecimento || {};
+    var rotulo = { completo: "Completo", parcial: "Parcial", bruto: "Sem enriquecimento" }[st];
+    var corpo = [el("div", { class: "cab" }, [
+      el("div", null, [el("h2", { text: l.nome || l.id }),
+        el("div", { class: "meta", text: [l.id, l.segmento, l.categoria].filter(Boolean).join(" · ") })]),
+      el("span", { class: "estado " + st, text: rotulo })
+    ])];
+    var linhaEmp = [];
+    if (emp.cnpj) linhaEmp.push(el("span", null, ["CNPJ ", el("b", { text: emp.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5") })]));
+    if (emp.razaoSocial) linhaEmp.push(el("span", { text: emp.razaoSocial }));
+    if (emp.porte) linhaEmp.push(el("span", { text: "Porte " + emp.porte }));
+    if (emp.abertura) linhaEmp.push(el("span", { text: "Desde " + emp.abertura.slice(0, 4) }));
+    if (emp.situacao && !/ativa/i.test(emp.situacao)) linhaEmp.push(el("b", { text: "Situação: " + emp.situacao }));
+    var redes = l.redes || {};
+    var links = [["Site", l.site], ["Instagram", redes.instagram || l.instagram], ["LinkedIn", redes.linkedinEmpresa], ["YouTube", redes.youtube]]
+      .filter(function (x) { return x[1]; }).map(function (x) {
+        var href = /^https?:/.test(x[1]) ? x[1] : x[0] === "Instagram" ? "https://instagram.com/" + String(x[1]).replace(/^@/, "") : "https://" + x[1];
+        return el("a", { href: href, target: "_blank", rel: "noopener", text: x[0] });
+      });
+    corpo.push(el("div", { class: "ficha" }, [
+      linhaEmp.length ? el("div", { class: "linha" }, linhaEmp) : el("div", { class: "linha", text: "CNPJ não confirmado" }),
+      emp.cnae ? el("div", { class: "linha", text: emp.cnae }) : null,
+      links.length ? el("div", { class: "linha" }, links) : null
+    ]));
+    if ((l.decisores || []).length) {
+      corpo.push(el("div", { class: "grupo" }, [el("h3", { text: "Quem lidera" })].concat(l.decisores.map(function (d) { return blocoPessoa(l, d, false); }))));
+    }
+    if ((l.socios || []).length) {
+      corpo.push(el("details", null, [el("summary", { text: "Quadro de sócios na Receita (" + l.socios.length + ")" }),
+        el("ul", { class: "socios" }, l.socios.map(function (s) { return el("li", { text: s.nome + (s.qualificacao ? " · " + s.qualificacao : "") }); }))]));
+    }
+    var contatos = l.contatos || [];
+    corpo.push(el("div", { class: "grupo" }, [el("h3", { text: "Contatos" + (l.contatoAtivo ? "" : " · a cadência usa o contato original (+" + (l.telefone || l.email || "") + ")") })]
+      .concat(contatos.map(function (c) { return blocoPessoa(l, c, true); }))
+      .concat(contatos.length ? [] : [el("p", { class: "meta", text: "Nenhum contato enriquecido ainda." })])));
+    if ((l.sinais || []).length) {
+      corpo.push(el("div", { class: "grupo" }, [el("h3", { text: "Sinais para a conversa" })].concat(l.sinais.map(function (s) {
+        return el("div", { class: "fonte" }, [s.texto + " · ", linkFonte(s.fonte)]);
+      }))));
+    }
+    var pend = (l.pendencias || []).concat(enr.observacao ? [enr.observacao] : []);
+    if (pend.length) corpo.push(el("p", { class: "dica", text: pend.join(" · ") }));
+    if (estado.novoContato === l.id) corpo.push(formContato(l));
+    else corpo.push(el("div", { class: "acoes" }, [el("button", { type: "button", class: "btn", disabled: !estado.podeMarcar,
+      onclick: function () { estado.novoContato = l.id; render(); } }, ["Adicionar contato"])]));
+    return el("article", { class: "card" }, corpo);
+  }
+  function renderLD() {
+    var todos = Object.keys(estado.leads).filter(function (k) { return k !== "TESTE"; }).map(function (k) { return estado.leads[k]; })
+      .sort(function (a, b) { return (a.ordem || 9999) - (b.ordem || 9999); });
+    var cont = { todos: todos.length, completo: 0, parcial: 0, bruto: 0, setor: 0 }, decisor = 0, direto = 0, semCnpj = 0;
+    todos.forEach(function (l) {
+      cont[statusLD(l)]++;
+      if (deSetor(l)) cont.setor++;
+      if ((l.decisores || []).length) decisor++;
+      if (l.enriquecimento && l.enriquecimento.contatoSugerido) direto++;
+      if (!(l.empresa && l.empresa.cnpj)) semCnpj++;
+    });
+    placar([cont.completo, "Completos"], [decisor, "Com quem lidera"], [direto, "Contato direto"], [semCnpj, "Sem CNPJ"],
+      todos.length ? cont.completo / todos.length : 0);
+    abas(cont);
+    var segs = {};
+    todos.forEach(function (l) { if (l.segmento) segs[l.segmento] = 1; });
+    preencherSelect("f-ld-segmento", Object.keys(segs).sort());
+    var f = estado.filtro.ld, q = f.busca.trim().toLowerCase();
+    var visiveis = todos.filter(function (l) {
+      if (f.grupo === "setor" ? !deSetor(l) : (f.grupo !== "todos" && statusLD(l) !== f.grupo)) return false;
+      if (f.segmento && l.segmento !== f.segmento) return false;
+      if (q) {
+        var alvo = [l.nome, l.id, l.empresa && l.empresa.cnpj, l.empresa && l.empresa.razaoSocial]
+          .concat((l.decisores || []).map(function (d) { return d.nome; }))
+          .concat((l.contatos || []).map(function (c) { return c.nome; })).join(" ").toLowerCase();
+        if (alvo.indexOf(q) < 0) return false;
+      }
+      return true;
+    });
+    var alvoEl = $("lista");
+    alvoEl.textContent = "";
+    if (!estado.carregado.leads) return carregando(alvoEl);
+    visiveis.forEach(function (l) { alvoEl.appendChild(cardEnriq(l)); });
+    if (!visiveis.length) vazio(alvoEl, "Nada neste filtro", "Troque a aba, o segmento ou a busca.");
   }
 
   // ================= PÓS-VENDA =================
@@ -791,7 +1007,7 @@
         origem: "Cadastro manual", leadId: null, segmento: "", etapa: 1, situacao: "ativo",
         criadoEm: new Date().toISOString(), dataKickoff: null, dataGravacao: null
       }, "Cliente cadastrado: boas-vindas para hoje", true).then(function (ok) {
-        if (ok) { estado.novoCliente = false; render(); }
+        if (ok) { estado.novoCliente = false; limparRascunho("nc-"); render(); }
       });
     }
     return el("article", { class: "card form" }, [
@@ -801,7 +1017,7 @@
       erro,
       el("div", { class: "acoes" }, [
         el("button", { type: "button", class: "btn principal", disabled: !estado.podeMarcar, onclick: salvar }, ["Cadastrar e começar"]),
-        el("button", { type: "button", class: "btn", onclick: function () { estado.novoCliente = false; render(); } }, ["Cancelar"])
+        el("button", { type: "button", class: "btn", onclick: function () { estado.novoCliente = false; limparRascunho("nc-"); render(); } }, ["Cancelar"])
       ])
     ]);
   }
@@ -885,17 +1101,20 @@
     alvo.appendChild(el("div", { class: "vazio" }, [el("b", { text: titulo }), texto]));
   }
   function render() {
-    var pv = estado.funil === "pv";
-    $("f-aq").setAttribute("aria-pressed", String(!pv));
+    var pv = estado.funil === "pv", ld = estado.funil === "ld";
+    $("f-aq").setAttribute("aria-pressed", String(estado.funil === "aq"));
     $("f-pv").setAttribute("aria-pressed", String(pv));
-    $("sel-aq").hidden = pv;
+    $("f-ld").setAttribute("aria-pressed", String(ld));
+    $("sel-aq").hidden = estado.funil !== "aq";
     $("sel-pv").hidden = !pv;
+    $("sel-ld").hidden = !ld;
     $("novo-cliente").disabled = !estado.podeMarcar || !estado.pv;
     var leads = Object.keys(estado.leads).filter(function (k) { return k !== "TESTE"; }).map(function (k) { return estado.leads[k]; });
     var clientes = Object.keys(estado.clientes).map(function (k) { return estado.clientes[k]; });
     $("n-aq").textContent = leads.filter(function (l) { return grupo(l) === "hoje"; }).length || "";
     $("n-pv").textContent = estado.pv ? (clientes.filter(function (c) { return grupoPV(c) === "hoje"; }).length || "") : "";
-    if (pv) renderPV(); else renderAQ();
+    $("n-ld").textContent = leads.filter(function (l) { return statusLD(l) !== "completo"; }).length || "";
+    if (pv) renderPV(); else if (ld) renderLD(); else renderAQ();
   }
   function trocarFunil(f) {
     estado.funil = f;
@@ -908,6 +1127,14 @@
   // ---------- eventos ----------
   $("f-aq").addEventListener("click", function () { trocarFunil("aq"); });
   $("f-pv").addEventListener("click", function () { trocarFunil("pv"); });
+  $("f-ld").addEventListener("click", function () { trocarFunil("ld"); });
+  $("f-ld-segmento").addEventListener("change", function (e) { estado.filtro.ld.segmento = e.target.value; render(); });
+  var buscaTimer;
+  $("f-ld-busca").addEventListener("input", function (e) {
+    clearTimeout(buscaTimer);
+    var v = e.target.value;
+    buscaTimer = setTimeout(function () { estado.filtro.ld.busca = v; render(); }, 200);
+  });
   $("abas").addEventListener("click", function (e) {
     var b = e.target.closest("button");
     if (!b) return;
@@ -921,6 +1148,12 @@
     $("f-" + k).addEventListener("change", function (e) { estado.filtro.pv[k] = e.target.value; render(); });
   });
   $("novo-cliente").addEventListener("click", function () { estado.novoCliente = true; render(); });
+  document.addEventListener("input", function (e) {
+    if (e.target.id && /^(nc|nk)-/.test(e.target.id)) estado.rascunho[e.target.id] = e.target.value;
+  });
+  document.addEventListener("change", function (e) {
+    if (e.target.id && /^(nc|nk)-/.test(e.target.id)) estado.rascunho[e.target.id] = e.target.value;
+  });
   // Vira o dia com a página aberta: recalcula o que vence hoje.
   setInterval(function () { if (estado.carregado.leads) render(); }, 10 * 60 * 1000);
 
@@ -968,8 +1201,8 @@
   }
 
   try {
-    var salvo = location.hash === "#posvenda" ? "pv" : localStorage.getItem("central-funil");
-    if (salvo === "pv" || salvo === "aq") estado.funil = salvo;
+    var salvo = location.hash === "#posvenda" ? "pv" : location.hash === "#leads" ? "ld" : localStorage.getItem("central-funil");
+    if (salvo === "pv" || salvo === "aq" || salvo === "ld") estado.funil = salvo;
   } catch (e) { /* sem armazenamento: começa no aquecimento */ }
   render();
   var usar = window.claude && typeof window.claude.use === "function" ? window.claude.use("db") : Promise.resolve(null);

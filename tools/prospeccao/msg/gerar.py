@@ -7,6 +7,7 @@ Uso:
 import argparse
 import json
 from collections import Counter
+from dataclasses import replace
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -14,6 +15,8 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from msg.checks import Personal, check_lote, check_personal, check_toque
 from msg.compose import compose_email, compose_whatsapp, wa_link
 from msg.copy_posvenda import linhas_copy as linhas_copy_pv
+from msg.enriquecimento import PAPEIS, ROTULO_PAPEL, carregar as carregar_enriq, contato_direto, primeiro_nome
+from msg.enriquecimento import status as status_enriq
 from msg.fotos import CATALOGO, foto_para, linha_foto
 from msg.copy_v1 import ICPS, TOQUES, VERSAO, linhas_copy
 from msg.prep import Lead, canal, carregar
@@ -50,16 +53,35 @@ def montar(l: Lead, p: Personal, ordem: int) -> dict:
     }
 
 
-def gerar(leads_path: str, personal_path: str) -> tuple[list[dict], list[str]]:
+def aplicar_enriquecimento(l: Lead, p: Personal, enr: dict | None) -> tuple[Lead, Personal]:
+    """Lead só com e-mail que ganhou WhatsApp de quem decide (ou da comunicação) vira lead de WhatsApp,
+    com a saudação pelo primeiro nome da pessoa. Os demais seguem como estão: a troca de contato de
+    um lead de WhatsApp é feita no card da central ("Usar na cadência")."""
+    if not enr or canal(l) != "E-mail":
+        return l, p
+    d = contato_direto(enr)
+    if not d or not d["telefone"] or d["whatsapp"] != "sim":
+        return l, p
+    l = replace(l, telefone=d["telefone"], celular=d["telefone"][4] == "9", whatsapp_fixo=d["telefone"][4] != "9",
+                flags=l.flags + ["WhatsApp do enriquecimento"])
+    nome = primeiro_nome(d["nome"])
+    if nome:
+        p = replace(p, saudacao=nome)
+    return l, p
+
+
+def gerar(leads_path: str, personal_path: str, enriq_path: str | None = None) -> tuple[list[dict], list[str]]:
     """Devolve (linhas, erros) só para leads com canal."""
     leads = [l for l in carregar(leads_path) if canal(l) != "Sem canal"]
     personal = carregar_personal(personal_path)
+    enriq = carregar_enriq(enriq_path) if enriq_path else {}
     linhas, erros, pares = [], [], []
     for ordem, l in enumerate(leads, start=1):
         p = personal.get(l.id)
         if p is None:
             erros.append(f"{l.id}: sem entrada em personal.json")
             continue
+        l, p = aplicar_enriquecimento(l, p, enriq.get(l.id))
         erros += check_personal(l, p)
         linha = montar(l, p, ordem)
         for t in linha["toques"]:
@@ -81,11 +103,14 @@ COLUNAS = [
     ("Saudação", "saudacao", 22), ("Nome curto", "nomeCurto", 18), ("Frase única", "fraseUnica", 50),
     ("Foto do toque 1", "foto", 22), ("Toque 1", "t1", 60), ("Toque 2", "t2", 60), ("Toque 3", "t3", 60),
     ("Status", "status", 12),
+    ("CNPJ", "cnpj", 16), ("Razão social", "razao", 30), ("Quem lidera", "lider", 24), ("Cargo", "cargoLider", 18),
+    ("Contato sugerido", "sugerido", 34), ("Enriquecimento", "statusEnriq", 12),
 ]
 
 
-def exportar_planilha(destino: str, leads: list[Lead], linhas: list[dict]) -> None:
+def exportar_planilha(destino: str, leads: list[Lead], linhas: list[dict], enriq: dict | None = None) -> None:
     por_id = {x["id"]: x for x in linhas}
+    enriq = enriq or {}
     wb = Workbook()
     ws = wb.active
     ws.title = "Leads"
@@ -110,6 +135,18 @@ def exportar_planilha(destino: str, leads: list[Lead], linhas: list[dict]) -> No
             d["status"] = "Pendente"
         else:
             d["status"] = "Sem canal"
+        e = enriq.get(l.id)
+        if e:
+            d["cnpj"], d["razao"] = e["empresa"].get("cnpj", ""), e["empresa"].get("razaoSocial", "")
+            if e["decisores"]:
+                d["lider"], d["cargoLider"] = e["decisores"][0]["nome"], e["decisores"][0]["cargo"]
+            s_ = contato_direto(e)
+            if s_:
+                d["sugerido"] = " · ".join(x for x in (s_["nome"], ROTULO_PAPEL[s_["papel"]],
+                                                       ("+" + s_["telefone"]) if s_["telefone"] else s_["email"]) if x)
+            d["statusEnriq"] = status_enriq(e)
+        else:
+            d["statusEnriq"] = "bruto"
         ws.append([d.get(k, "") if d.get(k) is not None else "" for _, k, _ in COLUNAS])
     for i, (_, _, w) in enumerate(COLUNAS, start=1):
         ws.column_dimensions[ws.cell(1, i).column_letter].width = w
@@ -133,6 +170,23 @@ def exportar_planilha(destino: str, leads: list[Lead], linhas: list[dict]) -> No
     cp.column_dimensions["B"].width = 8
     cp.column_dimensions["C"].width = 100
 
+    en = wb.create_sheet("Enriquecimento")
+    en.append(["ID", "Lead", "Papel", "Nome", "Cargo", "Telefone", "WhatsApp", "E-mail", "Fonte", "Confiança"])
+    for c in en[1]:
+        c.font, c.fill = cab, fundo
+    nomes = {l.id: l.nome for l in leads}
+    for lid, e in enriq.items():
+        for d_ in e["decisores"]:
+            en.append([lid, nomes.get(lid, ""), "Quem lidera", d_["nome"], d_["cargo"], "", "", "", d_["fonte"], d_["confianca"]])
+        for c_ in e["contatos"]:
+            en.append([lid, nomes.get(lid, ""), ROTULO_PAPEL[c_["papel"]], c_["nome"], c_["cargo"],
+                       ("+" + c_["telefone"]) if c_["telefone"] else "", c_["whatsapp"], c_["email"], c_["fonte"], c_["confianca"]])
+    for row in en.iter_rows(min_row=2):
+        for c in row:
+            c.font = corpo
+    for col, w in zip("ABCDEFGHIJ", (8, 30, 14, 26, 22, 17, 9, 28, 40, 10)):
+        en.column_dimensions[col].width = w
+
     pv = wb.create_sheet("Copy pós-venda")
     pv.append(["Etapa", "Quando / variante", "Texto"])
     for c in pv[1]:
@@ -155,8 +209,9 @@ def main() -> None:
     ap.add_argument("--personal", default="msg/personal.json")
     ap.add_argument("--planilha", help="exporta a planilha .xlsx com leads, mensagens e copy")
     ap.add_argument("--out", help="grava as mensagens geradas neste JSON")
+    ap.add_argument("--enriq", default="dados/enriquecimento.json", help="registros de enriquecimento validados")
     a = ap.parse_args()
-    linhas, erros = gerar(a.leads, a.personal)
+    linhas, erros = gerar(a.leads, a.personal, a.enriq)
     print("\n".join(erros) or "0 erros")
     print(f"{len(linhas)} leads com mensagem")
     print("Canais:", dict(Counter(x["canal"] for x in linhas)))
@@ -167,7 +222,7 @@ def main() -> None:
         with open(a.out, "w", encoding="utf-8") as fh:
             json.dump(linhas, fh, ensure_ascii=False, indent=1)
     if a.planilha:
-        exportar_planilha(a.planilha, carregar(a.leads), linhas)
+        exportar_planilha(a.planilha, carregar(a.leads), linhas, carregar_enriq(a.enriq))
         print("Planilha:", a.planilha)
 
 
