@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap">
 <style>
-  /* Layout: uma coluna de cards de lead sob um placar fixo; a cadência de 3 toques aparece como trilho em cada card. */
+  /* Layout: placar fixo com seletor de funil (aquecimento / pós-venda) e uma coluna de cards; cada card mostra o trilho do seu funil. */
   :root {
     --navy: #14243E;
     --creme: #FAF7F2;
@@ -44,7 +44,7 @@
   * { box-sizing: border-box; }
   body { background: var(--creme); color: var(--navy); font: 15px/1.5 var(--sans); }
   .wrap { max-width: 740px; margin: 0 auto; padding-inline: 16px; padding-block: 0 48px; }
-  button, select, a.btn { font: inherit; }
+  button, select, input, a.btn { font: inherit; }
   :focus-visible { outline: 2px solid var(--ouro); outline-offset: 2px; }
 
   header.topo {
@@ -57,6 +57,14 @@
   .marca h1 small { font: 500 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ouro-texto); margin-left: 8px; }
   .conexao { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--suave); }
   .conexao.on { color: var(--ok); }
+
+  .funis { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--navy); border-radius: 8px; overflow: hidden; }
+  .funis button { border: 0; background: var(--papel); color: var(--navy); padding: 8px 10px; cursor: pointer;
+                  font-weight: 500; display: flex; justify-content: center; gap: 6px; align-items: baseline; }
+  .funis button + button { border-left: 1px solid var(--navy); }
+  .funis button[aria-pressed="true"] { background: var(--navy); color: var(--creme); }
+  .funis .n { font: 500 12px var(--mono); opacity: .75; }
+
   .placar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; font-variant-numeric: tabular-nums; }
   .placar div { display: grid; gap: 2px; }
   .placar b { font: 600 26px/1 var(--display); }
@@ -73,16 +81,20 @@
                  border-radius: 999px; padding: 6px 12px; font-size: 14px; cursor: pointer; }
   .abas button[aria-pressed="true"] { background: var(--navy); color: var(--creme); border-color: var(--navy); }
   .abas .n { font-variant-numeric: tabular-nums; opacity: .7; margin-left: 4px; }
-  .selects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-  .selects label { display: grid; gap: 3px; font: 500 10.5px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--suave); }
-  .selects select { width: 100%; padding: 7px 8px; border: 1px solid var(--linha); border-radius: 8px;
-                    background: var(--papel); color: var(--navy); font: 14px var(--sans); }
+  .selects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; align-items: end; }
+  .selects.dois { grid-template-columns: repeat(2, minmax(0, 1fr)) auto; }
+  label.campo { display: grid; gap: 3px; font: 500 10.5px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--suave); }
+  label.campo select, label.campo input { width: 100%; padding: 7px 8px; border: 1px solid var(--linha); border-radius: 8px;
+                    background: var(--papel); color: var(--navy); font: 14px var(--sans); letter-spacing: 0; text-transform: none; min-width: 0; }
 
   #lista { display: grid; gap: 12px; }
   .card { background: var(--papel); border: 1px solid var(--linha); border-radius: 10px; padding: 14px;
           display: grid; gap: 10px; min-width: 0; }
   .card.teste { border-style: dashed; }
   .card.apagado { opacity: .62; }
+  .card.form { border-color: var(--ouro); }
+  .card.form h2 { margin: 0; font: 600 22px/1.2 var(--display); }
+  .grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .cab { display: flex; justify-content: space-between; gap: 10px; align-items: start; }
   .cab > div { min-width: 0; }
   .cab h2 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.25; text-wrap: balance; }
@@ -93,11 +105,11 @@
   .estado { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase;
             padding: 5px 8px; border-radius: 6px; white-space: nowrap; }
   .estado.hoje { background: var(--ouro-fundo); color: var(--ouro-texto); }
-  .estado.aguardando { background: var(--pergaminho); color: var(--suave); }
-  .estado.respondeu { background: var(--ok-fundo); color: var(--ok); }
-  .estado.encerrado, .estado.sair { background: var(--pergaminho); color: var(--alerta); }
+  .estado.aguardando, .estado.andamento { background: var(--pergaminho); color: var(--suave); }
+  .estado.respondeu, .estado.fechou, .estado.concluido { background: var(--ok-fundo); color: var(--ok); }
+  .estado.encerrado, .estado.sair, .estado.pausado { background: var(--pergaminho); color: var(--alerta); }
 
-  /* Trilho da cadência: visita, diagnóstico, piloto */
+  /* Trilho da prospecção: visita, diagnóstico, piloto */
   .trilho { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
   .passo { border-top: 3px solid var(--linha); padding-top: 6px; display: grid; gap: 1px; min-width: 0; }
   .passo b { font: 500 10.5px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--suave); }
@@ -107,12 +119,23 @@
   .passo.agora { border-color: var(--navy); }
   .passo.agora b, .passo.agora span { color: var(--navy); }
 
+  /* Trilho do pós-venda: sete segmentos e a etapa atual por extenso */
+  .esteira { display: grid; gap: 6px; }
+  .segs { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+  .segs i { height: 4px; border-radius: 2px; background: var(--linha); }
+  .segs i.feito { background: var(--ouro); }
+  .segs i.agora { background: var(--navy); }
+  .esteira .rotulo { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+  .esteira .rotulo b { font: 500 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+  .esteira .rotulo span { color: var(--suave); font-variant-numeric: tabular-nums; }
+
   .frase { margin: 0; font: 500 20px/1.3 var(--display); }
   details summary { cursor: pointer; font-size: 13px; color: var(--suave); }
   .msg { white-space: pre-wrap; font-size: 14px; background: var(--creme); border-radius: 8px;
          padding: 10px 12px; margin: 8px 0 0; overflow-wrap: anywhere; }
+  .dica { font-size: 13px; color: var(--ouro-texto); background: var(--ouro-fundo); border-radius: 8px; padding: 8px 10px; }
   .destino { font: 13px var(--mono); color: var(--suave); overflow-wrap: anywhere; user-select: all; }
-  .acoes { display: flex; flex-wrap: wrap; gap: 6px; }
+  .acoes { display: flex; flex-wrap: wrap; gap: 6px; align-items: end; }
   .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px;
          padding: 8px 14px; border-radius: 8px; border: 1px solid var(--linha); background: var(--papel);
          color: var(--navy); text-decoration: none; cursor: pointer; font-size: 14px; }
@@ -120,6 +143,7 @@
   .btn.ok { color: var(--ok); }
   .btn.sair { color: var(--alerta); margin-left: auto; }
   .btn[aria-disabled="true"], .btn:disabled { opacity: .45; pointer-events: none; }
+  .erro { color: var(--alerta); font-size: 13px; }
   .vazio { text-align: center; color: var(--suave); padding: 40px 12px; }
   .vazio b { display: block; font: 600 24px/1.2 var(--display); color: var(--navy); margin-bottom: 6px; }
   #toast { position: fixed; left: 50%; transform: translateX(-50%);
@@ -127,7 +151,9 @@
            padding: 8px 14px; border-radius: 8px; font-size: 14px; z-index: 10; }
   @media (max-width: 460px) {
     .placar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .selects { grid-template-columns: 1fr 1fr; }
+    .selects, .selects.dois { grid-template-columns: 1fr 1fr; }
+    .selects.dois .btn { grid-column: 1 / -1; }
+    .grade { grid-template-columns: 1fr; }
     .btn.sair { margin-left: 0; }
   }
 </style>
@@ -138,11 +164,15 @@
       <h1>Reiners Media<small>Central de disparo</small></h1>
       <span id="conexao" class="conexao">Conectando</span>
     </div>
+    <div class="funis" role="group" aria-label="Funil">
+      <button type="button" id="f-aq" data-funil="aq" aria-pressed="true">Aquecimento <span class="n" id="n-aq"></span></button>
+      <button type="button" id="f-pv" data-funil="pv" aria-pressed="false">Pós-venda <span class="n" id="n-pv"></span></button>
+    </div>
     <div class="placar">
-      <div><b id="p-hoje">0</b><span>Para hoje</span></div>
-      <div><b id="p-enviados">0</b><span>Toques hoje / <i id="p-meta" style="font-style:normal">20</i></span></div>
-      <div><b id="p-cadencia">0</b><span>Em cadência</span></div>
-      <div><b id="p-responderam">0</b><span>Responderam</span></div>
+      <div><b id="p1">0</b><span id="p1l">Para hoje</span></div>
+      <div><b id="p2">0</b><span id="p2l">Toques hoje</span></div>
+      <div><b id="p3">0</b><span id="p3l">Em cadência</span></div>
+      <div><b id="p4">0</b><span id="p4l">Responderam</span></div>
     </div>
     <div class="barra" aria-hidden="true"><i id="barra"></i></div>
   </header>
@@ -150,23 +180,21 @@
   <div id="aviso" class="aviso" hidden></div>
 
   <nav class="filtros" aria-label="Filtros">
-    <div class="abas" id="abas">
-      <button type="button" data-grupo="hoje" aria-pressed="true">Para hoje<span class="n"></span></button>
-      <button type="button" data-grupo="aguardando" aria-pressed="false">Aguardando<span class="n"></span></button>
-      <button type="button" data-grupo="respondeu" aria-pressed="false">Responderam<span class="n"></span></button>
-      <button type="button" data-grupo="encerrado" aria-pressed="false">Sem resposta<span class="n"></span></button>
-      <button type="button" data-grupo="sair" aria-pressed="false">Saíram<span class="n"></span></button>
-      <button type="button" data-grupo="todos" aria-pressed="false">Todos<span class="n"></span></button>
+    <div class="abas" id="abas"></div>
+    <div class="selects" id="sel-aq">
+      <label class="campo" for="f-segmento">Segmento<select id="f-segmento"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-faixa">Faixa<select id="f-faixa"><option value="">Todas</option></select></label>
+      <label class="campo" for="f-canal">Canal<select id="f-canal"><option value="">Todos</option></select></label>
     </div>
-    <div class="selects">
-      <label for="f-segmento">Segmento<select id="f-segmento"><option value="">Todos</option></select></label>
-      <label for="f-faixa">Faixa<select id="f-faixa"><option value="">Todas</option></select></label>
-      <label for="f-canal">Canal<select id="f-canal"><option value="">Todos</option></select></label>
+    <div class="selects dois" id="sel-pv" hidden>
+      <label class="campo" for="f-etapa">Etapa<select id="f-etapa"><option value="">Todas</option></select></label>
+      <label class="campo" for="f-produto">Produto<select id="f-produto"><option value="">Todos</option></select></label>
+      <button type="button" class="btn principal" id="novo-cliente">Novo cliente</button>
     </div>
   </nav>
 
   <main id="lista" aria-live="polite">
-    <div class="vazio"><b>Carregando a fila</b>Conectando ao banco da central.</div>
+    <div class="vazio"><b>Carregando</b>Conectando ao banco da central.</div>
   </main>
 </div>
 <div id="toast" role="status" hidden></div>
@@ -176,14 +204,28 @@
   "use strict";
   var NOMES_TOQUE = { 1: "Visita", 2: "Diagnóstico", 3: "Piloto" };
   var DIA = 86400000;
+  var DIAS_SEMANA = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+  var ABAS = {
+    aq: [["hoje", "Para hoje"], ["aguardando", "Aguardando"], ["respondeu", "Responderam"], ["fechou", "Fecharam"],
+         ["encerrado", "Sem resposta"], ["sair", "Saíram"], ["todos", "Todos"]],
+    pv: [["hoje", "Para hoje"], ["andamento", "Em andamento"], ["pausado", "Pausados"], ["concluido", "Concluídos"], ["todos", "Todos"]]
+  };
   var estado = {
+    funil: "aq",
     leads: {},
+    clientes: {},
     meta: { metaDiaria: 20, esperaDias: { "1": 0, "2": 4, "3": 6 } },
+    pv: null,
     db: null,
     podeMarcar: false,
     gravando: {},
-    carregado: false,
-    filtro: { grupo: "hoje", segmento: "", faixa: "", canal: "" }
+    carregado: { leads: false, clientes: false },
+    fechando: null,
+    novoCliente: false,
+    filtro: {
+      aq: { grupo: "hoje", segmento: "", faixa: "", canal: "" },
+      pv: { grupo: "hoje", etapa: "", produto: "" }
+    }
   };
   var $ = function (id) { return document.getElementById(id); };
 
@@ -193,6 +235,7 @@
     if (attrs) Object.keys(attrs).forEach(function (k) {
       if (k === "text") n.textContent = attrs[k];
       else if (k === "class") n.className = attrs[k];
+      else if (k === "value") n.value = attrs[k];
       else if (k.slice(0, 2) === "on") n.addEventListener(k.slice(2), attrs[k]);
       else if (attrs[k] !== null && attrs[k] !== undefined && attrs[k] !== false) n.setAttribute(k, attrs[k]);
     });
@@ -200,11 +243,20 @@
     return n;
   }
   function inicioDoDia(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+  function hoje() { return inicioDoDia(new Date()); }
   function mesmoDia(iso, ref) { return iso && inicioDoDia(iso).getTime() === inicioDoDia(ref).getTime(); }
   function dataCurta(d) {
     var x = new Date(d);
     if (isNaN(x)) return "";
     return x.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  }
+  // "2026-10-09T14:00" -> "quinta, 09/10, às 14h"
+  function quando(valor) {
+    if (!valor) return "";
+    var d = new Date(valor);
+    if (isNaN(d)) return "";
+    var h = d.getHours() + "h" + (d.getMinutes() ? String(d.getMinutes()).padStart(2, "0") : "");
+    return DIAS_SEMANA[d.getDay()] + ", " + dataCurta(d) + ", às " + h;
   }
   var toastTimer;
   function toast(txt) {
@@ -229,8 +281,57 @@
       navigator.clipboard.writeText(texto).then(function () { toast(rotulo + " copiado"); }, reserva);
     } else { reserva(); }
   }
+  function waLink(tel, texto) { return "https://wa.me/" + tel + "?text=" + encodeURIComponent(texto); }
+  function mailto(email, assunto, corpo) {
+    return "mailto:" + encodeURIComponent(email || "") + "?subject=" + encodeURIComponent(assunto || "") +
+      "&body=" + encodeURIComponent(corpo || "");
+  }
+  function limparTelefone(v) {
+    var d = String(v || "").replace(/\D/g, "").replace(/^0+/, "");
+    if (d.length === 10 || d.length === 11) d = "55" + d;
+    return /^55\d{10,11}$/.test(d) ? d : "";
+  }
+  function preencherSelect(id, valores) {
+    var s = $(id), atual = s.value, chave = valores.join("|");
+    if (s.dataset.chave === chave) return;
+    s.dataset.chave = chave;
+    while (s.options.length > 1) s.remove(1);
+    valores.forEach(function (v) { s.add(new Option(v, v)); });
+    s.value = valores.indexOf(atual) >= 0 ? atual : "";
+  }
 
-  // ---------- cadência ----------
+  // ---------- escrita ----------
+  function falhou(e) {
+    var code = e && e.code;
+    if (code === "revoked" || code === "not_granted" || code === "capability_disabled" || code === "capability_removed") {
+      desligar("A conexão com o banco caiu. Copiar e abrir mensagens continua funcionando; a marcação foi desativada.");
+    } else if (code === "invalid_argument") {
+      desligar("Sua conta pode ver a central, mas não pode marcar envios. Copiar e abrir mensagens continua funcionando.");
+    } else if (code === "quota_exceeded") {
+      toast("O banco da central está cheio. Avise o Claude para liberar espaço.");
+    } else {
+      toast("Não foi possível salvar. Tente de novo em instantes.");
+    }
+  }
+  function gravar(caminho, dados, msg, criar) {
+    if (!estado.podeMarcar || estado.gravando[caminho]) return Promise.resolve(false);
+    estado.gravando[caminho] = true;
+    render();
+    var ref = estado.db.doc(caminho);
+    return (criar ? ref.set(dados) : ref.update(dados)).then(function () { if (msg) toast(msg); return true; },
+      function (e) { falhou(e); return false; })
+      .then(function (ok) { delete estado.gravando[caminho]; render(); return ok; });
+  }
+  function desligar(msg) {
+    estado.podeMarcar = false;
+    $("aviso").textContent = msg;
+    $("aviso").hidden = false;
+    $("conexao").className = "conexao";
+    $("conexao").textContent = "Sem banco";
+    render();
+  }
+
+  // ================= AQUECIMENTO =================
   function etapa(l) { return Number(l.etapa) || 0; }
   function espera(n) { var e = estado.meta.esperaDias || {}; return Number(e[String(n)]) || 0; }
   function vencimento(l) {
@@ -242,85 +343,40 @@
     return new Date(inicioDoDia(ultimo).getTime() + espera(e + 1) * DIA);
   }
   function grupo(l) {
+    if (l.situacao === "fechou") return "fechou";
     if (l.situacao === "respondeu") return "respondeu";
     if (l.situacao === "sair") return "sair";
     if (etapa(l) >= 3) return "encerrado";
     var v = vencimento(l);
-    return v && v.getTime() <= inicioDoDia(new Date()).getTime() ? "hoje" : "aguardando";
+    return v && v.getTime() <= hoje().getTime() ? "hoje" : "aguardando";
   }
-  function toqueAtual(l) {
-    var n = Math.min(etapa(l) + 1, 3);
-    return (l.toques || []).filter(function (t) { return Number(t.n) === n; })[0] || {};
-  }
-  function mailto(l, t) {
-    return "mailto:" + encodeURIComponent(l.email || "") + "?subject=" + encodeURIComponent(t.assunto || "") +
-      "&body=" + encodeURIComponent(t.corpo || "");
-  }
+  function toque(l, n) { return (l.toques || []).filter(function (t) { return Number(t.n) === n; })[0] || {}; }
 
-  // ---------- escrita: só etapa, enviadoN e situacao ----------
-  function gravar(id, dados, msg) {
-    if (!estado.podeMarcar || estado.gravando[id]) return;
-    estado.gravando[id] = true;
-    render();
-    estado.db.doc("leads/" + id).update(dados).then(function () { toast(msg); }, function (e) {
-      var code = e && e.code;
-      if (code === "revoked" || code === "not_granted" || code === "capability_disabled" || code === "capability_removed") {
-        desligar("A conexão com o banco caiu. Copiar e abrir mensagens continua funcionando; a marcação foi desativada.");
-      } else if (code === "invalid_argument") {
-        desligar("Sua conta pode ver a central, mas não pode marcar envios. Copiar e abrir mensagens continua funcionando.");
-      } else {
-        toast("Não foi possível salvar. Tente de novo em instantes.");
-      }
-    }).then(function () { delete estado.gravando[id]; render(); });
-  }
   function marcarToque(l, n) {
     var dados = { etapa: n };
     dados["enviado" + n] = new Date().toISOString();
-    gravar(l.id, dados, "Toque " + n + " marcado como enviado");
+    gravar("leads/" + l.id, dados, "Toque " + n + " marcado como enviado");
   }
   function desfazerToque(l) {
     var e = etapa(l);
     if (e < 1) return;
     var dados = { etapa: e - 1 };
     dados["enviado" + e] = null;
-    gravar(l.id, dados, "Toque " + e + " desfeito");
+    gravar("leads/" + l.id, dados, "Toque " + e + " desfeito");
   }
-  function situacao(l, s, msg) { gravar(l.id, { situacao: s }, msg); }
-  function desligar(msg) {
-    estado.podeMarcar = false;
-    $("aviso").textContent = msg;
-    $("aviso").hidden = false;
-    $("conexao").className = "conexao";
-    $("conexao").textContent = "Sem banco";
-    render();
-  }
+  function situacao(l, s, msg) { gravar("leads/" + l.id, { situacao: s }, msg); }
 
-  // ---------- render ----------
-  function lista() { return Object.keys(estado.leads).map(function (k) { return estado.leads[k]; }); }
-  function ordenar(a, b) {
-    if (a.id === "TESTE") return -1;
-    if (b.id === "TESTE") return 1;
-    // Follow-up vencido vem antes de primeiro contato; depois, a ordem da fila.
-    var ea = etapa(a) > 0 ? 0 : 1, eb = etapa(b) > 0 ? 0 : 1;
-    if (estado.filtro.grupo === "hoje" && ea !== eb) return ea - eb;
-    if (estado.filtro.grupo === "aguardando") {
-      var va = vencimento(a), vb = vencimento(b);
-      if (va && vb && va.getTime() !== vb.getTime()) return va - vb;
-    }
-    return (a.ordem || 9999) - (b.ordem || 9999);
-  }
-  function preencherSelect(id, valores) {
-    var s = $(id), atual = s.value, chave = valores.join("|");
-    if (s.dataset.chave === chave) return;
-    s.dataset.chave = chave;
-    while (s.options.length > 1) s.remove(1);
-    valores.forEach(function (v) { s.add(new Option(v, v)); });
-    s.value = valores.indexOf(atual) >= 0 ? atual : "";
-  }
-  function unicos(campo) {
-    var vs = {};
-    lista().forEach(function (l) { if (l.id !== "TESTE" && l[campo]) vs[l[campo]] = 1; });
-    return Object.keys(vs).sort();
+  function fecharNegocio(l, produto) {
+    var cliente = {
+      nome: l.nome || "", saudacao: l.saudacao || "", telefone: l.canal === "WhatsApp" ? (l.telefone || "") : "",
+      email: l.email || "", produto: produto, origem: "Prospecção", leadId: l.id, segmento: l.segmento || "",
+      etapa: 1, situacao: "ativo", criadoEm: new Date().toISOString(), dataKickoff: null, dataGravacao: null
+    };
+    gravar("clientes/" + l.id, cliente, null, true).then(function (ok) {
+      if (!ok) return;
+      estado.fechando = null;
+      gravar("leads/" + l.id, { situacao: "fechou" }, "Foi para o pós-venda: boas-vindas para hoje");
+    });
   }
 
   function trilho(l) {
@@ -335,12 +391,23 @@
     }));
   }
 
-  function card(l) {
+  function formFechar(l) {
+    var produtos = Object.keys((estado.pv && estado.pv.produtos) || { "Outro": 1 });
+    var sel = el("select", { id: "fechar-produto-" + l.id }, produtos.map(function (p) { return el("option", { value: p, text: p }); }));
+    return el("div", { class: "acoes" }, [
+      el("label", { class: "campo", for: "fechar-produto-" + l.id }, ["Produto contratado", sel]),
+      el("button", { type: "button", class: "btn principal", disabled: !estado.podeMarcar,
+        onclick: function () { fecharNegocio(l, sel.value); } }, ["Mover para o pós-venda"]),
+      el("button", { type: "button", class: "btn", onclick: function () { estado.fechando = null; render(); } }, ["Cancelar"])
+    ]);
+  }
+
+  function cardLead(l) {
     var g = grupo(l), e = etapa(l);
     var ativo = g === "hoje" || g === "aguardando";
-    var semMarca = !estado.podeMarcar || !!estado.gravando[l.id];
+    var semMarca = !estado.podeMarcar || !!estado.gravando["leads/" + l.id];
     var email = l.canal === "E-mail";
-    var t = toqueAtual(l), n = Math.min(e + 1, 3);
+    var n = Math.min(e + 1, 3), t = toque(l, n);
 
     var chips = el("div", { class: "chips" }, [
       l.segmento ? el("span", { class: "chip", text: l.segmento }) : null,
@@ -349,7 +416,7 @@
       l.bairro ? el("span", { class: "chip", text: l.bairro }) : null
     ].concat((l.flags || []).map(function (f) { return el("span", { class: "chip flag", text: f }); })));
 
-    var rotulo = { hoje: "Toque " + n + " hoje", aguardando: "Aguardando", respondeu: "Respondeu",
+    var rotulo = { hoje: "Toque " + n + " hoje", aguardando: "Aguardando", respondeu: "Respondeu", fechou: "Fechou",
                    encerrado: "Sem resposta", sair: "Saiu" }[g];
     var cab = el("div", { class: "cab" }, [
       el("div", null, [
@@ -361,7 +428,7 @@
     ]);
 
     var verToque = ativo ? n : e || 1;
-    var tv = (l.toques || []).filter(function (x) { return Number(x.n) === verToque; })[0] || {};
+    var tv = toque(l, verToque);
     var texto = email ? ("Assunto: " + (tv.assunto || "") + "\n\n" + (tv.corpo || "")) : (tv.mensagem || "");
     var detalhes = el("details", null, [
       el("summary", { text: "Toque " + verToque + " · " + NOMES_TOQUE[verToque] + (email ? " · e-mail completo" : " · mensagem completa") }),
@@ -372,7 +439,7 @@
     if (ativo) {
       var podeHoje = g === "hoje";
       if (email) {
-        acoes.push(el("a", { class: "btn principal", href: mailto(l, t), target: "_blank", rel: "noopener",
+        acoes.push(el("a", { class: "btn principal", href: mailto(l.email, t.assunto, t.corpo), target: "_blank", rel: "noopener",
           "aria-disabled": podeHoje ? null : "true" }, ["Abrir e-mail " + n]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.assunto || "", "Assunto"); } }, ["Copiar assunto"]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.corpo || "", "Corpo"); } }, ["Copiar corpo"]));
@@ -388,11 +455,17 @@
     if (e > 0 && (ativo || g === "encerrado")) {
       acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { desfazerToque(l); } }, ["Desfazer toque " + e]));
     }
+    if (g !== "fechou" && g !== "sair") {
+      acoes.push(el("button", { type: "button", class: "btn ok", disabled: semMarca,
+        onclick: function () { estado.fechando = l.id; render(); } }, ["Fechou negócio"]));
+    }
     if (ativo || g === "encerrado") {
       acoes.push(el("button", { type: "button", class: "btn ok", disabled: semMarca,
         onclick: function () { situacao(l, "respondeu", "Marcado como respondeu"); } }, ["Respondeu"]));
       acoes.push(el("button", { type: "button", class: "btn sair", disabled: semMarca,
         onclick: function () { situacao(l, "sair", "Não contatar de novo"); } }, ["Pediu para sair"]));
+    } else if (g === "fechou") {
+      acoes.push(el("button", { type: "button", class: "btn", onclick: function () { trocarFunil("pv"); } }, ["Ver no pós-venda"]));
     } else {
       acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca,
         onclick: function () { situacao(l, "ativo", "De volta à cadência"); } }, ["Voltar para a cadência"]));
@@ -404,81 +477,383 @@
       l.fraseUnica ? el("p", { class: "frase", text: l.fraseUnica }) : null,
       detalhes,
       destino ? el("div", { class: "destino", text: destino }) : null,
-      el("div", { class: "acoes" }, acoes)
+      el("div", { class: "acoes" }, acoes),
+      estado.fechando === l.id ? formFechar(l) : null
     ]);
   }
 
-  function render() {
-    var todos = lista().sort(ordenar);
+  function ordenarLeads(a, b) {
+    if (a.id === "TESTE") return -1;
+    if (b.id === "TESTE") return 1;
+    var g = estado.filtro.aq.grupo;
+    var ea = etapa(a) > 0 ? 0 : 1, eb = etapa(b) > 0 ? 0 : 1;
+    if (g === "hoje" && ea !== eb) return ea - eb;
+    if (g === "aguardando") {
+      var va = vencimento(a), vb = vencimento(b);
+      if (va && vb && va.getTime() !== vb.getTime()) return va - vb;
+    }
+    return (a.ordem || 9999) - (b.ordem || 9999);
+  }
+
+  function renderAQ() {
+    var todos = Object.keys(estado.leads).map(function (k) { return estado.leads[k]; }).sort(ordenarLeads);
     var reais = todos.filter(function (l) { return l.id !== "TESTE"; });
     var agora = new Date();
-    var cont = { hoje: 0, aguardando: 0, respondeu: 0, encerrado: 0, sair: 0, todos: reais.length };
+    var cont = { hoje: 0, aguardando: 0, respondeu: 0, fechou: 0, encerrado: 0, sair: 0, todos: reais.length };
     var toquesHoje = 0;
     reais.forEach(function (l) {
       cont[grupo(l)]++;
       [1, 2, 3].forEach(function (n) { if (mesmoDia(l["enviado" + n], agora)) toquesHoje++; });
     });
     var meta = Number(estado.meta.metaDiaria) || 20;
-    $("p-hoje").textContent = cont.hoje;
-    $("p-enviados").textContent = toquesHoje;
-    $("p-meta").textContent = meta;
-    $("p-cadencia").textContent = cont.hoje + cont.aguardando;
-    $("p-responderam").textContent = cont.respondeu;
-    $("barra").style.transform = "scaleX(" + Math.min(1, toquesHoje / meta) + ")";
-
-    Array.prototype.forEach.call($("abas").querySelectorAll("button"), function (b) {
-      b.setAttribute("aria-pressed", String(b.dataset.grupo === estado.filtro.grupo));
-      b.querySelector(".n").textContent = cont[b.dataset.grupo];
-    });
+    placar([cont.hoje, "Para hoje"], [toquesHoje, "Toques hoje / " + meta], [cont.hoje + cont.aguardando, "Em cadência"],
+      [cont.respondeu + cont.fechou, "Responderam"], toquesHoje / meta);
+    abas(cont);
+    var unicos = function (campo) {
+      var vs = {};
+      reais.forEach(function (l) { if (l[campo]) vs[l[campo]] = 1; });
+      return Object.keys(vs).sort();
+    };
     preencherSelect("f-segmento", unicos("segmento"));
     preencherSelect("f-faixa", unicos("faixa"));
     preencherSelect("f-canal", unicos("canal"));
 
-    var f = estado.filtro;
+    var f = estado.filtro.aq;
     var visiveis = todos.filter(function (l) {
-      if (l.id === "TESTE") return f.grupo === "hoje" || f.grupo === "todos" || grupo(l) === f.grupo;
+      if (l.id === "TESTE") return f.grupo === "todos" || grupo(l) === f.grupo || f.grupo === "hoje";
       if (f.grupo !== "todos" && grupo(l) !== f.grupo) return false;
       if (f.segmento && l.segmento !== f.segmento) return false;
       if (f.faixa && l.faixa !== f.faixa) return false;
       if (f.canal && l.canal !== f.canal) return false;
       return true;
     });
-
     var alvo = $("lista");
     alvo.textContent = "";
-    if (!estado.carregado) {
-      alvo.appendChild(el("div", { class: "vazio" }, [el("b", { text: "Carregando a fila" }), "Conectando ao banco da central."]));
-      return;
-    }
-    if (!todos.length) {
-      alvo.appendChild(el("div", { class: "vazio" }, [el("b", { text: "Nenhum lead na fila" }), "Quando o Claude semear a central, os cards aparecem aqui."]));
-      return;
-    }
-    visiveis.forEach(function (l) { alvo.appendChild(card(l)); });
+    if (!estado.carregado.leads) return carregando(alvo);
+    if (!todos.length) return vazio(alvo, "Nenhum lead na fila", "Quando o Claude semear a central, os cards aparecem aqui.");
+    visiveis.forEach(function (l) { alvo.appendChild(cardLead(l)); });
     if (!visiveis.some(function (l) { return l.id !== "TESTE"; })) {
-      var vazio = f.grupo === "hoje" ? ["Nada para hoje", "Os próximos toques aparecem na aba Aguardando, com a data de cada um."] :
-        ["Nada neste filtro", "Troque a aba ou limpe os filtros."];
-      alvo.appendChild(el("div", { class: "vazio" }, [el("b", { text: vazio[0] }), vazio[1]]));
+      if (f.grupo === "hoje") vazio(alvo, "Nada para hoje", "Os próximos toques aparecem na aba Aguardando, com a data de cada um.");
+      else vazio(alvo, "Nada neste filtro", "Troque a aba ou limpe os filtros.");
     }
   }
 
-  // ---------- filtros ----------
+  // ================= PÓS-VENDA =================
+  function etapasPV() { return (estado.pv && estado.pv.etapas) || []; }
+  function etapaPV(c) { return Math.max(1, Number(c.etapa) || 1); }
+  function defEtapa(n) { return etapasPV()[n - 1] || null; }
+
+  function textoPV(c, n) {
+    var cfg = estado.pv, e = defEtapa(n);
+    if (!cfg || !e) return "";
+    var p = cfg.produtos[c.produto] || cfg.produtos["Outro"] || {};
+    var preparo = c.produto === "Podcast In Loco" ? cfg.preparo.sede : cfg.preparo.estudio;
+    var rec = cfg.recorrencia[c.produto] || cfg.recorrencia.padrao;
+    var valores = {
+      saudacao: c.saudacao || "", produto: c.produto || "", quando: quando(e.campoData ? c[e.campoData] : ""),
+      local: p.local || "", entregaveis: p.entregaveis || "", preparo: preparo || "", recorrencia: rec || ""
+    };
+    return e.texto.replace(/\{(\w+)\}/g, function (m, k) { return k in valores ? valores[k] : m; });
+  }
+
+  // Quando a mensagem da etapa atual deve sair; null = depende de data que ainda não foi marcada.
+  function vencimentoPV(c) {
+    var n = etapaPV(c), e = defEtapa(n);
+    if (!e) return null;
+    if (e.quando === "imediato") return new Date(0);
+    if (e.quando === "data") {
+      var d = c[e.campoData];
+      if (!d) return null;
+      return e.vespera ? new Date(inicioDoDia(d).getTime() - DIA) : new Date(0);
+    }
+    var anterior = c["pvConcluido" + (n - 1)];
+    return anterior ? new Date(inicioDoDia(anterior).getTime() + Number(e.quando) * DIA) : new Date(0);
+  }
+  function grupoPV(c) {
+    if (c.situacao === "pausado") return "pausado";
+    if (c.situacao === "concluido" || etapaPV(c) > etapasPV().length) return "concluido";
+    var n = etapaPV(c);
+    if (c["pvEnviado" + n]) return "andamento";
+    var v = vencimentoPV(c);
+    if (v === null) return "hoje"; // falta marcar a data: é a ação do dia
+    return v.getTime() <= hoje().getTime() ? "hoje" : "andamento";
+  }
+
+  function marcarPV(c, n) {
+    var dados = {};
+    dados["pvEnviado" + n] = new Date().toISOString();
+    gravar("clientes/" + c.id, dados, "Mensagem de " + defEtapa(n).nome.toLowerCase() + " marcada como enviada");
+  }
+  function concluirPV(c) {
+    var n = etapaPV(c), total = etapasPV().length;
+    var dados = { etapa: n + 1 };
+    dados["pvConcluido" + n] = new Date().toISOString();
+    if (n >= total) dados.situacao = "concluido";
+    gravar("clientes/" + c.id, dados, n >= total ? "Cliente concluído" : "Etapa concluída: " + defEtapa(n + 1).nome);
+  }
+  function voltarPV(c) {
+    var n = etapaPV(c);
+    if (n <= 1) return;
+    var dados = { etapa: n - 1, situacao: "ativo" };
+    dados["pvConcluido" + (n - 1)] = null;
+    dados["pvEnviado" + (n - 1)] = null;
+    gravar("clientes/" + c.id, dados, "Voltou para " + defEtapa(n - 1).nome);
+  }
+  function marcarData(c, campo, valor) {
+    var dados = {};
+    dados[campo] = valor || null;
+    gravar("clientes/" + c.id, dados, valor ? "Data salva" : "Data apagada");
+  }
+
+  function esteira(c) {
+    var n = etapaPV(c), total = etapasPV().length, e = defEtapa(n), g = grupoPV(c);
+    var segs = el("div", { class: "segs", "aria-hidden": "true" }, etapasPV().map(function (_, i) {
+      var k = i + 1;
+      return el("i", { class: k < n || g === "concluido" ? "feito" : (k === n ? "agora" : "") });
+    }));
+    var datas = [];
+    if (c.dataKickoff) datas.push("Kickoff " + quando(c.dataKickoff));
+    if (c.dataGravacao) datas.push("Gravação " + quando(c.dataGravacao));
+    var titulo = g === "concluido" ? "Todas as etapas concluídas" : "Etapa " + n + " de " + total + " · " + (e ? e.nome : "");
+    return el("div", { class: "esteira" }, [segs, el("div", { class: "rotulo" }, [
+      el("b", { text: titulo }), datas.length ? el("span", { text: datas.join(" · ") }) : null
+    ])]);
+  }
+
+  function cardCliente(c) {
+    var g = grupoPV(c), n = etapaPV(c), e = defEtapa(n);
+    var caminho = "clientes/" + c.id;
+    var semMarca = !estado.podeMarcar || !!estado.gravando[caminho];
+    var ativo = g === "hoje" || g === "andamento";
+    var texto = e ? textoPV(c, n) : "";
+    var precisaData = e && e.quando === "data" && !c[e.campoData];
+    var enviado = !!c["pvEnviado" + n];
+    var v = vencimentoPV(c);
+
+    var rotulo = { hoje: precisaData ? "Marcar data" : "Enviar hoje", andamento: enviado ? "Mensagem enviada" : "A partir de " + dataCurta(v),
+                   pausado: "Pausado", concluido: "Concluído" }[g];
+    var cab = el("div", { class: "cab" }, [
+      el("div", null, [
+        el("h2", { text: c.nome || c.id }),
+        el("div", { class: "meta", text: [c.produto, c.origem === "Prospecção" ? "veio da prospecção (" + (c.leadId || "") + ")" : "cadastro manual",
+          c.criadoEm ? "desde " + dataCurta(c.criadoEm) : ""].filter(Boolean).join(" · ") })
+      ]),
+      el("span", { class: "estado " + g, text: rotulo })
+    ]);
+
+    var corpo = [cab, esteira(c)];
+    if (ativo && e) {
+      if (e.quando === "data") {
+        var inp = el("input", { type: "datetime-local", id: "data-" + c.id + "-" + e.campoData, value: c[e.campoData] || "",
+          disabled: semMarca, onchange: function (ev) { marcarData(c, e.campoData, ev.target.value); } });
+        corpo.push(el("div", { class: "acoes" }, [
+          el("label", { class: "campo", for: inp.id }, [e.nome === "Kickoff" ? "Data do kickoff" : "Data da gravação", inp])
+        ]));
+        if (precisaData) corpo.push(el("p", { class: "dica", text: e.vespera ?
+          "Marque a data da gravação. O lembrete aparece em Para hoje na véspera." :
+          "Marque a data do kickoff combinada na resposta às boas-vindas para liberar a confirmação." }));
+      }
+      if (!precisaData) {
+        corpo.push(el("details", { open: g === "hoje" && !enviado ? "" : null }, [
+          el("summary", { text: "Mensagem · " + e.nome + (enviado ? " · enviada em " + dataCurta(c["pvEnviado" + n]) : "") }),
+          el("p", { class: "msg", text: texto })
+        ]));
+      }
+    }
+    var destino = c.telefone ? "+" + c.telefone : (c.email || "");
+    if (destino) corpo.push(el("div", { class: "destino", text: destino }));
+
+    var acoes = [];
+    if (ativo && e && !precisaData) {
+      if (c.telefone) {
+        acoes.push(el("a", { class: "btn" + (enviado ? "" : " principal"), href: waLink(c.telefone, texto), target: "_blank", rel: "noopener",
+          onclick: function () { if (!semMarca && !enviado) marcarPV(c, n); } }, [enviado ? "Abrir WhatsApp de novo" : "Abrir WhatsApp"]));
+      } else if (c.email) {
+        acoes.push(el("a", { class: "btn principal", href: mailto(c.email, "Reiners Media · " + e.nome, texto), target: "_blank", rel: "noopener" }, ["Abrir e-mail"]));
+        if (!enviado) acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { marcarPV(c, n); } }, ["Marcar enviada"]));
+      }
+      acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(texto, "Mensagem"); } }, ["Copiar"]));
+    }
+    if (ativo && e) {
+      acoes.push(el("button", { type: "button", class: "btn ok", disabled: semMarca, onclick: function () { concluirPV(c); } },
+        [n >= etapasPV().length ? "Concluir cliente" : "Concluir etapa"]));
+    }
+    if (n > 1 && g !== "pausado") {
+      acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { voltarPV(c); } }, ["Voltar etapa"]));
+    }
+    if (g === "pausado") {
+      acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca,
+        onclick: function () { gravar(caminho, { situacao: "ativo" }, "Cliente retomado"); } }, ["Retomar"]));
+    } else if (ativo) {
+      acoes.push(el("button", { type: "button", class: "btn sair", disabled: semMarca,
+        onclick: function () { gravar(caminho, { situacao: "pausado" }, "Cliente pausado"); } }, ["Pausar"]));
+    }
+    corpo.push(el("div", { class: "acoes" }, acoes));
+    return el("article", { class: "card" + (g === "pausado" ? " apagado" : "") }, corpo);
+  }
+
+  function formNovoCliente() {
+    var produtos = Object.keys((estado.pv && estado.pv.produtos) || { "Outro": 1 });
+    var campos = {
+      nome: el("input", { id: "nc-nome", autocomplete: "organization", placeholder: "Ex.: Clínica Exemplo" }),
+      saudacao: el("input", { id: "nc-saudacao", placeholder: "Ex.: Dra. Lara ou pessoal da Clínica Exemplo" }),
+      telefone: el("input", { id: "nc-telefone", inputmode: "tel", placeholder: "(65) 99999-0000" }),
+      email: el("input", { id: "nc-email", type: "email", placeholder: "contato@empresa.com.br" }),
+      produto: el("select", { id: "nc-produto" }, produtos.map(function (p) { return el("option", { value: p, text: p }); }))
+    };
+    var erro = el("p", { class: "erro", hidden: "" });
+    function campo(rotulo, k) { return el("label", { class: "campo", for: campos[k].id }, [rotulo, campos[k]]); }
+    function salvar() {
+      var nome = campos.nome.value.trim(), saudacao = campos.saudacao.value.trim();
+      var tel = campos.telefone.value.trim() ? limparTelefone(campos.telefone.value) : "";
+      var email = campos.email.value.trim();
+      var msg = !nome ? "Preencha o nome do cliente." : !saudacao ? "Preencha como a Letícia chama o cliente." :
+        (campos.telefone.value.trim() && !tel) ? "O WhatsApp precisa ter DDD, como (65) 99999-0000." :
+        (!tel && !email) ? "Informe um WhatsApp ou um e-mail." : "";
+      if (msg) { erro.textContent = msg; erro.hidden = false; return; }
+      var id = "C" + Date.now().toString(36).toUpperCase();
+      gravar("clientes/" + id, {
+        nome: nome, saudacao: saudacao, telefone: tel, email: email, produto: campos.produto.value,
+        origem: "Cadastro manual", leadId: null, segmento: "", etapa: 1, situacao: "ativo",
+        criadoEm: new Date().toISOString(), dataKickoff: null, dataGravacao: null
+      }, "Cliente cadastrado: boas-vindas para hoje", true).then(function (ok) {
+        if (ok) { estado.novoCliente = false; render(); }
+      });
+    }
+    return el("article", { class: "card form" }, [
+      el("h2", { text: "Novo cliente" }),
+      el("div", { class: "grade" }, [campo("Nome", "nome"), campo("Saudação", "saudacao"),
+        campo("WhatsApp", "telefone"), campo("E-mail", "email"), campo("Produto contratado", "produto")]),
+      erro,
+      el("div", { class: "acoes" }, [
+        el("button", { type: "button", class: "btn principal", disabled: !estado.podeMarcar, onclick: salvar }, ["Cadastrar e começar"]),
+        el("button", { type: "button", class: "btn", onclick: function () { estado.novoCliente = false; render(); } }, ["Cancelar"])
+      ])
+    ]);
+  }
+
+  function ordenarClientes(a, b) {
+    var va = vencimentoPV(a), vb = vencimentoPV(b);
+    var ta = va ? va.getTime() : -1, tb = vb ? vb.getTime() : -1;
+    if (ta !== tb) return ta - tb;
+    return String(a.criadoEm || "").localeCompare(String(b.criadoEm || ""));
+  }
+
+  function renderPV() {
+    var todos = Object.keys(estado.clientes).map(function (k) { return estado.clientes[k]; }).sort(ordenarClientes);
+    var cont = { hoje: 0, andamento: 0, pausado: 0, concluido: 0, todos: todos.length };
+    var limite = hoje().getTime() + 8 * DIA, gravacoes = 0;
+    todos.forEach(function (c) {
+      var g = grupoPV(c);
+      cont[g]++;
+      if (c.dataGravacao && g !== "concluido" && g !== "pausado") {
+        var t = new Date(c.dataGravacao).getTime();
+        if (t >= hoje().getTime() && t < limite) gravacoes++;
+      }
+    });
+    placar([cont.hoje, "Para hoje"], [cont.hoje + cont.andamento, "Clientes ativos"], [gravacoes, "Gravações em 7 dias"],
+      [cont.concluido, "Concluídos"], null);
+    abas(cont);
+    var etapas = etapasPV().map(function (e) { return e.n + " · " + e.nome; });
+    preencherSelect("f-etapa", etapas);
+    var prods = {};
+    todos.forEach(function (c) { if (c.produto) prods[c.produto] = 1; });
+    preencherSelect("f-produto", Object.keys(prods).sort());
+
+    var f = estado.filtro.pv;
+    var visiveis = todos.filter(function (c) {
+      if (f.grupo !== "todos" && grupoPV(c) !== f.grupo) return false;
+      if (f.etapa && (etapaPV(c) + " · " + (defEtapa(etapaPV(c)) || {}).nome) !== f.etapa) return false;
+      if (f.produto && c.produto !== f.produto) return false;
+      return true;
+    });
+    var alvo = $("lista");
+    alvo.textContent = "";
+    if (!estado.carregado.clientes) return carregando(alvo);
+    if (!estado.pv) {
+      return vazio(alvo, "Faltam os textos do pós-venda", "Peça ao Claude para semear config/posvenda no banco da central.");
+    }
+    if (estado.novoCliente) alvo.appendChild(formNovoCliente());
+    visiveis.forEach(function (c) { alvo.appendChild(cardCliente(c)); });
+    if (!todos.length) {
+      vazio(alvo, "Nenhum cliente no pós-venda", "Use Fechou negócio num lead do aquecimento ou Novo cliente para quem já comprou.");
+    } else if (!visiveis.length) {
+      if (f.grupo === "hoje") vazio(alvo, "Nada para hoje", "As próximas etapas aparecem em Em andamento.");
+      else vazio(alvo, "Nada neste filtro", "Troque a aba ou limpe os filtros.");
+    }
+  }
+
+  // ================= comum =================
+  function placar(a, b, c, d, progresso) {
+    [a, b, c, d].forEach(function (x, i) { $("p" + (i + 1)).textContent = x[0]; $("p" + (i + 1) + "l").textContent = x[1]; });
+    $("barra").style.transform = "scaleX(" + (progresso == null ? 0 : Math.min(1, progresso)) + ")";
+    $("barra").parentNode.hidden = progresso == null;
+  }
+  function abas(cont) {
+    var f = estado.filtro[estado.funil], nav = $("abas");
+    var chave = estado.funil;
+    if (nav.dataset.funil !== chave) {
+      nav.dataset.funil = chave;
+      nav.textContent = "";
+      ABAS[chave].forEach(function (a) {
+        nav.appendChild(el("button", { type: "button", "data-grupo": a[0] }, [a[1], el("span", { class: "n" })]));
+      });
+    }
+    Array.prototype.forEach.call(nav.querySelectorAll("button"), function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.grupo === f.grupo));
+      b.querySelector(".n").textContent = cont[b.dataset.grupo];
+    });
+  }
+  function carregando(alvo) {
+    alvo.appendChild(el("div", { class: "vazio" }, [el("b", { text: "Carregando" }), "Conectando ao banco da central."]));
+  }
+  function vazio(alvo, titulo, texto) {
+    alvo.appendChild(el("div", { class: "vazio" }, [el("b", { text: titulo }), texto]));
+  }
+  function render() {
+    var pv = estado.funil === "pv";
+    $("f-aq").setAttribute("aria-pressed", String(!pv));
+    $("f-pv").setAttribute("aria-pressed", String(pv));
+    $("sel-aq").hidden = pv;
+    $("sel-pv").hidden = !pv;
+    $("novo-cliente").disabled = !estado.podeMarcar || !estado.pv;
+    var leads = Object.keys(estado.leads).filter(function (k) { return k !== "TESTE"; }).map(function (k) { return estado.leads[k]; });
+    var clientes = Object.keys(estado.clientes).map(function (k) { return estado.clientes[k]; });
+    $("n-aq").textContent = leads.filter(function (l) { return grupo(l) === "hoje"; }).length || "";
+    $("n-pv").textContent = estado.pv ? (clientes.filter(function (c) { return grupoPV(c) === "hoje"; }).length || "") : "";
+    if (pv) renderPV(); else renderAQ();
+  }
+  function trocarFunil(f) {
+    estado.funil = f;
+    estado.fechando = null;
+    try { localStorage.setItem("central-funil", f); } catch (e) { /* sem armazenamento: tudo bem */ }
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- eventos ----------
+  $("f-aq").addEventListener("click", function () { trocarFunil("aq"); });
+  $("f-pv").addEventListener("click", function () { trocarFunil("pv"); });
   $("abas").addEventListener("click", function (e) {
     var b = e.target.closest("button");
     if (!b) return;
-    estado.filtro.grupo = b.dataset.grupo;
+    estado.filtro[estado.funil].grupo = b.dataset.grupo;
     render();
   });
   ["segmento", "faixa", "canal"].forEach(function (k) {
-    $("f-" + k).addEventListener("change", function (e) { estado.filtro[k] = e.target.value; render(); });
+    $("f-" + k).addEventListener("change", function (e) { estado.filtro.aq[k] = e.target.value; render(); });
   });
+  ["etapa", "produto"].forEach(function (k) {
+    $("f-" + k).addEventListener("change", function (e) { estado.filtro.pv[k] = e.target.value; render(); });
+  });
+  $("novo-cliente").addEventListener("click", function () { estado.novoCliente = true; render(); });
   // Vira o dia com a página aberta: recalcula o que vence hoje.
-  setInterval(function () { if (estado.carregado) render(); }, 10 * 60 * 1000);
+  setInterval(function () { if (estado.carregado.leads) render(); }, 10 * 60 * 1000);
 
   // ---------- banco ----------
   function iniciar(db) {
     if (!db) {
-      estado.carregado = true;
+      estado.carregado = { leads: true, clientes: true };
       desligar("O banco da central não respondeu. Entre com a sua conta para ver a fila e marcar os envios.");
       return;
     }
@@ -486,26 +861,38 @@
     estado.podeMarcar = true;
     $("conexao").className = "conexao on";
     $("conexao").textContent = "Ao vivo";
-    db.collection("leads").onSnapshot(function (snap) {
-      var novo = {};
-      snap.docs.forEach(function (d) {
-        if (!d.exists) return;
-        var dados = Object.assign({}, d.data());
-        dados.id = d.id;
-        novo[d.id] = dados;
+    function colecao(nome, chave) {
+      db.collection(nome).onSnapshot(function (snap) {
+        var novo = {};
+        snap.docs.forEach(function (d) {
+          if (!d.exists) return;
+          var dados = Object.assign({}, d.data());
+          dados.id = d.id;
+          novo[d.id] = dados;
+        });
+        estado[chave] = novo;
+        estado.carregado[chave] = true;
+        render();
+      }, function () {
+        estado.carregado[chave] = true;
+        desligar("A conexão com o banco caiu. Recarregue a página para tentar de novo.");
       });
-      estado.leads = novo;
-      estado.carregado = true;
-      render();
-    }, function () {
-      estado.carregado = true;
-      desligar("A conexão com o banco caiu. Recarregue a página para tentar de novo.");
-    });
+    }
+    colecao("leads", "leads");
+    colecao("clientes", "clientes");
     db.doc("config/meta").onSnapshot(function (d) {
       if (d.exists) { estado.meta = Object.assign({}, estado.meta, d.data()); render(); }
     }, function () {});
+    db.doc("config/posvenda").onSnapshot(function (d) {
+      estado.pv = d.exists ? d.data() : null;
+      render();
+    }, function () {});
   }
 
+  try {
+    var salvo = location.hash === "#posvenda" ? "pv" : localStorage.getItem("central-funil");
+    if (salvo === "pv" || salvo === "aq") estado.funil = salvo;
+  } catch (e) { /* sem armazenamento: começa no aquecimento */ }
   render();
   var usar = window.claude && typeof window.claude.use === "function" ? window.claude.use("db") : Promise.resolve(null);
   Promise.resolve(usar).then(iniciar, function () { iniciar(null); });

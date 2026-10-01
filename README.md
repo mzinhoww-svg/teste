@@ -110,7 +110,8 @@ Documentação em [`docs/agents.md`](docs/agents.md),
 [`docs/cadences.md`](docs/cadences.md) e
 [`docs/whatsapp-bridge.md`](docs/whatsapp-bridge.md).
 
-**Prospecção B2B** — [`tools/prospeccao/`](tools/prospeccao/README.md): lista de
+**Prospecção e pós-venda** — [`tools/prospeccao/`](tools/prospeccao/README.md): lista de
 leads de Cuiabá por segmento, cadência de três mensagens assinadas pela Letícia
-(visita, diagnóstico e piloto) e uma central de disparo publicada como Artifact.
+(visita, diagnóstico e piloto), funil de pós-venda (do kickoff à recorrência) e
+uma central de disparo publicada como Artifact.
 Python à parte, fora do build e do deploy; os dados de contato ficam fora do git.

@@ -13,6 +13,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 
 from msg.checks import Personal, check_lote, check_personal, check_toque
 from msg.compose import compose_email, compose_whatsapp, wa_link
+from msg.copy_posvenda import linhas_copy as linhas_copy_pv
 from msg.copy_v1 import ICPS, TOQUES, VERSAO, linhas_copy
 from msg.prep import Lead, canal, carregar
 
@@ -125,6 +126,20 @@ def exportar_planilha(destino: str, leads: list[Lead], linhas: list[dict]) -> No
     cp.column_dimensions["A"].width = 30
     cp.column_dimensions["B"].width = 8
     cp.column_dimensions["C"].width = 100
+
+    pv = wb.create_sheet("Copy pós-venda")
+    pv.append(["Etapa", "Quando / variante", "Texto"])
+    for c in pv[1]:
+        c.font, c.fill = cab, fundo
+    for linha in linhas_copy_pv():
+        pv.append(list(linha))
+    for row in pv.iter_rows(min_row=2):
+        for c in row:
+            c.font = corpo
+            c.alignment = Alignment(wrap_text=True, vertical="top")
+    pv.column_dimensions["A"].width = 24
+    pv.column_dimensions["B"].width = 28
+    pv.column_dimensions["C"].width = 100
     wb.save(destino)
 
 

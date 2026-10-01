@@ -41,8 +41,14 @@ def test_planilha_tem_leads_e_copy(arquivos, tmp_path):
     destino = tmp_path / "saida.xlsx"
     exportar_planilha(str(destino), carregar(lp), linhas)
     wb = load_workbook(destino)
-    assert wb.sheetnames == ["Leads", "Copy"]
+    assert wb.sheetnames == ["Leads", "Copy", "Copy pós-venda"]
     ws = wb["Leads"]
     assert ws.max_row == 4
     status = [ws.cell(r, ws.max_column).value for r in range(2, 5)]
     assert status == ["Pendente", "Pendente", "Sem canal"]
+
+
+def test_base_semeia_config_do_pos_venda():
+    from central.seed import base
+    ids = [w["doc_id"] for w in base()]
+    assert ids == ["TESTE", "meta", "posvenda"]

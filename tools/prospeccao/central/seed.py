@@ -11,6 +11,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from msg.compose import compose_whatsapp, wa_link  # noqa: E402
+from msg.copy_posvenda import doc_config as doc_posvenda  # noqa: E402
 from msg.copy_v1 import ESPERA_DIAS, TOQUES, VERSAO, WHATS_LETICIA  # noqa: E402
 
 LOTE = 50
@@ -52,7 +53,8 @@ def seed(linhas: list[dict]) -> list[list[dict]]:
 
 def base() -> list[dict]:
     return [{"op": "set", "collection": "leads", "doc_id": "TESTE", "data": doc_teste()},
-            {"op": "set", "collection": "config", "doc_id": "meta", "data": doc_meta()}]
+            {"op": "set", "collection": "config", "doc_id": "meta", "data": doc_meta()},
+            {"op": "set", "collection": "config", "doc_id": "posvenda", "data": doc_posvenda()}]
 
 
 def main() -> None:

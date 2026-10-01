@@ -1,4 +1,4 @@
-# Status · Prospecção e central · Reiners Media
+# Status · Prospecção, pós-venda e central · Reiners Media
 
 Atualizado em 01/10/2026.
 
@@ -17,7 +17,9 @@ Atualizado em 01/10/2026.
 | Central de disparo | https://claude.ai/artifact/91a7c2U3k1kV9PZYY7zvum |
 | Banco da central | 129 documentos: 127 em `leads`, o card `TESTE` e `config/meta` (meta de 20 toques por dia, esperas de 4 e 6 dias). Leads semeados com `etapa` 0 e `situacao` ativo |
 | Verificação | No nível de quem usa a página: marcar o toque 1 no `TESTE`, ler de volta (`etapa` 1 com a data) e desfazer |
-| Testes | 22 passando (`python3 -m pytest -q` em `tools/prospeccao/`) |
+| Pós-venda | Funil de 7 etapas na mesma central, textos em `config/posvenda`. Nenhum cliente cadastrado ainda: entram por "Fechou negócio" ou "Novo cliente" |
+| Verificação do pós-venda | No nível de quem usa a página: criar um cliente de teste, ler de volta e apagar. Texto montado pela página igual ao do Python nas 35 combinações de etapa e produto |
+| Testes | 62 passando (`python3 -m pytest -q` em `tools/prospeccao/`) |
 
 ## Pontos para a Letícia olhar
 
@@ -29,6 +31,9 @@ Atualizado em 01/10/2026.
 - **E-mail:** sai pelo botão "Abrir e-mail" (ou copiando assunto e corpo). Não criei rascunhos no Gmail porque a conta conectada aqui não é a da Reiners.
 - **Notas do Google:** a pesquisa achou nota só do Anderson Gadelha (5,0 em 35). As outras frases não citam número de avaliação.
 
+- **Clientes que já compraram:** cadastre pelo botão "Novo cliente" no pós-venda (nome, saudação, WhatsApp ou e-mail e produto). Se preferir, me passe a lista que eu semeio no banco.
+- **Etapa 6 (Entrega):** pede uma frase do cliente para o site. Ela só vai ao ar com autorização, como manda o código do site (depoimento real ou nenhum).
+
 ## Bloqueios
 
 - Nenhum. O Apify e o Tavily estão sem crédito, então a lista foi montada por busca na web e conferida no site de cada lead.
@@ -39,4 +44,5 @@ Atualizado em 01/10/2026.
 
 ## Log
 
+- 01/10/2026 23:10: funil de pós-venda (7 etapas), botão Fechou negócio e formulário Novo cliente; config/posvenda semeado e verificado.
 - 01/10/2026: cinco pesquisas em paralelo (uma por segmento), 128 leads, módulos e testes, central publicada, 127 frases únicas, 0 erros na checagem, banco semeado e verificado.
