@@ -7,7 +7,7 @@
          ["encerrado", "Sem resposta"], ["sair", "Saíram"], ["todos", "Todos"]],
     pv: [["hoje", "Para hoje"], ["andamento", "Em andamento"], ["pausado", "Pausados"], ["concluido", "Concluídos"], ["todos", "Todos"]],
     ld: [["todos", "Todos"], ["completo", "Completos"], ["parcial", "Parciais"], ["bruto", "Sem enriquecimento"], ["setor", "Contato de setor"]],
-    bs: [["base", "Na base"], ["pedido", "Na fila do Claude"], ["na_cadencia", "Na cadência"], ["todos", "Todas"]]
+    bs: [["base", "Na base"], ["pedido", "Na fila do Claude"], ["na_cadencia", "Na cadência"], ["sem_cadencia", "Sem cadência"], ["todos", "Todas"]]
   };
   var PAPEIS = { decisor: "Decisor", comunicacao: "Comunicação", secretaria: "Secretaria", comercial: "Comercial", geral: "Geral", setor: "Setor" };
   var estado = {
@@ -1400,14 +1400,17 @@
   // ================= BASE: faixas B e C da Explee =================
   // Lista leve (coleção base, um documento enxuto por empresa). A página só pede: grava status "pedido" e pedidoEm
   // no documento da base. Quem monta o lead (e o põe na fila do enriquecimento) é o Claude, na conversa.
-  var ROTULO_BASE = { base: "Na base", pedido: "Na fila do Claude", na_cadencia: "Na cadência" };
+  var ROTULO_BASE = { base: "Na base", pedido: "Na fila do Claude", na_cadencia: "Na cadência", sem_cadencia: "Sem cadência" };
   var PERSONAS = { decisor: "Decisor", comunicacao: "Comunicação", gestao: "Gestão", operacional: "Operacional" };
   var PAGINA_BASE = 100;
   var TEXTO_PEDIDO = " na fila. Abra a conversa com o Claude para ele montar os cards.";
+  // Assina ao abrir o funil e solta ao sair (trocarFunil): a coleção tem ~2 MB e só interessa aqui.
   function assinarBase() {
     if (estado.baseAssinada || !estado.db) return;
     estado.baseAssinada = true;
-    estado.db.collection("base").onSnapshot(function (snap) {
+    var vez = estado.baseVez = (estado.baseVez || 0) + 1;
+    estado.baseSoltar = estado.db.collection("base").onSnapshot(function (snap) {
+      if (vez !== estado.baseVez) return;  // chegou depois de soltar
       var novo = {};
       snap.docs.forEach(function (d) {
         if (!d.exists) return;
@@ -1420,16 +1423,44 @@
       estado.carregado.base = true;
       render();
     }, function () {
+      if (vez !== estado.baseVez) return;
       estado.carregado.base = true;
       estado.baseErro = true;
       render();
     });
   }
+  function soltarBase() {
+    if (!estado.baseAssinada) return;
+    estado.baseAssinada = false;
+    estado.baseVez = (estado.baseVez || 0) + 1;
+    estado.baseErro = false;
+    var soltar = estado.baseSoltar;
+    estado.baseSoltar = null;
+    if (typeof soltar === "function") soltar();
+  }
   function empresasNaFila(n) { return (n === 1 ? "1 empresa" : n + " empresas") + TEXTO_PEDIDO; }
   function pedidoBase() { return { status: "pedido", pedidoEm: new Date().toISOString() }; }
   function pedirUma(d) {
     if (!estado.podeMarcar || estado.bsLote || Regras.statusBase(estado.base[d.id] || d) !== "base") return;
-    gravar("base/" + d.id, pedidoBase()).then(function (ok) { if (ok) toast(empresasNaFila(1), null, 10000); });
+    // a linha sai de "Na base" e o botão some: o foco vai para o botão da próxima linha que ainda pode ser pedida
+    var vis = estado.visiveis.bs, i = vis.map(function (x) { return x.id; }).indexOf(d.id);
+    var depois = vis.slice(i + 1).concat(vis.slice(0, Math.max(i, 0))).filter(function (x) { return Regras.statusBase(x) === "base"; })
+      .map(function (x) { return x.id; });
+    gravar("base/" + d.id, pedidoBase()).then(function (ok) {
+      if (ok) toast(empresasNaFila(1), null, 10000);
+      focarProximoPedir(depois);
+    });
+  }
+  function focarProximoPedir(ids) {
+    if (!focoPerdido() || estado.funil !== "bs") return;
+    for (var k = 0; k < ids.length; k++) {
+      var b = $("bs-pedir-" + ids[k]);
+      if (b && !b.disabled) { b.focus(); return; }
+    }
+    var algum = $("fila").querySelector(".bs-lista button.pedir:not(:disabled)");
+    if (algum) { algum.focus(); return; }
+    var lista = $("fila").querySelector(".bs-lista");
+    if (lista) { lista.tabIndex = -1; lista.focus(); }
   }
   // Pedido em lote: um update por documento, em sequência (um de cada vez, para não estourar o limite de escritas).
   // Para no primeiro erro; quem já mudou de status no meio do caminho é pulado.
@@ -1437,13 +1468,14 @@
     if (!estado.podeMarcar || estado.bsLote || !ids.length) return;
     estado.bsConfirmar = false;
     estado.bsLote = { feitos: 0, total: ids.length };
-    var feitos = 0, falhou = false;
+    var feitos = 0, parou = false, erro = null;
     var passo = ids.reduce(function (p, id) {
       return p.then(function () {
         var d = estado.base[id];
-        if (falhou || !d || Regras.statusBase(d) !== "base") return;
-        return gravar("base/" + id, pedidoBase(), null, false, function () { falhou = true; }).then(function (ok) {
-          if (ok) feitos++; else falhou = true;
+        if (parou || !d || Regras.statusBase(d) !== "base") return;
+        return gravar("base/" + id, pedidoBase(), null, false, function (e) { erro = e || {}; }).then(function (ok) {
+          if (ok) feitos++;
+          else { parou = true; if (!erro) erro = { code: "sem_acesso" }; }  // sem aoFalhar: falhou() já avisou (acesso)
           if (estado.bsLote) estado.bsLote.feitos = feitos;
         });
       });
@@ -1452,8 +1484,17 @@
     return passo.then(function () {
       estado.bsLote = null;
       render();
-      if (feitos) toast(empresasNaFila(feitos) + (falhou ? " As outras não foram gravadas: tente de novo." : ""), null, 10000);
-      else if (falhou) toast("Não foi possível pedir. Tente de novo em instantes.");
+      var resto = ids.length - feitos;
+      if (!parou) { if (feitos) toast(empresasNaFila(feitos), null, 10000); }
+      else if (erro.code === "sem_acesso") {
+        // o aviso fixo do topo já diz o que houve com o acesso; aqui só a conta do que ficou gravado
+        if (feitos) toast(empresasNaFila(feitos) + " As outras " + resto + " não foram gravadas.", null, 10000);
+      } else if (erro.code === "quota_exceeded") {
+        falhou(erro);  // a mensagem própria do banco cheio, sem troca
+      } else {
+        toast((feitos ? (feitos === 1 ? "1 empresa foi" : feitos + " empresas foram") + " para a fila; as outras " + resto + " não foram gravadas."
+          : "Nenhuma empresa foi gravada.") + " Tente de novo em instantes.", null, 10000);
+      }
       var b = $("bs-lote-btn");
       if (b && focoPerdido()) b.focus();
     });
@@ -1464,7 +1505,7 @@
     caixa.hidden = estado.funil !== "bs";
     if (caixa.hidden) return;
     var lote = Regras.loteBase(filtrados), n = Math.min(lote.total, Regras.LOTE_BASE);
-    var sig = JSON.stringify([lote.total, estado.bsConfirmar, estado.bsLote, estado.podeMarcar, estado.carregado.base]);
+    var sig = JSON.stringify([lote.total, lote.ids, estado.bsConfirmar, estado.bsLote, estado.podeMarcar, estado.carregado.base]);
     if (caixa._sig === sig) return;
     caixa._sig = sig;
     var foco = document.activeElement && caixa.contains(document.activeElement) ? document.activeElement.id : null;
@@ -1502,7 +1543,7 @@
     var nome = d.nome || d.dominio || d.id;
     return {
       st: st,
-      estado: el("span", { class: "estado bs-" + st, id: "bs-st-" + d.id, text: ROTULO_BASE[st] }),
+      estado: el("span", { class: "estado bs-" + st, id: "bs-st-" + d.id, text: ROTULO_BASE[st] + (st === "sem_cadencia" && d.motivo ? ": " + d.motivo : "") }),
       linkedin: x.linkedin ? el("a", { href: x.linkedin, target: "_blank", rel: "noopener", "aria-label": "LinkedIn de " + (x.nome || nome) }, ["LinkedIn"]) : null,
       lead: d.leadId ? el("a", { class: "ir-lead", href: "#leads", "aria-label": "Ver o lead " + d.leadId + " de " + nome,
         onclick: function (ev) { ev.preventDefault(); irParaLead(d.leadId); } }, ["Ver lead ", el("span", { class: "num", text: d.leadId })]) : null,
@@ -1522,8 +1563,7 @@
         el("div", { class: "situacao" }, [p.estado])
       ]),
       // no celular os links viram botões de 44px
-      el("div", { class: "acoes" }, [p.botao, p.lead ? (p.lead.classList.add("btn"), p.lead) : null, p.linkedin ? el("a", { class: "btn", href: d.decisor.linkedin, target: "_blank", rel: "noopener",
-        "aria-label": "LinkedIn de " + (d.decisor.nome || d.nome) }, ["LinkedIn"]) : null])
+      el("div", { class: "acoes" }, [p.botao, p.lead ? (p.lead.classList.add("btn"), p.lead) : null, p.linkedin ? (p.linkedin.classList.add("btn"), p.linkedin) : null])
     ]);
   }
   function linhaTabelaBase(d) {
@@ -1561,7 +1601,7 @@
     var chave = JSON.stringify([estado.filtro.bs, estado.busca]);
     if (estado.bsChave !== chave) { estado.bsChave = chave; estado.bsLimite = PAGINA_BASE; estado.bsConfirmar = false; }
     var todos = estado.baseLista;
-    var cont = { todos: todos.length, base: 0, pedido: 0, na_cadencia: 0 }, comLinkedin = 0;
+    var cont = { todos: todos.length, base: 0, pedido: 0, na_cadencia: 0, sem_cadencia: 0 }, comLinkedin = 0;
     var segs = {}, faixas = {}, personas = {};
     todos.forEach(function (d) {
       cont[Regras.statusBase(d)]++;
@@ -2033,6 +2073,7 @@
     $("btn-filtros-rot").textContent = n ? "Filtros · " + n : "Filtros";
   }
   function trocarFunil(f) {
+    if (estado.funil === "bs" && f !== "bs") soltarBase();
     estado.funil = f;
     estado.fechando = null;
     estado.detalheAberto = false;

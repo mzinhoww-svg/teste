@@ -150,7 +150,7 @@ python3 -m scripts.base_explee base --entrada dados/explee/base.json --tiers B,C
 - Um documento por empresa em `base`, id `D` + 5 dígitos estável pelo domínio (sha1 do domínio; colisão vai para o próximo número livre; `--anteriores` mantém os ids de uma rodada anterior). Campos: `dominio`, `nome`, `segmento`, `tier`, `score`, `regiao`, `decisor` (`nome`, `cargo`, `persona`, `linkedin`), `pessoas`, `comLinkedin`, `campanhas`, `status` (`base`, `pedido` ou `na_cadencia`), `pedidoEm`, `leadId`, `migradoEm`. Cada um fica abaixo de 1 KB (a coleção toda, ~1 MB).
 - Quem já está em `leads` (site, `baseExplee.dominio`, `explee.dominio` ou e-mails) fica de fora.
 
-Na página, o funil **Base** (atalho `4`) só assina a coleção quando é aberto. A partir de 1024px é uma tabela (empresa, segmento, faixa, quem decide, LinkedIn, status); no celular, linhas. Mostra 100 por vez, com **Mostrar mais**. As abas são os status (Na base, Na fila do Claude, Na cadência, Todas), com a contagem; os filtros são segmento, faixa e quem decide (persona), mais a busca (empresa, domínio ou pessoa).
+Na página, o funil **Base** (atalho `4`) só assina a coleção quando é aberto e solta a assinatura quando sai dele. A partir de 1024px é uma tabela (empresa, segmento, faixa, quem decide, LinkedIn, status); no celular, linhas. Mostra 100 por vez, com **Mostrar mais**. As abas são os status (Na base, Na fila do Claude, Na cadência, Sem cadência, Todas), com a contagem; os filtros são segmento, faixa e quem decide (persona), mais a busca (empresa, domínio ou pessoa).
 
 - **Enriquecer e iniciar cadência**, em cada linha, grava só `status: "pedido"` e `pedidoEm` em `base/{id}`. A página nunca cria lead.
 - **Enriquecer e iniciar cadência dos filtrados (N)**, na barra de filtros, pede confirmação ali mesmo (sem modal) e grava até 50 por clique, um `update` por documento, um de cada vez; para no primeiro erro.
@@ -164,7 +164,7 @@ python3 -m scripts.base_explee processar --pedidos pedidos.json --existentes lea
 ```
 
 - `processar` monta os leads completos com o mesmo mapeamento do promover (toques na versão da região, flags "base Explee" e "migrado sem enriquecer"), agora também para os segmentos que a faixa A pulava: Entidades do agro, Cooperativas agro e Gestão pública como entidade (ICP3); Revendas e agtechs, Empresas B2B médias e Indústrias regionais como médio porte (ICP5). Os ids `B` continuam depois do maior existente.
-- Devolve `novosLeads` (gravados com `set`), `baseUpdates` (`status: "na_cadencia"`, `leadId`, `migradoEm`, gravados com `update` e `if_version`) e `pulados`. Empresa que já virou lead só ganha a atualização da base.
+- Devolve `novosLeads` (gravados com `set`), `baseUpdates` (`status: "na_cadencia"`, `leadId`, `migradoEm`; ou, para cada pulado, o status terminal `sem_cadencia` com o `motivo`; gravados com `update` e `if_version`) e `pulados`. Na página, os pulados ficam na aba **Sem cadência**, com "Sem cadência: <motivo>". Empresa que já virou lead só ganha a atualização da base.
 - Cada lead novo leva `enriquecimento.fila: true`: o próximo **Enriquecer base** busca esses primeiro, e a marca sai depois da busca.
 
 ### Sem contato → Para hoje

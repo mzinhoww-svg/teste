@@ -20,7 +20,7 @@ function simulador(inicial, falharGravacao, atraso) {
   inicial.leads.forEach((d) => { docs.leads[d.id] = copia(d.data); });
   inicial.clientes.forEach((d) => { docs.clientes[d.id] = copia(d.data); });
   (inicial.base || []).forEach((d) => { docs.base[d.id] = copia(d.data); });
-  window.__assinaturas = {};  // coleção -> quantas vezes a página assinou (a Base só assina quando abre)
+  window.__assinaturas = {}; window.__soltas = {};  // coleção -> quantas vezes a página assinou (a Base só assina quando abre)
   Object.keys(inicial.config).forEach((k) => { if (inicial.config[k]) docs.config[k] = copia(inicial.config[k]); });
   const notificar = () => assinantes.slice().forEach((a) => a());
   const parte = (caminho) => caminho.split("/");
@@ -33,14 +33,18 @@ function simulador(inicial, falharGravacao, atraso) {
         return () => {};
       },
       update(d) {
-        if (window.__falhar) return Promise.reject({ code: "unavailable" });
+        if (window.__falhar || (window.__falharDepois != null && escritas.length >= window.__falharDepois)) {
+          return Promise.reject({ code: typeof window.__falhar === "string" ? window.__falhar : (window.__falharCodigo || "unavailable") });
+        }
         docs[col][id] = Object.assign({}, docs[col][id] || {}, copia(d));
         escritas.push({ caminho, dados: copia(d) });
         notificar();
         return resolver();
       },
       set(d) {
-        if (window.__falhar) return Promise.reject({ code: "unavailable" });
+        if (window.__falhar || (window.__falharDepois != null && escritas.length >= window.__falharDepois)) {
+          return Promise.reject({ code: typeof window.__falhar === "string" ? window.__falhar : (window.__falharCodigo || "unavailable") });
+        }
         docs[col][id] = copia(d);
         escritas.push({ caminho, dados: copia(d) });
         notificar();
@@ -53,7 +57,10 @@ function simulador(inicial, falharGravacao, atraso) {
       window.__assinaturas[nome] = (window.__assinaturas[nome] || 0) + 1;
       const emitir = () => cb({ docs: Object.keys(docs[nome]).map((id) => ({ id, exists: true, data: () => copia(docs[nome][id]) })) });
       assinantes.push(emitir); emitir();
-      return () => {};
+      return () => {  // soltar: para de receber e conta (a Base solta ao sair do funil)
+        const i = assinantes.indexOf(emitir);
+        if (i >= 0) { assinantes.splice(i, 1); window.__soltas[nome] = (window.__soltas[nome] || 0) + 1; }
+      };
     },
   });
   window.__empurrar = (caminho, d) => {

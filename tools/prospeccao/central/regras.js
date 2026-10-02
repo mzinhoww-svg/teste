@@ -228,7 +228,9 @@ var Regras = (function () {
 
   // ---------- Base (coleção base: faixas B e C da Explee) ----------
   var LOTE_BASE = 50;  // teto de pedidos por clique no botão dos filtrados
-  function statusBase(d) { return d.status === "pedido" || d.status === "na_cadencia" ? d.status : "base"; }
+  // "sem_cadencia" é terminal: o Claude não achou cadência para o segmento (ou a copy não passou) e gravou o motivo.
+  var STATUS_BASE = { pedido: 1, na_cadencia: 1, sem_cadencia: 1 };
+  function statusBase(d) { return STATUS_BASE[d.status] ? d.status : "base"; }
   function casaBase(d, busca) {
     var q = semAcento(busca).trim();
     if (!q) return true;

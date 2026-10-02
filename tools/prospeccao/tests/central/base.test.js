@@ -280,3 +280,122 @@ test("Sem contato: celular encontrado aparece na linha e Usar na cadência leva 
   assert.equal(await page.locator("#fila [data-id=B0001] a.enviar").getAttribute("aria-disabled"), null, "na fila de hoje, com Enviar");
   assert.deepEqual(h.erros.map(String), []);
 });
+
+// ---------- rodada de revisão ----------
+test("Base: depois do pedido pela linha (Enter), o foco vai para o botão da próxima linha", async () => {
+  const h = await abrirBase();
+  const { page } = h;
+  await irParaBase(h);
+  const [primeiro, segundo] = await ids(page);
+  await page.focus("#bs-pedir-" + primeiro);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction((id) => !document.querySelector('#fila [data-id="' + id + '"]'), primeiro);
+  await page.waitForFunction(() => document.activeElement !== document.body);
+  assert.equal(await page.evaluate(() => document.activeElement.id), "bs-pedir-" + segundo);
+  assert.equal((await h.escritas.lista()).length, 1, "Enter no botão pede uma vez, não envia lead nenhum");
+  // a 390px (linhas) também
+  const m = await abrirBase({ largura: 390, altura: 844 });
+  await irParaBase(m);
+  const [a, b] = await ids(m.page);
+  await m.page.focus("#bs-pedir-" + a);
+  await m.page.keyboard.press("Enter");
+  await m.page.waitForFunction((id) => !document.querySelector('#fila [data-id="' + id + '"]'), a);
+  assert.equal(await m.page.evaluate(() => document.activeElement.id), "bs-pedir-" + b);
+  assert.deepEqual(h.erros.map(String).concat(m.erros.map(String)), []);
+});
+
+test("Base: sem_cadencia é terminal, com aba própria, o motivo escrito e o botão desativado", async () => {
+  const h = await abrirBase({ base: dados.empresasBase(20, (i) => i === 0 ? { status: "sem_cadencia", motivo: "segmento sem cadência: Outro" } : null) });
+  const { page } = h;
+  await irParaBase(h);
+  const n = (g) => page.locator('#abas [data-grupo="' + g + '"] .n').innerText();
+  assert.equal(await n("sem_cadencia"), "1");
+  assert.equal(await n("base"), "19");
+  assert.ok(!(await ids(page)).includes("D10001"), "fora de Na base");
+  assert.match(await page.locator("#bs-lote-btn").innerText(), /\(19\)$/, "fora do lote");
+  await page.click('#abas [data-grupo="sem_cadencia"]');
+  assert.deepEqual(await ids(page), ["D10001"]);
+  assert.equal(await page.locator("#bs-st-D10001").innerText(), "Sem cadência: segmento sem cadência: Outro");
+  assert.equal(await page.locator("#bs-pedir-D10001").isDisabled(), true);
+  await page.click('#abas [data-grupo="todos"]');
+  assert.ok((await ids(page)).includes("D10001"));
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("Base: sair do funil solta a assinatura da coleção; voltar assina de novo e lê o que mudou", async () => {
+  const h = await abrirBase();
+  const { page } = h;
+  await irParaBase(h);
+  const conta = () => page.evaluate(() => [window.__assinaturas.base || 0, window.__soltas.base || 0]);
+  assert.deepEqual(await conta(), [1, 0]);
+  await page.click("#f-aq");
+  assert.deepEqual(await conta(), [1, 1]);
+  await h.empurrar("base/D10001", { status: "pedido", pedidoEm: "2026-10-02T12:00:00Z" });  // mudou com a Base fechada
+  await page.locator("body").press("4");
+  await page.waitForSelector("#fila .bs-lista [data-id]");
+  assert.deepEqual(await conta(), [2, 1]);
+  assert.equal(await page.locator('#abas [data-grupo="pedido"] .n').innerText(), "2");
+  await page.click("#f-ld");
+  await page.click("#f-bs");
+  assert.deepEqual(await conta(), [3, 2], "uma assinatura por visita, nunca duas ao mesmo tempo");
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("Base: a confirmação do lote acompanha os ids, não só o total", async () => {
+  const h = await abrirBase();
+  const { page } = h;
+  await irParaBase(h);
+  await page.click("#bs-lote-btn");
+  // o total volta a 248, mas D10001 saiu da base e D10003 voltou
+  await h.empurrar("base/D10001", { status: "pedido", pedidoEm: "2026-10-02T12:00:00Z" });
+  await h.empurrar("base/D10003", { status: "base", pedidoEm: null });
+  assert.match(await page.locator("#bs-lote").innerText(), /primeiras 50 de 248/);
+  const antes = (await h.escritas.lista()).length;
+  await page.click("#bs-lote-ok");
+  await page.waitForFunction(() => /empresas na fila/.test(document.getElementById("toast").textContent), null, { timeout: 15000 });
+  const esc = (await h.escritas.lista()).slice(antes);
+  assert.equal(esc.length, 50);
+  assert.ok(!esc.some((e) => e.caminho === "base/D10001"));
+  assert.ok(esc.some((e) => e.caminho === "base/D10003"));
+});
+
+test("Base: erro no meio do lote diz quantas foram e quantas não; banco cheio mantém a mensagem própria", async () => {
+  const h = await abrirBase();
+  const { page } = h;
+  await irParaBase(h);
+  await page.evaluate(() => { window.__falharDepois = 3; });
+  await page.click("#bs-lote-btn");
+  await page.click("#bs-lote-ok");
+  await page.waitForFunction(() => /não foram gravadas/.test(document.getElementById("toast").textContent));
+  assert.equal(await page.locator("#toast").innerText(), "3 empresas foram para a fila; as outras 47 não foram gravadas. Tente de novo em instantes.");
+  assert.equal((await h.escritas.lista()).length, 3);
+  await page.evaluate(() => { window.__falharDepois = 4; window.__falharCodigo = "quota_exceeded"; });
+  await page.click("#bs-lote-btn");
+  await page.click("#bs-lote-ok");
+  await page.waitForFunction(() => /banco da central está cheio/.test(document.getElementById("toast").textContent));
+  await new Promise((r) => setTimeout(r, 100));
+  assert.equal(await page.locator("#toast").innerText(), "O banco da central está cheio. Avise o Claude para liberar espaço.");
+  assert.equal((await h.escritas.lista()).length, 4);
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("Funis cabem a 360px e 320px: rótulo curto à vista, nome inteiro no nome acessível", async () => {
+  for (const largura of [360, 320]) {
+    const h = await abrirBase({ largura, altura: 740, leads: dados.leads(25), base: dados.empresasBase(30, (i) => (i < 12 ? { status: "pedido" } : null)) });
+    await irParaBase(h);
+    await h.page.click("#f-aq");
+    const r = await h.page.evaluate(() => ({
+      cortados: Array.from(document.querySelectorAll(".funis button")).filter((b) => b.scrollWidth > b.clientWidth + 0.5).map((b) => b.id),
+      lateral: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      altura: document.querySelector(".funis").getBoundingClientRect().height,
+    }));
+    assert.deepEqual(r.cortados, [], "largura " + largura);
+    assert.equal(r.lateral, false);
+    assert.ok(r.altura <= 50, "uma linha só: " + r.altura);
+    const nomes = await h.page.evaluate(() => Array.from(document.querySelectorAll(".funis button")).map((b) => b.querySelector(".rot-longo") ? (getComputedStyle(b.querySelector(".rot-curto")).display !== "none" ? "curto" : "longo") : "-"));
+    assert.deepEqual(nomes, ["curto", "curto", "-", "-"]);
+    assert.match(await h.page.getByRole("button", { name: /^Aquecimento/ }).first().innerText(), /Aquec\./);
+    assert.equal(await h.page.getByRole("button", { name: /^Pós-venda/ }).count(), 1);
+    assert.deepEqual(h.erros.map(String), []);
+  }
+});

@@ -128,3 +128,10 @@ test("contatoEncontrado: decisor com telefone ainda não escolhido; nada se já 
   assert.equal(R.contatoEncontrado({ canal: "WhatsApp", contatos: [{ id: "k1", papel: "decisor", telefone: "1", invalido: true }] }), null);
   assert.equal(R.contatoEncontrado({ canal: "E-mail", contatos: [{ id: "k1", papel: "decisor", telefone: "5565988887777" }] }), null);
 });
+test("Base: sem_cadencia é status próprio, fora do lote e do filtro Na base", () => {
+  const lista = [{ id: "D1", status: "sem_cadencia", motivo: "x" }, { id: "D2", status: "base" }, { id: "D3", status: "qualquer" }];
+  assert.equal(R.statusBase(lista[0]), "sem_cadencia");
+  assert.equal(R.statusBase(lista[2]), "base");
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "sem_cadencia" }, "").map((d) => d.id), ["D1"]);
+  assert.deepEqual(R.loteBase(lista).ids, ["D2", "D3"]);
+});

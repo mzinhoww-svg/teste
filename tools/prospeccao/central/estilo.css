@@ -91,6 +91,12 @@
   .funis button + button { border-left: 1px solid var(--navy); }
   .funis button[aria-pressed="true"] { background: var(--navy); color: var(--creme); }
   .funis .n { font: 500 var(--t12) var(--mono); font-variant-numeric: tabular-nums; }
+  /* Abaixo de 400px os quatro funis não cabem por extenso: rótulo curto à vista, o nome inteiro para leitor de tela */
+  .funis .rot-curto { display: none; }
+  @media (max-width: 399px) {
+    .funis .rot-curto { display: inline; }
+    .funis .rot-longo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  }
 
   .placar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; font-variant-numeric: tabular-nums; }
   .placar div { display: grid; gap: 2px; align-content: start; }
@@ -370,6 +376,7 @@
   .estado.bs-base { background: var(--pergaminho); color: var(--suave); }
   .estado.bs-pedido { background: var(--ouro-fundo); color: var(--ouro-texto); }
   .estado.bs-na_cadencia { background: var(--ok-fundo); color: var(--ok); }
+  .estado.bs-sem_cadencia { background: var(--pergaminho); color: var(--alerta); white-space: normal; line-height: 1.3; }
   .bs-lote { display: grid; gap: 6px; min-width: 0; }
   .bs-lote .btn { white-space: normal; text-align: left; }
   .bs-lote-texto { margin: 0; font-size: var(--t13); line-height: 1.4; color: var(--suave); }
