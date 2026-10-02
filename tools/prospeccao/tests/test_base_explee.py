@@ -142,9 +142,21 @@ def test_processar_idempotente_e_quem_ja_e_lead_so_atualiza_a_base():
 
 
 def test_processar_segmento_desconhecido_vai_para_pulados():
-    res = processar([pedido(empresa(segmento="Outro segmento"))], [], None, AGORA)
-    assert res["novosLeads"] == [] and res["baseUpdates"] == []
-    assert res["pulados"][0]["motivo"].startswith("segmento sem cadência")
+    res = processar([pedido(empresa(segmento="Outro segmento")), pedido(empresa("ok.example"), "D00011")], [], None, AGORA)
+    assert [n["id"] for n in res["novosLeads"]] == ["B0001"]
+    assert res["pulados"][0]["motivo"] == "segmento sem cadência: Outro segmento"
+    # o pulado não fica "pedido" para sempre: status terminal com o motivo
+    assert res["baseUpdates"] == [
+        {"id": "D00011", "data": {"status": "na_cadencia", "leadId": "B0001", "migradoEm": AGORA}},
+        {"id": "D00010", "data": {"status": "sem_cadencia", "motivo": "segmento sem cadência: Outro segmento"}}]
+
+
+def test_processar_copy_reprovada_tambem_fica_sem_cadencia(monkeypatch):
+    import scripts.base_explee as be
+    monkeypatch.setattr(be, "checar", lambda lid, doc: [f"{lid}: frase vazia"])
+    res = be.processar([pedido(empresa())], [], None, AGORA)
+    assert res["novosLeads"] == []
+    assert res["baseUpdates"] == [{"id": "D00010", "data": {"status": "sem_cadencia", "motivo": "copy reprovada: B0001: frase vazia"}}]
 
 
 def test_cli_processar(tmp_path, capsys):

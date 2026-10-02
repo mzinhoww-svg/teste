@@ -23,6 +23,8 @@ Decisões:
 - `processar` usa os segmentos ampliados do promover (agro, cooperativas, gestão pública, revendas, B2B,
   indústrias), porque a Letícia pediu aquela empresa. Ids `B` continuam depois do maior B existente. Cada lead
   novo leva `enriquecimento.fila: true`, que põe ele na frente do próximo "Enriquecer base".
+- Pedido pulado (sem domínio, segmento sem cadência ou copy reprovada) não fica "pedido" para sempre: entra em
+  `baseUpdates` com `status: "sem_cadencia"` e o `motivo`, que a página mostra.
 - Pedido cuja empresa já virou lead (rodar de novo, ou o lead entrou por outro caminho) não gera lead: só a
   atualização da base, com o `leadId` que já existe.
 """
@@ -41,7 +43,7 @@ from scripts.promover_base import (_achatar, _dominios_existentes, _proximo_b, c
 
 PREFIXO = "D"
 ESPACO = 100000
-STATUS_BASE, STATUS_PEDIDO, STATUS_CADENCIA = "base", "pedido", "na_cadencia"
+STATUS_BASE, STATUS_PEDIDO, STATUS_CADENCIA, STATUS_SEM = "base", "pedido", "na_cadencia", "sem_cadencia"
 LIMITE_DOC = 1024  # bytes do JSON do documento
 
 
@@ -159,7 +161,8 @@ def _empresa_do_pedido(doc: dict, completas: dict) -> dict:
 
 
 def processar(pedidos, existentes, base: dict | None = None, agora: str | None = None) -> dict:
-    """{novosLeads: [{id, data}], baseUpdates: [{id, data}], pulados: [{id, dominio, motivo}]}.
+    """{novosLeads: [{id, data}], baseUpdates: [{id, data}], pulados: [{id, dominio, motivo}]}. Cada pulado também
+    vira uma atualização `{status: "sem_cadencia", motivo}` em baseUpdates.
 
     Só olha documentos com status "pedido". Não gera lead que já está na central."""
     agora = agora or _agora()
@@ -200,6 +203,9 @@ def processar(pedidos, existentes, base: dict | None = None, agora: str | None =
         updates.append({"id": bid, "data": {"status": STATUS_CADENCIA, "leadId": lid, "migradoEm": agora}})
         doms[dom] = lid
         num += 1
+    # Pulado não fica "pedido" para sempre: ganha o status terminal com o motivo, que a página mostra.
+    for p in pulados:
+        updates.append({"id": p["id"], "data": {"status": STATUS_SEM, "motivo": p["motivo"]}})
     return {"novosLeads": novos, "baseUpdates": updates, "pulados": pulados}
 
 
