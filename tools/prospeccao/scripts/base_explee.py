@@ -8,11 +8,12 @@ Só biblioteca padrão; não acessa o banco: lê JSON e grava JSON.
 
     python3 -m scripts.base_explee base --entrada dados/explee/base.json --tiers B,C \\
         --existentes dados/explee/existentes_docs.json --existentes dados/explee/promover.json \\
-        --saida dados/explee/base_docs.json [--anteriores base_docs_antigo.json]
+        --saida dados/explee/base_docs.json [--anteriores base_docs_antigo.json] [--site-contatos F] [--geo F]
     python3 -m scripts.base_explee processar --pedidos pedidos.json --existentes leads.json \\
         --saida processar.json [--base dados/explee/base.json]
     python3 -m scripts.base_explee site-leads --leads leads_a.json --site-contatos dados/explee/site_contatos.json \\
         --saida site_leads.json
+    python3 -m scripts.base_explee geo-leads --leads leads.json --geo dados/explee/geo.json --saida geo_leads.json
 
 Decisões:
 - Id `D` + 5 dígitos, estável pelo domínio: sha1 do domínio módulo 100000; colisão anda para o próximo número
@@ -25,6 +26,9 @@ Decisões:
 - `processar` usa os segmentos ampliados do promover (agro, cooperativas, gestão pública, revendas, B2B,
   indústrias), porque a Letícia pediu aquela empresa. Ids `B` continuam depois do maior B existente. Cada lead
   novo leva `enriquecimento.fila: true`, que põe ele na frente do próximo "Enriquecer base".
+- País, estado e cidade (`scripts/geo.py`, `--geo`) entram no documento como `pais`, `uf` e `cidade` e passam para o
+  lead novo. Estado MT no lead novo põe `regiao = "MT"` e refaz os toques (o lead ainda está na etapa 0, sem envio).
+  `geo-leads` preenche só os campos vazios dos leads que já existem.
 - Pedido pulado (sem domínio, segmento sem cadência ou copy reprovada) não fica "pedido" para sempre: entra em
   `baseUpdates` com `status: "sem_cadencia"` e o `motivo`, que a página mostra.
 - Pedido cuja empresa já virou lead (rodar de novo, ou o lead entrou por outro caminho) não gera lead: só a
@@ -41,8 +45,10 @@ from datetime import datetime, timezone
 from msg.regiao import regiao as regiao_do_lead
 from scripts.classificar_base import dominios_central
 from scripts.enriquecer_leads import _dominio
+from msg.regiao import CIDADES_MT, _sem_acento
+from scripts.geo import itens_da_entrada, resolver_empresa
 from scripts.promover_base import (_achatar, _dominios_existentes, _proximo_b, checar, doc_promovido,
-                                   pessoas_ordenadas, perfil_segmento)
+                                   nome_curto, pessoas_ordenadas, perfil_segmento, toques)
 
 PREFIXO = "D"
 ESPACO = 100000
@@ -134,8 +140,17 @@ def contato_do_lead(ce: dict | None, existentes: list[dict] | None = None, extra
             "confianca": "média"}
 
 
-def doc_base(emp: dict, achado: dict | None = None) -> dict:
-    """Documento enxuto da coleção `base` para uma empresa classificada. `achado` é o contato do site (opcional)."""
+def _geo_campos(g: dict | None) -> dict:
+    """pais, uf e cidade para o documento: o que não se sabe fica "" (o "?" do país também)."""
+    g = g or {}
+    pais = str(g.get("pais") or "").strip()
+    return {"pais": "" if pais == "?" else pais[:40], "uf": str(g.get("uf") or "").strip().upper()[:2],
+            "cidade": _texto(g.get("cidade"), 60)}
+
+
+def doc_base(emp: dict, achado: dict | None = None, geo: dict | None = None) -> dict:
+    """Documento enxuto da coleção `base` para uma empresa classificada. `achado` é o contato do site e `geo`, o
+    {pais, uf, cidade} do geo.py (os dois opcionais)."""
     pessoas = pessoas_ordenadas(emp)
     p = pessoas[0] if pessoas else (emp.get("decisor") or {})
     nome = (emp.get("nome") or "").strip() or emp["dominio"]
@@ -157,6 +172,8 @@ def doc_base(emp: dict, achado: dict | None = None) -> dict:
     ce = contato_empresa(achado, emp["dominio"])
     if ce:
         doc["contatoEmpresa"] = ce
+    if geo is not None:
+        doc.update(_geo_campos(geo))
     while doc["contatos"] and len(json.dumps(doc, ensure_ascii=False).encode("utf-8")) > LIMITE_DOC:
         doc["contatos"].pop()
     if len(json.dumps(doc, ensure_ascii=False).encode("utf-8")) > LIMITE_DOC:
@@ -175,7 +192,7 @@ def _dominios_na_central(existentes: list[dict]) -> dict:
 
 
 def montar_base(base: dict, existentes: list[dict], tiers=("B", "C"), anteriores: list[dict] | None = None,
-                site_contatos: dict | None = None) -> dict:
+                site_contatos: dict | None = None, geo: dict | None = None) -> dict:
     """{docs: [{id, data}], pulados: [{dominio, nome, motivo, id?}]}, na ordem faixa, score desc, domínio."""
     na_central = _dominios_na_central(existentes)
     empresas, pulados, vistos = [], [], set()
@@ -196,7 +213,8 @@ def montar_base(base: dict, existentes: list[dict], tiers=("B", "C"), anteriores
     ant = {_dominio(d.get("dominio") or ""): d["id"] for d in _itens(anteriores or []) if d.get("id")}
     ids = atribuir_ids([e["dominio"] for e in empresas], ant)
     empresas.sort(key=lambda e: (e.get("tier") or "", -(e.get("score") or 0), e["dominio"]))
-    return {"docs": [{"id": ids[e["dominio"]], "data": doc_base(e, (site_contatos or {}).get(e["dominio"]))} for e in empresas], "pulados": pulados}
+    return {"docs": [{"id": ids[e["dominio"]], "data": doc_base(e, (site_contatos or {}).get(e["dominio"]),
+                                                       (geo.get(e["dominio"]) or {}) if geo is not None else None)} for e in empresas], "pulados": pulados}
 
 
 # --------------------------------------------------------------------------- processar
@@ -245,6 +263,11 @@ def processar(pedidos, existentes, base: dict | None = None, agora: str | None =
             continue
         lid = f"B{num:04d}"
         dados = doc_promovido(emp, num, agora, ampliado=True)
+        dados.update({k: v for k, v in _geo_campos(doc).items()})
+        if dados["uf"] == "MT" and dados.get("regiao") != "MT":  # lead novo: etapa 0, nada enviado
+            curto = nome_curto(dados["nome"]) or dados["nome"]
+            dados["regiao"] = "MT"
+            dados["toques"] = toques(dados["icp"], dados["saudacao"], curto, dados["fraseUnica"], dados["foto"], "MT")
         erros = checar(lid, dados)
         if erros:
             pulados.append({"id": bid, "dominio": dom, "motivo": "copy reprovada: " + "; ".join(erros)})
@@ -281,6 +304,41 @@ def site_leads(leads, site_contatos: dict) -> list[dict]:
         novo = contato_do_lead(ce, contatos, (d.get("telefone"), d.get("email")))
         if novo:
             saida.append({"id": item["id"], "if_version": item.get("version"), "data": {"contatos": contatos + [novo]}})
+    return saida
+
+
+def _cidade_de_mt(cidade: str) -> bool:
+    c = _sem_acento(cidade)
+    return bool(c) and c in CIDADES_MT
+
+
+def geo_leads(leads, geo: dict) -> list[dict]:
+    """[{id, if_version, data: {pais, uf, cidade}}] só com o que falta nos leads que já existem (R, X e B).
+
+    Nunca troca valor que já está lá (nem bairro, nem cidade). A empresa é achada pelo `site`, `explee.dominio` ou
+    `baseExplee.dominio`; sem registro no geo, vale o DDD dos telefones do próprio lead e as dicas do nome. Sem cidade
+    no lead, usa a de `perfil.cidade` (leads R vêm com ela) e, se for cidade de MT, o estado é MT."""
+    saida = []
+    for item in leads or []:
+        d = item["data"] if isinstance(item.get("data"), dict) else item
+        i = itens_da_entrada([item])[0]
+        g = dict((geo or {}).get(i["dominio"]) or {})
+        if not g.get("uf"):
+            g = {**resolver_empresa(i["dominio"], i["nome"], None, i["telefones"], None),
+                 **{k: v for k, v in g.items() if k == "pais" and v and v != "?"}}
+        tem = {k: str(d.get(k) or "").strip() for k in ("pais", "uf", "cidade")}
+        perfil_cidade = str((d.get("perfil") or {}).get("cidade") or "").strip()
+        cidade = tem["cidade"] or perfil_cidade
+        uf = tem["uf"] or ("MT" if _cidade_de_mt(cidade) and not tem["cidade"] else "") or g.get("uf") or ""
+        if not cidade and g.get("cidade") and (not tem["uf"] or tem["uf"] == g.get("uf")):
+            cidade = g["cidade"]
+        pais = tem["pais"] or ("Brasil" if uf else (g.get("pais") if g.get("pais") != "?" else "")) or ""
+        novos = {}
+        for k, v in (("pais", pais), ("uf", uf), ("cidade", cidade)):
+            if v and not tem[k]:
+                novos[k] = v
+        if novos:
+            saida.append({"id": item["id"], "if_version": item.get("version"), "data": novos})
     return saida
 
 
@@ -323,7 +381,19 @@ def main(argv=None):
     sl.add_argument("--leads", required=True, help="JSON com a lista de leads ({id, version, data})")
     sl.add_argument("--site-contatos", required=True)
     sl.add_argument("--saida", required=True)
+    gl = sub.add_parser("geo-leads", help="preenche país, UF e cidade vazios dos leads que já existem")
+    gl.add_argument("--leads", required=True, help="JSON com a lista de leads ({id, version, data})")
+    gl.add_argument("--geo", required=True, help="geo.json do scripts.geo")
+    gl.add_argument("--saida", required=True)
+    b.add_argument("--geo", help="geo.json do scripts.geo: põe pais, uf e cidade em cada doc")
     a = ap.parse_args(argv)
+    if a.cmd == "geo-leads":
+        leads = _ler(a.leads)
+        res = geo_leads(leads, _ler(a.geo))
+        _gravar(a.saida, res)
+        print(json.dumps({"leads": len(leads), "comGeoNovo": len(res), "comUF": sum(1 for r in res if r["data"].get("uf")),
+                          "comCidade": sum(1 for r in res if r["data"].get("cidade"))}, ensure_ascii=False))
+        return 0
     if a.cmd == "site-leads":
         leads = _ler(a.leads)
         res = site_leads(leads, _ler(a.site_contatos))
@@ -334,12 +404,15 @@ def main(argv=None):
     if a.cmd == "base":
         tiers = tuple(t.strip() for t in a.tiers.split(",") if t.strip())
         res = montar_base(_ler(a.entrada), exist, tiers, _ler(a.anteriores) if a.anteriores else None,
-                          _ler(a.site_contatos) if a.site_contatos else None)
+                          _ler(a.site_contatos) if a.site_contatos else None,
+                          _ler(a.geo) if a.geo else None)
         _gravar(a.saida, res["docs"])
         tamanhos = [len(json.dumps(d["data"], ensure_ascii=False).encode("utf-8")) for d in res["docs"]]
         print(json.dumps({"docs": len(res["docs"]), "porFaixa": _contar([d["data"] for d in res["docs"]], "tier"),
                           "porSegmento": _contar([d["data"] for d in res["docs"]], "segmento"),
                           "comContatoEmpresa": sum(1 for d in res["docs"] if d["data"].get("contatoEmpresa")),
+                          "comUF": sum(1 for d in res["docs"] if d["data"].get("uf")),
+                          "comCidade": sum(1 for d in res["docs"] if d["data"].get("cidade")),
                           "maiorDocBytes": max(tamanhos, default=0), "totalBytes": sum(tamanhos),
                           "pulados": _contar(res["pulados"], "motivo")}, ensure_ascii=False))
         return 0

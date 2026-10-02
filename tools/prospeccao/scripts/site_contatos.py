@@ -20,6 +20,7 @@ UA = "Mozilla/5.0 (compatible; reiners-central/1.0)"
 RE_WA = re.compile(r"(?:wa\.me/|api\.whatsapp\.com/send\?phone=|whatsapp\.com/send/\?phone=)\+?(\d{10,13})")
 RE_TEL_LINK = re.compile(r"tel:\+?(?:55)?\(?([1-9][1-9])\)?[\s.-]?(9?[2-9]\d{3})[\s.-]?(\d{4})\b")
 RE_TEL = re.compile(r"\(\s*([1-9][1-9])\s*\)\s*(9?\s?[2-9]\d{3})[\s.-](\d{4})\b")
+RE_CEP = re.compile(r"\b(\d{5})-(\d{3})\b")
 RE_MAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 LIXO_MAIL = ("sentry", "wixpress", "example", "domain.com", "email.com", "seuemail", ".png", ".jpg", ".webp", ".svg")
 
@@ -50,7 +51,12 @@ def extrair(html: str, dominio: str) -> dict:
         mails.append(m)
     # e-mail do próprio domínio primeiro
     mails.sort(key=lambda m: 0 if m.endswith("@" + dominio) or m.endswith("." + dominio) else 1)
-    return {"whatsapp": wa[:2], "telefones": tel[:3], "emails": mails[:3]}
+    ceps = []
+    for a, b in RE_CEP.findall(html):
+        c = a + b
+        if c not in ceps and not c.startswith("00"):
+            ceps.append(c)
+    return {"whatsapp": wa[:2], "telefones": tel[:3], "emails": mails[:3], "ceps": ceps[:2]}
 
 
 def baixar(url: str, timeout: int = 8) -> str:
@@ -62,7 +68,7 @@ def baixar(url: str, timeout: int = 8) -> str:
 
 
 def coletar_um(dominio: str) -> dict:
-    achado = {"whatsapp": [], "telefones": [], "emails": [], "fonte": None}
+    achado = {"whatsapp": [], "telefones": [], "emails": [], "ceps": [], "fonte": None}
     for base in ("https://" + dominio, "https://www." + dominio):
         ok = False
         for c in CAMINHOS:
@@ -74,7 +80,7 @@ def coletar_um(dominio: str) -> dict:
             ok = True
             r = extrair(html, dominio)
             mudou = False
-            for k in ("whatsapp", "telefones", "emails"):
+            for k in ("whatsapp", "telefones", "emails", "ceps"):
                 for v in r[k]:
                     if v not in achado[k]:
                         achado[k].append(v)
@@ -85,7 +91,7 @@ def coletar_um(dominio: str) -> dict:
                 break
         if ok:
             break
-    for k, n in (("whatsapp", 2), ("telefones", 3), ("emails", 3)):
+    for k, n in (("whatsapp", 2), ("telefones", 3), ("emails", 3), ("ceps", 2)):
         achado[k] = achado[k][:n]
     return achado
 
