@@ -29,14 +29,17 @@
       ld: { grupo: "todos", segmento: "", busca: "" }
     },
     novoContato: null,
-    aberto: {},  // só a aba Leads ainda abre o perfil dentro do card (Task 7 migra)
-    selecionado: null,
-    abaDetalhe: "perfil",
+    sel: { aq: null, pv: null, ld: null },          // um item selecionado por funil
+    selIni: { aq: false, pv: false, ld: false },    // a seleção salva já foi conferida com a fila?
+    abaDetalhe: { aq: "perfil", pv: "etapa", ld: "perfil" },
+    visiveis: { aq: [], pv: [], ld: [] },
+    ordemLD: { col: null, dir: "asc" },
     confirmarSair: null,
-    selecaoInicial: false,
     rascunho: {}
   };
   var $ = function (id) { return document.getElementById(id); };
+  function sel() { return estado.sel[estado.funil]; }
+  function aba() { return estado.abaDetalhe[estado.funil]; }
 
   // ---------- utilidades ----------
   function el(tag, attrs, filhos) {
@@ -147,13 +150,13 @@
   function enviar(l) {
     if (!estado.podeMarcar || estado.gravando["leads/" + l.id]) return;
     var n = Math.min(etapa(l) + 1, 3);
-    var fila = estado.visiveisAQ || [];
+    var fila = estado.visiveis.aq;
     var dados = { etapa: n };
     dados["enviado" + n] = new Date().toISOString();
     gravar("leads/" + l.id, registrar(l, dados, "Toque " + n + " enviado")).then(function (ok) {
       if (!ok) return;  // falha: o erro já foi avisado e a seleção fica onde está
       avisoDesfazer(l, n);
-      var prox = Regras.proximoDoDia(fila, l.id, grupo);
+      var prox = estado.funil === "aq" ? Regras.proximoDoDia(fila, l.id, grupo) : null;  // fora do Aquecimento o envio não mexe na seleção
       if (prox) selecionar(prox);
     });
   }
@@ -286,7 +289,7 @@
   }
   // Próxima linha da fila visível depois desta; se ela era a última, a anterior. O card de teste não conta.
   function vizinhoNaFila(id) {
-    var fila = (estado.visiveisAQ || []).filter(function (x) { return x.id !== "TESTE"; });
+    var fila = estado.visiveis[estado.funil].filter(function (x) { return x.id !== "TESTE"; });
     var i = fila.map(function (x) { return x.id; }).indexOf(id);
     if (i < 0) return null;
     var v = fila[i + 1] || fila[i - 1];
@@ -296,8 +299,8 @@
   function comVizinho(l, gravacao) {
     var viz = vizinhoNaFila(l.id);
     return gravacao().then(function (ok) {
-      var ainda = (estado.visiveisAQ || []).some(function (x) { return x.id === l.id; });
-      if (ok && viz && !ainda && estado.selecionado === l.id) selecionar(viz);
+      var ainda = estado.visiveis[estado.funil].some(function (x) { return x.id === l.id; });
+      if (ok && viz && !ainda && sel() === l.id) selecionar(viz);
       return ok;
     });
   }
@@ -320,7 +323,7 @@
         ];
       }
     } else if (g === "fechou") {
-      filhos = [b("r-pv", "Ver no pós-venda", function () { trocarFunil("pv"); })];
+      filhos = [b("r-pv", "Ver no pós-venda", function () { if (estado.clientes[l.id]) guardarSel("pv", l.id); trocarFunil("pv"); })];
       filhos[0].disabled = false;
     } else {
       filhos = [b("r-volta", "Voltar para a cadência", function () { situacao(l, "ativo", "De volta à cadência"); })];
@@ -328,34 +331,42 @@
     return el("div", { class: "resultado", role: "group", "aria-label": "Resultado" }, filhos);
   }
 
-  var ABAS_DETALHE = [["perfil", "Perfil"], ["cadencia", "Cadência"], ["historico", "Histórico"]];
-  function abasDetalhe(l) {
-    var atual = estado.abaDetalhe;
+  var ABAS_DETALHE = {
+    aq: [["perfil", "Perfil"], ["cadencia", "Cadência"], ["historico", "Histórico"]],
+    ld: [["perfil", "Perfil"], ["cadencia", "Cadência"], ["historico", "Histórico"]],
+    pv: [["etapa", "Etapa"], ["cliente", "Cliente"], ["historico", "Histórico"]]
+  };
+  // Abas do detalhe: lista e foco por teclado são comuns; conteudo(k) devolve o painel da aba escolhida.
+  function abasDetalhe(rotulo, conteudo) {
+    var lista = ABAS_DETALHE[estado.funil], atual = aba();
     function ir(k, foco) {
-      estado.abaDetalhe = k;
+      estado.abaDetalhe[estado.funil] = k;
       render();
       if (foco && $("tab-" + k)) $("tab-" + k).focus();
     }
-    var lista = el("div", { class: "abas-detalhe", role: "tablist", "aria-label": "Sobre o lead" }, ABAS_DETALHE.map(function (a, i) {
+    var tabs = el("div", { class: "abas-detalhe", role: "tablist", "aria-label": rotulo }, lista.map(function (a, i) {
       return el("button", { type: "button", role: "tab", id: "tab-" + a[0], class: "aba", "aria-selected": String(a[0] === atual),
         "aria-controls": "painel-detalhe", tabindex: a[0] === atual ? "0" : "-1",
         onclick: function () { ir(a[0], false); },
         onkeydown: function (e) {
           var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0, alvo = null;
-          if (d) alvo = ABAS_DETALHE[(i + d + ABAS_DETALHE.length) % ABAS_DETALHE.length][0];
-          else if (e.key === "Home") alvo = ABAS_DETALHE[0][0];
-          else if (e.key === "End") alvo = ABAS_DETALHE[ABAS_DETALHE.length - 1][0];
+          if (d) alvo = lista[(i + d + lista.length) % lista.length][0];
+          else if (e.key === "Home") alvo = lista[0][0];
+          else if (e.key === "End") alvo = lista[lista.length - 1][0];
           if (alvo) { e.preventDefault(); ir(alvo, true); }
         } }, [a[1]]);
     }));
-    var conteudo;
-    if (atual === "cadencia") conteudo = el("div", { class: "perfil" }, [trilho(l), secaoCadencia(l)]);
-    else if (atual === "historico") conteudo = el("div", { class: "perfil" }, [secaoHistorico(l)]);
-    else conteudo = el("div", { class: "perfil perfil-cols" }, [
-      el("div", { class: "perfil-esq" }, [secaoFaz(l), secaoGancho(l), secaoJaTem(l), secaoEmpresa(l), secaoCuidado(l)]),
-      el("div", { class: "perfil-dir" }, secaoPessoas(l))
-    ]);
-    return [lista, el("div", { role: "tabpanel", tabindex: "0", id: "painel-detalhe", "aria-labelledby": "tab-" + atual, class: "painel" }, [conteudo])];
+    return [tabs, el("div", { role: "tabpanel", tabindex: "0", id: "painel-detalhe", "aria-labelledby": "tab-" + atual, class: "painel" }, [conteudo(atual)])];
+  }
+  function abasLead(l) {
+    return abasDetalhe("Sobre o lead", function (atual) {
+      if (atual === "cadencia") return el("div", { class: "perfil" }, [trilho(l), secaoCadencia(l)]);
+      if (atual === "historico") return el("div", { class: "perfil" }, [secaoHistorico(l)]);
+      return el("div", { class: "perfil perfil-cols" }, [
+        el("div", { class: "perfil-esq" }, [secaoFaz(l), secaoGancho(l), secaoJaTem(l), secaoEmpresa(l), secaoCuidado(l)]),
+        el("div", { class: "perfil-dir" }, secaoPessoas(l))
+      ]);
+    });
   }
 
   function cardLead(l) {
@@ -380,6 +391,7 @@
       el("span", { class: "estado " + g, text: rotulo })
     ]);
 
+    var emLeads = estado.funil === "ld";  // na aba Leads o detalhe abre no perfil; só mostra o Enviar se o lead está na cadência
     var verToque = ativo ? n : e || 1;
     var tv = toque(l, verToque);
     var texto = email ? ("Assunto: " + (tv.assunto || "") + "\n\n" + (tv.corpo || "")) : mensagemToque(l, tv);
@@ -405,7 +417,7 @@
 
     return el("article", { "data-detalhe": l.id, class: "lead" + (teste ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : "") }, [
       cab,
-      el("div", { class: "toque-atual" }, [
+      emLeads && !ativo ? null : el("div", { class: "toque-atual" }, [
         el("div", { class: "toque-rotulo", text: "Toque " + verToque + " · " + NOMES_TOQUE[verToque] + (email ? " · e-mail" : " · WhatsApp") }),
         el("p", { class: "msg", text: texto }),
         el("div", { class: "destino" + (dest ? "" : " sem") }, dest
@@ -413,10 +425,10 @@
           : [semDestino])
       ]),
       acoes.length ? el("div", { class: "acoes" }, acoes) : null,
-      comFoto ? blocoFoto(l, semMarca) : null,
-      resultado(l, g, semMarca),
-      estado.fechando === l.id ? formFechar(l) : null
-    ].concat(teste ? [] : abasDetalhe(l)));
+      comFoto && !emLeads ? blocoFoto(l, semMarca) : null,
+      emLeads ? null : resultado(l, g, semMarca),
+      !emLeads && estado.fechando === l.id ? formFechar(l) : null
+    ].concat(teste ? [] : abasLead(l)));
   }
 
   function ordenarLeads(a, b) { return Regras.ordenarLeads(a, b, estado.filtro.aq.grupo, estado.meta.esperaDias); }
@@ -455,7 +467,7 @@
     });
     if (!estado.carregado.leads) { limparFila(); carregando($("fila")); return desenharDetalhe(); }
     if (!todos.length) { limparFila(); vazio($("fila"), "Nenhum lead na fila", "Quando o Claude semear a central, as linhas aparecem aqui."); return desenharDetalhe(); }
-    estado.visiveisAQ = visiveis;
+    estado.visiveis.aq = visiveis;
     escolherSelecao(visiveis);
     desenharFila(visiveis);
     var alvo = $("fila");
@@ -467,7 +479,7 @@
   }
 
   // ---------- fila: linhas compactas reconciliadas por id ----------
-  function limparFila() { var a = $("fila"); while (a.firstChild) a.removeChild(a.firstChild); }
+  function limparFila() { var a = $("fila"); while (a.firstChild) a.removeChild(a.firstChild); a.dataset.modo = ""; }
   var ROTULO_ESTADO = { respondeu: "respondeu", fechou: "fechou negócio", sair: "pediu para sair", encerrado: "sem resposta" };
 
   // Estado de cada um dos três toques: feito, agora ou depois (e o texto para leitor de tela).
@@ -506,7 +518,7 @@
     var btnCopiar = el("button", { type: "button", class: "btn copiar", disabled: !ativo, "aria-label": "Copiar mensagem do toque " + n + " de " + (l.nome || l.id),
       onclick: function () { copiar(email ? (t.corpo || "") : mensagemToque(l, t), email ? "Corpo" : "Mensagem"); } }, ["Copiar"]);
     return el("div", { class: "linha" + (teste ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : ""), "data-id": l.id, tabindex: "0",
-      role: "group", "aria-label": teste ? "Card de teste" : (l.nome || l.id), "aria-current": estado.selecionado === l.id ? "true" : null }, [
+      role: "group", "aria-label": teste ? "Card de teste" : (l.nome || l.id), "aria-current": sel() === l.id ? "true" : null }, [
       el("div", { class: "info" }, [
         el("span", { class: "nome", text: teste ? "Card de teste" : (l.nome || l.id) }),
         el("span", { class: "sub", text: teste ? "WhatsApp da própria Reiners" : [l.categoria, l.bairro].filter(Boolean).join(" · ") }),
@@ -519,8 +531,8 @@
       el("div", { class: "acoes" }, [btnEnviar, btnCopiar])
     ]);
   }
-  function assinaturaLinha(l, ctx) {
-    return JSON.stringify(l) + ctx + (estado.selecionado === l.id ? "1" : "0") + (estado.gravando["leads/" + l.id] ? "g" : "");
+  function assinaturaLinha(item, ctx, colecao) {
+    return JSON.stringify(item) + ctx + (sel() === item.id ? "1" : "0") + (estado.gravando[colecao + "/" + item.id] ? "g" : "");
   }
   function atualizarLinha(n, novo) {
     var ativo = document.activeElement, guarda = null;
@@ -533,64 +545,84 @@
     while (novo.firstChild) n.appendChild(novo.firstChild);
     if (guarda) { var f = n.querySelector(guarda); if (f && !f.disabled) f.focus(); }
   }
-  // Reconcilia as linhas com o filtro atual: cria as que faltam, atualiza no próprio nó as que mudaram,
-  // remove as que saíram e só mexe na ordem quando preciso. Nada de limpar a fila inteira.
-  function desenharFila(visiveis) {
-    var alvo = $("fila"), mapa = {};
+  // Reconcilia as linhas de um contêiner com o filtro atual: cria as que faltam, atualiza no próprio nó as que mudaram,
+  // remove as que saíram e só mexe na ordem quando preciso. Nada de limpar a fila inteira. Serve aos três funis
+  // (linhas da fila e linhas da tabela de Leads): cfg = { alvo, fabrica(item), colecao, ctx }.
+  function reconciliar(itens, cfg) {
+    var alvo = cfg.alvo, mapa = {}, manter = {};
     Array.prototype.slice.call(alvo.children).forEach(function (c) {
-      if (c.classList.contains("linha") && c.dataset.id) mapa[c.dataset.id] = c; else alvo.removeChild(c);
+      if (c.dataset.id) mapa[c.dataset.id] = c;
+      else if (!c.classList.contains("form")) alvo.removeChild(c);  // o formulário de novo cliente fica onde está
     });
-    var ctx = JSON.stringify([estado.meta.esperaDias, estado.fotos, estado.podeMarcar, hoje().getTime()]), manter = {};
-    visiveis.forEach(function (l) { manter[l.id] = 1; });
+    itens.forEach(function (x) { manter[x.id] = 1; });
     Object.keys(mapa).forEach(function (id) { if (!manter[id]) { alvo.removeChild(mapa[id]); delete mapa[id]; } });
-    visiveis.forEach(function (l, i) {
-      var sig = assinaturaLinha(l, ctx), n = mapa[l.id];
-      if (!n) { n = linhaLead(l); n._sig = sig; }
-      else if (n._sig !== sig) { atualizarLinha(n, linhaLead(l)); n._sig = sig; }
-      if (alvo.children[i] !== n) alvo.insertBefore(n, alvo.children[i] || null);
+    var base = alvo.querySelector(":scope > .form") ? 1 : 0;
+    itens.forEach(function (x, i) {
+      var sig = assinaturaLinha(x, cfg.ctx, cfg.colecao), n = mapa[x.id];
+      if (!n) { n = cfg.fabrica(x); n._sig = sig; }
+      else if (n._sig !== sig) { atualizarLinha(n, cfg.fabrica(x)); n._sig = sig; }
+      if (alvo.children[i + base] !== n) alvo.insertBefore(n, alvo.children[i + base] || null);
     });
+  }
+  // Cada funil tem o seu modo de fila; trocar de modo recomeça do zero (os ids dos itens se repetem entre funis).
+  function prepararFila(modo) {
+    var alvo = $("fila");
+    if (alvo.dataset.modo !== modo) { limparFila(); alvo.dataset.modo = modo; }
+    return alvo;
+  }
+  function desenharFila(visiveis) {
+    var alvo = prepararFila("aq");
+    var ctx = JSON.stringify([estado.meta.esperaDias, estado.fotos, estado.podeMarcar, hoje().getTime()]);
+    reconciliar(visiveis, { alvo: alvo, fabrica: linhaLead, colecao: "leads", ctx: ctx });
   }
 
-  // ---------- seleção ----------
+  // ---------- seleção (uma por funil) ----------
+  function colecaoDoFunil() { return estado.funil === "pv" ? estado.clientes : estado.leads; }
   function escolherSelecao(visiveis) {
-    var ids = visiveis.map(function (l) { return l.id; });
+    var f = estado.funil, ids = visiveis.map(function (l) { return l.id; });
     var primeiro = ids.filter(function (id) { return id !== "TESTE"; })[0] || ids[0] || null;  // o card de teste não abre sozinho
-    if (!estado.selecaoInicial) {
-      // Primeira vez com dados: vale o lead salvo se ele estiver na fila de agora, senão o primeiro da fila.
-      estado.selecaoInicial = true;
-      if (ids.indexOf(estado.selecionado) < 0) estado.selecionado = primeiro;
-    } else if (estado.selecionado && !estado.leads[estado.selecionado]) {
-      estado.selecionado = primeiro;  // o lead sumiu do banco
+    if (!estado.selIni[f]) {
+      // Primeira vez com dados: vale o item salvo se ele estiver na fila de agora, senão o primeiro da fila.
+      estado.selIni[f] = true;
+      if (ids.indexOf(estado.sel[f]) < 0) estado.sel[f] = primeiro;
+    } else if (estado.sel[f] && !colecaoDoFunil()[estado.sel[f]]) {
+      estado.sel[f] = primeiro;  // o item sumiu do banco
     }
   }
+  function guardarSel(f, id) {
+    estado.sel[f] = id;
+    try { localStorage.setItem("central-sel-" + f, id); } catch (e) { /* tudo bem */ }
+  }
   function selecionar(id, opcoes) {
-    if (estado.selecionado !== id) estado.confirmarSair = null;
-    estado.selecionado = id;
-    try { localStorage.setItem("central-selecionado", id); } catch (e) { /* tudo bem */ }
+    if (sel() !== id) estado.confirmarSair = null;
+    guardarSel(estado.funil, id);
     render();
     if (opcoes && opcoes.foco) {
-      var linha = $("fila").querySelector('.linha[data-id="' + id + '"]');
+      var linha = $("fila").querySelector('[data-id="' + id + '"]');
       if (linha) linha.focus();
     }
   }
 
-  // ---------- detalhe: só refaz quando o lead selecionado ou o seu documento mudou ----------
+  // ---------- detalhe: só refaz quando o item selecionado ou o seu documento mudou ----------
   function desenharDetalhe() {
-    var alvo = $("detalhe");
-    var l = estado.funil === "aq" && estado.selecionado ? estado.leads[estado.selecionado] : null;
-    var sig = l ? JSON.stringify([l, estado.podeMarcar, !!estado.gravando["leads/" + l.id], estado.fechando === l.id, estado.novoContato === l.id, estado.abaDetalhe, estado.confirmarSair === l.id,
-      estado.fotos, !!estado.downloads, estado.meta.esperaDias, Object.keys((estado.pv && estado.pv.produtos) || {}), hoje().getTime()]) : "vazio";
+    var alvo = $("detalhe"), f = estado.funil, pv = f === "pv";
+    var l = sel() ? (pv ? (estado.pv ? estado.clientes[sel()] : null) : estado.leads[sel()]) : null;
+    var chave = l ? f + ":" + l.id : null;
+    var sig = l ? JSON.stringify([f, l, estado.podeMarcar, !!estado.gravando[(pv ? "clientes/" : "leads/") + l.id], estado.fechando === l.id, estado.novoContato === l.id, aba(), estado.confirmarSair === l.id,
+      estado.fotos, !!estado.downloads, estado.meta.esperaDias, pv ? estado.pv : Object.keys((estado.pv && estado.pv.produtos) || {}), hoje().getTime()]) : "vazio" + f;
     if (alvo._sig === sig) return;
-    var mesmo = !!l && alvo._id === l.id;
+    var mesmo = !!l && alvo._id === chave;
     var ativo = document.activeElement, idFoco = null, ini = null, fim = null, topo = mesmo ? alvo.scrollTop : 0;
     if (ativo && alvo.contains(ativo) && ativo.id) {
       idFoco = ativo.id;
       try { ini = ativo.selectionStart; fim = ativo.selectionEnd; } catch (e) { /* campo sem seleção */ }
     }
     while (alvo.firstChild) alvo.removeChild(alvo.firstChild);
-    if (l) alvo.appendChild(cardLead(l));
+    if (l) alvo.appendChild(pv ? detalheCliente(l) : cardLead(l));
+    else if (pv) vazio(alvo, "Nenhum cliente selecionado", "Selecione um cliente na fila para ver a mensagem da etapa, os dados e o histórico.");
     else vazio(alvo, "Nenhum lead selecionado", "Selecione um lead na fila para ver a mensagem, o perfil e o histórico.");
-    alvo._sig = sig; alvo._id = l ? l.id : null;
+    alvo.setAttribute("aria-label", pv ? "Detalhe do cliente" : "Detalhe do lead");
+    alvo._sig = sig; alvo._id = chave;
     alvo.scrollTop = topo;
     if (idFoco) {
       var novo = $(idFoco);
@@ -665,23 +697,6 @@
         el("button", { type: "button", class: "btn principal", disabled: !estado.podeMarcar, onclick: salvar }, ["Salvar contato"]),
         el("button", { type: "button", class: "btn", onclick: function () { estado.novoContato = null; limparRascunho("nk-"); render(); } }, ["Cancelar"])
       ])
-    ]);
-  }
-  // ---------- perfil do lead (no Aquecimento vive no detalhe; na aba Leads abre dentro do card até a Task 7) ----------
-  function alternarPerfil(id) {
-    if (estado.aberto[id]) delete estado.aberto[id]; else estado.aberto[id] = 1;
-    render();
-  }
-  // Título do card que abre e fecha o perfil.
-  function tituloAbrir(l, meta) {
-    var aberto = !!estado.aberto[l.id];
-    return el("div", null, [
-      el("h2", null, [el("button", { type: "button", class: "abrir", "aria-expanded": String(aberto),
-        onclick: function () { alternarPerfil(l.id); } }, [
-        el("span", { class: "nome-lead", text: l.nome || l.id }),
-        el("span", { class: "ver", text: aberto ? "Fechar perfil" : "Ver perfil" })
-      ])]),
-      el("div", { class: "meta", text: meta })
     ]);
   }
   function secao(titulo, filhos, extra) {
@@ -809,29 +824,86 @@
       el("div", { class: "acoes" }, [salvar])
     ], lista.length ? lista.length + (lista.length === 1 ? " registro" : " registros") : "");
   }
-  function perfil(l) {
-    return el("div", { class: "perfil" }, [secaoFaz(l), secaoGancho(l), secaoJaTem(l), secaoCadencia(l)]
-      .concat(secaoPessoas(l)).concat([secaoEmpresa(l), secaoCuidado(l), secaoHistorico(l)]));
+  // Lead na aba Leads: status do enriquecimento, quem lidera e o contato direto sugerido.
+  var ROTULO_ENRIQ = { completo: "Completo", parcial: "Parcial", bruto: "Sem enriquecimento" };
+  var ORDEM_ENRIQ = { completo: 0, parcial: 1, bruto: 2 };
+  function liderDe(l) { var d = (l.decisores || [])[0]; return d ? d.nome + (d.cargo ? ", " + d.cargo : "") : ""; }
+  function diretoDe(l) {
+    var sug = (l.contatos || []).filter(function (c) { return c.id === (l.enriquecimento || {}).contatoSugerido; })[0];
+    return sug ? (sug.nome || PAPEIS[sug.papel]) + (sug.telefone ? (sug.whatsapp === "sim" ? " · WhatsApp" : " · telefone") : " · e-mail") : "";
   }
-
-  function cardEnriq(l) {
-    var st = statusLD(l), enr = l.enriquecimento || {};
-    var rotulo = { completo: "Completo", parcial: "Parcial", bruto: "Sem enriquecimento" }[st];
-    var lider = (l.decisores || [])[0];
-    var sug = (l.contatos || []).filter(function (c) { return c.id === enr.contatoSugerido; })[0];
-    var resumo = [
-      lider ? el("span", null, ["Lidera: ", el("b", { text: lider.nome + (lider.cargo ? ", " + lider.cargo : "") })]) : null,
-      sug ? el("span", null, ["Contato direto: ", el("b", { text: (sug.nome || PAPEIS[sug.papel]) + (sug.telefone ? (sug.whatsapp === "sim" ? " · WhatsApp" : " · telefone") : " · e-mail") })]) : null,
-      (l.alertas || []).length ? el("b", { text: "Tem alerta" }) : null
-    ].filter(Boolean);
-    return el("article", { "data-id": l.id, class: "card" }, [
-      el("div", { class: "cab" }, [
-        tituloAbrir(l, [l.id, l.segmento, l.categoria].filter(Boolean).join(" · ")),
-        el("span", { class: "estado " + st, text: rotulo })
-      ]),
-      resumo.length ? el("div", { class: "resumo" }, resumo) : null,
-      estado.aberto[l.id] ? perfil(l) : null
+  function cnpjDe(l) {
+    var c = l.empresa && l.empresa.cnpj;
+    return c ? String(c).replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5") : "";
+  }
+  function linhaLeadEnriq(l) {
+    var st = statusLD(l), lider = liderDe(l);
+    return el("div", { class: "linha", "data-id": l.id, tabindex: "0", role: "group", "aria-label": l.nome || l.id, "aria-current": sel() === l.id ? "true" : null }, [
+      el("div", { class: "info" }, [
+        el("span", { class: "nome", text: l.nome || l.id }),
+        el("span", { class: "sub", text: [l.segmento, l.categoria].filter(Boolean).join(" · ") }),
+        el("div", { class: "situacao" }, [
+          el("span", { class: "estado " + st, text: ROTULO_ENRIQ[st] }),
+          lider ? el("span", { class: "quando", text: "Lidera: " + lider }) : null,
+          (l.alertas || []).length ? el("span", { class: "chip alerta", text: "Alerta" }) : null
+        ])
+      ])
     ]);
+  }
+  // Tabela da aba Leads (≥1024px): uma linha por lead, cabeçalhos que ordenam.
+  var COLUNAS_LD = [
+    ["empresa", "Empresa", function (l) { return String(l.nome || l.id).toLowerCase(); }],
+    ["status", "Status", function (l) { return ORDEM_ENRIQ[statusLD(l)]; }],
+    ["lidera", "Lidera", function (l) { return liderDe(l).toLowerCase(); }],
+    ["contato", "Contato direto", function (l) { return diretoDe(l).toLowerCase(); }],
+    ["cnpj", "CNPJ", function (l) { return cnpjDe(l); }],
+    ["alertas", "Alertas", function (l) { return (l.alertas || []).length; }]
+  ];
+  function ordenarLD(lista) {
+    var o = estado.ordemLD, col = COLUNAS_LD.filter(function (c) { return c[0] === o.col; })[0];
+    var porOrdem = function (a, b) { return (a.ordem || 9999) - (b.ordem || 9999); };
+    if (!col) return lista.sort(porOrdem);
+    var sinal = o.dir === "desc" ? -1 : 1;
+    return lista.sort(function (a, b) {
+      var x = col[2](a), y = col[2](b);
+      if (x === y) return porOrdem(a, b);
+      if (x === "" || y === "") return x === "" ? 1 : -1;  // vazio sempre no fim
+      return (x < y ? -1 : 1) * sinal;
+    });
+  }
+  function linhaTabelaLD(l) {
+    var st = statusLD(l), alertas = (l.alertas || []).length;
+    return el("tr", { "data-id": l.id, tabindex: "0", "aria-current": sel() === l.id ? "true" : null }, [
+      el("th", { scope: "row", class: "nome", text: l.nome || l.id }),
+      el("td", null, [el("span", { class: "estado " + st, text: ROTULO_ENRIQ[st] })]),
+      el("td", { text: liderDe(l) || "—" }),
+      el("td", { text: diretoDe(l) || "—" }),
+      el("td", { class: "num", text: cnpjDe(l) || "—" }),
+      el("td", null, [alertas ? el("span", { class: "chip alerta", text: alertas === 1 ? "1 alerta" : alertas + " alertas" }) : "—"])
+    ]);
+  }
+  function tabelaLeads(lista) {
+    var alvo = prepararFila("ldtab"), tabela = alvo.querySelector("table");
+    if (!tabela) {
+      var cab = el("tr", null, COLUNAS_LD.map(function (c) {
+        return el("th", { scope: "col", "data-col": c[0] }, [el("button", { type: "button", class: "ordenar", "data-col": c[0],
+          onclick: function () {
+            var o = estado.ordemLD;
+            estado.ordemLD = o.col === c[0] ? { col: c[0], dir: o.dir === "asc" ? "desc" : "asc" } : { col: c[0], dir: "asc" };
+            render();
+            var b = $("fila").querySelector('th button[data-col="' + c[0] + '"]');
+            if (b) b.focus();
+          } }, [c[1]])]);
+      }));
+      tabela = el("table", { class: "tabela" }, [el("caption", { class: "sr", text: "Leads, com status do enriquecimento" }), el("thead", null, [cab]), el("tbody")]);
+      alvo.appendChild(el("div", { class: "tabela-wrap" }, [tabela]));
+    }
+    Array.prototype.forEach.call(tabela.querySelectorAll("thead th"), function (th) {
+      if (th.dataset.col === estado.ordemLD.col) th.setAttribute("aria-sort", estado.ordemLD.dir === "desc" ? "descending" : "ascending");
+      else th.removeAttribute("aria-sort");
+    });
+    Array.prototype.forEach.call(alvo.children, function (c) { if (c.classList.contains("vazio")) alvo.removeChild(c); });
+    reconciliar(lista, { alvo: tabela.tBodies[0], fabrica: linhaTabelaLD, colecao: "leads", ctx: "" });
   }
   function renderLD() {
     var todos = Object.keys(estado.leads).filter(function (k) { return k !== "TESTE"; }).map(function (k) { return estado.leads[k]; })
@@ -862,11 +934,19 @@
       }
       return true;
     });
+    var tabelaLayout = document.body.dataset.layout === "tres" || document.body.dataset.layout === "dois";
+    if (tabelaLayout) ordenarLD(visiveis);
     var alvoEl = $("fila");
-    alvoEl.textContent = "";
-    if (!estado.carregado.leads) return carregando(alvoEl);
-    visiveis.forEach(function (l) { alvoEl.appendChild(cardEnriq(l)); });
+    if (!estado.carregado.leads) { limparFila(); carregando(alvoEl); return desenharDetalhe(); }
+    estado.visiveis.ld = visiveis;
+    escolherSelecao(visiveis);
+    if (tabelaLayout) tabelaLeads(visiveis);
+    else {
+      prepararFila("ld");
+      reconciliar(visiveis, { alvo: alvoEl, fabrica: linhaLeadEnriq, colecao: "leads", ctx: "" });
+    }
     if (!visiveis.length) vazio(alvoEl, "Nada neste filtro", "Troque a aba, o segmento ou a busca.");
+    desenharDetalhe();
   }
 
   // ================= PÓS-VENDA =================
@@ -880,14 +960,14 @@
   function marcarPV(c, n) {
     var dados = {};
     dados["pvEnviado" + n] = new Date().toISOString();
-    gravar("clientes/" + c.id, dados, "Mensagem de " + defEtapa(n).nome.toLowerCase() + " marcada como enviada");
+    return comVizinho(c, function () { return gravar("clientes/" + c.id, dados, "Mensagem de " + defEtapa(n).nome.toLowerCase() + " marcada como enviada"); });
   }
   function concluirPV(c) {
     var n = etapaPV(c), total = etapasPV().length;
     var dados = { etapa: n + 1 };
     dados["pvConcluido" + n] = new Date().toISOString();
     if (n >= total) dados.situacao = "concluido";
-    gravar("clientes/" + c.id, dados, n >= total ? "Cliente concluído" : "Etapa concluída: " + defEtapa(n + 1).nome);
+    return comVizinho(c, function () { return gravar("clientes/" + c.id, dados, n >= total ? "Cliente concluído" : "Etapa concluída: " + defEtapa(n + 1).nome); });
   }
   function voltarPV(c) {
     var n = etapaPV(c);
@@ -895,12 +975,12 @@
     var dados = { etapa: n - 1, situacao: "ativo" };
     dados["pvConcluido" + (n - 1)] = null;
     dados["pvEnviado" + (n - 1)] = null;
-    gravar("clientes/" + c.id, dados, "Voltou para " + defEtapa(n - 1).nome);
+    return comVizinho(c, function () { return gravar("clientes/" + c.id, dados, "Voltou para " + defEtapa(n - 1).nome); });
   }
   function marcarData(c, campo, valor) {
     var dados = {};
     dados[campo] = valor || null;
-    gravar("clientes/" + c.id, dados, valor ? "Data salva" : "Data apagada");
+    return gravar("clientes/" + c.id, dados, valor ? "Data salva" : "Data apagada");
   }
 
   function esteira(c) {
@@ -918,76 +998,161 @@
     ])]);
   }
 
-  function cardCliente(c) {
+  // O que a linha e o detalhe precisam saber do cliente numa conta só.
+  function infoPV(c) {
     var g = grupoPV(c), n = etapaPV(c), e = defEtapa(n);
-    var caminho = "clientes/" + c.id;
-    var semMarca = !estado.podeMarcar || !!estado.gravando[caminho];
-    var ativo = g === "hoje" || g === "andamento";
     var texto = e ? textoPV(c, n) : "";
-    var precisaData = e && e.quando === "data" && !c[e.campoData];
-    var enviado = !!c["pvEnviado" + n];
+    var precisaData = !!e && e.quando === "data" && !c[e.campoData];
+    var email = !c.telefone && !!c.email;
+    var link = !e || precisaData ? "" : c.telefone ? waLink(c.telefone, texto) : c.email ? mailto(c.email, "Reiners Media · " + e.nome, texto) : "";
+    return { g: g, n: n, e: e, texto: texto, precisaData: precisaData, enviado: !!c["pvEnviado" + n], ativo: g === "hoje" || g === "andamento",
+      email: email, link: link, semMarca: !estado.podeMarcar || !!estado.gravando["clientes/" + c.id] };
+  }
+  function copiarPV(c, p) { copiar(p.texto, "Mensagem"); }
+  // Data que interessa na linha: kickoff ou gravação marcados, senão quando a mensagem sai.
+  function dataLinhaPV(c, p) {
+    if (p.g === "pausado") return "pausado";
+    if (p.g === "concluido") return "concluído";
     var v = vencimentoPV(c);
+    if (p.e && p.e.quando === "data") {
+      var marcada = c[p.e.campoData];
+      return marcada ? el("span", { class: "num", text: dataCurta(marcada) }) : "marcar a data";
+    }
+    if (p.g === "hoje") return "hoje";
+    if (p.enviado) return ["enviada ", el("span", { class: "num", text: dataCurta(c["pvEnviado" + p.n]) })];
+    return v ? ["a partir de ", el("span", { class: "num", text: dataCurta(v) })] : "";
+  }
+  function linhaCliente(c) {
+    var p = infoPV(c), total = etapasPV().length;
+    var podeEnviar = p.g === "hoje" && !!p.link;
+    var btnEnviar = el("a", { class: "btn principal enviar", href: podeEnviar ? p.link : null, target: podeEnviar ? "_blank" : null, rel: podeEnviar ? "noopener" : null,
+      "aria-disabled": podeEnviar ? null : "true", "aria-label": "Enviar mensagem de " + (p.e ? p.e.nome.toLowerCase() : "etapa") + " para " + (c.nome || c.id),
+      onclick: function () { if (podeEnviar && !p.semMarca && !p.enviado) marcarPV(c, p.n); } }, ["Enviar"]);
+    var btnCopiar = el("button", { type: "button", class: "btn copiar", disabled: !(p.ativo && p.e && !p.precisaData), "aria-label": "Copiar mensagem de " + (c.nome || c.id),
+      onclick: function () { copiarPV(c, p); } }, ["Copiar"]);
+    var etapaTxt = p.g === "concluido" ? "Todas as etapas concluídas" : "Etapa " + p.n + "/" + total + " · " + (p.e ? p.e.nome : "");
+    return el("div", { class: "linha" + (p.g === "pausado" ? " apagado" : ""), "data-id": c.id, tabindex: "0", role: "group", "aria-label": c.nome || c.id,
+      "aria-current": sel() === c.id ? "true" : null }, [
+      el("div", { class: "info" }, [
+        el("span", { class: "nome", text: c.nome || c.id }),
+        el("span", { class: "sub", text: c.produto || "" }),
+        el("div", { class: "situacao" }, [el("span", { class: "quando" }, [etapaTxt, " · ", el("span", null, [].concat(dataLinhaPV(c, p)))])])
+      ]),
+      el("div", { class: "acoes" }, [btnEnviar, btnCopiar])
+    ]);
+  }
 
-    var rotulo = { hoje: precisaData ? "Marcar data" : "Enviar hoje", andamento: enviado ? "Mensagem enviada" : "A partir de " + dataCurta(v),
+  var QUANDO_PV_TXT = function (e) {
+    if (e.quando === "data") return e.vespera ? "na véspera da gravação" : "depois que o kickoff estiver marcado";
+    if (typeof e.quando === "number") return e.quando + " dias depois da etapa anterior";
+    return "assim que entra na etapa";
+  };
+  function abaEtapaPV(c, p) {
+    var etapas = etapasPV(), proxima = defEtapa(p.n + 1);
+    return el("div", { class: "perfil" }, [
+      secao("Esteira", [esteira(c), el("ol", { class: "etapas" }, etapas.map(function (e) {
+        var feito = p.g === "concluido" || e.n < p.n, atual = !feito && e.n === p.n;
+        var quandoTxt = c["pvConcluido" + e.n] ? "concluída " + dataCurta(c["pvConcluido" + e.n]) : c["pvEnviado" + e.n] ? "enviada " + dataCurta(c["pvEnviado" + e.n]) : QUANDO_PV_TXT(e);
+        return el("li", { class: feito ? "feito" : atual ? "agora" : null, "aria-current": atual ? "step" : null }, [
+          el("b", { text: e.n + " · " + e.nome }), el("span", { text: atual ? "agora · " + quandoTxt : quandoTxt })
+        ]);
+      }))]),
+      secao("O que vem depois", [el("p", { class: "vazio-p", text: p.g === "concluido" ? "Todas as etapas foram concluídas."
+        : proxima ? "Ao concluir esta etapa, a próxima é " + proxima.nome + ": " + QUANDO_PV_TXT(proxima) + "." : "Esta é a última etapa. Ao concluir, o cliente vai para Concluídos." })])
+    ]);
+  }
+  function abaClientePV(c) {
+    var tel = c.telefone ? Regras.telefoneFormatado(c.telefone) : "";
+    var origem = c.leadId ? "veio da prospecção (" + c.leadId + ")" : (c.origem || "").toLowerCase();
+    var dados = [
+      tel ? el("div", { class: "resumo" }, ["WhatsApp ", el("b", { class: "num", text: tel })]) : null,
+      c.email ? el("div", { class: "resumo" }, ["E-mail ", el("b", { text: c.email })]) : null,
+      c.saudacao ? el("div", { class: "resumo" }, ["Letícia chama de ", el("b", { text: c.saudacao })]) : null
+    ].filter(Boolean);
+    var sobre = [
+      c.produto ? el("div", { class: "resumo" }, ["Produto ", el("b", { text: c.produto })]) : null,
+      c.segmento ? el("div", { class: "resumo" }, ["Segmento ", el("b", { text: c.segmento })]) : null,
+      origem ? el("div", { class: "resumo" }, ["Origem: ", el("b", { text: origem })]) : null,
+      c.criadoEm ? el("div", { class: "resumo" }, ["Cliente desde ", el("b", { class: "num", text: dataCurta(c.criadoEm) })]) : null
+    ].filter(Boolean);
+    return el("div", { class: "perfil perfil-cols" }, [
+      el("div", { class: "perfil-esq" }, [secao("Contato", dados.length ? dados : [el("p", { class: "vazio-p", text: "Sem telefone nem e-mail cadastrado." })])]),
+      el("div", { class: "perfil-dir" }, [secao("Sobre o cliente", sobre)])
+    ]);
+  }
+  function eventosPV(c) {
+    var lista = [];
+    if (c.criadoEm) lista.push({ em: c.criadoEm, texto: "Cliente cadastrado" + (c.leadId ? " a partir do lead " + c.leadId : "") });
+    etapasPV().forEach(function (e) {
+      if (c["pvEnviado" + e.n]) lista.push({ em: c["pvEnviado" + e.n], texto: "Mensagem de " + e.nome.toLowerCase() + " enviada" });
+      if (c["pvConcluido" + e.n]) lista.push({ em: c["pvConcluido" + e.n], texto: "Etapa concluída: " + e.nome });
+    });
+    return lista.filter(function (x) { return x.em && !isNaN(new Date(x.em)); }).sort(function (a, b) { return new Date(b.em) - new Date(a.em); });
+  }
+  function abaHistoricoPV(c) {
+    var lista = eventosPV(c);
+    return el("div", { class: "perfil" }, [secao("Histórico", [lista.length ? el("ol", { class: "tempo" }, lista.map(function (x) {
+      var d = new Date(x.em);
+      return el("li", null, [
+        el("time", { datetime: x.em, text: dataCurta(d) + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0") }),
+        el("span", { text: x.texto })
+      ]);
+    })) : el("p", { class: "vazio-p", text: "Nada registrado ainda." })], lista.length ? lista.length + (lista.length === 1 ? " registro" : " registros") : "")]);
+  }
+
+  // Detalhe do cliente: o topo decide a mensagem da etapa (texto, destino, Enviar, Copiar, datas) e as ações; as abas explicam.
+  function detalheCliente(c) {
+    var p = infoPV(c), e = p.e, g = p.g, n = p.n, total = etapasPV().length;
+    var caminho = "clientes/" + c.id, semMarca = p.semMarca;
+    var rotulo = { hoje: p.precisaData ? "Marcar data" : "Enviar hoje", andamento: p.enviado ? "Mensagem enviada" : "A partir de " + dataCurta(vencimentoPV(c)),
                    pausado: "Pausado", concluido: "Concluído" }[g];
     var cab = el("div", { class: "cab" }, [
       el("div", null, [
         el("h2", { text: c.nome || c.id }),
-        el("div", { class: "meta" }, [[c.produto, c.origem === "Prospecção" ? "veio da prospecção (" + (c.leadId || "") + ")" : "cadastro manual"].filter(Boolean).join(" · "),
-          c.criadoEm ? " · desde " : null, c.criadoEm ? el("span", { class: "num", text: dataCurta(c.criadoEm) }) : null])
+        el("div", { class: "meta" }, [[c.produto, g === "concluido" ? "todas as etapas concluídas" : "etapa " + n + " de " + total + " · " + (e ? e.nome : "")].filter(Boolean).join(" · ")])
       ]),
       el("span", { class: "estado " + g, text: rotulo })
     ]);
-
-    var corpo = [cab, esteira(c)];
-    if (ativo && e) {
+    var corpo = [cab];
+    var destino = c.telefone ? Regras.telefoneFormatado(c.telefone) : (c.email || "");
+    if (p.ativo && e) {
+      var bloco = [el("div", { class: "toque-rotulo", text: "Etapa " + n + " · " + e.nome + (p.email ? " · e-mail" : " · WhatsApp") })];
       if (e.quando === "data") {
         var inp = el("input", { type: "datetime-local", id: "data-" + c.id + "-" + e.campoData, value: c[e.campoData] || "",
           disabled: semMarca, onchange: function (ev) { marcarData(c, e.campoData, ev.target.value); } });
-        corpo.push(el("div", { class: "acoes" }, [
-          el("label", { class: "campo", for: inp.id }, [e.nome === "Kickoff" ? "Data do kickoff" : "Data da gravação", inp])
-        ]));
-        if (precisaData) corpo.push(el("p", { class: "dica", text: e.vespera ?
+        bloco.push(el("label", { class: "campo", for: inp.id }, [e.nome === "Kickoff" ? "Data do kickoff" : "Data da gravação", inp]));
+        if (p.precisaData) bloco.push(el("p", { class: "dica", text: e.vespera ?
           "Marque a data da gravação. O lembrete aparece em Para hoje na véspera." :
           "Marque a data do kickoff combinada na resposta às boas-vindas para liberar a confirmação." }));
       }
-      if (!precisaData) {
-        corpo.push(el("details", { open: g === "hoje" && !enviado ? "" : null }, [
-          el("summary", { text: "Mensagem · " + e.nome + (enviado ? " · enviada em " + dataCurta(c["pvEnviado" + n]) : "") }),
-          el("p", { class: "msg", text: texto })
-        ]));
+      if (!p.precisaData) {
+        bloco.push(el("p", { class: "msg", text: p.texto }));
+        bloco.push(el("div", { class: "destino" + (destino ? "" : " sem") }, destino
+          ? ["Para: ", p.email ? destino : el("span", { class: "num", text: destino })] : [p.email ? "Sem e-mail cadastrado" : "Sem telefone cadastrado"]));
       }
-    }
-    var destino = c.telefone ? "+" + c.telefone : (c.email || "");
-    if (destino) corpo.push(el("div", { class: "destino", text: destino }));
-
-    var acoes = [];
-    if (ativo && e && !precisaData) {
-      if (c.telefone) {
-        acoes.push(el("a", { class: "btn" + (enviado ? "" : " principal"), href: waLink(c.telefone, texto), target: "_blank", rel: "noopener",
-          onclick: function () { if (!semMarca && !enviado) marcarPV(c, n); } }, [enviado ? "Abrir WhatsApp de novo" : "Abrir WhatsApp"]));
-      } else if (c.email) {
-        acoes.push(el("a", { class: "btn principal", href: mailto(c.email, "Reiners Media · " + e.nome, texto), target: "_blank", rel: "noopener" }, ["Abrir e-mail"]));
-        if (!enviado) acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { marcarPV(c, n); } }, ["Marcar enviada"]));
+      corpo.push(el("div", { class: "toque-atual" }, bloco));
+      if (!p.precisaData && p.link) {
+        var acoes = [el("a", { class: "btn" + (p.enviado ? "" : " principal"), href: p.link, target: "_blank", rel: "noopener",
+          onclick: function () { if (!semMarca && !p.enviado) marcarPV(c, n); } }, [p.enviado ? (p.email ? "Abrir e-mail de novo" : "Abrir WhatsApp de novo") : "Enviar"])];
+        acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiarPV(c, p); } }, ["Copiar"]));
+        corpo.push(el("div", { class: "acoes" }, acoes));
       }
-      acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(texto, "Mensagem"); } }, ["Copiar"]));
+    } else if (destino) {
+      corpo.push(el("div", { class: "destino" }, ["Para: ", el("span", { class: "num", text: destino })]));
     }
-    if (ativo && e) {
-      acoes.push(el("button", { type: "button", class: "btn ok", disabled: semMarca, onclick: function () { concluirPV(c); } },
-        [n >= etapasPV().length ? "Concluir cliente" : "Concluir etapa"]));
-    }
-    if (n > 1 && g !== "pausado") {
-      acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { voltarPV(c); } }, ["Voltar etapa"]));
-    }
-    if (g === "pausado") {
-      acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca,
-        onclick: function () { gravar(caminho, { situacao: "ativo" }, "Cliente retomado"); } }, ["Retomar"]));
-    } else if (ativo) {
-      acoes.push(el("button", { type: "button", class: "btn sair", disabled: semMarca,
-        onclick: function () { gravar(caminho, { situacao: "pausado" }, "Cliente pausado"); } }, ["Pausar"]));
-    }
-    corpo.push(el("div", { class: "acoes" }, acoes));
-    return el("article", { "data-id": c.id, class: "card" + (g === "pausado" ? " apagado" : "") }, corpo);
+    var gestao = [];
+    if (p.ativo && e) gestao.push(el("button", { type: "button", class: "btn ok", disabled: semMarca, onclick: function () { concluirPV(c); } },
+      [n >= total ? "Concluir cliente" : "Concluir etapa"]));
+    if (n > 1 && g !== "pausado") gestao.push(el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { voltarPV(c); } }, ["Voltar etapa"]));
+    if (g === "pausado") gestao.push(el("button", { type: "button", class: "btn", disabled: semMarca,
+      onclick: function () { comVizinho(c, function () { return gravar(caminho, { situacao: "ativo" }, "Cliente retomado"); }); } }, ["Retomar"]));
+    else if (p.ativo) gestao.push(el("button", { type: "button", class: "btn alerta", disabled: semMarca,
+      onclick: function () { comVizinho(c, function () { return gravar(caminho, { situacao: "pausado" }, "Cliente pausado"); }); } }, ["Pausar"]));
+    corpo.push(el("div", { class: "resultado", role: "group", "aria-label": "Andamento do cliente" }, gestao));
+    corpo = corpo.concat(abasDetalhe("Sobre o cliente", function (atual) {
+      return atual === "cliente" ? abaClientePV(c) : atual === "historico" ? abaHistoricoPV(c) : abaEtapaPV(c, p);
+    }));
+    return el("article", { "data-detalhe": c.id, class: "lead" + (g === "pausado" ? " apagado" : "") }, corpo);
   }
 
   function formNovoCliente() {
@@ -1061,19 +1226,26 @@
       return true;
     });
     var alvo = $("fila");
-    alvo.textContent = "";
-    if (!estado.carregado.clientes) return carregando(alvo);
+    if (!estado.carregado.clientes) { limparFila(); carregando(alvo); return desenharDetalhe(); }
     if (!estado.pv) {
-      return vazio(alvo, "Faltam os textos do pós-venda", "Peça ao Claude para semear config/posvenda no banco da central.");
+      limparFila();
+      vazio(alvo, "Faltam os textos do pós-venda", "Peça ao Claude para semear config/posvenda no banco da central.");
+      return desenharDetalhe();
     }
-    if (estado.novoCliente) alvo.appendChild(formNovoCliente());
-    visiveis.forEach(function (c) { alvo.appendChild(cardCliente(c)); });
+    estado.visiveis.pv = visiveis;
+    escolherSelecao(visiveis);
+    prepararFila("pv");
+    var form = alvo.querySelector(":scope > .form");
+    if (estado.novoCliente && !form) alvo.insertBefore(formNovoCliente(), alvo.firstChild);
+    else if (!estado.novoCliente && form) alvo.removeChild(form);
+    reconciliar(visiveis, { alvo: alvo, fabrica: linhaCliente, colecao: "clientes", ctx: JSON.stringify([estado.pv, estado.podeMarcar, hoje().getTime()]) });
     if (!todos.length) {
       vazio(alvo, "Nenhum cliente no pós-venda", "Use Fechou negócio num lead do aquecimento ou Novo cliente para quem já comprou.");
     } else if (!visiveis.length) {
       if (f.grupo === "hoje") vazio(alvo, "Nada para hoje", "As próximas etapas aparecem em Em andamento.");
       else vazio(alvo, "Nada neste filtro", "Troque a aba ou limpe os filtros.");
     }
+    desenharDetalhe();
   }
 
   // ================= comum =================
@@ -1117,9 +1289,16 @@
     var clientes = Object.keys(estado.clientes).map(function (k) { return estado.clientes[k]; });
     $("n-aq").textContent = leads.filter(function (l) { return grupo(l) === "hoje"; }).length || "";
     $("n-pv").textContent = estado.pv ? (clientes.filter(function (c) { return grupoPV(c) === "hoje"; }).length || "") : "";
-    $("n-ld").textContent = leads.filter(function (l) { return statusLD(l) !== "completo"; }).length || "";
+    // Leads: o número é de quem ainda falta completar (o rótulo aparece no trilho largo e vai para leitor de tela nos outros).
+    var faltam = leads.filter(function (l) { return statusLD(l) !== "completo"; }).length;
+    var nld = $("n-ld");
+    if (nld.dataset.v !== String(faltam)) {
+      nld.dataset.v = String(faltam);
+      nld.textContent = "";
+      if (faltam) { nld.appendChild(document.createTextNode(String(faltam))); nld.appendChild(el("span", { class: "rot", text: " a completar" })); }
+    }
+    document.body.dataset.funil = estado.funil;
     if (pv) renderPV(); else if (ld) renderLD(); else renderAQ();
-    if (pv || ld) desenharDetalhe();
   }
   function trocarFunil(f) {
     estado.funil = f;
@@ -1152,18 +1331,20 @@
   ["etapa", "produto"].forEach(function (k) {
     $("f-" + k).addEventListener("change", function (e) { estado.filtro.pv[k] = e.target.value; render(); });
   });
+  // Linhas da fila e linhas da tabela de Leads selecionam do mesmo jeito.
+  var LINHA = ".linha[data-id], tr[data-id]";
   $("fila").addEventListener("click", function (e) {
-    var linha = e.target.closest(".linha[data-id]");
+    var linha = e.target.closest(LINHA);
     if (!linha || e.target.closest("a, button")) return;  // Enviar e Copiar têm ação própria
     selecionar(linha.dataset.id, { foco: true });
   });
   $("fila").addEventListener("keydown", function (e) {
-    if (e.target.classList && e.target.classList.contains("linha") && (e.key === "Enter" || e.key === " ")) {
+    if (e.target.matches && e.target.matches(LINHA) && (e.key === "Enter" || e.key === " ")) {
       e.preventDefault();
       selecionar(e.target.dataset.id, { foco: true });
     }
   });
-  $("novo-cliente").addEventListener("click", function () { estado.novoCliente = true; render(); });
+  $("novo-cliente").addEventListener("click", function () { estado.novoCliente = true; render(); if ($("nc-nome")) $("nc-nome").focus(); });
   document.addEventListener("input", function (e) {
     if (e.target.id && /^(nc|nk|nh)-/.test(e.target.id)) estado.rascunho[e.target.id] = e.target.value;
   });
@@ -1221,7 +1402,11 @@
     var w = window.matchMedia;
     return w("(min-width: 1280px)").matches ? "tres" : w("(min-width: 1024px)").matches ? "dois" : w("(min-width: 760px)").matches ? "gaveta" : "uma";
   }
-  function sincronizarLayout() { document.body.dataset.layout = layoutAtual(); }
+  function sincronizarLayout() {
+    var antes = document.body.dataset.layout;
+    document.body.dataset.layout = layoutAtual();
+    if (antes && antes !== document.body.dataset.layout && estado.funil === "ld") render();  // Leads troca entre tabela e linhas
+  }
   ["(min-width: 1280px)", "(min-width: 1024px)", "(min-width: 760px)"].forEach(function (q) {
     var m = window.matchMedia(q);
     if (m.addEventListener) m.addEventListener("change", sincronizarLayout); else m.addListener(sincronizarLayout);
@@ -1231,7 +1416,8 @@
   try {
     var salvo = location.hash === "#posvenda" ? "pv" : location.hash === "#leads" ? "ld" : localStorage.getItem("central-funil");
     if (salvo === "pv" || salvo === "aq" || salvo === "ld") estado.funil = salvo;
-    estado.selecionado = localStorage.getItem("central-selecionado") || null;
+    ["aq", "pv", "ld"].forEach(function (f) { estado.sel[f] = localStorage.getItem("central-sel-" + f) || null; });
+    if (!estado.sel.aq) estado.sel.aq = localStorage.getItem("central-selecionado") || null;  // chave da versão anterior: era só do Aquecimento
   } catch (e) { /* sem armazenamento: começa no aquecimento */ }
   render();
   var usar = window.claude && typeof window.claude.use === "function" ? window.claude.use("db") : Promise.resolve(null);

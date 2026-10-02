@@ -482,3 +482,148 @@ test("Enviar fica desativado sem e-mail ou sem telefone, com o motivo", async ()
   await h.page.click("#detalhe a.principal", { force: true });
   assert.deepEqual(await h.escritas.lista(), []);
 });
+
+// ---------- Task 7: pós-venda e leads na estrutura nova ----------
+async function abrirFunil(funil, opts) {
+  const h = await abrir(Object.assign({ largura: 1440 }, opts || {}));
+  abertos.push(h);
+  h.page.on("popup", (p) => p.close());
+  await h.page.context().route(/wa\.me|mailto/, (r) => r.abort());
+  await h.page.waitForSelector("#fila [data-id]");
+  await h.page.click("#f-" + funil);
+  return h;
+}
+const idsDaFila = (page) => page.evaluate(() => Array.from(document.querySelectorAll("#fila [data-id]")).map((n) => n.dataset.id));
+
+test("Leads vira tabela ordenável a 1440px e linhas a 390px", async () => {
+  const h = await abrirFunil("ld");
+  await h.page.waitForSelector("#fila table");
+  const cab = await h.page.evaluate(() => Array.from(document.querySelectorAll("#fila table thead th")).map((t) => t.textContent.trim()));
+  assert.deepEqual(cab, ["Empresa", "Status", "Lidera", "Contato direto", "CNPJ", "Alertas"]);
+  assert.equal(await h.page.locator("#fila table tbody tr[data-id]").count(), 7);
+  assert.equal(await h.page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true);
+  let ids = await idsDaFila(h.page);
+  assert.equal(ids[0], "R0001", "ordem padrão");
+  await h.page.click('#fila th button:has-text("Empresa")');
+  assert.equal(await h.page.getAttribute('#fila th:has(button:has-text("Empresa"))', "aria-sort"), "ascending");
+  await h.page.click('#fila th button:has-text("Empresa")');
+  assert.equal(await h.page.getAttribute('#fila th:has(button:has-text("Empresa"))', "aria-sort"), "descending");
+  ids = await idsDaFila(h.page);
+  assert.equal(ids[0], "R0007");
+  // clicar na linha seleciona e abre o perfil
+  await h.page.click("#fila tr[data-id=R0003] td");
+  assert.equal(await h.page.getAttribute("#fila tr[data-id=R0003]", "aria-current"), "true");
+  assert.match(await h.page.locator("#detalhe").innerText(), /Clínica Modelo 3/);
+  assert.deepEqual(await h.page.evaluate(() => Array.from(document.querySelectorAll("#detalhe [role=tab][aria-selected=true]")).map((b) => b.textContent)), ["Perfil"]);
+  // Enter numa linha focada também seleciona
+  await h.page.focus("#fila tr[data-id=R0005]");
+  await h.page.keyboard.press("Enter");
+  assert.equal(await h.page.getAttribute("#fila tr[data-id=R0005]", "aria-current"), "true");
+  assert.deepEqual(h.erros.map(String), []);
+
+  const m = await abrirFunil("ld", { largura: 390, altura: 844 });
+  assert.equal(await m.page.locator("#fila table").count(), 0);
+  assert.equal(await m.page.locator("#fila .linha[data-id]").count(), 7);
+  assert.equal(await m.page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true);
+  assert.match(await m.page.locator('#fila [data-id=R0001]').innerText(), /Clínica Modelo 1/);
+});
+
+test("cliente sem lead de origem não mostra 'veio da prospecção ()'", async () => {
+  const dc = require("./dados.js").clientes();
+  dc[0].data.leadId = "R0001";
+  dc.push({ id: "C0004", data: Object.assign({}, dc[0].data, { nome: "Cliente Quatro", leadId: null, origem: "Prospecção", criadoEm: new Date(Date.now() - 86400000).toISOString() }) });
+  const h = await abrirFunil("pv", { clientes: dc });
+  await h.page.click("#fila [data-id=C0004] .nome");
+  await h.page.click('#detalhe [role=tab]:has-text("Cliente")');
+  const t = await h.page.locator("#detalhe").innerText();
+  assert.ok(!/\(\)/.test(t), t);
+  assert.ok(!/veio da prospecção/.test(t), t);
+  await h.page.click("#fila [data-id=C0001] .nome");
+  assert.match(await h.page.locator("#detalhe").innerText(), /veio da prospecção \(R0001\)/);
+});
+
+test("Todos do pós-venda põe pausados no fim", async () => {
+  const h = await abrirFunil("pv");
+  await h.page.click('#abas [data-grupo="todos"]');
+  const ids = await idsDaFila(h.page);
+  assert.equal(ids.length, 3);
+  assert.equal(ids[ids.length - 1], "C0003");
+});
+
+test("contagem dos funis: itens para hoje; Leads 'a completar'", async () => {
+  const dl = require("./dados.js").leads(7);
+  dl.find((d) => d.id === "R0003").data.enriquecimento.status = "parcial";
+  dl.find((d) => d.id === "R0005").data.enriquecimento.status = "bruto";
+  const h = await abrir({ largura: 1440, leads: dl });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  assert.equal((await h.page.textContent("#n-aq")).trim(), "4");
+  assert.equal((await h.page.textContent("#n-pv")).trim(), "2", "C0001 (boas-vindas) e C0002 (kickoff com data) vencem hoje; C0003 está pausado");
+  const ld = (await h.page.textContent("#f-ld")).replace(/\s+/g, " ");
+  assert.match(ld, /2/);
+  assert.match(ld, /a completar/);
+});
+
+test("cada funil guarda a própria seleção", async () => {
+  const h = await abrirFunil("ld");
+  await h.page.click("#fila tr[data-id=R0005] td");
+  await h.page.click("#f-pv");
+  await h.page.click('#abas [data-grupo="todos"]');
+  await h.page.click("#fila [data-id=C0002] .nome");
+  await h.page.click("#f-aq");
+  await h.page.click('#abas [data-grupo="todos"]');
+  await h.page.click("#fila [data-id=R0003] .nome");
+  assert.match(await h.page.locator("#detalhe").innerText(), /Clínica Modelo 3/);
+  await h.page.click("#f-ld");
+  assert.equal(await h.page.getAttribute('#fila [aria-current="true"]', "data-id"), "R0005");
+  assert.match(await h.page.locator("#detalhe").innerText(), /Clínica Modelo 5/);
+  await h.page.click("#f-pv");
+  assert.equal(await h.page.getAttribute('#fila [aria-current="true"]', "data-id"), "C0002");
+  assert.match(await h.page.locator("#detalhe").innerText(), /Cliente Dois/);
+  await h.page.click("#f-aq");
+  assert.equal(await h.page.getAttribute('#fila [aria-current="true"]', "data-id"), "R0003");
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("pós-venda: linha, detalhe com abas e ações", async () => {
+  const h = await abrirFunil("pv");
+  const linha = await h.page.evaluate(() => {
+    const n = document.querySelector("#fila [data-id=C0001]");
+    return { nome: n.querySelector(".nome").textContent, texto: n.innerText, href: n.querySelector("a.enviar").getAttribute("href"), copiar: !!n.querySelector("button.copiar") };
+  });
+  assert.equal(linha.nome, "Cliente Um");
+  assert.match(linha.texto, /Etapa 1\/7 · Boas-vindas/);
+  assert.match(linha.texto, /Hora de Estúdio/);
+  assert.match(decodeURIComponent(linha.href), /wa\.me\/5565922220001\?text=Oi, pessoal da Cliente Um/);
+  assert.ok(linha.copiar);
+  assert.equal(await h.page.locator('#fila [aria-current="true"]').count(), 1, "abre com um cliente selecionado");
+  await h.page.click("#fila [data-id=C0001] .nome");
+  assert.equal(await h.page.getAttribute('#fila [aria-current="true"]', "data-id"), "C0001");
+  const det = await h.page.locator("#detalhe").innerText();
+  assert.match(det, /Cliente Um/);
+  assert.match(det, /Que bom ter vocês com a gente no Hora de Estúdio/);
+  assert.match(det, /Para:/);
+  assert.deepEqual(await h.page.evaluate(() => Array.from(document.querySelectorAll("#detalhe [role=tab]")).map((b) => b.textContent)), ["Etapa", "Cliente", "Histórico"]);
+  await h.page.click('#detalhe [role=tab]:has-text("Histórico")');
+  assert.match(await h.page.locator("#detalhe [role=tabpanel]").innerText(), /Cliente cadastrado/);
+  // Enviar na linha marca a mensagem
+  await h.page.click("#fila [data-id=C0001] a.enviar");
+  await h.page.waitForFunction(() => window.__escritas.length > 0);
+  let e = (await h.escritas.lista())[0];
+  assert.equal(e.caminho, "clientes/C0001");
+  assert.ok(e.dados.pvEnviado1);
+  // enviado, C0001 sai de Para hoje e a seleção vai para o próximo; em Todos ele continua lá
+  assert.equal(await h.page.getAttribute('#fila [aria-current="true"]', "data-id"), "C0002");
+  await h.page.click('#abas [data-grupo="todos"]');
+  await h.page.click("#fila [data-id=C0001] .nome");
+  // Concluir etapa e Pausar
+  await h.page.click('#detalhe button:has-text("Concluir etapa")');
+  await h.page.waitForFunction(() => window.__escritas.length > 1);
+  e = (await h.escritas.lista())[1];
+  assert.equal(e.dados.etapa, 2);
+  assert.ok(e.dados.pvConcluido1);
+  await h.page.click('#detalhe button:has-text("Pausar")');
+  await h.page.waitForFunction(() => window.__escritas.length > 2);
+  assert.equal((await h.escritas.lista())[2].dados.situacao, "pausado");
+  assert.deepEqual(h.erros.map(String), []);
+});
