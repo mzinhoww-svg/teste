@@ -3,6 +3,11 @@ const assert = require("node:assert");
 const { abrir } = require("./harness.js");
 
 const abertos = [];
+// O texto do aviso entra um tick depois (região aria-live): espera ele aparecer antes de ler.
+const textoAviso = async (page) => {
+  await page.waitForFunction(() => document.getElementById("toast").textContent.trim() !== "");
+  return page.locator("#toast").innerText();
+};
 after(async () => { for (const h of abertos) await h.fechar(); });
 
 test("carrega a fila com os leads e sem erro de script", async () => {
@@ -264,7 +269,7 @@ test("Enviar marca o toque, mostra o aviso e seleciona o próximo do dia", async
   const e = (await h.escritas.lista())[0];
   assert.equal(e.caminho, "leads/" + atual);
   assert.ok(e.dados.etapa >= 1 && e.dados["enviado" + e.dados.etapa]);
-  assert.match(await h.page.locator("#toast").innerText(), /^Toque \d marcado · Desfazer$/);
+  assert.match(await textoAviso(h.page), /^Toque \d marcado · Desfazer$/);
   assert.equal(await h.page.locator("#toast button").innerText(), "Desfazer");
   assert.equal(await selecionadaId(h.page), esperado);
   assert.notEqual(esperado, atual);
@@ -747,7 +752,7 @@ test("pós-venda: Enviar mostra o aviso com Desfazer e desfaz a marca", async ()
   const h = await abrirFunil("pv");
   await h.page.click("#fila [data-id=C0001] a.enviar");
   await h.page.waitForFunction(() => window.__escritas.length > 0);
-  assert.match(await h.page.locator("#toast").innerText(), /^Mensagem da etapa 1 marcada · Desfazer$/);
+  assert.match(await textoAviso(h.page), /^Mensagem da etapa 1 marcada · Desfazer$/);
   await h.page.click("#toast button");
   await h.page.waitForFunction(() => window.__escritas.length > 1);
   const e = (await h.escritas.lista())[1];
@@ -805,11 +810,11 @@ test("j/k mudam a seleção e Enter envia", async () => {
   await h.page.waitForFunction(() => window.__escritas.length > 0);
   const e = (await h.escritas.lista())[0];
   assert.equal(e.caminho, "leads/" + atual);
-  assert.match(await h.page.locator("#toast").innerText(), /^Toque \d marcado · Desfazer$/);
+  assert.match(await textoAviso(h.page), /^Toque \d marcado · Desfazer$/);
   assert.notEqual(await selecionadaId(h.page), atual, "a seleção avança como no clique");
   // c copia a mensagem do selecionado
   await h.page.keyboard.press("c");
-  assert.match(await h.page.locator("#toast").innerText(), /copiado|Não deu para copiar/);
+  await h.page.waitForFunction(() => /copiado|Não deu para copiar/.test(document.getElementById("toast").textContent));
   // 3, 2, 1 trocam de funil
   await h.page.keyboard.press("3");
   assert.equal(await h.page.getAttribute("body", "data-funil"), "ld");
@@ -1078,4 +1083,219 @@ test("O que já tem mostra o texto dos sinais, inclusive em texto simples", asyn
   const txt = await h.page.locator("#detalhe").innerText();
   assert.match(txt, /Instagram ativo/);
   assert.match(txt, /Sem podcast/);
+});
+
+// ---------- Revisão final ----------
+const esperaFoco = (page) => page.waitForFunction(() => document.activeElement && document.activeElement !== document.body, null, { timeout: 2000 }).catch(() => {});
+
+test("c em Leads num lead fora da cadência não grava nada, nem com anotação digitada", async () => {
+  const h = await abrirFunil("ld");
+  await h.page.waitForSelector("#fila table");
+  await h.page.click("#fila tr[data-id=R0005] td");  // respondeu: o detalhe não tem Enviar/Copiar, só Usar na cadência
+  assert.ok(await h.page.locator('#detalhe button:has-text("Usar na cadência")').count(), "o botão que grava está no detalhe");
+  await h.page.keyboard.press("c");
+  await h.page.waitForTimeout(300);
+  assert.deepEqual(await h.escritas.lista(), [], "c não troca o contato da cadência");
+  await h.page.click('#detalhe [role=tab]:has-text("Histórico")');
+  await h.page.fill("#nh-R0005", "ligar na segunda");
+  await h.page.focus("#fila tr[data-id=R0005]");
+  await h.page.keyboard.press("c");
+  await h.page.waitForTimeout(300);
+  assert.deepEqual(await h.escritas.lista(), [], "c não salva a anotação");
+  assert.equal(await h.page.inputValue("#nh-R0005"), "ligar na segunda", "o rascunho fica");
+  // num lead em cadência o c continua copiando a mensagem
+  await h.page.click("#fila tr[data-id=R0001] td");
+  await h.page.keyboard.press("c");
+  await h.page.waitForFunction(() => /copiado|Não deu para copiar/.test(document.getElementById("toast").textContent));
+  assert.deepEqual(await h.escritas.lista(), []);
+});
+
+test("Enter dentro do detalhe não envia (painel da aba e título da gaveta)", async () => {
+  const h = await abrirDetalhe();
+  await abrirLead(h, "R0001");
+  await h.page.focus("#painel-detalhe");
+  await h.page.keyboard.press("Enter");
+  await h.page.waitForTimeout(300);
+  assert.deepEqual(await h.escritas.lista(), [], "1440: Enter no painel da aba");
+  const g = await abrirPequeno(900, 800);
+  await g.page.focus("#fila [data-id=R0001]");
+  await g.page.keyboard.press("Enter");  // abre a gaveta com o foco no título
+  await g.page.waitForSelector("#detalhe.aberto");
+  assert.equal(await g.page.evaluate(() => document.activeElement.id), "detalhe-titulo");
+  await g.page.keyboard.press("Enter");
+  await g.page.waitForTimeout(300);
+  assert.deepEqual(await g.escritas.lista(), [], "900: Enter no título da gaveta");
+  assert.equal(await g.page.locator("#detalhe.aberto").count(), 1);
+});
+
+test("enviar o último lead de hoje não seleciona o card TESTE", async () => {
+  const h = await abrirEnvio();
+  const ordem = await h.page.evaluate(() => Array.from(document.querySelectorAll("#fila .linha")).map((n) => n.dataset.id));
+  assert.deepEqual(ordem, ["TESTE", "R0004", "R0007", "R0001", "R0003"]);
+  await h.page.click("#fila [data-id=R0003] .nome");
+  await h.page.click("#fila [data-id=R0003] a.enviar");
+  await h.page.waitForFunction(() => window.__escritas.length > 0);
+  await h.page.waitForFunction(() => document.querySelector('#fila [aria-current="true"]').dataset.id !== "R0003");
+  assert.equal(await selecionadaId(h.page), "R0004");
+});
+
+test("o foco não cai no body depois de Enviar, Respondeu, Salvar anotação, Usar na cadência e Desfazer", async () => {
+  // Enviar na linha: o foco vai para o próximo do dia
+  let h = await abrirEnvio();
+  await h.page.click("#fila [data-id=R0001] a.enviar");
+  await h.page.waitForFunction(() => window.__escritas.length > 0);
+  await esperaFoco(h.page);
+  let f = await focoAtual(h.page);
+  assert.notEqual(f.tag, "BODY", "Enviar");
+  assert.equal(f.linha, await selecionadaId(h.page), "Enviar: foco na linha selecionada");
+  // Desfazer no aviso: o foco volta para a linha do lead desfeito
+  await h.page.click("#toast button");
+  await h.page.waitForFunction(() => window.__escritas.length > 1);
+  await esperaFoco(h.page);
+  f = await focoAtual(h.page);
+  assert.notEqual(f.tag, "BODY", "Desfazer");
+  assert.equal(f.linha, "R0001", "Desfazer: " + JSON.stringify(f));
+  // Respondeu: o lead sai de Para hoje e o foco vai com a seleção
+  h = await abrirDetalhe();
+  await abrirLead(h, "R0001");
+  await h.page.click("#detalhe .resultado >> text=Respondeu");
+  await h.page.waitForFunction(() => window.__escritas.length > 0);
+  await esperaFoco(h.page);
+  f = await focoAtual(h.page);
+  assert.notEqual(f.tag, "BODY", "Respondeu");
+  assert.equal(f.linha, "R0003", "Respondeu: " + JSON.stringify(f));
+  // Salvar anotação: o foco volta ao botão
+  await h.page.click('#detalhe [role=tab]:has-text("Histórico")');
+  await h.page.fill("#nh-R0003", "falei com a recepção");
+  await h.page.click("#nota-salvar-R0003");
+  await h.page.waitForFunction(() => window.__escritas.length > 1);
+  await esperaFoco(h.page);
+  assert.equal((await focoAtual(h.page)).id, "nota-salvar-R0003", "Salvar anotação");
+  // Usar na cadência: o foco fica no botão do mesmo contato (agora Voltar ao contato original)
+  await h.page.click('#detalhe [role=tab]:has-text("Perfil")');
+  await h.page.click('#detalhe button:has-text("Usar na cadência")');
+  await h.page.waitForFunction(() => window.__escritas.length > 2);
+  await esperaFoco(h.page);
+  f = await focoAtual(h.page);
+  assert.equal(f.id, "contato-R0003-k1", "Usar na cadência: " + JSON.stringify(f));
+  assert.equal(f.texto, "Voltar ao contato original");
+});
+
+test("Desfazer do aviso funciona com contraste ≥4,5:1 nos dois temas", async () => {
+  for (const tema of ["claro", "escuro"]) {
+    const h = await abrirEnvio({ tema });
+    await h.page.click("#fila [data-id=R0001] a.enviar");
+    await h.page.waitForSelector("#toast button");
+    const r = await h.page.evaluate(() => {
+      const lum = (cor) => {
+        const [r, g, b] = cor.match(/[\d.]+/g).slice(0, 3).map((v) => { v = Number(v) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      };
+      const b = document.querySelector("#toast button"), t = document.getElementById("toast");
+      const a = lum(getComputedStyle(b).color), f = lum(getComputedStyle(t).backgroundColor);
+      return { razao: (Math.max(a, f) + 0.05) / (Math.min(a, f) + 0.05), sublinhado: getComputedStyle(b).textDecorationLine };
+    });
+    assert.ok(r.razao >= 4.5, tema + ": " + r.razao.toFixed(2));
+    assert.equal(r.sublinhado, "underline");
+  }
+});
+
+test("#toast nunca recebe hidden: some esvaziando e o texto entra depois da limpeza", async () => {
+  const h = await abrirEnvio();
+  await h.page.evaluate(() => {
+    window.__toastLog = [];
+    const t = document.getElementById("toast");
+    new MutationObserver(() => window.__toastLog.push({ hidden: t.hasAttribute("hidden"), texto: t.textContent })).observe(t, { attributes: true, childList: true, subtree: true });
+  });
+  assert.equal(await h.page.evaluate(() => document.getElementById("toast").hasAttribute("hidden")), false);
+  assert.equal(await h.page.locator("#toast").isHidden(), true, "vazio, sem caixa");
+  await h.page.click("#fila [data-id=R0001] a.enviar");
+  await h.page.waitForSelector("#toast button");
+  await h.page.click("#toast button");
+  await h.page.waitForFunction(() => /Nada a desfazer|^$/.test(document.getElementById("toast").textContent) && window.__escritas.length > 1);
+  await h.page.keyboard.press("c");
+  await h.page.waitForFunction(() => /copiado|Não deu para copiar/.test(document.getElementById("toast").textContent));
+  const log = await h.page.evaluate(() => window.__toastLog);
+  assert.ok(log.length > 0);
+  assert.ok(log.every((x) => !x.hidden), "nunca hidden");
+  const i = log.findIndex((x) => /copiado|Não deu/.test(x.texto));
+  assert.ok(i > 0 && log[i - 1].texto === "", "o texto novo entra depois de uma limpeza: " + JSON.stringify(log.slice(Math.max(0, i - 2), i + 1)));
+});
+
+test("cartão de contato mostra o telefone formatado", async () => {
+  const h = await abrirDetalhe();
+  await abrirLead(h, "R0001");
+  assert.match(await h.page.locator("#detalhe .perfil-dir").innerText(), /\+55 \(65\) 91111-0001 · WhatsApp/);
+});
+
+test("1100px: Esc na busca vazia leva o foco ao botão Filtros", async () => {
+  const h = await abrir({ largura: 1100 });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  await h.page.keyboard.press("/");
+  await h.page.keyboard.press("Escape");
+  assert.equal(await h.page.evaluate(() => document.activeElement.id), "btn-filtros");
+  assert.equal(await h.page.getAttribute("#btn-filtros", "aria-expanded"), "false");
+});
+
+test("1440px: / foca a busca sem marcar aria-expanded no botão escondido", async () => {
+  const h = await abrir({ largura: 1440 });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  await h.page.keyboard.press("/");
+  assert.equal(await h.page.evaluate(() => document.activeElement.id), "f-busca");
+  assert.equal(await h.page.getAttribute("#btn-filtros", "aria-expanded"), "false");
+});
+
+test("Enviar da linha fica inerte enquanto a própria gravação não volta", async () => {
+  // espera zero entre toques: depois do envio o lead continua em Para hoje, então só a gravação em curso segura o link
+  const h = await abrirEnvio({ atraso: 600, meta: { metaDiaria: 20, esperaDias: { "1": 0, "2": 0, "3": 0 } } });
+  let popups = 0;
+  h.page.on("popup", () => popups++);
+  await h.page.click("#fila [data-id=R0001] a.enviar");
+  const durante = await h.page.evaluate(() => { const a = document.querySelector("#fila [data-id=R0001] a.enviar"); return { dis: a.getAttribute("aria-disabled"), href: a.getAttribute("href") }; });
+  assert.deepEqual(durante, { dis: "true", href: null });
+  await h.page.click("#fila [data-id=R0001] a.enviar", { force: true });
+  await h.page.waitForTimeout(900);
+  assert.equal(popups, 1, "a conversa abriu uma vez só");
+  assert.equal((await h.escritas.lista()).length, 1);
+});
+
+test("Desfazer depois de trocar de funil não mexe na seleção do outro funil", async () => {
+  const h = await abrirEnvio();
+  await h.page.click("#fila [data-id=R0001] a.enviar");
+  await h.page.waitForSelector("#toast button");
+  await h.page.evaluate(() => document.activeElement.blur());
+  await h.page.keyboard.press("2");
+  const ids = await idsDaFila(h.page);
+  const outro = ids[ids.length - 1];  // não é o primeiro da fila: um reset para o primeiro também falharia
+  assert.notEqual(outro, ids[0]);
+  await h.page.click("#fila [data-id=" + outro + "] .nome");
+  const antes = await selecionadaId(h.page);
+  assert.equal(antes, outro);
+  await h.page.click("#toast button");
+  await h.page.waitForFunction(() => window.__escritas.length > 1);
+  assert.equal((await h.escritas.lista())[1].dados.etapa, 0, "o toque foi desfeito");
+  assert.equal(await selecionadaId(h.page), antes);
+  await h.page.keyboard.press("1");
+  await h.page.keyboard.press("2");
+  assert.equal(await selecionadaId(h.page), antes, "a seleção guardada do pós-venda também ficou");
+});
+
+test("estilo.css esconde [hidden] por conta própria", () => {
+  const css = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "..", "central", "estilo.css"), "utf8");
+  assert.match(css, /\[hidden\]\s*\{\s*display:\s*none\s*!important;?\s*\}/);
+});
+
+test("Cuidado mostra alertas no formato real e em texto simples", async () => {
+  const leads = dadosT.leads(7);
+  leads.find((d) => d.id === "R0003").data.alertas = ["Telefone desatualizado"];
+  const h = await abrirDetalhe({ leads });
+  await abrirLead(h, "R0007");
+  let t = await h.page.locator("#detalhe .perfil-esq").innerText();
+  assert.match(t, /Telefone sem confirmação · Google Maps/);
+  await abrirLead(h, "R0003");
+  t = await h.page.locator("#detalhe .perfil-esq").innerText();
+  assert.match(t, /Telefone desatualizado/);
+  assert.ok(!/undefined/.test(t), t);
 });

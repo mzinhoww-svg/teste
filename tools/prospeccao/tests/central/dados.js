@@ -29,7 +29,7 @@ function base(num, sobre) {
     empresa: { cnpj: "00.000.000/00" + String(num).padStart(2, "0") + "-00", razaoSocial: "Modelo " + num + " Ltda", porte: "ME", abertura: "2015-03-01", cnae: "8630-5/04" },
     socios: [{ nome: "Sócia Modelo " + num, qualificacao: "Sócio-Administrador" }],
     decisores: [{ nome: "Ana Souza", cargo: "Diretora", fonte: "https://modelo" + num + ".example/equipe", confianca: "alta" }],
-    contatos: [{ id: "k1", papel: "decisor", nome: "ANA SOUZA", cargo: "Diretora", telefone: "5565911110" + x, whatsapp: "5565911110" + x, email: "ana" + num + "@modelo.example", fonte: "site", confianca: "alta" }],
+    contatos: [{ id: "k1", papel: "decisor", nome: "ANA SOUZA", cargo: "Diretora", telefone: "5565911110" + x, whatsapp: "sim", email: "ana" + num + "@modelo.example", fonte: "site", confianca: "alta" }],
     sinais: [{ texto: "Instagram ativo", fonte: "https://instagram.com/exemplo" }, { texto: "Sem podcast", fonte: "" }], alertas: [], pendencias: [],
     enriquecimento: { status: "completo", atualizadoEm: dia(3), contatoSugerido: "k1" },
     historico: [],
@@ -49,7 +49,7 @@ function leads(n) {
     () => base(4, { canal: "E-mail", etapa: 1, enviado1: atras(10) }),
     () => base(5, { situacao: "respondeu", etapa: 1, enviado1: atras(2) }),
     () => base(6, { situacao: "sair", etapa: 1, enviado1: atras(5) }),
-    () => base(7, { etapa: 2, enviado1: atras(14), enviado2: atras(7), alertas: ["Telefone sem confirmação"] }),
+    () => base(7, { etapa: 2, enviado1: atras(14), enviado2: atras(7), alertas: [{ texto: "Telefone sem confirmação", fonte: "Google Maps" }] }),
   ];
   for (let i = 1; i <= n; i++) docs.push(i <= 7 ? fixos[i - 1]() : base(i));
   return docs;

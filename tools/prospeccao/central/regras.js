@@ -92,11 +92,13 @@ var Regras = (function () {
   }
 
   // Próximo item que vence hoje depois de idAtual; se não houver, o primeiro antes dele; senão null.
+  // O card TESTE (WhatsApp da própria Reiners) nunca é o próximo do dia.
   function proximoDoDia(fila, idAtual, grupoDe) {
     var i = -1, k;
+    var vale = function (x) { return x.id !== "TESTE" && grupoDe(x) === "hoje"; };
     for (k = 0; k < fila.length; k++) { if (fila[k].id === idAtual) { i = k; break; } }
-    for (k = i + 1; k < fila.length; k++) { if (grupoDe(fila[k]) === "hoje") return fila[k].id; }
-    for (k = 0; k < i; k++) { if (grupoDe(fila[k]) === "hoje") return fila[k].id; }
+    for (k = i + 1; k < fila.length; k++) { if (vale(fila[k])) return fila[k].id; }
+    for (k = 0; k < i; k++) { if (vale(fila[k])) return fila[k].id; }
     return null;
   }
 

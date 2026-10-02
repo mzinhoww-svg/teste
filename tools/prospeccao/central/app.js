@@ -62,14 +62,26 @@
   function mesmoDia(iso, ref) { return iso && inicioDoDia(iso).getTime() === inicioDoDia(ref).getTime(); }
   var dataCurta = Regras.dataCurta;
   var quando = Regras.quando;
-  var toastTimer;
+  // #toast é a única região aria-live: nunca some com hidden (o leitor de tela deixa de anunciar). Vazio, o CSS o
+  // deixa sem caixa; o texto entra no tick seguinte à limpeza para ser anunciado como mudança.
+  var toastTimer, toastVez = 0;
   var DESFAZER_MS = 8000;
+  var FIXO = -1;  // aviso que só sai por ação dela
+  function limparToast() {
+    toastVez++;
+    clearTimeout(toastTimer);
+    $("toast").textContent = "";
+  }
   function toast(txt, conteudo, ms) {
     var t = $("toast");
-    t.textContent = ""; t.hidden = false;
-    if (conteudo) { t.appendChild(document.createTextNode(txt)); t.appendChild(conteudo); } else t.textContent = txt;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.hidden = true; }, ms || 2400);
+    limparToast();
+    var vez = toastVez;
+    setTimeout(function () {
+      if (vez !== toastVez) return;  // outro aviso já tomou o lugar
+      t.appendChild(document.createTextNode(txt));
+      if (conteudo) t.appendChild(conteudo);
+      if (ms !== FIXO) toastTimer = setTimeout(function () { if (vez === toastVez) limparToast(); }, ms || 2400);
+    }, 0);
   }
   function copiar(texto, rotulo) {
     function reserva() {
@@ -129,8 +141,21 @@
     var ref = estado.db.doc(caminho);
     return (criar ? ref.set(dados) : ref.update(dados)).then(function () { if (msg) toast(msg); return true; },
       function (e) { falhou(e); return false; })
-      .then(function (ok) { delete estado.gravando[caminho]; render(); return ok; });
+      .then(function (ok) { delete estado.gravando[caminho]; render(); focarSePerdido(); return ok; });
   }
+  // Depois de uma ação o foco fica no lead: no título do detalhe aberto em gaveta, senão na linha selecionada.
+  function focoPerdido() {
+    var a = document.activeElement;
+    return !a || a === document.body || !a.isConnected;
+  }
+  function focarSelecao() {
+    if (estado.detalheAberto && $("detalhe-titulo")) { $("detalhe-titulo").focus({ preventScroll: true }); return; }
+    var linha = sel() && $("fila").querySelector('[data-id="' + sel() + '"]');
+    if (linha) linha.focus({ preventScroll: true });
+  }
+  function focarSePerdido() { if (focoPerdido()) focarSelecao(); }
+  // Ao mudar a seleção depois de uma gravação, o foco acompanha se estava na fila ou tinha se perdido.
+  function focoAcompanha() { return focoPerdido() || $("fila").contains(document.activeElement); }
   function desligar(msg) {
     estado.podeMarcar = false;
     $("aviso").textContent = msg;
@@ -158,7 +183,8 @@
       if (!ok) return;  // falha: o erro já foi avisado e a seleção fica onde está
       avisoDesfazer(l, n);
       var prox = estado.funil === "aq" ? Regras.proximoDoDia(fila, l.id, grupo) : null;  // fora do Aquecimento o envio não mexe na seleção
-      if (prox) selecionar(prox);
+      // o foco segue para o próximo quando estava na fila ou se perdeu (a linha enviada saiu de Para hoje)
+      if (prox) selecionar(prox, { foco: focoAcompanha() });
     });
   }
   // Aviso de 8 segundos com Desfazer, igual para Aquecimento e pós-venda.
@@ -171,12 +197,12 @@
   function desfazerToque(l, n) {
     var atual = estado.leads[l.id] || l;
     var e = etapa(atual);
-    $("toast").hidden = true;
+    limparToast();
     if (e < 1 || (n != null && e !== n)) { toast("Nada a desfazer"); return; }
     var dados = { etapa: e - 1 };
     dados["enviado" + e] = null;
     gravar("leads/" + l.id, registrar(atual, dados, "Toque " + e + " desfeito")).then(function (ok) {
-      if (ok) selecionar(l.id);
+      if (ok && estado.funil === "aq") selecionar(l.id, { foco: focoAcompanha() });  // trocou de funil: não mexe na seleção do outro
     });
   }
   // Histórico do lead: cada ação da central entra como uma linha com data. Os envios vêm de enviado1..3.
@@ -303,7 +329,7 @@
     var viz = vizinhoNaFila(l.id);
     return gravacao().then(function (ok) {
       var ainda = estado.visiveis[estado.funil].some(function (x) { return x.id === l.id; });
-      if (ok && viz && !ainda && sel() === l.id) selecionar(viz);
+      if (ok && viz && !ainda && sel() === l.id) selecionar(viz, { foco: focoAcompanha() });
       return ok;
     });
   }
@@ -408,13 +434,13 @@
       var podeHoje = g === "hoje";
       var link = !dest ? "" : email ? mailtoToque(l, t) : linkToque(l, t);
       var liberado = podeHoje && !!link;
-      acoes.push(el("a", { class: "btn principal", href: liberado ? link : null, target: liberado ? "_blank" : null, rel: liberado ? "noopener" : null,
+      acoes.push(el("a", { id: "acao-enviar-" + l.id, class: "btn principal enviar", href: liberado ? link : null, target: liberado ? "_blank" : null, rel: liberado ? "noopener" : null,
         "aria-disabled": liberado ? null : "true", onclick: function () { if (liberado) enviar(l); } }, ["Enviar"]));
       if (email) {
-        acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.assunto || "", "Assunto"); } }, ["Copiar assunto"]));
-        acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.corpo || "", "Corpo"); } }, ["Copiar corpo"]));
+        acoes.push(el("button", { type: "button", id: "acao-copiar-assunto-" + l.id, class: "btn copiar", onclick: function () { copiar(t.assunto || "", "Assunto"); } }, ["Copiar assunto"]));
+        acoes.push(el("button", { type: "button", id: "acao-copiar-" + l.id, class: "btn copiar", onclick: function () { copiar(t.corpo || "", "Corpo"); } }, ["Copiar corpo"]));
       } else {
-        acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(mensagemToque(l, t), "Mensagem"); } }, ["Copiar"]));
+        acoes.push(el("button", { type: "button", id: "acao-copiar-" + l.id, class: "btn copiar", onclick: function () { copiar(mensagemToque(l, t), "Mensagem"); } }, ["Copiar"]));
       }
     }
 
@@ -514,7 +540,8 @@
     var teste = l.id === "TESTE";
     var pontos = pontosDe(l);
     var link = !destinoDe(l, email) ? "" : email ? mailtoToque(l, t) : linkToque(l, t);
-    var podeEnviar = g === "hoje" && !!link;
+    // enquanto a gravação deste lead não volta, o link não abre de novo (sem banco ele abre normalmente)
+    var podeEnviar = g === "hoje" && !!link && !estado.gravando["leads/" + l.id];
     var btnEnviar = el("a", { class: "btn principal enviar", href: podeEnviar ? link : null, target: podeEnviar ? "_blank" : null, rel: podeEnviar ? "noopener" : null,
       "aria-disabled": podeEnviar ? null : "true", "aria-label": "Enviar toque " + n + " para " + (l.nome || l.id),
       onclick: function () { if (podeEnviar) enviar(l); } }, ["Enviar"]);
@@ -619,7 +646,10 @@
     if (ativo && alvo.contains(ativo) && ativo.id) {
       idFoco = ativo.id;
       try { ini = ativo.selectionStart; fim = ativo.selectionEnd; } catch (e) { /* campo sem seleção */ }
+    } else if (estado.focoPendente && (!ativo || ativo === document.body)) {
+      idFoco = estado.focoPendente;  // o botão estava desativado durante a gravação: volta para ele agora
     }
+    estado.focoPendente = null;
     while (alvo.firstChild) alvo.removeChild(alvo.firstChild);
     alvo.appendChild(el("div", { class: "barra-detalhe" }, [el("button", { type: "button", class: "btn fechar-detalhe", onclick: fecharDetalhe }, ["Fechar"])]));
     if (l) alvo.appendChild(pv ? detalheCliente(l) : cardLead(l));
@@ -631,8 +661,11 @@
     if (idFoco) {
       var novo = $(idFoco);
       if (novo && alvo.contains(novo)) {
-        novo.focus({ preventScroll: true });
-        try { if (ini != null) novo.setSelectionRange(ini, fim); } catch (e) { /* tudo bem */ }
+        if (novo.disabled) estado.focoPendente = idFoco;
+        else {
+          novo.focus({ preventScroll: true });
+          try { if (ini != null) novo.setSelectionRange(ini, fim); } catch (e) { /* tudo bem */ }
+        }
       }
     }
   }
@@ -710,22 +743,23 @@
     var linha = $("fila").querySelector('[data-id="' + novo.id + '"]');
     if (linha && linha.scrollIntoView) linha.scrollIntoView({ block: "nearest" });
   }
-  // Procura o botão da seleção na linha e, se a linha não o tem (aba Leads), no detalhe.
-  function botaoDaSelecao(seletorLinha, seletorDetalhe) {
+  // Procura o controle da seleção na linha e, se a linha não o tem (aba Leads), nas ações do topo do detalhe.
+  // Só vale a classe própria (a.enviar, button.copiar): um atalho nunca cai em outro botão que grava.
+  function botaoDaSelecao(seletor) {
     var id = sel();
     if (!id) return null;
     var linha = $("fila").querySelector('[data-id="' + id + '"]');
-    var b = linha && linha.querySelector(seletorLinha);
-    if (!b) b = Array.prototype.filter.call($("detalhe").querySelectorAll(seletorDetalhe), function (x) { return !x.closest("[aria-hidden='true']"); })[0] || null;
+    var b = linha && linha.querySelector(seletor);
+    if (!b) b = Array.prototype.filter.call($("detalhe").querySelectorAll(".acoes " + seletor), function (x) { return !x.closest("[aria-hidden='true']"); })[0] || null;
     return b && !b.disabled && b.getAttribute("aria-disabled") !== "true" ? b : null;
   }
   // Mesmo caminho do clique em Enviar: o link abre a conversa e o clique grava, avisa com Desfazer e avança.
   function enviarSelecionado() {
-    var b = botaoDaSelecao("a.enviar", ".acoes a.btn.principal");
+    var b = botaoDaSelecao("a.enviar");
     if (b) b.click();
   }
   function copiarSelecionado() {
-    var b = botaoDaSelecao("button.copiar", ".acoes button.btn");
+    var b = botaoDaSelecao("button.copiar");
     if (b) b.click();
   }
   function focarResultado() {
@@ -741,7 +775,9 @@
       if (atalhosAbertos()) { e.preventDefault(); mostrarAtalhos(false); return; }
       if (t === $("f-busca")) {
         e.preventDefault();
-        if (t.value) { t.value = ""; aplicarBusca(""); } else { t.blur(); if (!LARGO.matches) painel(false); }
+        if (t.value) { t.value = ""; aplicarBusca(""); }
+        else if (!LARGO.matches) { painel(false); $("btn-filtros").focus(); }  // o campo some: o foco vai para o botão que o abre
+        else t.blur();
         return;
       }
       if (estado.detalheAberto) { e.preventDefault(); fecharDetalhe(); }
@@ -763,7 +799,7 @@
     if (k === "/") {
       e.preventDefault();
       if (estado.detalheAberto) fecharDetalhe();  // o trilho fica inert enquanto o detalhe está aberto
-      painel(true);
+      if (!LARGO.matches) painel(true);  // no trilho largo o painel já está aberto e o botão Filtros nem aparece
       $("f-busca").focus();
       return;
     }
@@ -776,6 +812,8 @@
     if (k === "c") { copiarSelecionado(); return; }
     if (k === "r") { e.preventDefault(); focarResultado(); return; }
     if (k === "Enter") {
+      // Dentro do detalhe, da lista de atalhos e do aviso, Enter nunca envia: lá ela usa o botão Enviar visível.
+      if (t && t.closest && t.closest("#detalhe, #atalhos, #toast")) return;
       // Botão, link e resumo fazem a própria ação; a linha só abre o detalhe na gaveta e na tela cheia.
       if (t && t.closest && t.closest("a, button, summary")) return;
       var linha = t && t.closest && t.closest(LINHA);
@@ -786,7 +824,6 @@
   }
   document.addEventListener("keydown", teclado);
   $("atalhos-fechar").addEventListener("click", function () { mostrarAtalhos(false); });
-  window.Central = Object.assign(window.Central || {}, { abrirDetalhe: abrirDetalhe, fecharDetalhe: fecharDetalhe, teclado: teclado });
 
   // ================= LEADS: estrutura e enriquecimento =================
   function statusLD(l) { return (l.enriquecimento && l.enriquecimento.status) || "bruto"; }
@@ -799,14 +836,14 @@
     var ativo = ehContato && l.contatoAtivo === c.id;
     var caminho = "leads/" + l.id, semMarca = !estado.podeMarcar || !!estado.gravando[caminho];
     var dados = [];
-    if (c.telefone) dados.push(el("span", { class: "dado", text: "+" + c.telefone + (c.whatsapp === "sim" ? " · WhatsApp" : c.whatsapp === "nao" ? " · sem WhatsApp" : "") }));
+    if (c.telefone) dados.push(el("span", { class: "dado", text: Regras.telefoneFormatado(c.telefone) + (c.whatsapp === "sim" ? " · WhatsApp" : c.whatsapp === "nao" ? " · sem WhatsApp" : "") }));
     if (c.email) dados.push(el("span", { class: "dado", text: c.email }));
     if (c.linkedin) dados.push(el("a", { class: "dado", href: c.linkedin, target: "_blank", rel: "noopener", text: "LinkedIn" }));
     var acoes = [];
     if (ehContato && (c.telefone || c.email)) {
       acoes.push(ativo ?
-        el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { gravar(caminho, registrar(l, { contatoAtivo: null }, "Cadência voltou para o contato original"), "A cadência volta para o contato original"); } }, ["Voltar ao contato original"]) :
-        el("button", { type: "button", class: "btn ok", disabled: semMarca, onclick: function () { gravar(caminho, registrar(l, { contatoAtivo: c.id }, "Cadência passou para " + (c.nome || PAPEIS[c.papel])), "Cadência vai para " + (c.nome || PAPEIS[c.papel])); } }, ["Usar na cadência"]));
+        el("button", { type: "button", id: "contato-" + l.id + "-" + c.id, class: "btn", disabled: semMarca, onclick: function () { gravar(caminho, registrar(l, { contatoAtivo: null }, "Cadência voltou para o contato original"), "A cadência volta para o contato original"); } }, ["Voltar ao contato original"]) :
+        el("button", { type: "button", id: "contato-" + l.id + "-" + c.id, class: "btn ok", disabled: semMarca, onclick: function () { gravar(caminho, registrar(l, { contatoAtivo: c.id }, "Cadência passou para " + (c.nome || PAPEIS[c.papel])), "Cadência vai para " + (c.nome || PAPEIS[c.papel])); } }, ["Usar na cadência"]));
     }
     return el("div", { class: "pessoa" + (ativo ? " ativo" : "") }, [
       el("div", { class: "topo" }, [
@@ -920,7 +957,10 @@
   }
   function secaoCuidado(l) {
     var pend = (l.pendencias || []).concat((l.enriquecimento || {}).observacao ? [l.enriquecimento.observacao] : []);
-    var filhos = (l.alertas || []).map(function (s) { return el("div", { class: "aviso" }, [s.texto + (s.fonte ? " · " : ""), linkFonte(s.fonte)]); });
+    var filhos = (l.alertas || []).map(function (s) {
+      if (typeof s === "string") s = { texto: s };  // dado antigo: alerta em texto simples
+      return el("div", { class: "aviso" }, [(s.texto || "") + (s.fonte ? " · " : ""), linkFonte(s.fonte)]);
+    });
     if (pend.length) filhos.push(el("p", { class: "dica", text: pend.join(" · ") }));
     return filhos.length ? secao("Cuidado e pendências", filhos) : null;
   }
@@ -960,7 +1000,7 @@
   function secaoHistorico(l) {
     var lista = eventos(l), id = "nh-" + l.id;
     var campo = el("textarea", { id: id, class: "nota", placeholder: "Ex.: Falei com a secretária, pediu para ligar na segunda." });
-    var salvar = el("button", { type: "button", class: "btn principal", disabled: !estado.podeMarcar || !!estado.gravando["leads/" + l.id],
+    var salvar = el("button", { type: "button", id: "nota-salvar-" + l.id, class: "btn principal", disabled: !estado.podeMarcar || !!estado.gravando["leads/" + l.id],
       onclick: function () {
         var txt = campo.value.trim();
         if (!txt) { toast("Escreva a anotação antes de salvar."); return; }
@@ -1115,12 +1155,12 @@
   // Só desfaz se a marca ainda está lá e o cliente continua nessa etapa.
   function desfazerPV(c, n) {
     var atual = estado.clientes[c.id] || c;
-    $("toast").hidden = true;
+    limparToast();
     if (!atual["pvEnviado" + n] || etapaPV(atual) !== n) { toast("Nada a desfazer"); return; }
     var dados = {};
     dados["pvEnviado" + n] = null;
     if (Array.isArray(atual.historico)) registrar(atual, dados, "Mensagem da etapa " + n + " desfeita");
-    gravar("clientes/" + c.id, dados).then(function (ok) { if (ok) selecionar(c.id); });
+    gravar("clientes/" + c.id, dados).then(function (ok) { if (ok && estado.funil === "pv") selecionar(c.id, { foco: focoAcompanha() }); });
   }
   function concluirPV(c) {
     var n = etapaPV(c), total = etapasPV().length;
@@ -1184,7 +1224,7 @@
   }
   function linhaCliente(c) {
     var p = infoPV(c), total = etapasPV().length;
-    var podeEnviar = p.g === "hoje" && !!p.link;
+    var podeEnviar = p.g === "hoje" && !!p.link && !estado.gravando["clientes/" + c.id];
     var btnEnviar = el("a", { class: "btn principal enviar", href: podeEnviar ? p.link : null, target: podeEnviar ? "_blank" : null, rel: podeEnviar ? "noopener" : null,
       "aria-disabled": podeEnviar ? null : "true", "aria-label": "Enviar mensagem de " + (p.e ? p.e.nome.toLowerCase() : "etapa") + " para " + (c.nome || c.id),
       onclick: function () { if (podeEnviar && !p.semMarca && !p.enviado) marcarPV(c, p.n); } }, ["Enviar"]);
@@ -1292,21 +1332,21 @@
       }
       corpo.push(el("div", { class: "toque-atual" }, bloco));
       if (!p.precisaData && p.link) {
-        var acoes = [el("a", { class: "btn" + (p.enviado ? "" : " principal"), href: p.link, target: "_blank", rel: "noopener",
+        var acoes = [el("a", { id: "pv-enviar-" + c.id, class: "btn" + (p.enviado ? "" : " principal enviar"), href: p.link, target: "_blank", rel: "noopener",
           onclick: function () { if (!semMarca && !p.enviado) marcarPV(c, n); } }, [p.enviado ? (p.email ? "Abrir e-mail de novo" : "Abrir WhatsApp de novo") : "Enviar"])];
-        acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiarPV(c, p); } }, ["Copiar"]));
+        acoes.push(el("button", { type: "button", id: "pv-copiar-" + c.id, class: "btn copiar", onclick: function () { copiarPV(c, p); } }, ["Copiar"]));
         corpo.push(el("div", { class: "acoes" }, acoes));
       }
     } else if (destino) {
       corpo.push(el("div", { class: "destino" }, ["Para: ", el("span", { class: "num", text: destino })]));
     }
     var gestao = [];
-    if (p.ativo && e) gestao.push(el("button", { type: "button", class: "btn ok", disabled: semMarca, onclick: function () { concluirPV(c); } },
+    if (p.ativo && e) gestao.push(el("button", { type: "button", id: "pv-concluir-" + c.id, class: "btn ok", disabled: semMarca, onclick: function () { concluirPV(c); } },
       [n >= total ? "Concluir cliente" : "Concluir etapa"]));
-    if (n > 1 && g !== "pausado") gestao.push(el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { voltarPV(c); } }, ["Voltar etapa"]));
-    if (g === "pausado") gestao.push(el("button", { type: "button", class: "btn", disabled: semMarca,
+    if (n > 1 && g !== "pausado") gestao.push(el("button", { type: "button", id: "pv-voltar-" + c.id, class: "btn", disabled: semMarca, onclick: function () { voltarPV(c); } }, ["Voltar etapa"]));
+    if (g === "pausado") gestao.push(el("button", { type: "button", id: "pv-retomar-" + c.id, class: "btn", disabled: semMarca,
       onclick: function () { comVizinho(c, function () { return gravar(caminho, { situacao: "ativo" }, "Cliente retomado"); }); } }, ["Retomar"]));
-    else if (p.ativo) gestao.push(el("button", { type: "button", class: "btn alerta", disabled: semMarca,
+    else if (p.ativo) gestao.push(el("button", { type: "button", id: "pv-pausar-" + c.id, class: "btn alerta", disabled: semMarca,
       onclick: function () { comVizinho(c, function () { return gravar(caminho, { situacao: "pausado" }, "Cliente pausado"); }); } }, ["Pausar"]));
     corpo.push(el("div", { class: "resultado", role: "group", "aria-label": "Andamento do cliente" }, gestao));
     corpo = corpo.concat(abasDetalhe("Sobre o cliente", function (atual) {

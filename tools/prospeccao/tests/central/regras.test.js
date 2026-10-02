@@ -20,6 +20,13 @@ test("proximoDoDia pula para o próximo que vence hoje e volta ao início", () =
   assert.equal(R.proximoDoDia(fila, "C", g), "A");
   assert.equal(R.proximoDoDia([{ id: "A", g: "hoje" }], "A", g), null);
 });
+test("proximoDoDia nunca volta para o card TESTE", () => {
+  const g = x => x.g;
+  const fila = [{ id: "TESTE", g: "hoje" }, { id: "A", g: "hoje" }, { id: "B", g: "aguardando" }, { id: "C", g: "hoje" }];
+  assert.equal(R.proximoDoDia(fila, "C", g), "A", "o último de hoje volta ao primeiro lead real, não ao TESTE");
+  assert.equal(R.proximoDoDia([{ id: "TESTE", g: "hoje" }, { id: "A", g: "hoje" }], "A", g), null);
+  assert.equal(R.proximoDoDia(fila, "TESTE", g), "A");
+});
 test("comSaudacao troca a saudação pelo primeiro nome do contato ativo", () => {
   const l = { saudacao: "pessoal da Clínica", contatoAtivo: "k1", contatos: [{ id: "k1", nome: "ANA SOUZA" }] };
   assert.equal(R.comSaudacao(l, "Oi, pessoal da Clínica,\n\nTexto"), "Oi, Ana,\n\nTexto");

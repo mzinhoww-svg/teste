@@ -8,7 +8,10 @@ const RAIZ = path.join(__dirname, "..", "..", "central");
 const ler = (nome) => fs.readFileSync(path.join(RAIZ, nome), "utf8");
 
 // Roda dentro da página, antes de qualquer script da central.
-function simulador(inicial, falharGravacao) {
+function simulador(inicial, falharGravacao, atraso) {
+  window.__falhar = falharGravacao;  // o teste pode trocar no meio (h.falhar)
+  // com atraso, o dado aparece no snapshot na hora (como no banco real) e a promessa só resolve depois
+  const resolver = () => (atraso ? new Promise((r) => setTimeout(r, atraso)) : Promise.resolve());
   const docs = { leads: {}, clientes: {}, config: {} };
   const assinantes = [];
   const escritas = [];
@@ -28,18 +31,18 @@ function simulador(inicial, falharGravacao) {
         return () => {};
       },
       update(d) {
-        if (falharGravacao) return Promise.reject({ code: "unavailable" });
+        if (window.__falhar) return Promise.reject({ code: "unavailable" });
         docs[col][id] = Object.assign({}, docs[col][id] || {}, copia(d));
         escritas.push({ caminho, dados: copia(d) });
         notificar();
-        return Promise.resolve();
+        return resolver();
       },
       set(d) {
-        if (falharGravacao) return Promise.reject({ code: "unavailable" });
+        if (window.__falhar) return Promise.reject({ code: "unavailable" });
         docs[col][id] = copia(d);
         escritas.push({ caminho, dados: copia(d) });
         notificar();
-        return Promise.resolve();
+        return resolver();
       },
     };
   };
@@ -83,7 +86,7 @@ async function abrir(opts) {
   let html = ler("index.html");
   html = html.replace('<link rel="stylesheet" href="estilo.css">', () => "<style>" + ler("estilo.css") + "</style>");
   html = html.replace(/<script src="([^"]+)"><\/script>/g, (m, f) => "<script>" + ler(f).replace(/<\/script/gi, "<\\/script") + "</script>");
-  const mock = "<script>(" + simulador.toString() + ")(" + JSON.stringify(inicial) + "," + JSON.stringify(!!opts.falharGravacao) + ");</script>";
+  const mock = "<script>(" + simulador.toString() + ")(" + JSON.stringify(inicial) + "," + JSON.stringify(!!opts.falharGravacao) + "," + JSON.stringify(opts.atraso || 0) + ");</script>";
   const pagina = '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
     "<style>[hidden]{display:none!important}body{margin:0}</style>" + mock + html;
   await page.setContent(pagina);
@@ -94,6 +97,7 @@ async function abrir(opts) {
     escritas: { // lê as escritas da página sob demanda
       async lista() { return page.evaluate(() => window.__escritas.slice()); },
     },
+    falhar: (v) => page.evaluate((x) => { window.__falhar = x; }, !!v),
     empurrar: (caminho, d) => page.evaluate(([c, x]) => window.__empurrar(c, x), [caminho, d]),
     fechar: () => browser.close(),
   };
