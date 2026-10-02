@@ -181,6 +181,13 @@
   .pontos i.feito { background: var(--ouro); border-color: var(--ouro); }
   .pontos i.agora { background: var(--navy); border-color: var(--navy); }
   .chip.alerta { background: var(--alerta-fundo); color: var(--alerta); font-weight: 500; flex: none; }
+  .meta .chip { margin-left: 6px; }
+  a.chip { text-decoration: underline; text-underline-offset: 2px; }
+  .toque-atual .aviso { margin: 0; max-width: 58ch; }  /* alerta colado ao Enviar, na mesma medida da mensagem */
+  .alertas-toque { display: grid; gap: 6px; }
+  .alertas-toque:focus, .secao:focus { outline: none; }
+  .alertas-toque:focus-visible, .secao:focus-visible { outline: 2px solid var(--ouro); outline-offset: 2px; border-radius: 8px; }
+  [aria-invalid="true"] { border-color: var(--alerta) !important; }
   /* Detalhe do lead selecionado: sem moldura, o painel já é a região; os blocos se separam por espaço e por filetes */
   .detalhe .card { background: none; border: 0; padding: 0; border-radius: 0; }
   .lead { display: grid; gap: 16px; min-width: 0; }
@@ -189,7 +196,7 @@
   .toque-atual { display: grid; gap: 6px; min-width: 0; }
   .toque-rotulo { font: 500 var(--t13)/1.3 var(--sans); color: var(--suave); }
   .toque-atual .msg { margin: 0; background: var(--papel); border: 1px solid var(--linha); max-height: 320px; overflow: auto; }
-  .toque-atual .msg, .toques .msg { max-width: 68ch; }  /* linha de leitura e prévia mais perto de como chega no WhatsApp */
+  .toque-atual .msg, .toques .msg { max-width: 58ch; }  /* linha de leitura e prévia mais perto de como chega no WhatsApp */
   .lead .destino { user-select: auto; }
   .lead .destino.sem { color: var(--alerta); font-weight: 500; }
   .lead .acoes { align-items: center; }
@@ -343,6 +350,8 @@
   .tempo time { font-size: var(--t13); line-height: 1.5; color: var(--suave); }
   .tempo li.nota span { white-space: pre-wrap; overflow-wrap: anywhere; }
   .tempo li.nota time::after { content: " · nota"; color: var(--ouro-texto); }
+  /* Placeholder com o mesmo cinza dos rótulos: AA nos dois temas (o padrão do navegador fica em 3,4:1 no escuro) */
+  input::placeholder, textarea::placeholder { color: var(--suave); opacity: 1; }
   textarea.nota { width: 100%; min-height: 64px; padding: 8px; border: 1px solid var(--borda-campo); border-radius: 8px;
                   background: var(--papel); color: var(--navy); font: var(--t14)/1.4 var(--sans); resize: vertical; }
   @media (max-width: 759px) { .linha { min-height: 72px; } .linha .btn { min-height: 44px; } }
@@ -351,6 +360,15 @@
     .selects, .selects.dois { grid-template-columns: 1fr 1fr; }
     .funis button { padding-inline: 4px; }
     .grade { grid-template-columns: 1fr; }
+  }
+  /* Celular: as abas de status viram uma linha que rola de lado, com Filtros na mesma linha; a página não rola de lado */
+  @media (max-width: 759px) {
+    .filtros { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .filtros .abas { flex: 1 1 0; min-width: 0; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain;
+                     scroll-snap-type: x proximity; scrollbar-width: thin; padding: 4px; margin: -4px; }
+    .filtros .abas button { flex: none; white-space: nowrap; scroll-snap-align: start; }
+    #btn-filtros { flex: none; }
+    #novo-cliente, .painel-filtros { flex: 1 1 100%; }
   }
   @media (max-width: 759px) {
     .btn, .desfazer-h, summary, .toques summary, select, input, textarea { min-height: 44px; }

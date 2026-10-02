@@ -1378,7 +1378,7 @@ test("só a linha selecionada tem o Enviar cheio; o detalhe mantém o primário"
   }
 });
 
-test("mensagem do detalhe com no máximo 68ch de largura", async () => {
+test("mensagem do detalhe com no máximo 58ch de largura", async () => {
   const h = await abrirDetalhe();
   await abrirLead(h, "R0001");
   const r = await h.page.evaluate(() => {
@@ -1388,7 +1388,7 @@ test("mensagem do detalhe com no máximo 68ch de largura", async () => {
     return { max: getComputedStyle(m).maxWidth, w: m.getBoundingClientRect().width, ch: largura, detalhe: document.getElementById("detalhe").clientWidth };
   });
   assert.notEqual(r.max, "none");
-  assert.ok(r.w <= 68 * r.ch + 1 && r.w < r.detalhe - 100, JSON.stringify(r));
+  assert.ok(r.w <= 58 * r.ch + 1 && r.w < r.detalhe - 100, JSON.stringify(r));
 });
 
 test("fora do Aquecimento a meta diz que é de toques", async () => {
@@ -1595,3 +1595,110 @@ test("Enriquecer base: 390px sem rolagem lateral, botão de 44px visível no top
   }
 });
 
+// ---------- Crítica 30/40: P2 ----------
+test("alerta do lead aparece junto do Enviar e o chip do cabeçalho leva até ele", async () => {
+  const h = await abrirDetalhe({ altura: 600 });
+  await abrirLead(h, "R0007");
+  const r = await h.page.evaluate(() => {
+    const top = (s) => { const e = document.querySelector("#detalhe " + s); return e ? e.getBoundingClientRect().top : -1; };
+    return { destino: top(".toque-atual .destino"), alerta: top(".toque-atual .aviso"), acoes: top(".acoes"), texto: (document.querySelector("#detalhe .toque-atual .aviso") || {}).textContent };
+  });
+  assert.match(r.texto, /Alerta: Telefone sem confirmação · Google Maps/);
+  assert.ok(r.destino < r.alerta && r.alerta < r.acoes, JSON.stringify(r));
+  assert.match(await h.page.locator("#detalhe .perfil-esq").innerText(), /Telefone sem confirmação/, "a cópia do Perfil continua");
+  const chip = h.page.locator("#detalhe .meta a.chip.alerta");
+  assert.equal(await chip.getAttribute("href"), "#alertas-R0007");
+  const ml = await chip.evaluate((e) => getComputedStyle(e).marginLeft);
+  assert.equal(ml, "6px");
+  await h.page.click('#detalhe [role=tab]:has-text("Cadência")');
+  await chip.click();
+  assert.equal(await h.page.evaluate(() => document.activeElement.id), "alertas-R0007");
+  assert.deepEqual(await h.escritas.lista(), []);
+});
+
+test("chip de alerta em Leads (fora da cadência) leva à seção Cuidado do Perfil", async () => {
+  const leads = dadosT.leads(7);
+  Object.assign(leads.find((d) => d.id === "R0005").data, { alertas: [{ texto: "CNPJ baixado", fonte: "Receita" }] });
+  const h = await abrirLeads({ leads });
+  await h.page.click("#fila [data-id=R0005]");
+  await h.page.click('#detalhe [role=tab]:has-text("Histórico")');
+  await h.page.click("#detalhe .meta a.chip.alerta");
+  assert.equal(await h.page.evaluate(() => document.activeElement.id), "cuidado-R0005");
+});
+
+test("390px: abas de status numa linha que rola de lado, com Filtros na mesma linha", async () => {
+  const h = await abrir({ largura: 390, altura: 844, leads: dadosT.leads(25) });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  const r = await h.page.evaluate(() => {
+    const abas = document.getElementById("abas"), bs = Array.from(abas.querySelectorAll("button"));
+    const tops = bs.map((b) => Math.round(b.getBoundingClientRect().top));
+    const f = document.getElementById("btn-filtros").getBoundingClientRect();
+    return { tops, rola: abas.scrollWidth > abas.clientWidth, overflow: getComputedStyle(abas).overflowX, filtrosTop: Math.round(f.top), filtrosH: f.height, filtrosDir: f.right,
+      alturas: bs.map((b) => b.getBoundingClientRect().height), primeiro: document.querySelector("#fila [data-id]").getBoundingClientRect().top };
+  });
+  assert.equal(new Set(r.tops).size, 1, "uma linha só: " + r.tops);
+  assert.ok(r.rola && r.overflow === "auto");
+  assert.ok(Math.abs(r.filtrosTop - r.tops[0]) <= 4, "Filtros na mesma linha");
+  assert.ok(r.filtrosH >= 44 && r.alturas.every((x) => x >= 44));
+  assert.ok(r.filtrosDir <= 390 - 15);
+  assert.ok(r.primeiro < 340, "primeiro lead bem mais alto, veio " + r.primeiro);
+  assert.ok(await semRolagemLateral(h.page));
+  await h.page.click('#abas [data-grupo="todos"]');  // a última aba alcança com rolagem dentro da linha
+  assert.equal(await h.page.getAttribute('#abas [data-grupo="todos"]', "aria-pressed"), "true");
+  assert.ok(await semRolagemLateral(h.page));
+});
+
+test("placeholder com a cor --suave nos dois temas (AA)", async () => {
+  for (const tema of ["claro", "escuro"]) {
+    const h = await abrir({ largura: 1440, tema });
+    abertos.push(h);
+    const r = await h.page.evaluate(() => {
+      const i = document.getElementById("f-busca");
+      const ph = getComputedStyle(i, "::placeholder");
+      const suave = document.createElement("i"); suave.style.color = "var(--suave)"; document.body.appendChild(suave);
+      const cor = getComputedStyle(suave).color; suave.remove();
+      return { cor: ph.color, op: ph.opacity, suave: cor, texto: i.placeholder };
+    });
+    assert.equal(r.cor, r.suave, tema);
+    assert.equal(r.op, "1");
+    assert.equal(r.texto, "Empresa, pessoa ou CNPJ");
+  }
+});
+
+test("erro do novo contato é anunciado, marca o campo e leva o foco a ele", async () => {
+  const h = await abrirLeads();
+  await h.page.click("#fila [data-id=R0001]");
+  await h.page.click("#detalhe >> text=Adicionar contato");
+  await h.page.fill("#nk-tel-R0001", "9999");
+  await h.page.click("#detalhe >> text=Salvar contato");
+  const r = await h.page.evaluate(() => {
+    const e = document.getElementById("nk-erro-R0001"), t = document.getElementById("nk-tel-R0001");
+    return { role: e.getAttribute("role"), hidden: e.hidden, texto: e.textContent, inv: t.getAttribute("aria-invalid"), desc: t.getAttribute("aria-describedby"), foco: document.activeElement.id };
+  });
+  assert.deepEqual(r, { role: "alert", hidden: false, texto: "O telefone precisa ter DDD, como (65) 99999-0000.", inv: "true", desc: "nk-erro-R0001", foco: "nk-tel-R0001" });
+  await h.page.fill("#nk-tel-R0001", "65999990000");
+  await h.page.click("#detalhe >> text=Salvar contato");
+  const r2 = await h.page.evaluate(() => ({ tel: document.getElementById("nk-tel-R0001").getAttribute("aria-invalid"), fonte: document.getElementById("nk-fonte-R0001").getAttribute("aria-invalid"), foco: document.activeElement.id }));
+  assert.deepEqual(r2, { tel: null, fonte: "true", foco: "nk-fonte-R0001" });
+  assert.deepEqual(await h.escritas.lista(), []);
+});
+
+test("erro do novo cliente é anunciado, marca o campo e leva o foco a ele", async () => {
+  const h = await abrir({ largura: 1440 });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  await h.page.click("#f-pv");
+  await h.page.click("#novo-cliente");
+  await h.page.click("text=Cadastrar e começar");
+  let r = await h.page.evaluate(() => ({ role: document.getElementById("nc-erro").getAttribute("role"), inv: document.getElementById("nc-nome").getAttribute("aria-invalid"),
+    desc: document.getElementById("nc-nome").getAttribute("aria-describedby"), foco: document.activeElement.id }));
+  assert.deepEqual(r, { role: "alert", inv: "true", desc: "nc-erro", foco: "nc-nome" });
+  await h.page.fill("#nc-nome", "Clínica X");
+  await h.page.fill("#nc-saudacao", "Dra. X");
+  await h.page.click("text=Cadastrar e começar");
+  r = await h.page.evaluate(() => ({ nome: document.getElementById("nc-nome").getAttribute("aria-invalid"), tel: document.getElementById("nc-telefone").getAttribute("aria-invalid"), foco: document.activeElement.id,
+    texto: document.getElementById("nc-erro").textContent }));
+  assert.deepEqual(r, { nome: null, tel: "true", foco: "nc-telefone", texto: "Informe um WhatsApp ou um e-mail." });
+  assert.deepEqual(await h.escritas.lista(), []);
+});

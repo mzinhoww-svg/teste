@@ -449,7 +449,8 @@
       ]) : el("div", null, [
         el("h2", { text: l.nome || l.id }),
         el("div", { class: "meta" }, [el("span", { class: "num", text: l.id }), l.categoria ? " · " + l.categoria : null,
-          (l.alertas || []).length ? el("span", { class: "chip alerta", text: "Alerta no perfil" }) : null])
+          (l.alertas || []).length ? el("a", { class: "chip alerta", href: "#alertas-" + l.id, onclick: function (ev) { ev.preventDefault(); irParaAlertas(l); } },
+            [(l.alertas.length === 1 ? "1 alerta" : l.alertas.length + " alertas")]) : null])
       ]),
       el("span", { class: "estado " + g, text: rotulo })
     ]);
@@ -485,7 +486,9 @@
         el("p", { class: "msg", text: texto }),
         el("div", { class: "destino" + (dest ? "" : " sem") }, dest
           ? ["Para: ", ca && ca.nome ? ca.nome + " · " : "", email ? dest : el("span", { class: "num", text: dest })]
-          : [semDestino])
+          : [semDestino]),
+        // o alerta fica colado no Enviar que ele deve segurar (a cópia completa continua em Perfil, em Cuidado e pendências)
+        (l.alertas || []).length ? el("div", { class: "alertas-toque", id: "alertas-" + l.id, tabindex: "-1" }, linhasAlerta(l, true)) : null
       ]),
       acoes.length ? el("div", { class: "acoes" }, acoes) : null,
       comFoto && !emLeads ? blocoFoto(l, semMarca) : null,
@@ -893,6 +896,15 @@
       acoes.length ? el("div", { class: "acoes" }, acoes) : null
     ]));
   }
+  // Erro de formulário: anunciado (role="alert"), ligado ao campo que falhou (aria-invalid + aria-describedby) e com o foco nele.
+  function mostrarErro(erro, campos, ruim, msg) {
+    Object.keys(campos).forEach(function (k) { campos[k].removeAttribute("aria-invalid"); campos[k].removeAttribute("aria-describedby"); });
+    erro.textContent = msg || "";
+    erro.hidden = !msg;
+    if (!msg) return false;
+    if (ruim) { ruim.setAttribute("aria-invalid", "true"); ruim.setAttribute("aria-describedby", erro.id); ruim.focus(); }
+    return true;
+  }
   function formContato(l) {
     var id = l.id;
     var campos = {
@@ -904,14 +916,15 @@
       email: el("input", { id: "nk-email-" + id, type: "email", placeholder: "nome@empresa.com.br" }),
       fonte: el("input", { id: "nk-fonte-" + id, placeholder: "Onde achou: link, cartão, indicação…" })
     };
-    var erro = el("p", { class: "erro", hidden: "" });
+    var erro = el("p", { class: "erro", id: "nk-erro-" + id, role: "alert", hidden: "" });
     function campo(rot, k) { return el("label", { class: "campo", for: campos[k].id }, [rot, campos[k]]); }
     function salvar() {
       var tel = campos.telefone.value.trim() ? limparTelefone(campos.telefone.value) : "";
       var email = campos.email.value.trim().toLowerCase();
       var msg = (campos.telefone.value.trim() && !tel) ? "O telefone precisa ter DDD, como (65) 99999-0000." :
         (!tel && !email) ? "Informe um telefone ou um e-mail." : !campos.fonte.value.trim() ? "Diga de onde veio o contato." : "";
-      if (msg) { erro.textContent = msg; erro.hidden = false; return; }
+      var ruim = !msg ? null : /telefone|DDD/.test(msg) ? campos.telefone : campos.fonte;
+      if (mostrarErro(erro, campos, ruim, msg)) return;
       var lista = (l.contatos || []).slice();
       var n = lista.reduce(function (m, c) { return Math.max(m, Number(String(c.id).slice(1)) || 0); }, 0) + 1;
       lista.push({ id: "k" + n, papel: campos.papel.value, nome: campos.nome.value.trim(), cargo: campos.cargo.value.trim(),
@@ -992,14 +1005,29 @@
       l.contatoAtivo ? "a cadência usa o contato marcado" : "a cadência usa o contato original"));
     return filhos;
   }
+  function linhasAlerta(l, rotulo) {
+    return (l.alertas || []).map(function (s) {
+      if (typeof s === "string") s = { texto: s };  // dado antigo: alerta em texto simples
+      return el("div", { class: "aviso" }, [rotulo ? el("b", { text: "Alerta: " }) : null, (s.texto || "") + (s.fonte ? " · " : ""), linkFonte(s.fonte)]);
+    });
+  }
+  // O chip do cabeçalho leva ao alerta junto do Enviar; sem bloco de toque (Leads fora da cadência), à seção Cuidado do Perfil.
+  function irParaAlertas(l) {
+    var alvo = $("alertas-" + l.id) || $("cuidado-" + l.id);
+    if (!alvo) { estado.abaDetalhe[estado.funil] = "perfil"; render(); alvo = $("cuidado-" + l.id); }
+    if (!alvo) return;
+    if (alvo.scrollIntoView) alvo.scrollIntoView({ block: "nearest" });
+    alvo.focus({ preventScroll: true });
+  }
   function secaoCuidado(l) {
     var pend = (l.pendencias || []).concat((l.enriquecimento || {}).observacao ? [l.enriquecimento.observacao] : []);
-    var filhos = (l.alertas || []).map(function (s) {
-      if (typeof s === "string") s = { texto: s };  // dado antigo: alerta em texto simples
-      return el("div", { class: "aviso" }, [(s.texto || "") + (s.fonte ? " · " : ""), linkFonte(s.fonte)]);
-    });
+    var filhos = linhasAlerta(l, false);
     if (pend.length) filhos.push(el("p", { class: "dica", text: pend.join(" · ") }));
-    return filhos.length ? secao("Cuidado e pendências", filhos) : null;
+    if (!filhos.length) return null;
+    var s = secao("Cuidado e pendências", filhos);
+    s.id = "cuidado-" + l.id;
+    s.tabIndex = -1;
+    return s;
   }
   // As três mensagens da cadência, já com a saudação, o contato e a foto escolhidos.
   function secaoCadencia(l) {
@@ -1514,7 +1542,7 @@
       email: el("input", { id: "nc-email", type: "email", placeholder: "contato@empresa.com.br" }),
       produto: el("select", { id: "nc-produto" }, produtos.map(function (p) { return el("option", { value: p, text: p }); }))
     };
-    var erro = el("p", { class: "erro", hidden: "" });
+    var erro = el("p", { class: "erro", id: "nc-erro", role: "alert", hidden: "" });
     function campo(rotulo, k) { return el("label", { class: "campo", for: campos[k].id }, [rotulo, campos[k]]); }
     function salvar() {
       var nome = campos.nome.value.trim(), saudacao = campos.saudacao.value.trim();
@@ -1523,7 +1551,8 @@
       var msg = !nome ? "Preencha o nome do cliente." : !saudacao ? "Preencha como a Letícia chama o cliente." :
         (campos.telefone.value.trim() && !tel) ? "O WhatsApp precisa ter DDD, como (65) 99999-0000." :
         (!tel && !email) ? "Informe um WhatsApp ou um e-mail." : "";
-      if (msg) { erro.textContent = msg; erro.hidden = false; return; }
+      var ruim = !msg ? null : !nome ? campos.nome : !saudacao ? campos.saudacao : campos.telefone;
+      if (mostrarErro(erro, campos, ruim, msg)) return;
       var id = "C" + Date.now().toString(36).toUpperCase();
       gravar("clientes/" + id, {
         nome: nome, saudacao: saudacao, telefone: tel, email: email, produto: campos.produto.value,

@@ -146,7 +146,7 @@ A central são quatro arquivos que sobem juntos no mesmo Artifact: `index.html` 
 - 760 a 1023px: só a fila; o detalhe abre em gaveta pela direita, com até 560px.
 - Abaixo de 760px: uma coluna, detalhe em tela cheia com Voltar e alvos de toque de 44px. Só o seletor de funis e a linha da meta ficam fixos no topo.
 
-Abaixo de 1280px a busca e os seletores ficam num painel que o botão **Filtros** abre; com filtro ativo o botão mostra a contagem ("Filtros · 2"). As abas de status ficam sempre à vista.
+Abaixo de 1280px a busca e os seletores ficam num painel que o botão **Filtros** abre; com filtro ativo o botão mostra a contagem ("Filtros · 2"). As abas de status ficam sempre à vista; abaixo de 760px elas formam uma linha só, que rola de lado, com o botão **Filtros** na mesma linha.
 
 ### Atalhos
 
