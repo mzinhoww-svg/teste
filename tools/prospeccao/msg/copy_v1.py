@@ -23,6 +23,7 @@ ICPS = {
     "ICP3": "Empresas, agro e entidades",
     "ICP4": "Mentores e imobiliário",
     "ICP5": "Empresas de médio porte",
+    "ICP6": "Eventos e feiras",
 }
 
 # O que a Reiners faz por cada ICP (entra no toque 1).
@@ -37,6 +38,8 @@ O_QUE_FAZEMOS = {
              "e entrega o episódio e os cortes prontos para publicar."),
     "ICP5": ("A gente produz videocast corporativo: a empresa conta a própria história, "
              "apresenta lideranças e clientes, e constrói presença institucional que dura."),
+    "ICP6": ("A gente grava podcast e videocast com quem faz o evento acontecer: entrevistas com "
+             "organizadores, palestrantes e expositores, que mantêm a conversa viva antes e depois de cada edição."),
 }
 
 # ---------- Toque 1 · visita ao estúdio ----------

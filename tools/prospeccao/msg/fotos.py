@@ -86,6 +86,7 @@ REGRAS = [
     ("ICP4", r"", "puff-pessoa-04"),
     ("ICP5", r"colegio|faculdade|escola|ensino", "escritorio-pessoa-02"),
     ("ICP5", r"", "mesa-pessoa-04"),
+    ("ICP6", r"", "sofa-pessoa-01"),
 ]
 
 
