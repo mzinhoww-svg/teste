@@ -43,7 +43,7 @@
   body { margin: 0; background: var(--creme); color: var(--navy); font: var(--t14)/1.5 var(--sans); }
   button, select, input, a.btn { font: inherit; }
   :focus-visible { outline: 2px solid var(--ouro); outline-offset: 2px; }
-  .num, .placar b, .meta, .destino, .dado, time { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .num, .placar b, .dado, time { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 
   /* ===== Grade: uma coluna por padrão (abaixo de 1024px) ===== */
   .central { display: block; max-width: 1600px; margin-inline: auto; padding-inline: 16px; padding-block: 0 48px; }
@@ -77,7 +77,7 @@
   .placar span { font: 500 var(--t12)/1.25 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--suave); }
   .barra { height: 3px; background: var(--linha); border-radius: 2px; overflow: hidden; }
   .barra i { display: block; height: 100%; width: 100%; background: var(--ouro); transform: scaleX(0); transform-origin: left; transition: transform .2s; }
-  @media (prefers-reduced-motion: reduce) { .barra i { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .barra i, .linha { transition: none; } }
 
   .aviso { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: var(--alerta-fundo); color: var(--alerta); font-size: var(--t14); }
 
@@ -93,7 +93,7 @@
   label.campo select, label.campo input { width: 100%; padding: 7px 8px; min-height: 44px; border: 1px solid var(--borda-campo); border-radius: 8px;
                     background: var(--papel); color: var(--navy); font: var(--t14) var(--sans); min-width: 0; }
 
-  .fila { display: grid; gap: 12px; align-content: start; }
+  .fila { display: grid; gap: 8px; align-content: start; }
   .card { background: var(--papel); border: 1px solid var(--linha); border-radius: 10px; padding: 14px;
           display: grid; gap: 10px; min-width: 0; }
   .card.teste { border-style: dashed; }
@@ -114,6 +114,31 @@
   .estado.aguardando, .estado.andamento { background: var(--pergaminho); color: var(--suave); }
   .estado.respondeu, .estado.fechou, .estado.concluido { background: var(--ok-fundo); color: var(--ok); }
   .estado.encerrado, .estado.sair, .estado.pausado { background: var(--pergaminho); color: var(--alerta); }
+
+  /* Fila: linhas compactas, uma por lead */
+  .linha { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; min-width: 0;
+           min-height: 68px; padding: 8px 12px; background: var(--papel); border: 1px solid var(--linha); border-radius: 8px; cursor: pointer;
+           transition: background-color .15s, border-color .15s; }
+  .linha:hover { border-color: var(--borda-campo); }
+  .linha[aria-current="true"] { background: var(--pergaminho); border-color: var(--navy); }
+  .linha.teste { border-style: dashed; }
+  .linha.apagado .nome { color: var(--suave); }
+  .linha .info { display: grid; gap: 1px; min-width: 0; }
+  .linha .nome { font: 700 var(--t16)/1.3 var(--sans); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .linha .sub { font-size: var(--t13); line-height: 1.4; color: var(--suave); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .linha .situacao { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: var(--t13); line-height: 1.4; color: var(--suave); }
+  .linha .quando { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .linha .acoes { flex-wrap: nowrap; align-items: center; gap: 6px; }
+  .linha .btn { min-height: 36px; padding: 4px 12px; }
+  .linha .btn.principal { font-weight: 500; }
+  .pontos { display: inline-flex; gap: 4px; flex: none; }
+  .pontos i { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--borda-campo); }
+  .pontos i.feito { background: var(--ouro); border-color: var(--ouro); }
+  .pontos i.agora { background: var(--navy); border-color: var(--navy); }
+  .chip.alerta { background: var(--alerta-fundo); color: var(--alerta); font-weight: 500; flex: none; }
+  /* Detalhe do lead selecionado: sem moldura, o painel já é a região */
+  .detalhe .card { background: none; border: 0; padding: 0; border-radius: 0; }
+  .detalhe .card.apagado { background: none; }
 
   /* Cadência do card: visita, diagnóstico, piloto */
   .card .trilho { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
@@ -216,6 +241,7 @@
   .tempo li.nota time::after { content: " · nota"; color: var(--ouro-texto); }
   textarea.nota { width: 100%; min-height: 64px; padding: 8px; border: 1px solid var(--borda-campo); border-radius: 8px;
                   background: var(--papel); color: var(--navy); font: var(--t14)/1.4 var(--sans); resize: vertical; }
+  @media (max-width: 759px) { .linha { min-height: 72px; } .linha .btn { min-height: 44px; } }
   @media (max-width: 460px) {
     .tempo li { grid-template-columns: 1fr; gap: 0; }
     .selects, .selects.dois { grid-template-columns: 1fr 1fr; }
@@ -224,7 +250,7 @@
     .grade { grid-template-columns: 1fr; }
     .btn.sair { margin-left: 0; }
   }
-  @media (max-width: 759px) { .btn, .estado { min-height: 44px; } .estado { display: inline-flex; align-items: center; } }
+  @media (max-width: 759px) { .btn { min-height: 44px; } }
 
   /* ===== >=1024px: o detalhe aparece ao lado da fila ===== */
   @media (min-width: 1024px) {

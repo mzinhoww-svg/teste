@@ -29,7 +29,9 @@
       ld: { grupo: "todos", segmento: "", busca: "" }
     },
     novoContato: null,
-    aberto: {},
+    aberto: {},  // só a aba Leads ainda abre o perfil dentro do card (Task 7 migra)
+    selecionado: null,
+    selecaoInicial: false,
     rascunho: {}
   };
   var $ = function (id) { return document.getElementById(id); };
@@ -133,6 +135,7 @@
   // ================= AQUECIMENTO =================
   var etapa = Regras.etapa;
   function vencimento(l) { return Regras.vencimento(l, estado.meta.esperaDias); }
+  function espera(n) { var e = estado.meta.esperaDias || {}; return Number(e[String(n)]) || 0; }
   function grupo(l) { return Regras.grupo(l, estado.meta.esperaDias, new Date()); }
   var toque = Regras.toque;
 
@@ -247,6 +250,12 @@
     ]);
   }
 
+  function mailtoToque(l, t) {
+    var ca = contatoAtivo(l);
+    return mailto(emailDestino(l), t.assunto, comSaudacao(l, t.corpo || "").replace("Olá, " + l.saudacao + ",", "Olá, " + (ca && ca.nome ? primeiroNome(ca.nome) : l.saudacao) + ","));
+  }
+
+  // Detalhe do lead selecionado: o conteúdo do antigo card + o perfil completo (Task 6 reorganiza em Resultado e abas).
   function cardLead(l) {
     var g = grupo(l), e = etapa(l);
     var ativo = g === "hoje" || g === "aguardando";
@@ -268,7 +277,11 @@
       l.id === "TESTE" ? el("div", null, [
         el("h2", { text: "Card de teste" }),
         el("div", { class: "meta", text: "Manda as mensagens para o WhatsApp da própria Reiners." })
-      ]) : tituloAbrir(l, [l.id, l.categoria, l.score != null ? "score " + l.score : ""].filter(Boolean).join(" · ")),
+      ]) : el("div", null, [
+        el("h2", { text: l.nome || l.id }),
+        el("div", { class: "meta" }, [el("span", { class: "num", text: l.id }), l.categoria ? " · " + l.categoria : null,
+          l.score != null ? " · score " : null, l.score != null ? el("span", { class: "num", text: String(l.score) }) : null])
+      ]),
       el("span", { class: "estado " + g, text: rotulo })
     ]);
 
@@ -285,7 +298,7 @@
     if (ativo) {
       var podeHoje = g === "hoje";
       if (email) {
-        acoes.push(el("a", { class: "btn principal", href: mailto(emailDestino(l), t.assunto, comSaudacao(l, t.corpo || "").replace("Olá, " + l.saudacao + ",", "Olá, " + (contatoAtivo(l) && contatoAtivo(l).nome ? primeiroNome(contatoAtivo(l).nome) : l.saudacao) + ",")), target: "_blank", rel: "noopener",
+        acoes.push(el("a", { class: "btn principal", href: mailtoToque(l, t), target: "_blank", rel: "noopener",
           "aria-disabled": podeHoje ? null : "true" }, ["Abrir e-mail " + n]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.assunto || "", "Assunto"); } }, ["Copiar assunto"]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.corpo || "", "Corpo"); } }, ["Copiar corpo"]));
@@ -319,17 +332,19 @@
     }
 
     var ca = contatoAtivo(l);
-    var destino = (email ? emailDestino(l) : (telefoneDestino(l) ? "+" + telefoneDestino(l) : "")) +
+    var tel = !email && telefoneDestino(l) ? "+" + telefoneDestino(l) : "";
+    var destino = (email ? emailDestino(l) : tel) +
       (ca ? " · " + [ca.nome, ca.cargo || PAPEIS[ca.papel]].filter(Boolean).join(", ") : "");
-    return el("article", { "data-id": l.id, class: "card" + (l.id === "TESTE" ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : "") }, [
+    return el("article", { "data-detalhe": l.id, class: "card" + (l.id === "TESTE" ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : "") }, [
       cab, chips, trilho(l),
       l.fraseUnica ? el("p", { class: "frase", text: l.fraseUnica }) : null,
       comFoto ? blocoFoto(l, semMarca) : null,
       detalhes,
-      destino ? el("div", { class: "destino", text: destino }) : null,
+      destino ? el("div", { class: "destino" }, [tel ? el("span", { class: "num", text: tel }) : (email ? emailDestino(l) : ""),
+        ca ? " · " + [ca.nome, ca.cargo || PAPEIS[ca.papel]].filter(Boolean).join(", ") : ""]) : null,
       el("div", { class: "acoes" }, acoes),
       estado.fechando === l.id ? formFechar(l) : null,
-      estado.aberto[l.id] && l.id !== "TESTE" ? perfil(l) : null
+      l.id !== "TESTE" ? perfil(l) : null
     ]);
   }
 
@@ -367,14 +382,149 @@
       if (f.canal && l.canal !== f.canal) return false;
       return true;
     });
+    if (!estado.carregado.leads) { limparFila(); carregando($("fila")); return desenharDetalhe(); }
+    if (!todos.length) { limparFila(); vazio($("fila"), "Nenhum lead na fila", "Quando o Claude semear a central, as linhas aparecem aqui."); return desenharDetalhe(); }
+    escolherSelecao(visiveis);
+    desenharFila(visiveis);
     var alvo = $("fila");
-    alvo.textContent = "";
-    if (!estado.carregado.leads) return carregando(alvo);
-    if (!todos.length) return vazio(alvo, "Nenhum lead na fila", "Quando o Claude semear a central, os cards aparecem aqui.");
-    visiveis.forEach(function (l) { alvo.appendChild(cardLead(l)); });
     if (!visiveis.some(function (l) { return l.id !== "TESTE"; })) {
       if (f.grupo === "hoje") vazio(alvo, "Nada para hoje", "Os próximos toques aparecem na aba Aguardando, com a data de cada um.");
       else vazio(alvo, "Nada neste filtro", "Troque a aba ou limpe os filtros.");
+    }
+    desenharDetalhe();
+  }
+
+  // ---------- fila: linhas compactas reconciliadas por id ----------
+  function limparFila() { var a = $("fila"); while (a.firstChild) a.removeChild(a.firstChild); }
+  var ROTULO_ESTADO = { respondeu: "respondeu", fechou: "fechou negócio", sair: "pediu para sair", encerrado: "sem resposta" };
+
+  // Estado de cada um dos três toques: feito, agora ou depois (e o texto para leitor de tela).
+  function pontosDe(l) {
+    var e = etapa(l), g = grupo(l), v = vencimento(l), ativo = g === "hoje" || g === "aguardando";
+    var classes = [], falas = [];
+    [1, 2, 3].forEach(function (n) {
+      var feito = n <= e, agora = !feito && n === e + 1 && ativo;
+      classes.push(feito ? "feito" : agora ? "agora" : "depois");
+      falas.push("toque " + n + " " + (feito ? "enviado" : agora ? (g === "hoje" ? "hoje" : "a partir de " + dataCurta(v)) : ativo ? "depois" : "não vai sair"));
+    });
+    var fala = falas.join(", ");
+    return { classes: classes, fala: fala.charAt(0).toUpperCase() + fala.slice(1) };
+  }
+  function quandoDe(l) {
+    var g = grupo(l), e = etapa(l);
+    if (g === "hoje") return ["hoje"];
+    if (g === "aguardando") return ["a partir de ", el("span", { class: "num", text: dataCurta(vencimento(l)) })];
+    var ultimo = l["enviado" + e];
+    var partes = [ROTULO_ESTADO[g] || g];
+    if (g === "encerrado" && ultimo) partes = partes.concat([" · enviado ", el("span", { class: "num", text: dataCurta(ultimo) })]);
+    return partes;
+  }
+  function linhaLead(l) {
+    var g = grupo(l), e = etapa(l), email = l.canal === "E-mail";
+    var ativo = g === "hoje" || g === "aguardando";
+    var semMarca = !estado.podeMarcar || !!estado.gravando["leads/" + l.id];
+    var n = Math.min(e + 1, 3), t = toque(l, n);
+    var teste = l.id === "TESTE";
+    var pontos = pontosDe(l);
+    var link = email ? mailtoToque(l, t) : linkToque(l, t);
+    var podeEnviar = g === "hoje" && !!link;
+    var btnEnviar = el("a", { class: "btn principal enviar", href: podeEnviar ? link : null, target: podeEnviar ? "_blank" : null, rel: podeEnviar ? "noopener" : null,
+      "aria-disabled": podeEnviar ? null : "true", "aria-label": "Enviar toque " + n + " para " + (l.nome || l.id),
+      // Hoje: o clique no WhatsApp marca o toque; no e-mail o link só abre (a Task 5 muda isso).
+      onclick: function () { if (podeEnviar && !email && !semMarca) marcarToque(l, n); } }, ["Enviar"]);
+    var btnCopiar = el("button", { type: "button", class: "btn copiar", disabled: !ativo, "aria-label": "Copiar mensagem do toque " + n + " de " + (l.nome || l.id),
+      onclick: function () { copiar(email ? (t.corpo || "") : mensagemToque(l, t), email ? "Corpo" : "Mensagem"); } }, ["Copiar"]);
+    return el("div", { class: "linha" + (teste ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : ""), "data-id": l.id, tabindex: "0",
+      role: "group", "aria-label": teste ? "Card de teste" : (l.nome || l.id), "aria-current": estado.selecionado === l.id ? "true" : null }, [
+      el("div", { class: "info" }, [
+        el("span", { class: "nome", text: teste ? "Card de teste" : (l.nome || l.id) }),
+        el("span", { class: "sub", text: teste ? "WhatsApp da própria Reiners" : [l.categoria, l.bairro].filter(Boolean).join(" · ") }),
+        el("div", { class: "situacao" }, [
+          el("span", { class: "pontos", role: "img", "aria-label": pontos.fala }, pontos.classes.map(function (c) { return el("i", { class: c }); })),
+          el("span", { class: "quando" }, quandoDe(l)),
+          (l.alertas || []).length ? el("span", { class: "chip alerta", text: "Alerta" }) : null
+        ])
+      ]),
+      el("div", { class: "acoes" }, [btnEnviar, btnCopiar])
+    ]);
+  }
+  function assinaturaLinha(l, ctx) {
+    return JSON.stringify(l) + ctx + (estado.selecionado === l.id ? "1" : "0") + (estado.gravando["leads/" + l.id] ? "g" : "");
+  }
+  function atualizarLinha(n, novo) {
+    var ativo = document.activeElement, guarda = null;
+    if (ativo && n.contains(ativo) && ativo !== n) guarda = ativo.classList.contains("copiar") ? ".copiar" : ativo.classList.contains("enviar") ? ".enviar" : null;
+    n.className = novo.className;
+    ["aria-current", "aria-label"].forEach(function (a) {
+      if (novo.hasAttribute(a)) n.setAttribute(a, novo.getAttribute(a)); else n.removeAttribute(a);
+    });
+    while (n.firstChild) n.removeChild(n.firstChild);
+    while (novo.firstChild) n.appendChild(novo.firstChild);
+    if (guarda) { var f = n.querySelector(guarda); if (f && !f.disabled) f.focus(); }
+  }
+  // Reconcilia as linhas com o filtro atual: cria as que faltam, atualiza no próprio nó as que mudaram,
+  // remove as que saíram e só mexe na ordem quando preciso. Nada de limpar a fila inteira.
+  function desenharFila(visiveis) {
+    var alvo = $("fila"), mapa = {};
+    Array.prototype.slice.call(alvo.children).forEach(function (c) {
+      if (c.classList.contains("linha") && c.dataset.id) mapa[c.dataset.id] = c; else alvo.removeChild(c);
+    });
+    var ctx = JSON.stringify([estado.meta.esperaDias, estado.fotos, estado.podeMarcar, hoje().getTime()]), manter = {};
+    visiveis.forEach(function (l) { manter[l.id] = 1; });
+    Object.keys(mapa).forEach(function (id) { if (!manter[id]) { alvo.removeChild(mapa[id]); delete mapa[id]; } });
+    visiveis.forEach(function (l, i) {
+      var sig = assinaturaLinha(l, ctx), n = mapa[l.id];
+      if (!n) { n = linhaLead(l); n._sig = sig; }
+      else if (n._sig !== sig) { atualizarLinha(n, linhaLead(l)); n._sig = sig; }
+      if (alvo.children[i] !== n) alvo.insertBefore(n, alvo.children[i] || null);
+    });
+  }
+
+  // ---------- seleção ----------
+  function escolherSelecao(visiveis) {
+    var ids = visiveis.map(function (l) { return l.id; });
+    if (!estado.selecaoInicial) {
+      // Primeira vez com dados: vale o lead salvo se ele estiver na fila de agora, senão o primeiro da fila.
+      estado.selecaoInicial = true;
+      if (ids.indexOf(estado.selecionado) < 0) estado.selecionado = ids[0] || null;
+    } else if (estado.selecionado && !estado.leads[estado.selecionado]) {
+      estado.selecionado = ids[0] || null;  // o lead sumiu do banco
+    }
+  }
+  function selecionar(id, opcoes) {
+    estado.selecionado = id;
+    try { localStorage.setItem("central-selecionado", id); } catch (e) { /* tudo bem */ }
+    render();
+    if (opcoes && opcoes.foco) {
+      var linha = $("fila").querySelector('.linha[data-id="' + id + '"]');
+      if (linha) linha.focus();
+    }
+  }
+
+  // ---------- detalhe: só refaz quando o lead selecionado ou o seu documento mudou ----------
+  function desenharDetalhe() {
+    var alvo = $("detalhe");
+    var l = estado.funil === "aq" && estado.selecionado ? estado.leads[estado.selecionado] : null;
+    var sig = l ? JSON.stringify([l, estado.podeMarcar, !!estado.gravando["leads/" + l.id], estado.fechando === l.id, estado.novoContato === l.id,
+      estado.fotos, !!estado.downloads, estado.meta.esperaDias, Object.keys((estado.pv && estado.pv.produtos) || {}), hoje().getTime()]) : "vazio";
+    if (alvo._sig === sig) return;
+    var mesmo = !!l && alvo._id === l.id;
+    var ativo = document.activeElement, idFoco = null, ini = null, fim = null, topo = mesmo ? alvo.scrollTop : 0;
+    if (ativo && alvo.contains(ativo) && ativo.id) {
+      idFoco = ativo.id;
+      try { ini = ativo.selectionStart; fim = ativo.selectionEnd; } catch (e) { /* campo sem seleção */ }
+    }
+    while (alvo.firstChild) alvo.removeChild(alvo.firstChild);
+    if (l) alvo.appendChild(cardLead(l));
+    else vazio(alvo, "Nenhum lead selecionado", "Selecione um lead na fila para ver a mensagem, o perfil e o histórico.");
+    alvo._sig = sig; alvo._id = l ? l.id : null;
+    alvo.scrollTop = topo;
+    if (idFoco) {
+      var novo = $(idFoco);
+      if (novo && alvo.contains(novo)) {
+        novo.focus({ preventScroll: true });
+        try { if (ini != null) novo.setSelectionRange(ini, fim); } catch (e) { /* tudo bem */ }
+      }
     }
   }
 
@@ -444,10 +594,9 @@
       ])
     ]);
   }
-  // ---------- perfil do lead (abre dentro do card, nos dois funis) ----------
+  // ---------- perfil do lead (no Aquecimento vive no detalhe; na aba Leads abre dentro do card até a Task 7) ----------
   function alternarPerfil(id) {
     if (estado.aberto[id]) delete estado.aberto[id]; else estado.aberto[id] = 1;
-    try { localStorage.setItem("central-abertos", JSON.stringify(Object.keys(estado.aberto))); } catch (e) { /* tudo bem */ }
     render();
   }
   // Título do card que abre e fecha o perfil.
@@ -701,8 +850,8 @@
     var cab = el("div", { class: "cab" }, [
       el("div", null, [
         el("h2", { text: c.nome || c.id }),
-        el("div", { class: "meta", text: [c.produto, c.origem === "Prospecção" ? "veio da prospecção (" + (c.leadId || "") + ")" : "cadastro manual",
-          c.criadoEm ? "desde " + dataCurta(c.criadoEm) : ""].filter(Boolean).join(" · ") })
+        el("div", { class: "meta" }, [[c.produto, c.origem === "Prospecção" ? "veio da prospecção (" + (c.leadId || "") + ")" : "cadastro manual"].filter(Boolean).join(" · "),
+          c.criadoEm ? " · desde " : null, c.criadoEm ? el("span", { class: "num", text: dataCurta(c.criadoEm) }) : null])
       ]),
       el("span", { class: "estado " + g, text: rotulo })
     ]);
@@ -887,6 +1036,7 @@
     $("n-pv").textContent = estado.pv ? (clientes.filter(function (c) { return grupoPV(c) === "hoje"; }).length || "") : "";
     $("n-ld").textContent = leads.filter(function (l) { return statusLD(l) !== "completo"; }).length || "";
     if (pv) renderPV(); else if (ld) renderLD(); else renderAQ();
+    if (pv || ld) desenharDetalhe();
   }
   function trocarFunil(f) {
     estado.funil = f;
@@ -918,6 +1068,17 @@
   });
   ["etapa", "produto"].forEach(function (k) {
     $("f-" + k).addEventListener("change", function (e) { estado.filtro.pv[k] = e.target.value; render(); });
+  });
+  $("fila").addEventListener("click", function (e) {
+    var linha = e.target.closest(".linha[data-id]");
+    if (!linha || e.target.closest("a, button")) return;  // Enviar e Copiar têm ação própria
+    selecionar(linha.dataset.id, { foco: true });
+  });
+  $("fila").addEventListener("keydown", function (e) {
+    if (e.target.classList && e.target.classList.contains("linha") && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      selecionar(e.target.dataset.id, { foco: true });
+    }
   });
   $("novo-cliente").addEventListener("click", function () { estado.novoCliente = true; render(); });
   document.addEventListener("input", function (e) {
@@ -987,7 +1148,7 @@
   try {
     var salvo = location.hash === "#posvenda" ? "pv" : location.hash === "#leads" ? "ld" : localStorage.getItem("central-funil");
     if (salvo === "pv" || salvo === "aq" || salvo === "ld") estado.funil = salvo;
-    (JSON.parse(localStorage.getItem("central-abertos") || "[]") || []).forEach(function (id) { estado.aberto[id] = 1; });
+    estado.selecionado = localStorage.getItem("central-selecionado") || null;
   } catch (e) { /* sem armazenamento: começa no aquecimento */ }
   render();
   var usar = window.claude && typeof window.claude.use === "function" ? window.claude.use("db") : Promise.resolve(null);
