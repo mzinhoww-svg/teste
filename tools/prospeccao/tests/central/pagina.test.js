@@ -784,3 +784,122 @@ test("900px: Esc fecha a gaveta mesmo com o foco fora do detalhe; Tab não escap
   assert.notEqual(await page.evaluate(() => document.activeElement.tagName), "BODY");
   assert.deepEqual(h.erros.map(String), []);
 });
+
+// ---------- Task 9: atalhos e busca ----------
+test("j/k mudam a seleção e Enter envia", async () => {
+  const h = await abrirEnvio();
+  const ordem = await h.page.evaluate(() => Array.from(document.querySelectorAll("#fila .linha")).map((n) => n.dataset.id));
+  await h.page.evaluate(() => document.activeElement.blur());  // depois de clicar na aba o foco está no botão da aba, que tem a própria ação
+  const ini = await selecionadaId(h.page);
+  assert.equal(ini, "R0004");
+  await h.page.keyboard.press("j");
+  assert.equal(await selecionadaId(h.page), ordem[ordem.indexOf(ini) + 1]);
+  await h.page.keyboard.press("k");
+  assert.equal(await selecionadaId(h.page), ini);
+  await h.page.keyboard.press("k");
+  assert.equal(await selecionadaId(h.page), ordem[ordem.indexOf(ini) - 1], "k sobe até o card TESTE");
+  await h.page.keyboard.press("j");
+  const atual = await selecionadaId(h.page);
+  await h.page.keyboard.press("Enter");
+  await h.page.waitForFunction(() => window.__escritas.length > 0);
+  const e = (await h.escritas.lista())[0];
+  assert.equal(e.caminho, "leads/" + atual);
+  assert.match(await h.page.locator("#toast").innerText(), /^Toque \d marcado · Desfazer$/);
+  assert.notEqual(await selecionadaId(h.page), atual, "a seleção avança como no clique");
+  // c copia a mensagem do selecionado
+  await h.page.keyboard.press("c");
+  assert.match(await h.page.locator("#toast").innerText(), /copiado|Não deu para copiar/);
+  // 3, 2, 1 trocam de funil
+  await h.page.keyboard.press("3");
+  assert.equal(await h.page.getAttribute("body", "data-funil"), "ld");
+  await h.page.keyboard.press("2");
+  assert.equal(await h.page.getAttribute("body", "data-funil"), "pv");
+  await h.page.keyboard.press("1");
+  assert.equal(await h.page.getAttribute("body", "data-funil"), "aq");
+  // r foca o primeiro botão do Resultado
+  await h.page.keyboard.press("r");
+  assert.equal(await h.page.evaluate(() => document.activeElement.textContent), "Respondeu");
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("atalhos não agem dentro de campos", async () => {
+  const h = await abrirEnvio();
+  const antes = await selecionadaId(h.page);
+  const nota = h.page.locator("#detalhe textarea").first();
+  await h.page.click("#detalhe summary:has-text('Histórico'), #detalhe [role=tab]:has-text('Histórico')").catch(() => {});
+  await nota.waitFor();
+  await nota.focus();
+  for (const k of ["j", "k", "c", "r", "?", "/", "1", "2", "Enter"]) await h.page.keyboard.press(k);
+  assert.equal(await selecionadaId(h.page), antes);
+  assert.equal((await h.escritas.lista()).length, 0);
+  assert.equal(await h.page.locator("#atalhos").isVisible(), false);
+  assert.equal(await h.page.getAttribute("body", "data-funil"), "aq");
+  assert.match(await nota.inputValue(), /^jkcr\?\/12/);
+  // na busca também
+  await h.page.focus("#f-busca");
+  for (const k of ["j", "c", "Enter"]) await h.page.keyboard.press(k);
+  assert.equal(await h.page.inputValue("#f-busca"), "jc");
+  assert.equal((await h.escritas.lista()).length, 0);
+  // com modificador nada age
+  await h.page.evaluate(() => document.activeElement.blur());
+  await h.page.keyboard.press("Control+j");
+  assert.equal(await selecionadaId(h.page), antes);
+});
+
+test("/ foca a busca e filtra no pós-venda também", async () => {
+  const h = await abrirEnvio();
+  await h.page.keyboard.press("2");
+  await h.page.click('#abas [data-grupo="todos"]');
+  assert.equal(await h.page.locator("#fila .linha[data-id]").count(), 3);
+  await h.page.keyboard.press("/");
+  assert.equal(await h.page.evaluate(() => document.activeElement.id), "f-busca");
+  assert.equal(await h.page.inputValue("#f-busca"), "", "a barra não entra no campo");
+  await h.page.keyboard.type("dois");
+  await h.page.waitForFunction(() => document.querySelectorAll("#fila .linha[data-id]").length === 1);
+  assert.equal(await h.page.locator("#fila .linha[data-id]").getAttribute("data-id"), "C0002");
+  // a busca vale nos outros funis (CNPJ no Aquecimento) e Esc limpa e depois sai do campo
+  await h.page.keyboard.press("Escape");
+  assert.equal(await h.page.inputValue("#f-busca"), "");
+  assert.equal(await h.page.evaluate(() => document.activeElement.id), "f-busca", "primeiro Esc só limpa");
+  await h.page.waitForFunction(() => document.querySelectorAll("#fila .linha[data-id]").length === 3);
+  await h.page.keyboard.press("Escape");
+  assert.notEqual(await h.page.evaluate(() => document.activeElement.id), "f-busca");
+  await h.page.keyboard.press("1");
+  await h.page.click('#abas [data-grupo="todos"]');
+  await h.page.fill("#f-busca", "00.000.000/0003");
+  await h.page.evaluate(() => document.activeElement.blur());
+  await h.page.waitForFunction(() => document.querySelectorAll("#fila .linha[data-id]:not([data-id=TESTE])").length === 1);
+  assert.equal(await h.page.locator("#fila .linha[data-id]:not([data-id=TESTE])").getAttribute("data-id"), "R0003");
+  await h.page.keyboard.press("3");
+  await h.page.waitForFunction(() => document.querySelectorAll("#fila [data-id]").length === 1);
+  await h.page.fill("#f-busca", "");
+  await h.page.evaluate(() => document.activeElement.blur());
+  await h.page.waitForFunction(() => document.querySelectorAll("#fila [data-id]").length === 7);
+});
+
+test("? mostra a lista de atalhos e Esc fecha", async () => {
+  const h = await abrirEnvio();
+  await h.page.keyboard.press("Shift+?");
+  const painel = h.page.locator("#atalhos");
+  assert.equal(await painel.isVisible(), true);
+  assert.equal(await painel.getAttribute("role"), "dialog");
+  assert.equal(await painel.getAttribute("aria-label"), "Atalhos");
+  assert.equal(await painel.getAttribute("aria-modal"), null, "não é modal");
+  assert.match(await painel.innerText(), /Enviar o lead selecionado/);
+  await h.page.keyboard.press("Escape");
+  assert.equal(await painel.isVisible(), false);
+  await h.page.keyboard.press("Shift+?");
+  await h.page.keyboard.press("Shift+?");
+  assert.equal(await painel.isVisible(), false, "? alterna");
+  // Esc fecha o painel antes da gaveta
+  await h.page.setViewportSize({ width: 900, height: 800 });
+  await h.page.waitForFunction(() => document.body.dataset.layout === "gaveta");
+  await h.page.click("#fila [data-id=R0004] .nome");
+  await h.page.waitForSelector("#detalhe.aberto");
+  await h.page.keyboard.press("Shift+?");
+  await h.page.keyboard.press("Escape");
+  assert.equal(await painel.isVisible(), false);
+  assert.equal(await h.page.locator("#detalhe.aberto").count(), 1, "o primeiro Esc fechou só o painel");
+  await h.page.keyboard.press("Escape");
+  assert.equal(await h.page.locator("#detalhe.aberto").count(), 0);
+});

@@ -26,8 +26,9 @@
     filtro: {
       aq: { grupo: "hoje", segmento: "", faixa: "", canal: "" },
       pv: { grupo: "hoje", etapa: "", produto: "" },
-      ld: { grupo: "todos", segmento: "", busca: "" }
+      ld: { grupo: "todos", segmento: "" }
     },
+    busca: "",                                      // só em memória; vale para os três funis
     novoContato: null,
     sel: { aq: null, pv: null, ld: null },          // um item selecionado por funil
     selIni: { aq: false, pv: false, ld: false },    // a seleção salva já foi conferida com a fila?
@@ -460,6 +461,7 @@
 
     var f = estado.filtro.aq;
     var visiveis = todos.filter(function (l) {
+      if (!Regras.casaBusca(l, estado.busca)) return false;
       if (l.id === "TESTE") return f.grupo === "todos" || grupo(l) === f.grupo || f.grupo === "hoje";
       if (f.grupo !== "todos" && grupo(l) !== f.grupo) return false;
       if (f.segmento && l.segmento !== f.segmento) return false;
@@ -683,18 +685,92 @@
     }
   }
   $("veu").addEventListener("click", fecharDetalhe);
-  document.addEventListener("keydown", function (e) {
-    if (!estado.detalheAberto || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.key === "Escape") { e.preventDefault(); fecharDetalhe(); return; }
-    if (e.key !== "Tab") return;
-    var foc = Array.prototype.filter.call($("detalhe").querySelectorAll("button, a[href], input, select, textarea, summary, [tabindex]:not([tabindex='-1'])"),
-      function (n) { return !n.disabled && n.offsetParent !== null; });
-    if (!foc.length) return;
-    var primeiro = foc[0], ultimo = foc[foc.length - 1], ativo = document.activeElement;
-    if (e.shiftKey && ativo === primeiro) { e.preventDefault(); ultimo.focus(); }
-    else if (!e.shiftKey && ativo === ultimo) { e.preventDefault(); primeiro.focus(); }
-  });
-  window.Central = Object.assign(window.Central || {}, { abrirDetalhe: abrirDetalhe, fecharDetalhe: fecharDetalhe });
+  // ---------- atalhos de teclado ----------
+  function emCampo(t) {
+    return !!t && (t.nodeType === 1) && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable);
+  }
+  function atalhosAbertos() { return !$("atalhos").hidden; }
+  function mostrarAtalhos(v) { $("atalhos").hidden = !v; }
+  function andar(passo, t) {
+    var fila = estado.visiveis[estado.funil];
+    if (!fila.length) return;
+    var i = fila.map(function (x) { return x.id; }).indexOf(sel());
+    var novo = fila[Math.max(0, Math.min(fila.length - 1, i < 0 ? 0 : i + passo))];
+    if (!novo || novo.id === sel()) return;
+    var naLinha = !!(t && t.closest && t.closest(LINHA));
+    selecionar(novo.id, { foco: naLinha });
+    var linha = $("fila").querySelector('[data-id="' + novo.id + '"]');
+    if (linha && linha.scrollIntoView) linha.scrollIntoView({ block: "nearest" });
+  }
+  // Procura o botão da seleção na linha e, se a linha não o tem (aba Leads), no detalhe.
+  function botaoDaSelecao(seletorLinha, seletorDetalhe) {
+    var id = sel();
+    if (!id) return null;
+    var linha = $("fila").querySelector('[data-id="' + id + '"]');
+    var b = linha && linha.querySelector(seletorLinha);
+    if (!b) b = Array.prototype.filter.call($("detalhe").querySelectorAll(seletorDetalhe), function (x) { return !x.closest("[aria-hidden='true']"); })[0] || null;
+    return b && !b.disabled && b.getAttribute("aria-disabled") !== "true" ? b : null;
+  }
+  // Mesmo caminho do clique em Enviar: o link abre a conversa e o clique grava, avisa com Desfazer e avança.
+  function enviarSelecionado() {
+    var b = botaoDaSelecao("a.enviar", ".acoes a.btn.principal");
+    if (b) b.click();
+  }
+  function copiarSelecionado() {
+    var b = botaoDaSelecao("button.copiar", ".acoes button.btn");
+    if (b) b.click();
+  }
+  function focarResultado() {
+    if (!sel() || estado.funil === "ld") return;
+    if (emGaveta() && !estado.detalheAberto) abrirDetalhe(sel());
+    var b = $("detalhe").querySelector(".resultado button:not(:disabled)");
+    if (b) b.focus();
+  }
+  function teclado(e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = e.target, k = e.key;
+    if (k === "Escape") {
+      if (atalhosAbertos()) { e.preventDefault(); mostrarAtalhos(false); return; }
+      if (t === $("f-busca")) {
+        e.preventDefault();
+        if (t.value) { t.value = ""; aplicarBusca(""); } else t.blur();
+        return;
+      }
+      if (estado.detalheAberto) { e.preventDefault(); fecharDetalhe(); }
+      return;
+    }
+    if (k === "Tab" && estado.detalheAberto) {
+      var foc = Array.prototype.filter.call($("detalhe").querySelectorAll("button, a[href], input, select, textarea, summary, [tabindex]:not([tabindex='-1'])"),
+        function (n) { return !n.disabled && n.offsetParent !== null; });
+      if (!foc.length) return;
+      var primeiro = foc[0], ultimo = foc[foc.length - 1], ativo = document.activeElement;
+      if (e.shiftKey && ativo === primeiro) { e.preventDefault(); ultimo.focus(); }
+      else if (!e.shiftKey && ativo === ultimo) { e.preventDefault(); primeiro.focus(); }
+      return;
+    }
+    if (emCampo(t)) return;  // digitando: nenhum atalho age
+    if (k === "?") { e.preventDefault(); mostrarAtalhos(!atalhosAbertos()); return; }
+    if (k === "/") { e.preventDefault(); $("f-busca").focus(); return; }
+    if (k === "1" || k === "2" || k === "3") {
+      var f = { "1": "aq", "2": "pv", "3": "ld" }[k];
+      if (f !== estado.funil) trocarFunil(f);
+      return;
+    }
+    if (k === "j" || k === "k") { e.preventDefault(); andar(k === "j" ? 1 : -1, t); return; }
+    if (k === "c") { copiarSelecionado(); return; }
+    if (k === "r") { e.preventDefault(); focarResultado(); return; }
+    if (k === "Enter") {
+      // Botão, link e resumo fazem a própria ação; a linha só abre o detalhe na gaveta e na tela cheia.
+      if (t && t.closest && t.closest("a, button, summary")) return;
+      var linha = t && t.closest && t.closest(LINHA);
+      if (linha) { if (emGaveta()) return; if (linha.dataset.id !== sel()) selecionar(linha.dataset.id, { foco: true }); }
+      e.preventDefault();
+      enviarSelecionado();
+    }
+  }
+  document.addEventListener("keydown", teclado);
+  $("atalhos-fechar").addEventListener("click", function () { mostrarAtalhos(false); });
+  window.Central = Object.assign(window.Central || {}, { abrirDetalhe: abrirDetalhe, fecharDetalhe: fecharDetalhe, teclado: teclado });
 
   // ================= LEADS: estrutura e enriquecimento =================
   function statusLD(l) { return (l.enriquecimento && l.enriquecimento.status) || "bruto"; }
@@ -985,17 +1061,11 @@
     var segs = {};
     todos.forEach(function (l) { if (l.segmento) segs[l.segmento] = 1; });
     preencherSelect("f-ld-segmento", Object.keys(segs).sort());
-    var f = estado.filtro.ld, q = f.busca.trim().toLowerCase();
+    var f = estado.filtro.ld;
     var visiveis = todos.filter(function (l) {
       if (f.grupo === "setor" ? !deSetor(l) : (f.grupo !== "todos" && statusLD(l) !== f.grupo)) return false;
       if (f.segmento && l.segmento !== f.segmento) return false;
-      if (q) {
-        var alvo = [l.nome, l.id, l.empresa && l.empresa.cnpj, l.empresa && l.empresa.razaoSocial]
-          .concat((l.decisores || []).map(function (d) { return d.nome; }))
-          .concat((l.contatos || []).map(function (c) { return c.nome; })).join(" ").toLowerCase();
-        if (alvo.indexOf(q) < 0) return false;
-      }
-      return true;
+      return Regras.casaBusca(l, estado.busca);
     });
     var tabelaLayout = document.body.dataset.layout === "tres" || document.body.dataset.layout === "dois";
     if (tabelaLayout) ordenarLD(visiveis);
@@ -1295,6 +1365,7 @@
 
     var f = estado.filtro.pv;
     var visiveis = todos.filter(function (c) {
+      if (!Regras.casaBusca(c, estado.busca)) return false;
       if (f.grupo !== "todos" && grupoPV(c) !== f.grupo) return false;
       if (f.etapa && (etapaPV(c) + " · " + (defEtapa(etapaPV(c)) || {}).nome) !== f.etapa) return false;
       if (f.produto && c.produto !== f.produto) return false;
@@ -1391,10 +1462,11 @@
   $("f-ld").addEventListener("click", function () { trocarFunil("ld"); });
   $("f-ld-segmento").addEventListener("change", function (e) { estado.filtro.ld.segmento = e.target.value; render(); });
   var buscaTimer;
-  $("f-ld-busca").addEventListener("input", function (e) {
+  function aplicarBusca(v) { clearTimeout(buscaTimer); estado.busca = v; render(); }
+  $("f-busca").addEventListener("input", function (e) {
     clearTimeout(buscaTimer);
     var v = e.target.value;
-    buscaTimer = setTimeout(function () { estado.filtro.ld.busca = v; render(); }, 200);
+    buscaTimer = setTimeout(function () { estado.busca = v; render(); }, 200);
   });
   $("abas").addEventListener("click", function (e) {
     var b = e.target.closest("button");
@@ -1418,6 +1490,7 @@
   });
   $("fila").addEventListener("keydown", function (e) {
     if (e.target.matches && e.target.matches(LINHA) && (e.key === "Enter" || e.key === " ")) {
+      if (e.key === "Enter" && !emGaveta()) return;  // com o detalhe ao lado, Enter na linha envia (teclado)
       e.preventDefault();
       selecionar(e.target.dataset.id, { foco: true });
       abrirDetalhe(e.target.dataset.id);

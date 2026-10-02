@@ -165,8 +165,23 @@ var Regras = (function () {
     return (historico || []).concat([item]).slice(-100);
   }
 
+  // Busca da central: nome, CNPJ, pessoa e contato (lead ou cliente). Sem acento e sem caixa; CNPJ e telefone casam também só pelos dígitos.
+  function semAcento(t) { return String(t == null ? "" : t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
+  function casaBusca(item, busca) {
+    var q = semAcento(busca).trim();
+    if (!q) return true;
+    var e = item.empresa || {};
+    var partes = [item.nome, item.id, item.saudacao, item.email, item.telefone, item.cnpj, e.cnpj, e.razaoSocial]
+      .concat((item.decisores || []).map(function (d) { return d.nome; }))
+      .concat((item.contatos || []).reduce(function (a, c) { return a.concat([c.nome, c.email, c.telefone]); }, []));
+    var alvo = partes.map(semAcento).join(" | ");
+    if (alvo.indexOf(q) >= 0) return true;
+    var dig = q.replace(/\D/g, "");
+    return dig.length >= 3 && alvo.replace(/\D/g, "").indexOf(dig) >= 0;
+  }
+
   return {
-    DIA: DIA, inicioDoDia: inicioDoDia, dataCurta: dataCurta, quando: quando, waLink: waLink, telefoneFormatado: telefoneFormatado,
+    casaBusca: casaBusca, DIA: DIA, inicioDoDia: inicioDoDia, dataCurta: dataCurta, quando: quando, waLink: waLink, telefoneFormatado: telefoneFormatado,
     etapa: etapa, vencimento: vencimento, grupo: grupo, toque: toque,
     contatoAtivo: contatoAtivo, primeiroNome: primeiroNome, comSaudacao: comSaudacao,
     telefoneDestino: telefoneDestino, emailDestino: emailDestino, fotoDe: fotoDe,

@@ -34,6 +34,7 @@
 
   <nav class="filtros" aria-label="Filtros">
     <div class="abas" id="abas"></div>
+    <label class="campo busca" for="f-busca">Buscar<input id="f-busca" type="search" placeholder="Empresa, pessoa, CNPJ ou contato" aria-keyshortcuts="/" autocomplete="off"></label>
     <div class="selects" id="sel-aq">
       <label class="campo" for="f-segmento">Segmento<select id="f-segmento"><option value="">Todos</option></select></label>
       <label class="campo" for="f-faixa">Faixa<select id="f-faixa"><option value="">Todas</option></select></label>
@@ -41,7 +42,6 @@
     </div>
     <div class="selects dois" id="sel-ld" hidden>
       <label class="campo" for="f-ld-segmento">Segmento<select id="f-ld-segmento"><option value="">Todos</option></select></label>
-      <label class="campo" for="f-ld-busca">Buscar<input id="f-ld-busca" type="search" placeholder="Empresa, pessoa ou CNPJ"></label>
     </div>
     <div class="selects dois" id="sel-pv" hidden>
       <label class="campo" for="f-etapa">Etapa<select id="f-etapa"><option value="">Todas</option></select></label>
@@ -60,7 +60,20 @@
     <div class="vazio"><b>Nenhum lead selecionado</b>Selecione um lead na fila para ver a mensagem, o perfil e o histórico.</div>
   </aside>
 </div>
-<div id="atalhos" hidden></div>
+<div id="atalhos" role="dialog" aria-label="Atalhos" hidden>
+  <div class="atalhos-topo"><b>Atalhos</b><button type="button" class="btn" id="atalhos-fechar">Fechar</button></div>
+  <dl>
+    <div><dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>Próximo e anterior na fila</dd></div>
+    <div><dt><kbd>Enter</kbd></dt><dd>Enviar o lead selecionado</dd></div>
+    <div><dt><kbd>c</kbd></dt><dd>Copiar a mensagem</dd></div>
+    <div><dt><kbd>/</kbd></dt><dd>Ir para a busca</dd></div>
+    <div><dt><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></dt><dd>Aquecimento, Pós-venda, Leads</dd></div>
+    <div><dt><kbd>r</kbd></dt><dd>Abrir Resultado</dd></div>
+    <div><dt><kbd>Esc</kbd></dt><dd>Fechar o detalhe e sair da busca</dd></div>
+    <div><dt><kbd>?</kbd></dt><dd>Mostrar e esconder esta lista</dd></div>
+  </dl>
+  <p>Os atalhos ficam desligados dentro de campos de texto.</p>
+</div>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="regras.js"></script>
