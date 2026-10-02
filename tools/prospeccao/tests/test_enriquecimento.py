@@ -1,5 +1,5 @@
-from msg.enriquecimento import (cnpj_valido, contato_direto, contatos_hunter, doc_lead, normalizar, somar_contatos,
-                                status, telefone_valido)
+from msg.enriquecimento import (cnpj_valido, contato_direto, contatos_hunter, contatos_planilha, doc_lead, normalizar,
+                                somar_contatos, status, telefone_valido, telefones)
 
 
 def test_cnpj_com_digito_verificador():
@@ -111,3 +111,38 @@ def test_hunter_sem_verificacao_fica_media_e_somar_renumera():
     assert [c["id"] for c in junto["contatos"]] == ["k1", "k2"]
     assert contato_direto(junto)["email"] == "fulana@exemplo.com.br"
     assert limpo["contatos"][0]["id"] == "k1" and len(limpo["contatos"]) == 1  # não altera o original
+
+
+def test_telefones_da_planilha_corrige_formato():
+    assert telefones("5565999991111.0") == ["5565999991111"]          # número que o Excel virou float
+    assert telefones("556599991111") == ["5565999991111"]             # celular antigo sem o 9
+    assert telefones("6599991111") == ["5565999991111"]
+    assert telefones("+556530000000; +5565999992222") == ["556530000000", "5565999992222"]
+    assert telefones("") == [] and telefones("123") == []
+
+
+def _linha(**kw):
+    base = {"Lead ID": "R0001", "First Name": "Fulana", "Last Name": "de Tal", "Title": "Sócia",
+            "Person Mobile Phone": "", "Person WhatsApp": "", "Person Contact Source URL": "",
+            "Person Contact Source": "", "Company Mobile Phone": "", "Company WhatsApp": "",
+            "Company Contact Source URL": "", "Company Contact Source": ""}
+    base.update(kw)
+    return base
+
+
+def test_planilha_traz_whatsapp_do_decisor_e_da_empresa_com_fonte():
+    limpo, _ = normalizar(_reg())
+    novos = contatos_planilha(limpo, _linha(
+        **{"Person Mobile Phone": "5565988887777.0", "Person WhatsApp": "5565988887777",
+           "Person Contact Source URL": "https://exemplo.com.br/equipe",
+           "Company WhatsApp": "65 3000-0000; 65 98111-2222", "Company Contact Source URL": "https://exemplo.com.br/contato"}))
+    assert [(c["papel"], c["telefone"], c["whatsapp"]) for c in novos] == [
+        ("decisor", "5565988887777", "sim"), ("geral", "5565981112222", "sim")]  # o fixo da empresa já era conhecido
+    assert novos[0]["nome"] == "Fulana de Tal" and novos[0]["fonte"] == "https://exemplo.com.br/equipe"
+
+
+def test_planilha_ignora_sem_link_e_cadastro_da_receita():
+    limpo, _ = normalizar(_reg())
+    assert contatos_planilha(limpo, _linha(**{"Person Mobile Phone": "65988887777", "Person Contact Source": "web"})) == []
+    assert contatos_planilha(limpo, _linha(**{"Person Mobile Phone": "65988887777",
+        "Person Contact Source URL": "https://casadosdados.com.br/solucao/cnpj/exemplo-33000167000101"})) == []

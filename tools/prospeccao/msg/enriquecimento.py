@@ -39,9 +39,21 @@ def telefone_valido(tel: str) -> str:
     d = re.sub(r"\D", "", tel or "")
     if len(d) in (10, 11):
         d = "55" + d
+    if len(d) == 12 and d.startswith("55") and d[4] in "6789":
+        d = d[:4] + "9" + d[4:]  # celular no formato antigo, sem o nono dígito
     if not re.fullmatch(r"55[1-9]\d(9\d{8}|[2-5]\d{7})", d):
         return ""
     return d
+
+
+def telefones(texto) -> list[str]:
+    """Todos os telefones válidos de uma célula de planilha ("x; y", "5565...0" que o Excel virou float)."""
+    saida = []
+    for parte in re.split(r"[;,/|]|\be\b|\bou\b", texto if isinstance(texto, str) else ""):
+        t = telefone_valido(re.sub(r"\.0+\s*$", "", parte.strip()))
+        if t and t not in saida:
+            saida.append(t)
+    return saida
 
 
 def _txt(v) -> str:
@@ -208,6 +220,36 @@ def contatos_hunter(reg: dict, hunter: dict) -> list[dict]:
     return novos
 
 
+def contatos_planilha(reg: dict, linha: dict, ja_tem=()) -> list[dict]:
+    """Telefones de uma linha da planilha enriquecida (Reiners_Leads_Apollo...csv), já normalizados.
+
+    Pessoa (celular/WhatsApp de quem decide) vira Decisor; celular/WhatsApp da empresa vira Geral.
+    Só entra com o link da fonte, e cadastro da Receita (Casa dos Dados) fica de fora: esses números
+    dependem de decisão à parte.
+    """
+    vistos = {c["telefone"] for c in reg.get("contatos", []) if c.get("telefone")} | set(ja_tem)
+    novos = []
+
+    def somar(papel, nome, cargo, cel, whats, url):
+        url = _txt(url)
+        if not url.startswith("http") or "casadosdados" in url:
+            return
+        wl = telefones(whats)
+        for t in telefones(cel) + wl:
+            if t in vistos:
+                continue
+            vistos.add(t)
+            novos.append({"id": "", "papel": papel, "nome": nome, "cargo": cargo, "telefone": t,
+                          "whatsapp": "sim" if t in wl else "?", "email": "", "fonte": url, "confianca": "media"})
+
+    nome = f"{_txt(linha.get('First Name'))} {_txt(linha.get('Last Name'))}".strip()
+    somar("decisor", nome, _txt(linha.get("Title")), linha.get("Person Mobile Phone"),
+          linha.get("Person WhatsApp"), linha.get("Person Contact Source URL"))
+    somar("geral", "", "", linha.get("Company Mobile Phone"), linha.get("Company WhatsApp"),
+          linha.get("Company Contact Source URL"))
+    return novos
+
+
 def _dominio(url: str) -> str:
     m = re.search(r"^(?:https?://)?(?:www\.)?([^/\s?#]+)", (url or "").strip().lower())
     return m.group(1) if m else ""
@@ -240,7 +282,7 @@ def carregar(caminho: str) -> dict[str, dict]:
 
 
 def main() -> None:
-    """python3 -m msg.enriquecimento dados/enriq_brutos/*.json --out dados/enriquecimento.json"""
+    """python3 -m msg.enriquecimento dados/enriq_brutos/*.json [--hunter dados/hunter] [--planilha x.csv]"""
     import argparse
     import json
     from collections import Counter
@@ -249,6 +291,7 @@ def main() -> None:
     ap.add_argument("--out", default="dados/enriquecimento.json")
     ap.add_argument("--hunter", help="pasta com um domain-search do Hunter por domínio (dominio.json)")
     ap.add_argument("--leads", default="dados/leads.json", help="para ligar o domínio do site ao lead")
+    ap.add_argument("--planilha", help="CSV enriquecido por fora (coluna Lead ID), ex. dados/apollo_enriquecido.csv")
     a = ap.parse_args()
     regs, avisos = [], []
     for caminho in a.brutos:
@@ -276,6 +319,22 @@ def main() -> None:
                 regs[i] = somar_contatos(regs[i], novos)
                 ganhos.update(c["papel"] for c in novos)
         print("Hunter:", dict(ganhos))
+    if a.planilha:
+        import csv
+        with open(a.leads, encoding="utf-8") as fh:
+            dos_leads = {l["id"]: set(telefones(l.get("telefone"))) for l in json.load(fh)}
+        idx = {r["id"]: k for k, r in enumerate(regs)}
+        ganhos = Counter()
+        with open(a.planilha, encoding="utf-8-sig") as fh:
+            for linha in csv.DictReader(fh):
+                k = idx.get(_txt(linha.get("Lead ID")))
+                if k is None:
+                    continue
+                novos = contatos_planilha(regs[k], linha, dos_leads.get(regs[k]["id"], set()))
+                if novos:
+                    regs[k] = somar_contatos(regs[k], novos)
+                    ganhos.update(f"{c['papel']} {'WhatsApp' if c['whatsapp'] == 'sim' else 'telefone'}" for c in novos)
+        print("Planilha:", dict(ganhos))
     with open(a.out, "w", encoding="utf-8") as fh:
         json.dump(regs, fh, ensure_ascii=False, indent=1)
     print(f"{len(regs)} registros em {a.out}")

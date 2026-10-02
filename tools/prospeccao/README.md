@@ -45,6 +45,8 @@ As pesquisas gravam um JSON por segmento em `dados/enriq_brutos/` (formato em `m
 
 **Hunter.io**: `python3 -m msg.enriquecimento dados/enriq_brutos/*.json --hunter dados/hunter` soma os e-mails do domain-search do Hunter (um JSON por domínio em `dados/hunter/`). O e-mail cujo nome e sobrenome batem com um sócio da Receita ou com quem lidera entra como **Decisor**, com confiança alta (nota do Hunter ≥ 90 e e-mail verificado), média (≥ 70) ou baixa. Cargo alto que não bate com ninguém conhecido entra como **Geral**, com confiança baixa. O resto fica de fora. A fonte fica como "Hunter.io · página onde o e-mail aparece".
 
+**Planilha enriquecida por fora** (o CSV de importação do Apollo, devolvido com as colunas Person/Company Mobile Phone e WhatsApp e as URLs de fonte): `--planilha dados/apollo_enriquecido.csv` soma os telefones pelo Lead ID. O celular ou WhatsApp da pessoa vira **Decisor**, o da empresa vira **Geral**, os dois com confiança média. Número sem link de fonte ou vindo do cadastro da Receita (Casa dos Dados) fica de fora. A leitura corrige o que o Excel estraga: `.0` no fim, celular antigo sem o nono dígito e dois números na mesma célula.
+
 Na central, a seção **Leads** mostra tudo isso e tem dois botões. **Usar na cadência** manda as próximas mensagens para o contato escolhido, com a saudação pelo nome dele. **Adicionar contato** registra à mão um contato com a fonte.
 
 Regra: só entra contato publicado pela própria empresa ou pela pessoa para fins profissionais (site, Instagram, LinkedIn), com o link de onde veio. Nada de lista vazada nem e-mail deduzido.
