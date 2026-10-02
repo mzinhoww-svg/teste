@@ -72,7 +72,8 @@ async function abrir(opts) {
   const inicial = {
     leads: opts.leads === undefined ? dados.leads(7) : opts.leads,
     clientes: opts.clientes === undefined ? dados.clientes() : opts.clientes,
-    config: { meta: opts.meta || dados.meta(), fotos: dados.fotos(), posvenda: dados.posvenda() },
+    // enriquecimento: o documento config/enriquecimento (ausente quando não vem); h.empurrar("config/enriquecimento", {...}) mescla depois
+    config: { meta: opts.meta || dados.meta(), fotos: dados.fotos(), posvenda: dados.posvenda(), enriquecimento: opts.enriquecimento || null },
   };
   const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
   const ctx = await browser.newContext({ viewport: { width: largura, height: opts.altura || 900 } });

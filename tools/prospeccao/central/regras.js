@@ -184,7 +184,34 @@ var Regras = (function () {
     return numeros.some(function (n) { return String(n == null ? "" : n).replace(/\D/g, "").indexOf(dig) >= 0; });
   }
 
+  // ---------- enriquecimento (config/enriquecimento) ----------
+  // Dinheiro em micro-dólar: 130000 -> "US$ 0,13".
+  function dinheiroMicro(m) {
+    var v = Number(m) || 0;
+    return "US$ " + (v / 1e6).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  // Taxa de acerto: 0.333 -> "33%"; sem taxa -> "—".
+  function porcento(taxa) {
+    if (taxa == null || taxa === "" || isNaN(Number(taxa))) return "—";
+    var v = Number(taxa);
+    if (v <= 1) v *= 100;
+    return Math.round(v) + "%";
+  }
+  var MOTIVOS = {
+    "saldo insuficiente": "Parou: saldo insuficiente. Precisa recarregar o treg.",
+    "acerto abaixo de 30%": "Parou: o acerto ficou abaixo de 30%, então não valia seguir pagando.",
+    "teto de US$10": "Parou: chegou ao teto de US$ 10 desta execução.",
+    "erros consecutivos": "Parou: o treg deu erro várias vezes seguidas. Vale tentar de novo mais tarde."
+  };
+  function motivoParada(m) {
+    if (!m) return "Parou antes de terminar.";
+    return MOTIVOS[m] || "Parou: " + String(m).replace(/\.$/, "") + ".";
+  }
+  // Enquanto o pedido espera o Claude ou a execução roda, não cabe outro pedido.
+  function enriqOcupado(status) { return status === "pedido" || status === "estimando" || status === "executando"; }
+
   return {
+    dinheiroMicro: dinheiroMicro, porcento: porcento, motivoParada: motivoParada, enriqOcupado: enriqOcupado,
     casaBusca: casaBusca, DIA: DIA, inicioDoDia: inicioDoDia, dataCurta: dataCurta, quando: quando, waLink: waLink, telefoneFormatado: telefoneFormatado,
     etapa: etapa, vencimento: vencimento, grupo: grupo, toque: toque,
     contatoAtivo: contatoAtivo, primeiroNome: primeiroNome, comSaudacao: comSaudacao,

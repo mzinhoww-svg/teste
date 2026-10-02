@@ -1446,3 +1446,152 @@ test("aviso de envio não marcado volta depois de um aviso comum (c)", async () 
   await h.page.waitForFunction(() => document.getElementById("toast").textContent === "", null, { timeout: 4000 });
   assert.equal(await h.page.locator('#toast button:has-text("Marcar como enviado")').count(), 0);
 });
+
+// ---------- Enriquecer base (funil Leads, config/enriquecimento) ----------
+const minutosAtras = (m) => new Date(Date.now() - m * 60000).toISOString();
+const HIST = [
+  { execucaoId: "E1", em: "2026-09-20T10:00:00Z", candidatos: 10, consultados: 10, achados: 3, taxa: 0.3, gastoMicro: 375000, motivoParada: null },
+  { execucaoId: "E2", em: "2026-09-25T10:00:00Z", candidatos: 12, consultados: 12, achados: 4, taxa: 0.333, gastoMicro: 500000, motivoParada: null },
+  { execucaoId: "E3", em: "2026-09-28T10:00:00Z", candidatos: 20, consultados: 10, achados: 2, taxa: 0.2, gastoMicro: 250000, motivoParada: "acerto abaixo de 30%" },
+  { execucaoId: "E4", em: "2026-09-30T10:00:00Z", candidatos: 8, consultados: 8, achados: 4, taxa: 0.5, gastoMicro: 500000, motivoParada: "saldo insuficiente" },
+];
+async function abrirLeads(opts) {
+  const h = await abrir(Object.assign({ largura: 1440 }, opts || {}));
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  await h.page.click("#f-ld");
+  await h.page.waitForSelector("#enriq:not([hidden])");
+  return h;
+}
+const estadoEnriq = (page) => page.evaluate(() => ({
+  desligado: document.getElementById("btn-enriq").getAttribute("aria-disabled") === "true",
+  motivo: document.getElementById("enriq-motivo").hidden ? "" : document.getElementById("enriq-motivo").textContent,
+  status: document.getElementById("enriq-status").hidden ? "" : document.getElementById("enriq-status").innerText,
+  hist: document.getElementById("enriq-hist").hidden ? "" : document.getElementById("enriq-hist").innerText,
+}));
+
+test("Enriquecer base: só aparece no funil Leads", async () => {
+  const h = await abrir({ largura: 1440 });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  assert.equal(await h.page.locator("#enriq").isVisible(), false);
+  await h.page.click("#f-ld");
+  assert.equal(await h.page.locator("#btn-enriq").isVisible(), true);
+  assert.match(await h.page.locator("#enriq").innerText(), /Busca o celular de quem decide.*Teto de US\$ 10 por execução/s);
+  await h.page.click("#f-pv");
+  assert.equal(await h.page.locator("#enriq").isVisible(), false);
+});
+
+for (const existe of [true, false]) {
+  test("Enriquecer base grava só {status: pedido, pedidoEm} e nada em leads" + (existe ? "" : " (documento ainda não existe)"), async () => {
+    const h = await abrirLeads(existe ? { enriquecimento: { status: "ocioso", historicoExecucoes: HIST } } : {});
+    let e = await estadoEnriq(h.page);
+    assert.equal(e.desligado, false);
+    assert.equal(e.status, "", "ocioso: sem cartão de andamento");
+    await h.page.click("#btn-enriq");
+    await h.page.waitForFunction(() => window.__escritas.length > 0);
+    const escritas = await h.escritas.lista();
+    assert.equal(escritas.length, 1);
+    assert.equal(escritas[0].caminho, "config/enriquecimento");
+    assert.deepEqual(Object.keys(escritas[0].dados).sort(), ["pedidoEm", "status"]);
+    assert.equal(escritas[0].dados.status, "pedido");
+    assert.ok(Math.abs(new Date(escritas[0].dados.pedidoEm) - Date.now()) < 60000);
+    assert.equal(await textoAviso(h.page), "Pedido registrado. Abra a conversa com o Claude e mande qualquer mensagem para ele começar.");
+    e = await estadoEnriq(h.page);
+    assert.ok(e.desligado);
+    assert.match(e.status, /^Pedido em \d\d:\d\d\. Esperando o Claude começar\.$/);
+    assert.equal(await h.page.evaluate(() => document.activeElement.id), "btn-enriq", "o foco fica no botão");
+    await h.page.focus("#btn-enriq");
+    await h.page.keyboard.press("Enter");  // segundo pedido pelo teclado não grava de novo
+    await h.page.click("#btn-enriq", { force: true });
+    assert.equal((await h.escritas.lista()).length, 1);
+    assert.ok(!(await h.escritas.lista()).some((x) => x.caminho.startsWith("leads/")));
+  });
+}
+
+test("Enriquecer base: botão desligado com motivo em texto durante pedido, estimando e executando", async () => {
+  for (const status of ["pedido", "estimando", "executando", "ocioso", "concluido", "parado"]) {
+    const h = await abrirLeads({ enriquecimento: { status, pedidoEm: minutosAtras(3), estimativa: { candidatos: 86, taxa: 0.33, custoEstimadoMicro: 3550000 },
+      progresso: { lote: 1, consultados: 10, achados: 3, taxa: 0.3, gastoMicro: 375000, atualizadoEm: minutosAtras(1) } } });
+    const e = await estadoEnriq(h.page);
+    const ocupado = ["pedido", "estimando", "executando"].includes(status);
+    assert.equal(e.desligado, ocupado, status);
+    assert.equal(!!e.motivo, ocupado, status + ": motivo em texto");
+    if (ocupado) assert.equal(await h.page.getAttribute("#btn-enriq", "aria-describedby"), "enriq-motivo");
+    const op = await h.page.evaluate(() => getComputedStyle(document.getElementById("btn-enriq")).opacity);
+    assert.equal(op, "1", "nunca por opacidade");
+    await h.page.click("#btn-enriq", { force: true });
+    await h.page.waitForTimeout(50);
+    assert.equal((await h.escritas.lista()).length, ocupado ? 0 : 1, status);
+    await h.fechar();
+  }
+});
+
+test("Enriquecer base: estimando mostra candidatos, custo e taxa", async () => {
+  const h = await abrirLeads({ enriquecimento: { status: "estimando", execucaoId: "E9", estimativa: { candidatos: 86, buscasLinkedin: 78, taxa: 0.33, custoEstimadoMicro: 3750000 } } });
+  const e = await estadoEnriq(h.page);
+  assert.match(e.status, /Estimando o custo/);
+  assert.match(e.status, /Candidatos\s+86/);
+  assert.match(e.status, /Custo estimado\s+US\$ 3,75/);
+  assert.match(e.status, /Taxa usada\s+33%/);
+});
+
+test("Enriquecer base: o cartão acompanha o snapshot (executando, depois concluído) sem aviso no #toast", async () => {
+  const h = await abrirLeads({ enriquecimento: { status: "estimando", estimativa: { candidatos: 40, taxa: 0.33, custoEstimadoMicro: 1650000 }, historicoExecucoes: HIST } });
+  await h.empurrar("config/enriquecimento", { status: "executando", progresso: { lote: 1, consultados: 10, achados: 3, taxa: 0.3, gastoMicro: 375000, atualizadoEm: minutosAtras(0) } });
+  let e = await estadoEnriq(h.page);
+  assert.match(e.status, /Buscando telefones · lote 1/);
+  assert.match(e.status, /Consultados\s+10 de 40/);
+  assert.match(e.status, /Achados\s+3/);
+  assert.match(e.status, /Taxa\s+30%/);
+  assert.match(e.status, /Gasto\s+US\$ 0,38/);
+  assert.match(e.status, /Atualizado às \d\d:\d\d/);
+  const barra = await h.page.evaluate(() => { const b = document.querySelector("#enriq-status progress"); return { v: b.value, max: b.max, h: b.getBoundingClientRect().height, cls: b.className }; });
+  assert.deepEqual(barra, { v: 10, max: 40, h: 8, cls: "barra" });
+  assert.ok(e.desligado);
+  await h.empurrar("config/enriquecimento", { progresso: { lote: 2, consultados: 20, achados: 7, taxa: 0.35, gastoMicro: 875000, atualizadoEm: minutosAtras(0) } });
+  e = await estadoEnriq(h.page);
+  assert.match(e.status, /lote 2/);
+  assert.match(e.status, /Consultados\s+20 de 40/);
+  await h.empurrar("config/enriquecimento", { status: "concluido", progresso: { lote: 4, consultados: 40, achados: 14, taxa: 0.35, gastoMicro: 1750000, atualizadoEm: minutosAtras(0) } });
+  e = await estadoEnriq(h.page);
+  assert.match(e.status, /Execução concluída/);
+  assert.match(e.status, /Achados\s+14/);
+  assert.match(e.status, /Gasto\s+US\$ 1,75/);
+  assert.equal(e.desligado, false);
+  // últimas 3 execuções, a mais recente primeiro
+  assert.equal(await h.page.locator("#enriq-hist summary").innerText(), "Últimas execuções (3)");
+  await h.page.click("#enriq-hist summary");
+  await h.empurrar("config/enriquecimento", { progresso: { lote: 4, consultados: 40, achados: 14, taxa: 0.35, gastoMicro: 1750000, atualizadoEm: minutosAtras(0) } });
+  const itens = await h.page.locator("#enriq-hist li").allInnerTexts();
+  assert.equal(itens.length, 3);
+  assert.match(itens[0], /4 achados em 8 · 50% · US\$ 0,50 · parou: saldo insuficiente/);
+  assert.match(itens[2], /4 achados em 12/);
+  assert.equal(await h.page.locator("#toast").innerText(), "", "mudança vinda do snapshot não vai para o #toast");
+  assert.equal(await h.page.locator("[aria-live]").count(), 1, "#toast continua a única região aria-live");
+  assert.equal(await h.page.locator("#enriq [role=alert], #enriq [role=status]").count(), 0);
+  assert.deepEqual(await h.escritas.lista(), []);
+});
+
+test("Enriquecer base: parado mostra o motivo em palavras simples", async () => {
+  const h = await abrirLeads({ enriquecimento: { status: "parado", motivoParada: "saldo insuficiente", progresso: { lote: 0, consultados: 0, achados: 0, taxa: null, gastoMicro: 0 } } });
+  const e = await estadoEnriq(h.page);
+  assert.match(e.status, /Parou: saldo insuficiente\. Precisa recarregar o treg\./);
+  assert.equal(e.desligado, false);
+  await h.empurrar("config/enriquecimento", { motivoParada: "acerto abaixo de 30%" });
+  assert.match((await estadoEnriq(h.page)).status, /Parou: o acerto ficou abaixo de 30%/);
+});
+
+test("Enriquecer base: 390px sem rolagem lateral, botão de 44px visível no topo", async () => {
+  for (const tema of ["claro", "escuro"]) {
+    const h = await abrirLeads({ largura: 390, altura: 844, tema, enriquecimento: { status: "executando", estimativa: { candidatos: 86, taxa: 0.33, custoEstimadoMicro: 3550000 },
+      progresso: { lote: 3, consultados: 30, achados: 10, taxa: 0.333, gastoMicro: 1250000, atualizadoEm: minutosAtras(1) }, historicoExecucoes: HIST } });
+    assert.ok(await semRolagemLateral(h.page));
+    const b = await caixa(h.page, "#btn-enriq");
+    assert.ok(b.visivel && b.h >= 44 && b.y + b.h <= 844, JSON.stringify(b));
+    const card = await caixa(h.page, "#enriq-status");
+    assert.ok(card.x >= 15 && card.x + card.w <= 375 + 1, JSON.stringify(card));
+    await h.fechar();
+  }
+});
+

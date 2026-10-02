@@ -20,7 +20,8 @@
     db: null,
     podeMarcar: false,
     gravando: {},
-    carregado: { leads: false, clientes: false },
+    enriq: null,                                    // config/enriquecimento (o Claude grava; a página só pede)
+    carregado: { leads: false, clientes: false, enriq: false },
     fechando: null,
     novoCliente: false,
     filtro: {
@@ -1173,6 +1174,110 @@
     desenharDetalhe();
   }
 
+  // ---------- Enriquecer base: pedido e andamento ao vivo (config/enriquecimento) ----------
+  // A página só pede (status "pedido" + pedidoEm); quem roda é o Claude, no próximo turno da conversa, e ele grava o resto.
+  // O cartão não é região aria-live: só o clique dela avisa, pelo #toast.
+  var CAMINHO_ENRIQ = "config/enriquecimento";
+  function horaDe(iso) {
+    var d = new Date(iso);
+    if (!iso || isNaN(d)) return "";
+    var h = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    return mesmoDia(d, new Date()) ? h : dataCurta(d) + " às " + h;
+  }
+  function motivoEnriq() {
+    var st = (estado.enriq || {}).status;
+    if (!estado.podeMarcar) return "Sem acesso para gravar no banco: o pedido fica desligado.";
+    if (estado.enriqErro) return "Não deu para ler o andamento no banco. Recarregue a página.";
+    if (!estado.carregado.enriq) return "Carregando o andamento.";
+    if (estado.gravando[CAMINHO_ENRIQ]) return "Registrando o pedido.";
+    if (st === "pedido") return "Já tem um pedido esperando o Claude.";
+    if (st === "estimando" || st === "executando") return "Já tem uma execução em andamento. O botão volta quando ela terminar.";
+    return "";
+  }
+  function pedirEnriq() {
+    if (motivoEnriq()) return;
+    // update exige o documento; se o Claude ainda não o criou, set grava só os mesmos dois campos.
+    gravar(CAMINHO_ENRIQ, { status: "pedido", pedidoEm: new Date().toISOString() }, null, !estado.enriq).then(function (ok) {
+      if (ok) toast("Pedido registrado. Abra a conversa com o Claude e mande qualquer mensagem para ele começar.", null, 10000);
+    });
+  }
+  function numerosEnriq(pares) {
+    return el("dl", { class: "enriq-numeros" }, pares.filter(Boolean).map(function (p) {
+      return el("div", null, [el("dt", { text: p[0] }), el("dd", { class: "num", text: String(p[1]) })]);
+    }));
+  }
+  function statusEnriq(d) {
+    var st = d.status, est = d.estimativa || {}, pr = d.progresso || {};
+    var hist = d.historicoExecucoes || [];
+    var custoEst = est.custoEstimadoMicro != null ? est.custoEstimadoMicro : est.custoMicro;
+    if (st === "pedido") return [el("p", { class: "enriq-estado", text: "Pedido em " + (horaDe(d.pedidoEm) || "instantes atrás") + ". Esperando o Claude começar." })];
+    if (st === "estimando") {
+      return [el("p", { class: "enriq-estado", text: "Estimando o custo" }), numerosEnriq([
+        ["Candidatos", est.candidatos != null ? est.candidatos : "—"],
+        ["Custo estimado", custoEst != null ? Regras.dinheiroMicro(custoEst) : "—"],
+        ["Taxa usada", Regras.porcento(est.taxa)],
+        typeof est.foraDoAlvo === "number" ? ["Fora do alvo", est.foraDoAlvo] : null
+      ])];
+    }
+    if (st === "executando") {
+      var total = Number(est.candidatos) || 0, feitos = Number(pr.consultados) || 0;
+      return [
+        el("p", { class: "enriq-estado", text: "Buscando telefones · lote " + (pr.lote || 0) }),
+        numerosEnriq([["Consultados", total ? feitos + " de " + total : feitos], ["Achados", pr.achados || 0],
+          ["Taxa", Regras.porcento(pr.taxa)], ["Gasto", Regras.dinheiroMicro(pr.gastoMicro)]]),
+        total ? el("progress", { class: "barra", max: String(total), value: String(Math.min(feitos, total)), "aria-label": "Consultados de " + total + " candidatos" }) : null,
+        pr.atualizadoEm ? el("p", { class: "enriq-hora", text: "Atualizado às " + horaDe(pr.atualizadoEm) }) : null
+      ];
+    }
+    if (st === "concluido" || st === "parado") {
+      // resumo final: o progresso gravado no fim, ou a última execução do histórico
+      var fim = d.progresso || hist[hist.length - 1] || {};
+      return [
+        el("p", { class: "enriq-estado" + (st === "parado" ? " parado" : ""), text: st === "parado" ? Regras.motivoParada(d.motivoParada) : "Execução concluída" }),
+        numerosEnriq([["Consultados", fim.consultados || 0], ["Achados", fim.achados || 0],
+          ["Taxa", Regras.porcento(fim.taxa)], ["Gasto", Regras.dinheiroMicro(fim.gastoMicro)]])
+      ];
+    }
+    return null;
+  }
+  function desenharEnriq() {
+    var sec = $("enriq");
+    sec.hidden = estado.funil !== "ld";
+    if (sec.hidden) return;
+    var d = estado.enriq || {};
+    var motivo = motivoEnriq(), btn = $("btn-enriq"), m = $("enriq-motivo");
+    // aria-disabled em vez de disabled: o foco fica no botão depois do clique, e o motivo é lido junto
+    if (motivo) { btn.setAttribute("aria-disabled", "true"); btn.setAttribute("aria-describedby", "enriq-motivo"); }
+    else { btn.removeAttribute("aria-disabled"); btn.removeAttribute("aria-describedby"); }
+    m.textContent = motivo;
+    m.hidden = !motivo;
+    var sig = JSON.stringify([d, hoje().getTime()]);
+    if (sec._sig === sig) return;
+    sec._sig = sig;
+    var card = $("enriq-status"), filhos = statusEnriq(d);
+    card.textContent = "";
+    card.hidden = !filhos;
+    card.dataset.status = d.status || "ocioso";
+    (filhos || []).forEach(function (f) { if (f) card.appendChild(f); });
+    var lista = $("enriq-hist"), hist = (d.historicoExecucoes || []).slice(-3).reverse();
+    var antes = lista.querySelector("details"), aberto = !!(antes && antes.open);  // aberto e foco sobrevivem ao snapshot
+    var comFoco = !!(antes && antes.contains(document.activeElement));
+    lista.textContent = "";
+    lista.hidden = !hist.length;
+    if (hist.length) {
+      // recolhido: no celular o cartão não empurra a fila para longe
+      var det = el("details", { open: aberto ? "" : null }, [
+        el("summary", { text: "Últimas execuções (" + hist.length + ")" })]);
+      lista.appendChild(det);
+      det.appendChild(el("ol", null, hist.map(function (x) {
+        var partes = [x.achados || 0, (x.achados === 1 ? " achado em " : " achados em "), x.consultados || 0, " · ", Regras.porcento(x.taxa), " · ", Regras.dinheiroMicro(x.gastoMicro)].join("");
+        return el("li", null, [el("time", { datetime: x.em || "", text: x.em ? dataCurta(x.em) : "—" }), el("span", { text: partes + (x.motivoParada ? " · parou: " + x.motivoParada : "") })]);
+      })));
+      if (comFoco) det.querySelector("summary").focus({ preventScroll: true });
+    }
+  }
+  $("btn-enriq").addEventListener("click", pedirEnriq);
+
   // ================= PÓS-VENDA =================
   function etapasPV() { return (estado.pv && estado.pv.etapas) || []; }
   var etapaPV = Regras.etapaPV;
@@ -1566,6 +1671,7 @@
     document.body.dataset.funil = estado.funil;
     if (pv) renderPV(); else if (ld) renderLD(); else renderAQ();
     desenharMeta();
+    desenharEnriq();
     contarFiltros();
     aplicarDetalhe();
   }
@@ -1646,7 +1752,7 @@
   // ---------- banco ----------
   function iniciar(db) {
     if (!db) {
-      estado.carregado = { leads: true, clientes: true };
+      estado.carregado = { leads: true, clientes: true, enriq: true };
       desligar("O banco da central não respondeu. Entre com a sua conta para ver a fila e marcar os envios.");
       return;
     }
@@ -1680,6 +1786,11 @@
       estado.fotos = d.exists ? (d.data().fotos || null) : null;
       render();
     }, function () {});
+    db.doc(CAMINHO_ENRIQ).onSnapshot(function (d) {
+      estado.enriq = d.exists ? d.data() : null;
+      estado.carregado.enriq = true;
+      render();
+    }, function () { estado.enriqErro = true; render(); });  // sem leitura, nada de pedido: um set às cegas apagaria o histórico
     db.doc("config/posvenda").onSnapshot(function (d) {
       estado.pv = d.exists ? d.data() : null;
       render();

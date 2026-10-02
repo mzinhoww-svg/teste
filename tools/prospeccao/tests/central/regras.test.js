@@ -49,3 +49,17 @@ test("casaBusca não junta dígitos de campos diferentes", () => {
   assert.equal(R.casaBusca(l, "11.222.333"), true);
   assert.equal(R.casaBusca(l, "988880"), true);
 });
+test("enriquecimento: dinheiro em micro-dólar, taxa e motivo de parada", () => {
+  assert.equal(R.dinheiroMicro(130000), "US$ 0,13");
+  assert.equal(R.dinheiroMicro(10000000), "US$ 10,00");
+  assert.equal(R.dinheiroMicro(1234560000), "US$ 1.234,56");
+  assert.equal(R.dinheiroMicro(null), "US$ 0,00");
+  assert.equal(R.porcento(0.333), "33%");
+  assert.equal(R.porcento(35), "35%");
+  assert.equal(R.porcento(null), "—");
+  assert.equal(R.motivoParada("saldo insuficiente"), "Parou: saldo insuficiente. Precisa recarregar o treg.");
+  assert.match(R.motivoParada("acerto abaixo de 30%"), /abaixo de 30%/);
+  assert.equal(R.motivoParada("outra coisa"), "Parou: outra coisa.");
+  assert.ok(R.enriqOcupado("pedido") && R.enriqOcupado("estimando") && R.enriqOcupado("executando"));
+  assert.ok(!R.enriqOcupado("ocioso") && !R.enriqOcupado("concluido") && !R.enriqOcupado("parado") && !R.enriqOcupado(undefined));
+});

@@ -131,6 +131,10 @@ Um seletor no topo troca entre **Aquecimento**, **Pós-venda** e **Leads**, cada
 
 Nos dois funis, abrir o link do WhatsApp marca a mensagem como enviada. No e-mail, o envio é marcado no botão, porque o `mailto:` pode não abrir dentro do Artifact.
 
+### Enriquecer base
+
+No funil Leads, o bloco **Enriquecer base** (no trilho a partir de 1024px; acima das abas no celular) pede ao Claude uma execução de `/enriquecer-leads`: buscar via treg o celular de quem decide em cada lead ainda não buscado, com teto de US$ 10 por execução. O botão grava só `status: "pedido"` e `pedidoEm` em `config/enriquecimento` (com `update`; `set` dos mesmos dois campos se o documento ainda não existe) e nunca toca em `leads`. A execução começa no próximo turno da conversa com o Claude, que confere esse documento no início de cada turno (`CLAUDE.md`). O cartão de andamento lê o documento ao vivo: pedido, estimativa (candidatos, custo, taxa), execução (lote, consultados, achados, taxa, gasto e barra), resumo final ou motivo da parada, e as três últimas execuções. Enquanto o status é `pedido`, `estimando` ou `executando`, ou sem acesso para gravar, o botão fica desativado com o motivo escrito. Só o clique avisa no `#toast`; as mudanças vindas do banco não são anunciadas.
+
 ### Publicação
 
 A central são quatro arquivos que sobem juntos no mesmo Artifact: `index.html` é a página e `estilo.css`, `regras.js` e `app.js` vão em `files`, mantendo `fotos/`. Publicar só o HTML deixa a página sem estilo e sem lógica.
