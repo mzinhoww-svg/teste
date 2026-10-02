@@ -483,12 +483,13 @@
   // ---------- seleção ----------
   function escolherSelecao(visiveis) {
     var ids = visiveis.map(function (l) { return l.id; });
+    var primeiro = ids.filter(function (id) { return id !== "TESTE"; })[0] || ids[0] || null;  // o card de teste não abre sozinho
     if (!estado.selecaoInicial) {
       // Primeira vez com dados: vale o lead salvo se ele estiver na fila de agora, senão o primeiro da fila.
       estado.selecaoInicial = true;
-      if (ids.indexOf(estado.selecionado) < 0) estado.selecionado = ids[0] || null;
+      if (ids.indexOf(estado.selecionado) < 0) estado.selecionado = primeiro;
     } else if (estado.selecionado && !estado.leads[estado.selecionado]) {
-      estado.selecionado = ids[0] || null;  // o lead sumiu do banco
+      estado.selecionado = primeiro;  // o lead sumiu do banco
     }
   }
   function selecionar(id, opcoes) {

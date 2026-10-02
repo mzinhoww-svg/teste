@@ -217,6 +217,7 @@ test("linha: nome, pontos com aria-label, botões; selecionar mostra o detalhe",
   assert.ok(linha.altura >= 64 && linha.altura <= 80, "altura " + linha.altura);
   // a primeira linha vem selecionada; clicar numa linha troca a seleção e o detalhe
   assert.equal(await h.page.locator('#fila [aria-current="true"]').count(), 1);
+  assert.equal(await h.page.getAttribute('#fila [aria-current="true"]', "data-id"), "R0004", "abre no primeiro lead real (quem já está em cadência vem antes), não no TESTE");
   await h.page.click("#fila [data-id=R0003] .nome");
   assert.equal(await h.page.getAttribute("#fila [data-id=R0003]", "aria-current"), "true");
   assert.equal(await h.page.locator('#fila [aria-current="true"]').count(), 1);
