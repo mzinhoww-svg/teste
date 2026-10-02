@@ -177,7 +177,9 @@ var Regras = (function () {
     var alvo = partes.map(semAcento).join(" | ");
     if (alvo.indexOf(q) >= 0) return true;
     var dig = q.replace(/\D/g, "");
-    return dig.length >= 3 && alvo.replace(/\D/g, "").indexOf(dig) >= 0;
+    if (dig.length < 3) return false;
+    var numeros = [item.id, item.telefone, item.cnpj, e.cnpj].concat((item.contatos || []).map(function (c) { return c.telefone; }));
+    return numeros.some(function (n) { return String(n == null ? "" : n).replace(/\D/g, "").indexOf(dig) >= 0; });
   }
 
   return {

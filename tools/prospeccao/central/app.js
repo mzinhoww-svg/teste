@@ -690,7 +690,16 @@
     return !!t && (t.nodeType === 1) && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable);
   }
   function atalhosAbertos() { return !$("atalhos").hidden; }
-  function mostrarAtalhos(v) { $("atalhos").hidden = !v; }
+  var focoAntesAtalhos = null;
+  function mostrarAtalhos(v) {
+    if (v === atalhosAbertos()) return;
+    $("atalhos").hidden = !v;
+    if (v) { focoAntesAtalhos = document.activeElement; $("atalhos-fechar").focus(); }
+    else {
+      var volta = focoAntesAtalhos; focoAntesAtalhos = null;
+      if (volta && volta !== document.body && document.contains(volta) && !volta.closest("[inert]")) volta.focus();
+    }
+  }
   function andar(passo, t) {
     var fila = estado.visiveis[estado.funil];
     if (!fila.length) return;
@@ -750,7 +759,14 @@
     }
     if (emCampo(t)) return;  // digitando: nenhum atalho age
     if (k === "?") { e.preventDefault(); mostrarAtalhos(!atalhosAbertos()); return; }
-    if (k === "/") { e.preventDefault(); $("f-busca").focus(); return; }
+    if (atalhosAbertos()) return;  // com a lista aberta só Esc e ? agem
+    if (e.repeat && (k === "Enter" || k === "c")) return;  // tecla segurada não envia lead atrás de lead
+    if (k === "/") {
+      e.preventDefault();
+      if (estado.detalheAberto) fecharDetalhe();  // o trilho fica inert enquanto o detalhe está aberto
+      $("f-busca").focus();
+      return;
+    }
     if (k === "1" || k === "2" || k === "3") {
       var f = { "1": "aq", "2": "pv", "3": "ld" }[k];
       if (f !== estado.funil) trocarFunil(f);

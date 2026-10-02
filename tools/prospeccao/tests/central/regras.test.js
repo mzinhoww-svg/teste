@@ -35,3 +35,10 @@ test("registrar guarda as últimas 100 linhas", () => {
   const novo = R.registrar(h, "fim", null, new Date("2026-10-02T12:00:00Z"));
   assert.equal(novo.length, 100); assert.equal(novo[99].texto, "fim"); assert.equal(novo[0].texto, "1");
 });
+test("casaBusca não junta dígitos de campos diferentes", () => {
+  const l = { id: "R0012", telefone: "5565900001", empresa: { cnpj: "11.222.333/0001-44" }, contatos: [{ telefone: "5565988880" }] };
+  assert.equal(R.casaBusca(l, "00129"), false, "fim do id + início do telefone");
+  assert.equal(R.casaBusca(l, "0012"), true);
+  assert.equal(R.casaBusca(l, "11.222.333"), true);
+  assert.equal(R.casaBusca(l, "988880"), true);
+});

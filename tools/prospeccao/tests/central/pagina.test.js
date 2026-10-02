@@ -903,3 +903,55 @@ test("? mostra a lista de atalhos e Esc fecha", async () => {
   await h.page.keyboard.press("Escape");
   assert.equal(await h.page.locator("#detalhe.aberto").count(), 0);
 });
+
+test("Enter e c seguros não repetem enquanto a tecla está segurada", async () => {
+  const h = await abrirEnvio();
+  await h.page.evaluate(() => document.activeElement.blur());
+  const antes = await selecionadaId(h.page);
+  await h.page.evaluate(() => {
+    document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", repeat: true, bubbles: true }));
+    document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "c", repeat: true, bubbles: true }));
+  });
+  await h.page.waitForTimeout(300);
+  assert.equal((await h.escritas.lista()).length, 0);
+  assert.equal(await h.page.locator("#toast").isVisible(), false);
+  assert.equal(await selecionadaId(h.page), antes);
+  await h.page.keyboard.press("Enter");
+  await h.page.waitForFunction(() => window.__escritas.length === 1);
+});
+
+test("com a lista de atalhos aberta só Esc e ? agem; o foco entra e volta", async () => {
+  const h = await abrirEnvio();
+  await h.page.focus("#f-busca");
+  await h.page.evaluate(() => document.activeElement.blur());
+  await h.page.focus("#fila .linha[data-id]");
+  const origem = await h.page.evaluate(() => document.activeElement.dataset.id);
+  const antes = await selecionadaId(h.page);
+  await h.page.keyboard.press("Shift+?");
+  assert.equal(await h.page.evaluate(() => document.activeElement.id), "atalhos-fechar");
+  await h.page.keyboard.press("j");
+  await h.page.keyboard.press("2");
+  assert.equal(await selecionadaId(h.page), antes);
+  assert.equal(await h.page.getAttribute("body", "data-funil"), "aq");
+  await h.page.keyboard.press("Escape");
+  assert.equal(await h.page.evaluate(() => document.activeElement.dataset.id), origem);
+  await h.page.keyboard.press("Shift+?");
+  await h.page.keyboard.press("Shift+?");
+  assert.equal(await h.page.evaluate(() => document.activeElement.dataset.id), origem, "? também devolve o foco");
+  await h.page.keyboard.press("Shift+?");
+  await h.page.click("#atalhos-fechar");
+  assert.equal(await h.page.locator("#atalhos").isVisible(), false);
+  assert.equal(await h.page.evaluate(() => document.activeElement.dataset.id), origem, "o botão também");
+});
+
+test("/ com a gaveta aberta fecha o detalhe e foca a busca", async () => {
+  const h = await abrirEnvio();
+  await h.page.setViewportSize({ width: 900, height: 800 });
+  await h.page.waitForFunction(() => document.body.dataset.layout === "gaveta");
+  await h.page.click("#fila [data-id=R0004] .nome");
+  await h.page.waitForSelector("#detalhe.aberto");
+  await h.page.evaluate(() => document.activeElement.blur());
+  await h.page.keyboard.press("/");
+  assert.equal(await h.page.locator("#detalhe.aberto").count(), 0);
+  assert.equal(await h.page.evaluate(() => document.activeElement.id), "f-busca");
+});
