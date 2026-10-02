@@ -18,6 +18,9 @@ Decisões:
   conselhos e advocacia no ICP2 (jurídico), ou no ICP3 se o nome é de conselho ou ordem. Segmento sem ICP é pulado.
 - Canal WhatsApp sem telefone: `waLink` fica vazio, e a página só monta o link quando há destino (o contato que o
   enriquecimento achar e a Letícia escolher em "Usar na cadência"). Até lá o Enviar fica desativado.
+- Migração sem enriquecer (decisão da Letícia, pelo custo): os docs entram sem telefone, com a flag
+  "migrado sem enriquecer", `enriquecimento.migradoSemEnriquecer` e a pendência de achar o celular quando houver
+  verba. Na central eles ficam na aba "Sem contato" até aparecer um destino.
 - `fraseUnica` é uma linha por segmento, sem nenhum fato sobre a empresa: a base não traz pesquisa do lead.
 - Região (msg/regiao.py): a copy de cada lead sai na versão da região ("MT", "fora" ou "?"), gravada em `regiao`.
   Sem telefone, a região vem do nome e do domínio; quando o enriquecimento acha o celular, o DDD passa a decidir, e
@@ -47,7 +50,8 @@ from scripts.enriquecer_leads import _dominio
 
 ORDEM_BASE = 5000
 FLAG = "base Explee"
-PENDENCIA = "Achar celular do decisor"
+FLAG_MIGRADO = "migrado sem enriquecer"
+PENDENCIA = "Sem telefone: achar o celular do decisor quando houver verba"
 TIPO_HIST = "explee"
 CANAL = "WhatsApp"
 
@@ -191,7 +195,7 @@ def doc_promovido(emp: dict, num: int, agora: str) -> dict:
         "ordem": ORDEM_BASE + num, "nome": nome, "saudacao": saudacao, "icp": icp, "segmento": emp.get("segmento"),
         "categoria": categoria, "faixa": emp.get("tier") or "", "score": emp.get("score"), "bairro": "",
         "canal": CANAL, "telefone": "", "email": "", "site": emp["dominio"], "instagram": "",
-        "fraseUnica": frase, "flags": [FLAG], "versaoCopy": VERSAO, "regiao": reg,
+        "fraseUnica": frase, "flags": [FLAG, FLAG_MIGRADO], "versaoCopy": VERSAO, "regiao": reg,
         "toques": toques(icp, saudacao, curto, frase, foto, reg), "foto": foto,
     })
     dados.update(ESTADO_INICIAL)
@@ -201,7 +205,7 @@ def doc_promovido(emp: dict, num: int, agora: str) -> dict:
                    "fonteDados": "Explee", "fonteFrase": "Segmento"},
         "empresa": {}, "socios": [], "redes": {"linkedinEmpresa": "", "instagram": "", "youtube": ""},
         "decisores": decisores, "contatos": [], "sinais": [], "alertas": [], "pendencias": [PENDENCIA],
-        "enriquecimento": {"status": "bruto"},
+        "enriquecimento": {"status": "bruto", "migradoSemEnriquecer": True},
         "historico": [{"em": agora, "texto": f"Entrou da base Explee (faixa {emp.get('tier')}, campanha {principal}): "
                                              "já recebeu e-mail da Explee sem responder", "tipo": TIPO_HIST}],
         "baseExplee": {"dominio": emp["dominio"], "campanhas": campanhas,

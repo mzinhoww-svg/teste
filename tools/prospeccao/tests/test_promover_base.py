@@ -48,8 +48,9 @@ def test_mapeia_campos_e_tem_todos_os_campos_da_pagina():
     assert (d["canal"], d["telefone"], d["email"]) == ("WhatsApp", "", "")
     assert d["situacao"] == "ativo" and d["etapa"] == 0 and d["ordem"] == 5001
     assert (d["enviado1"], d["enviado2"], d["enviado3"], d["contatoAtivo"]) == (None, None, None, None)
-    assert d["faixa"] == "A" and d["score"] == 60 and d["flags"] == ["base Explee"]
-    assert d["pendencias"] == ["Achar celular do decisor"] and d["enriquecimento"] == {"status": "bruto"}
+    assert d["faixa"] == "A" and d["score"] == 60 and d["flags"] == ["base Explee", "migrado sem enriquecer"]
+    assert d["pendencias"] == ["Sem telefone: achar o celular do decisor quando houver verba"]
+    assert d["enriquecimento"] == {"status": "bruto", "migradoSemEnriquecer": True}
     assert d["baseExplee"] == {"dominio": "abex.example", "campanhas": ["Associações setoriais"],
                            "personIds": ["p1", "p2", "p3"], "tier": "A", "score": 60}
     assert d["historico"] == [{"em": AGORA, "tipo": "explee", "texto": "Entrou da base Explee (faixa A, campanha "

@@ -42,6 +42,8 @@ var Regras = (function () {
     if (l.situacao === "respondeu") return "respondeu";
     if (l.situacao === "sair") return "sair";
     if (etapa(l) >= 3) return "encerrado";
+    // Na cadência sem destino (lead migrado sem enriquecer): fica fora de "Para hoje" e da meta até ter telefone ou e-mail.
+    if ((!l.situacao || l.situacao === "ativo") && !temDestino(l)) return "semcontato";
     var v = vencimento(l, esperaDias);
     return v && v.getTime() <= inicioDoDia(agora).getTime() ? "hoje" : "aguardando";
   }
@@ -71,6 +73,11 @@ var Regras = (function () {
     var c = contatoAtivo(l);
     return c && c.email ? c.email : l.email;
   }
+  // Destino que serve ao canal: e-mail no canal E-mail, telefone (o do contato ativo ou o do lead) nos outros.
+  function temDestino(l) {
+    var d = l.canal === "E-mail" ? emailDestino(l) : telefoneDestino(l);
+    return !!String(d || "").trim();
+  }
 
   // ---------- foto do toque 1 ----------
   function fotoDe(l, fotos) {
@@ -88,7 +95,8 @@ var Regras = (function () {
   }
   function linkToque(l, t, fotos) {
     var msg = mensagemToque(l, t, fotos), tel = telefoneDestino(l);
-    return (msg === t.mensagem && tel === l.telefone) ? t.waLink : (tel ? waLink(tel, msg) : "");
+    // toque semeado sem link (lead migrado sem telefone que ganhou um depois): monta o link na hora
+    return (msg === t.mensagem && tel === l.telefone && t.waLink) ? t.waLink : (tel ? waLink(tel, msg) : "");
   }
 
   // Próximo item que vence hoje depois de idAtual; se não houver, o primeiro antes dele; senão null.
@@ -215,7 +223,7 @@ var Regras = (function () {
     casaBusca: casaBusca, DIA: DIA, inicioDoDia: inicioDoDia, dataCurta: dataCurta, quando: quando, waLink: waLink, telefoneFormatado: telefoneFormatado,
     etapa: etapa, vencimento: vencimento, grupo: grupo, toque: toque,
     contatoAtivo: contatoAtivo, primeiroNome: primeiroNome, comSaudacao: comSaudacao,
-    telefoneDestino: telefoneDestino, emailDestino: emailDestino, fotoDe: fotoDe,
+    telefoneDestino: telefoneDestino, emailDestino: emailDestino, temDestino: temDestino, fotoDe: fotoDe,
     mensagemToque: mensagemToque, linkToque: linkToque, proximoDoDia: proximoDoDia, ordenarLeads: ordenarLeads,
     etapaPV: etapaPV, vencimentoPV: vencimentoPV, grupoPV: grupoPV, textoPV: textoPV, ordenarClientes: ordenarClientes,
     registrar: registrar

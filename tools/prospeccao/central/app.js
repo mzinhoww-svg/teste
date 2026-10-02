@@ -3,7 +3,7 @@
   var NOMES_TOQUE = { 1: "Visita", 2: "Diagnóstico", 3: "Piloto" };
   var DIA = Regras.DIA;
   var ABAS = {
-    aq: [["hoje", "Para hoje"], ["aguardando", "Aguardando"], ["respondeu", "Responderam"], ["fechou", "Fecharam"],
+    aq: [["hoje", "Para hoje"], ["aguardando", "Aguardando"], ["semcontato", "Sem contato"], ["respondeu", "Responderam"], ["fechou", "Fecharam"],
          ["encerrado", "Sem resposta"], ["sair", "Saíram"], ["todos", "Todos"]],
     pv: [["hoje", "Para hoje"], ["andamento", "Em andamento"], ["pausado", "Pausados"], ["concluido", "Concluídos"], ["todos", "Todos"]],
     ld: [["todos", "Todos"], ["completo", "Completos"], ["parcial", "Parciais"], ["bruto", "Sem enriquecimento"], ["setor", "Contato de setor"]]
@@ -351,6 +351,12 @@
   function emailExplee(l) { return ((l.explee && l.explee.email) || emailDestino(l) || "").trim(); }
   function mailtoExplee(l) { return mailto(emailExplee(l), "Re: " + (l.nome || ""), ""); }
   function chipExplee(l) { return l.explee ? el("span", { class: "chip explee", text: "Explee" }) : null; }
+  // Lead da base Explee que entrou sem telefone (sem verba para enriquecer agora).
+  function migradoSemEnriquecer(l) {
+    return (l.flags || []).indexOf("migrado sem enriquecer") >= 0 || !!(l.enriquecimento && l.enriquecimento.migradoSemEnriquecer);
+  }
+  function chipMigrado(l) { return migradoSemEnriquecer(l) ? el("span", { class: "chip migrado", text: "Migrado sem enriquecer" }) : null; }
+  function textoSemContato(l) { return l.canal === "E-mail" ? "Sem e-mail" : "Sem telefone"; }
   function dataHora(iso) {
     var d = new Date(iso);
     if (!iso || isNaN(d)) return "";
@@ -404,7 +410,7 @@
     };
     var filhos;
     var semVolta = g === "respondeu" && semCadencia(l);  // sem cadência não há para onde voltar
-    if (g === "hoje" || g === "aguardando" || g === "encerrado" || semVolta) {
+    if (g === "hoje" || g === "aguardando" || g === "semcontato" || g === "encerrado" || semVolta) {
       if (estado.confirmarSair === l.id) {
         filhos = [
           b("r-sair-ok", "Confirmar saída", function () { estado.confirmarSair = null; situacao(l, "sair", "Não contatar de novo"); }, "alerta"),
@@ -467,12 +473,14 @@
   function cardLead(l) {
     var g = grupo(l), e = etapa(l);
     var ativo = g === "hoje" || g === "aguardando";
+    // sem contato ainda é cadência: o detalhe mostra o próximo toque, o Copiar e o Enviar desativado com o motivo
+    var naCadencia = ativo || g === "semcontato";
     var semMarca = !estado.podeMarcar || !!estado.gravando["leads/" + l.id];
     var email = l.canal === "E-mail";
     var n = Math.min(e + 1, 3), t = toque(l, n);
     var teste = l.id === "TESTE";
 
-    var rotulo = { hoje: "Toque " + n + " hoje", aguardando: "Aguardando", respondeu: "Respondeu", fechou: "Fechou",
+    var rotulo = { hoje: "Toque " + n + " hoje", aguardando: "Aguardando", semcontato: textoSemContato(l), respondeu: "Respondeu", fechou: "Fechou",
                    encerrado: "Sem resposta", sair: "Saiu" }[g];
     var cab = el("div", { class: "cab" }, [
       teste ? el("div", null, [
@@ -480,7 +488,7 @@
         el("div", { class: "meta", text: "Manda as mensagens para o WhatsApp da própria Reiners." })
       ]) : el("div", null, [
         el("h2", { text: l.nome || l.id }),
-        el("div", { class: "meta" }, [el("span", { class: "num", text: l.id }), l.categoria && !(l.explee && l.categoria === "Explee") ? " · " + l.categoria : null, chipExplee(l),
+        el("div", { class: "meta" }, [el("span", { class: "num", text: l.id }), l.categoria && !(l.explee && l.categoria === "Explee") ? " · " + l.categoria : null, chipExplee(l), chipMigrado(l),
           (l.alertas || []).length ? el("a", { class: "chip alerta", href: "#alertas-" + l.id, onclick: function (ev) { ev.preventDefault(); irParaAlertas(l); } },
             [(l.alertas.length === 1 ? "1 alerta" : l.alertas.length + " alertas")]) : null])
       ]),
@@ -488,10 +496,10 @@
     ]);
 
     var emLeads = estado.funil === "ld";  // na aba Leads o detalhe abre no perfil; só mostra o Enviar se o lead está na cadência
-    var verToque = ativo ? n : e || 1;
+    var verToque = naCadencia ? n : e || 1;
     var tv = toque(l, verToque);
     var texto = email ? ("Assunto: " + (tv.assunto || "") + "\n\n" + (tv.corpo || "")) : mensagemToque(l, tv);
-    var comFoto = !email && ativo && n === 1;
+    var comFoto = !email && naCadencia && n === 1;
     var dest = destinoDe(l, email);
     var ca = contatoAtivo(l);
     var semDestino = email ? "Sem e-mail cadastrado" : "Sem telefone cadastrado";
@@ -503,7 +511,7 @@
     if (comExplee && emailExplee(l)) {
       acoes.push(el("a", { id: "acao-email-" + l.id, class: "btn principal abrir-email", href: mailtoExplee(l), target: "_blank", rel: "noopener" }, ["Abrir e-mail"]));
     }
-    if (ativo && !semCad) {
+    if (naCadencia && !semCad) {
       var podeHoje = g === "hoje";
       var link = !dest || !temMensagem(t) ? "" : email ? mailtoToque(l, t) : linkToque(l, t);
       var liberado = podeHoje && !!link;
@@ -520,7 +528,7 @@
     return el("article", { "data-detalhe": l.id, class: "lead" + (teste ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : "") }, [
       cab,
       comExplee ? blocoExplee(l) : null,
-      (emLeads && !ativo) || semCad ? null : el("div", { class: "toque-atual" }, [
+      (emLeads && !naCadencia) || semCad ? null : el("div", { class: "toque-atual" }, [
         el("div", { class: "toque-rotulo", text: "Toque " + verToque + " · " + NOMES_TOQUE[verToque] + (email ? " · e-mail" : " · WhatsApp") }),
         el("p", { class: "msg", text: texto }),
         el("div", { class: "destino" + (dest ? "" : " sem") }, dest
@@ -542,7 +550,7 @@
     var todos = Object.keys(estado.leads).map(function (k) { return estado.leads[k]; }).sort(ordenarLeads);
     var reais = todos.filter(function (l) { return l.id !== "TESTE"; });
     var agora = new Date();
-    var cont = { hoje: 0, aguardando: 0, respondeu: 0, fechou: 0, encerrado: 0, sair: 0, todos: reais.length };
+    var cont = { hoje: 0, aguardando: 0, semcontato: 0, respondeu: 0, fechou: 0, encerrado: 0, sair: 0, todos: reais.length };
     var toquesHoje = 0;
     reais.forEach(function (l) {
       cont[grupo(l)]++;
@@ -578,6 +586,7 @@
     var alvo = $("fila");
     if (!visiveis.some(function (l) { return l.id !== "TESTE"; })) {
       if (f.grupo === "hoje") vazio(alvo, "Nada para hoje", "Os próximos toques aparecem na aba Aguardando, com a data de cada um.");
+      else if (f.grupo === "semcontato") vazio(alvo, "Todos têm contato", "Lead na cadência sem telefone ou e-mail aparece aqui até ganhar um destino.");
       else vazio(alvo, "Nada neste filtro", "Troque a aba ou limpe os filtros.");
     }
     desenharDetalhe();
@@ -603,6 +612,7 @@
     var g = grupo(l), e = etapa(l);
     if (g === "hoje") return ["hoje"];
     if (g === "aguardando") return ["a partir de ", el("span", { class: "num", text: dataCurta(vencimento(l)) })];
+    if (g === "semcontato") return [textoSemContato(l)];
     var ultimo = l["enviado" + e];
     var partes = [ROTULO_ESTADO[g] || g];
     if (g === "encerrado" && ultimo) partes = partes.concat([" · enviado ", el("span", { class: "num", text: dataCurta(ultimo) })]);
@@ -627,6 +637,8 @@
       onclick: function () { copiar(email ? (t.corpo || "") : mensagemToque(l, t), email ? "Corpo" : "Mensagem"); } }, ["Copiar"]);
     // Sem cadência (hot lead da Explee): nada de Enviar/Copiar; a linha leva o Abrir e-mail, que não marca nada.
     var acoes = [btnEnviar, btnCopiar];
+    // Sem contato: em vez de um Enviar desativado, a linha só diz o que falta (em "situação") e leva a flag.
+    if (g === "semcontato") acoes = [];
     if (semCad) acoes = l.explee && emailExplee(l) ? [el("a", { class: "btn abrir-email" + (sel() === l.id ? " principal" : ""), href: mailtoExplee(l), target: "_blank", rel: "noopener",
       "aria-label": "Abrir e-mail para " + (l.nome || l.id) }, ["Abrir e-mail"])] : [];
     var x = l.explee || {};
@@ -638,9 +650,10 @@
         el("span", { class: "nome", text: teste ? "Card de teste" : (l.nome || l.id) }),
         el("span", { class: "sub", text: sub }),
         el("div", { class: "situacao" }, [
-          semCad ? null : el("span", { class: "pontos", role: "img", "aria-label": pontos.fala }, pontos.classes.map(function (c) { return el("i", { class: c }); })),
+          semCad || g === "semcontato" ? null : el("span", { class: "pontos", role: "img", "aria-label": pontos.fala }, pontos.classes.map(function (c) { return el("i", { class: c }); })),
           el("span", { class: "quando" }, quandoTxt),
           chipExplee(l),
+          g === "semcontato" ? chipMigrado(l) : null,
           (l.alertas || []).length ? el("span", { class: "chip alerta", text: "Alerta" }) : null
         ])
       ]),
@@ -1089,7 +1102,8 @@
       var t = toque(l, n), enviado = l["enviado" + n], proximo = ativo && n === e + 1;
       var quandoTxt = enviado ? "enviado " + dataCurta(enviado) :
         proximo ? (g === "hoje" ? "sai hoje" : "a partir de " + dataCurta(v)) :
-        ativo && n > e + 1 ? espera(n) + " dias depois do toque " + (n - 1) : "não vai sair";
+        ativo && n > e + 1 ? espera(n) + " dias depois do toque " + (n - 1) :
+        g === "semcontato" ? "espera um contato" : "não vai sair";
       var texto = email ? "Assunto: " + (t.assunto || "") + "\n\n" + (t.corpo || "") : mensagemToque(l, t);
       return el("details", { class: proximo ? "proximo" : null, open: proximo ? "" : null }, [
         el("summary", null, ["Toque " + n + " · " + NOMES_TOQUE[n], el("span", { text: quandoTxt })]),

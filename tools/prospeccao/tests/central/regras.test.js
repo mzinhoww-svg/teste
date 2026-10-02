@@ -3,9 +3,10 @@ const R = require("../../central/regras.js");
 const ESPERA = { "1": 0, "2": 4, "3": 6 };
 test("grupo: toque 1 vence hoje; toque 2 só 4 dias depois", () => {
   const agora = new Date("2026-10-02T12:00:00");
-  assert.equal(R.grupo({ etapa: 0, situacao: "ativo" }, ESPERA, agora), "hoje");
-  assert.equal(R.grupo({ etapa: 1, situacao: "ativo", enviado1: "2026-10-01T10:00:00" }, ESPERA, agora), "aguardando");
-  assert.equal(R.grupo({ etapa: 1, situacao: "ativo", enviado1: "2026-09-28T10:00:00" }, ESPERA, agora), "hoje");
+  const tel = { telefone: "5565999991111" };
+  assert.equal(R.grupo({ etapa: 0, situacao: "ativo", ...tel }, ESPERA, agora), "hoje");
+  assert.equal(R.grupo({ etapa: 1, situacao: "ativo", enviado1: "2026-10-01T10:00:00", ...tel }, ESPERA, agora), "aguardando");
+  assert.equal(R.grupo({ etapa: 1, situacao: "ativo", enviado1: "2026-09-28T10:00:00", ...tel }, ESPERA, agora), "hoje");
   assert.equal(R.grupo({ etapa: 3, situacao: "ativo" }, ESPERA, agora), "encerrado");
 });
 test("telefoneFormatado", () => {
@@ -62,4 +63,39 @@ test("enriquecimento: dinheiro em micro-dólar, taxa e motivo de parada", () => 
   assert.equal(R.motivoParada("outra coisa"), "Parou: outra coisa.");
   assert.ok(R.enriqOcupado("pedido") && R.enriqOcupado("estimando") && R.enriqOcupado("executando"));
   assert.ok(!R.enriqOcupado("ocioso") && !R.enriqOcupado("concluido") && !R.enriqOcupado("parado") && !R.enriqOcupado(undefined));
+});
+test("grupo: lead na cadência sem destino vai para semcontato até ganhar telefone ou e-mail", () => {
+  const agora = new Date("2026-10-02T12:00:00");
+  const migrado = { etapa: 0, canal: "WhatsApp", telefone: "", email: "", contatoAtivo: null,
+    contatos: [], flags: ["base Explee", "migrado sem enriquecer"] };
+  assert.equal(R.grupo(migrado, ESPERA, agora), "semcontato");
+  assert.equal(R.grupo(Object.assign({}, migrado, { situacao: "ativo" }), ESPERA, agora), "semcontato");
+  assert.equal(R.grupo(Object.assign({}, migrado, { email: "a@b.example" }), ESPERA, agora), "semcontato", "e-mail não serve ao WhatsApp");
+  // o enriquecimento acha o celular, mas só vale quando vira destino (contato ativo ou telefone do lead)
+  const achado = Object.assign({}, migrado, { contatos: [{ id: "k1", papel: "decisor", telefone: "5511988887777" }] });
+  assert.equal(R.grupo(achado, ESPERA, agora), "semcontato");
+  assert.equal(R.grupo(Object.assign({}, achado, { contatoAtivo: "k1" }), ESPERA, agora), "hoje");
+  assert.equal(R.grupo(Object.assign({}, migrado, { telefone: "5565999991111" }), ESPERA, agora), "hoje");
+  assert.equal(R.grupo(Object.assign({}, migrado, { telefone: "5565999991111", etapa: 1, enviado1: "2026-10-01T10:00:00" }), ESPERA, agora), "aguardando");
+  // canal E-mail: vale o e-mail do lead ou do contato ativo
+  const email = Object.assign({}, migrado, { canal: "E-mail" });
+  assert.equal(R.grupo(email, ESPERA, agora), "semcontato");
+  assert.equal(R.grupo(Object.assign({}, email, { email: "a@b.example" }), ESPERA, agora), "hoje");
+  assert.equal(R.grupo(Object.assign({}, email, { contatoAtivo: "k1", contatos: [{ id: "k1", email: "k@b.example" }] }), ESPERA, agora), "hoje");
+  // fora da cadência o destino não importa
+  for (const s of ["respondeu", "fechou", "sair"]) assert.equal(R.grupo(Object.assign({}, migrado, { situacao: s }), ESPERA, agora), s);
+  assert.equal(R.grupo(Object.assign({}, migrado, { etapa: 3 }), ESPERA, agora), "encerrado");
+});
+test("grupo: as fixtures dos testes continuam nos mesmos grupos", () => {
+  const dados = require("./dados.js");
+  const agora = new Date();
+  const g = Object.fromEntries(dados.leads(7).map((d) => [d.id, R.grupo(d.data, ESPERA, agora)]));
+  assert.deepEqual(g, { TESTE: "hoje", R0001: "hoje", R0002: "aguardando", R0003: "hoje", R0004: "hoje",
+    R0005: "respondeu", R0006: "sair", R0007: "hoje" });
+  assert.equal(R.grupo(dados.explee(1).data, ESPERA, agora), "respondeu");
+});
+test("linkToque monta o link quando o toque foi semeado sem link e o telefone chegou depois", () => {
+  const l = { telefone: "5565999991111", toques: [{ n: 1, mensagem: "Oi, Paulo.", waLink: "" }] };
+  assert.equal(R.linkToque(l, l.toques[0]), "https://wa.me/5565999991111?text=Oi%2C%20Paulo.");
+  assert.equal(R.linkToque({ telefone: "", toques: [] }, { n: 1, mensagem: "x", waLink: "" }), "");
 });

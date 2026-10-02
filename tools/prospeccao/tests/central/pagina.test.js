@@ -489,6 +489,7 @@ test("Enviar fica desativado sem e-mail ou sem telefone, com o motivo", async ()
   por("R0004").email = ""; por("R0004").contatos = [];
   por("R0001").telefone = ""; por("R0001").contatos = [];
   const h = await abrirDetalhe({ leads });
+  await h.page.click('#abas [data-grupo="semcontato"]');  // sem destino o lead sai de Para hoje
   await abrirLead(h, "R0004");
   let r = await h.page.evaluate(() => { const a = document.querySelector("#detalhe .acoes a.principal"); return { dis: a.getAttribute("aria-disabled"), href: a.getAttribute("href"), txt: document.querySelector("#detalhe .destino").textContent }; });
   assert.equal(r.dis, "true"); assert.equal(r.href, null); assert.match(r.txt, /Sem e-mail cadastrado/);
@@ -1701,4 +1702,103 @@ test("erro do novo cliente é anunciado, marca o campo e leva o foco a ele", asy
     texto: document.getElementById("nc-erro").textContent }));
   assert.deepEqual(r, { nome: null, tel: "true", foco: "nc-telefone", texto: "Informe um WhatsApp ou um e-mail." });
   assert.deepEqual(await h.escritas.lista(), []);
+});
+
+// ---------- leads migrados sem enriquecer: aba Sem contato ----------
+function migrado(num, sobre) {
+  const d = require("./dados.js").leads(0)[0];  // só para pegar o formato do TESTE e trocar tudo
+  const id = "B" + String(num).padStart(4, "0");
+  const data = Object.assign({}, d.data, {
+    nome: "Associação Migrada " + num, saudacao: "Paulo", categoria: "Associação setorial", segmento: "Associações setoriais",
+    canal: "WhatsApp", telefone: "", email: "", contatoAtivo: null, contatos: [], ordem: 5000 + num,
+    flags: ["base Explee", "migrado sem enriquecer"], pendencias: ["Sem telefone: achar o celular do decisor quando houver verba"],
+    enriquecimento: { status: "bruto", migradoSemEnriquecer: true }, alertas: [], historico: [],
+    toques: [1, 2, 3].map((n) => ({ n, mensagem: "Oi, Paulo, tudo bem?\n\nToque " + n + ".", waLink: "", assunto: "", corpo: "" })),
+  }, sobre || {});
+  return { id, data };
+}
+async function abrirComMigrados(opts) {
+  const dl = require("./dados.js").leads(7).concat([migrado(1), migrado(2), migrado(3)]);
+  const h = await abrir(Object.assign({ largura: 1440, leads: dl }, opts || {}));
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  return h;
+}
+
+test("Sem contato: migrados sem telefone ficam fora de Para hoje e da meta, com contagem própria", async () => {
+  const h = await abrirComMigrados();
+  const { page } = h;
+  const n = (g) => page.locator('#abas [data-grupo="' + g + '"] .n').innerText();
+  assert.deepEqual(await page.evaluate(() => Array.from(document.querySelectorAll("#abas button")).map((b) => b.dataset.grupo)),
+    ["hoje", "aguardando", "semcontato", "respondeu", "fechou", "encerrado", "sair", "todos"], "Sem contato logo depois de Aguardando");
+  assert.equal(await page.locator('#abas [data-grupo="semcontato"]').innerText().then((t) => t.replace(/\s+/g, " ").trim()), "Sem contato 3");
+  assert.equal(await n("hoje"), "4");
+  assert.equal(await n("aguardando"), "1");
+  assert.equal(await n("todos"), "10");
+  assert.equal(await page.locator("#p1").innerText(), "4", "placar Para hoje");
+  assert.equal((await page.textContent("#n-aq")).trim(), "4");
+  assert.match(await page.locator("#meta-texto").innerText(), /· 4 para hoje$/);
+  const idsHoje = await page.evaluate(() => Array.from(document.querySelectorAll("#fila [data-id]")).map((x) => x.dataset.id));
+  assert.ok(!idsHoje.some((id) => id.startsWith("B")), "nenhum migrado em Para hoje: " + idsHoje);
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("Sem contato: a linha diz Sem telefone e leva a flag, sem Enviar desativado", async () => {
+  const h = await abrirComMigrados();
+  const { page } = h;
+  await page.click('#abas [data-grupo="semcontato"]');
+  const ids = await page.evaluate(() => Array.from(document.querySelectorAll("#fila [data-id]")).map((x) => x.dataset.id).filter((id) => id !== "TESTE"));
+  assert.deepEqual(ids, ["B0001", "B0002", "B0003"]);
+  const linha = page.locator("#fila [data-id=B0001]");
+  assert.match(await linha.locator(".quando").innerText(), /^Sem telefone$/);
+  assert.equal(await linha.locator(".chip.migrado").innerText(), "Migrado sem enriquecer");
+  assert.equal(await linha.locator("a.enviar, .btn.enviar").count(), 0, "sem Enviar desativado");
+  assert.equal(await linha.locator("[aria-live]").count(), 0);
+  await page.click("#fila [data-id=B0001] .nome");
+  const det = await page.locator("#detalhe").innerText();
+  assert.match(det, /Sem telefone cadastrado/);
+  assert.equal(await page.locator("#detalhe a.enviar").getAttribute("aria-disabled"), "true", "no detalhe o Enviar fica, desativado, com o motivo");
+  assert.equal(await page.locator("#detalhe .estado.semcontato").innerText(), "Sem telefone");
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("Sem contato: quando o telefone aparece, o lead vai para Para hoje", async () => {
+  const h = await abrirComMigrados();
+  const { page } = h;
+  const n = (g) => page.locator('#abas [data-grupo="' + g + '"] .n').innerText();
+  await h.empurrar("leads/B0002", { contatos: [{ id: "k1", papel: "decisor", nome: "Paulo Pereira", telefone: "5511988887777", whatsapp: "?" }] });
+  assert.equal(await n("semcontato"), "3", "achado pelo enriquecimento, mas ainda não escolhido");
+  await h.empurrar("leads/B0002", { contatoAtivo: "k1" });
+  assert.equal(await n("semcontato"), "2");
+  assert.equal(await n("hoje"), "5");
+  await h.empurrar("leads/B0003", { telefone: "5565999990003" });
+  assert.equal(await n("semcontato"), "1");
+  assert.equal(await n("hoje"), "6");
+  assert.equal(await page.locator("#p1").innerText(), "6");
+  await page.click('#abas [data-grupo="hoje"]');
+  const linha = page.locator("#fila [data-id=B0003]");
+  assert.equal(await linha.locator("a.enviar").count(), 1);
+  assert.equal(await linha.locator("a.enviar").getAttribute("aria-disabled"), null);
+  assert.equal(await linha.locator(".chip.migrado").count(), 0, "a flag só aparece na aba Sem contato");
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("Sem contato a 390px: abas e linhas com 44px, texto ≥12px e sem rolagem lateral", async () => {
+  const h = await abrirComMigrados({ largura: 390, altura: 844 });
+  const { page } = h;
+  await page.click('#abas [data-grupo="semcontato"]');
+  const r = await page.evaluate(() => {
+    const ruins = [], pequenos = [];
+    document.querySelectorAll('#abas button, #fila .linha').forEach((n) => {
+      const b = n.getBoundingClientRect();
+      if (b.height && b.height < 43.5) ruins.push(n.textContent.trim().slice(0, 20) + " h=" + b.height);
+    });
+    document.querySelectorAll("#fila *").forEach((n) => {
+      if (!n.childNodes.length || ![...n.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim())) return;
+      const fs = parseFloat(getComputedStyle(n).fontSize);
+      if (fs < 12) pequenos.push(n.textContent.trim().slice(0, 20) + " " + fs);
+    });
+    return { ruins, pequenos, lateral: document.documentElement.scrollWidth > document.documentElement.clientWidth };
+  });
+  assert.deepEqual(r, { ruins: [], pequenos: [], lateral: false });
 });
