@@ -160,10 +160,12 @@
       if (prox) selecionar(prox);
     });
   }
-  function avisoDesfazer(l, n) {
-    var b = el("button", { type: "button", class: "desfazer", onclick: function () { desfazerToque(l, n); } }, ["Desfazer"]);
-    toast("Toque " + n + " marcado · ", b, DESFAZER_MS);
+  // Aviso de 8 segundos com Desfazer, igual para Aquecimento e pós-venda.
+  function avisoComDesfazer(texto, desfazer) {
+    var b = el("button", { type: "button", class: "desfazer", onclick: desfazer }, ["Desfazer"]);
+    toast(texto + " · ", b, DESFAZER_MS);
   }
+  function avisoDesfazer(l, n) { avisoComDesfazer("Toque " + n + " marcado", function () { desfazerToque(l, n); }); }
   // n = o toque que o aviso ou a linha do histórico promete desfazer; se o lead já andou, não desfaz outro.
   function desfazerToque(l, n) {
     var atual = estado.leads[l.id] || l;
@@ -618,6 +620,7 @@
       try { ini = ativo.selectionStart; fim = ativo.selectionEnd; } catch (e) { /* campo sem seleção */ }
     }
     while (alvo.firstChild) alvo.removeChild(alvo.firstChild);
+    alvo.appendChild(el("div", { class: "barra-detalhe" }, [el("button", { type: "button", class: "btn fechar-detalhe", onclick: fecharDetalhe }, ["Fechar"])]));
     if (l) alvo.appendChild(pv ? detalheCliente(l) : cardLead(l));
     else if (pv) vazio(alvo, "Nenhum cliente selecionado", "Selecione um cliente na fila para ver a mensagem da etapa, os dados e o histórico.");
     else vazio(alvo, "Nenhum lead selecionado", "Selecione um lead na fila para ver a mensagem, o perfil e o histórico.");
@@ -632,6 +635,59 @@
       }
     }
   }
+
+  // ---------- detalhe como gaveta (760–1023px) ou tela cheia (<760px) ----------
+  function emGaveta() { var l = document.body.dataset.layout; return l === "gaveta" || l === "uma"; }
+  function abrirDetalhe(id) {
+    if (!emGaveta()) return;
+    var item = id || sel();
+    if (!item || !colecaoDoFunil()[item]) return;
+    if (sel() !== item) guardarSel(estado.funil, item);
+    estado.detalheAberto = true;
+    estado.origemDetalhe = item;
+    estado.focarTitulo = true;
+    render();
+  }
+  function fecharDetalhe() {
+    if (!estado.detalheAberto) return;
+    estado.detalheAberto = false;
+    render();
+    var linha = $("fila").querySelector('[data-id="' + estado.origemDetalhe + '"]') || $("fila").querySelector('[data-id="' + sel() + '"]');
+    if (linha) linha.focus();
+  }
+  // Mantém a classe, o papel de diálogo, o título focável, o véu e a trava de rolagem de acordo com o estado.
+  function aplicarDetalhe() {
+    var d = $("detalhe"), titulo = d.querySelector("h2");
+    if (estado.detalheAberto && (!emGaveta() || !titulo || !sel())) estado.detalheAberto = false;
+    var aberto = !!estado.detalheAberto;
+    d.classList.toggle("aberto", aberto);
+    $("veu").hidden = !aberto;
+    document.documentElement.classList.toggle("detalhe-aberto", aberto);
+    document.body.classList.toggle("detalhe-aberto", aberto);
+    var fechar = d.querySelector(".fechar-detalhe");
+    if (fechar) fechar.textContent = document.body.dataset.layout === "uma" ? "Voltar" : "Fechar";
+    if (titulo) { titulo.id = "detalhe-titulo"; titulo.tabIndex = -1; }
+    if (aberto) {
+      d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true"); d.setAttribute("aria-labelledby", "detalhe-titulo");
+      var ativo = document.activeElement;
+      if (estado.focarTitulo || !ativo || ativo === document.body || !d.contains(ativo)) { estado.focarTitulo = false; titulo.focus({ preventScroll: true }); }
+    } else {
+      ["role", "aria-modal", "aria-labelledby"].forEach(function (a) { d.removeAttribute(a); });
+    }
+  }
+  $("veu").addEventListener("click", fecharDetalhe);
+  $("detalhe").addEventListener("keydown", function (e) {
+    if (!estado.detalheAberto) return;
+    if (e.key === "Escape") { e.preventDefault(); fecharDetalhe(); return; }
+    if (e.key !== "Tab") return;
+    var foc = Array.prototype.filter.call($("detalhe").querySelectorAll("button, a[href], input, select, textarea, summary, [tabindex]:not([tabindex='-1'])"),
+      function (n) { return !n.disabled && n.offsetParent !== null; });
+    if (!foc.length) return;
+    var primeiro = foc[0], ultimo = foc[foc.length - 1], ativo = document.activeElement;
+    if (e.shiftKey && ativo === primeiro) { e.preventDefault(); ultimo.focus(); }
+    else if (!e.shiftKey && ativo === ultimo) { e.preventDefault(); primeiro.focus(); }
+  });
+  window.Central = Object.assign(window.Central || {}, { abrirDetalhe: abrirDetalhe, fecharDetalhe: fecharDetalhe });
 
   // ================= LEADS: estrutura e enriquecimento =================
   function statusLD(l) { return (l.enriquecimento && l.enriquecimento.status) || "bruto"; }
@@ -960,7 +1016,19 @@
   function marcarPV(c, n) {
     var dados = {};
     dados["pvEnviado" + n] = new Date().toISOString();
-    return comVizinho(c, function () { return gravar("clientes/" + c.id, dados, "Mensagem de " + defEtapa(n).nome.toLowerCase() + " marcada como enviada"); });
+    var ok = comVizinho(c, function () { return gravar("clientes/" + c.id, dados); });
+    ok.then(function (feito) { if (feito) avisoComDesfazer("Mensagem da etapa " + n + " marcada", function () { desfazerPV(c, n); }); });
+    return ok;
+  }
+  // Só desfaz se a marca ainda está lá e o cliente continua nessa etapa.
+  function desfazerPV(c, n) {
+    var atual = estado.clientes[c.id] || c;
+    $("toast").hidden = true;
+    if (!atual["pvEnviado" + n] || etapaPV(atual) !== n) { toast("Nada a desfazer"); return; }
+    var dados = {};
+    dados["pvEnviado" + n] = null;
+    if (Array.isArray(atual.historico)) registrar(atual, dados, "Mensagem da etapa " + n + " desfeita");
+    gravar("clientes/" + c.id, dados).then(function (ok) { if (ok) selecionar(c.id); });
   }
   function concluirPV(c) {
     var n = etapaPV(c), total = etapasPV().length;
@@ -1299,10 +1367,12 @@
     }
     document.body.dataset.funil = estado.funil;
     if (pv) renderPV(); else if (ld) renderLD(); else renderAQ();
+    aplicarDetalhe();
   }
   function trocarFunil(f) {
     estado.funil = f;
     estado.fechando = null;
+    estado.detalheAberto = false;
     try { localStorage.setItem("central-funil", f); } catch (e) { /* sem armazenamento: tudo bem */ }
     render();
     window.scrollTo(0, 0);
@@ -1337,11 +1407,13 @@
     var linha = e.target.closest(LINHA);
     if (!linha || e.target.closest("a, button")) return;  // Enviar e Copiar têm ação própria
     selecionar(linha.dataset.id, { foco: true });
+    abrirDetalhe(linha.dataset.id);
   });
   $("fila").addEventListener("keydown", function (e) {
     if (e.target.matches && e.target.matches(LINHA) && (e.key === "Enter" || e.key === " ")) {
       e.preventDefault();
       selecionar(e.target.dataset.id, { foco: true });
+      abrirDetalhe(e.target.dataset.id);
     }
   });
   $("novo-cliente").addEventListener("click", function () { estado.novoCliente = true; render(); if ($("nc-nome")) $("nc-nome").focus(); });
@@ -1405,7 +1477,8 @@
   function sincronizarLayout() {
     var antes = document.body.dataset.layout;
     document.body.dataset.layout = layoutAtual();
-    if (antes && antes !== document.body.dataset.layout && estado.funil === "ld") render();  // Leads troca entre tabela e linhas
+    if (!emGaveta()) estado.detalheAberto = false;
+    if (antes && antes !== document.body.dataset.layout) render();  // Leads troca entre tabela e linhas; o detalhe troca de gaveta
   }
   ["(min-width: 1280px)", "(min-width: 1024px)", "(min-width: 760px)"].forEach(function (q) {
     var m = window.matchMedia(q);

@@ -627,3 +627,137 @@ test("pós-venda: linha, detalhe com abas e ações", async () => {
   assert.equal((await h.escritas.lista())[2].dados.situacao, "pausado");
   assert.deepEqual(h.erros.map(String), []);
 });
+
+// ---------- Task 8: gaveta (760–1023px) e tela cheia (<760px) ----------
+async function abrirPequeno(largura, altura, funil) {
+  const h = await abrir({ largura, altura });
+  abertos.push(h);
+  await h.page.emulateMedia({ reducedMotion: "reduce" });  // sem animação: as caixas medidas já estão no lugar final
+  h.page.on("popup", (p) => p.close());
+  await h.page.context().route(/wa\.me|mailto/, (r) => r.abort());
+  await h.page.waitForSelector("#fila [data-id]");
+  if (funil) await h.page.click("#f-" + funil);
+  return h;
+}
+const focoAtual = (page) => page.evaluate(() => {
+  const a = document.activeElement;
+  return { tag: a.tagName, texto: (a.textContent || "").trim().slice(0, 40), dentro: !!a.closest("#detalhe"), id: a.id, linha: a.closest(".linha") ? a.closest(".linha").dataset.id : null, ehLinha: a.classList.contains("linha") };
+});
+
+test("900px: detalhe abre como gaveta e Esc fecha devolvendo o foco à linha", async () => {
+  const h = await abrirPequeno(900, 800);
+  const { page } = h;
+  assert.equal(await page.evaluate(() => document.body.dataset.layout), "gaveta");
+  assert.equal((await caixa(page, "#detalhe")).visivel, false, "fechado por padrão");
+  await page.click("#fila [data-id=R0004] .nome");
+  await page.waitForSelector("#detalhe.aberto");
+  const c = await caixa(page, "#detalhe");
+  assert.ok(c.visivel && c.w <= 560 && Math.abs(c.x + c.w - 900) <= 1 && c.h >= 799, "gaveta pela direita, altura total: " + JSON.stringify(c));
+  assert.equal(await page.getAttribute("#detalhe", "role"), "dialog");
+  assert.equal(await page.getAttribute("#detalhe", "aria-modal"), "true");
+  const titulo = await page.getAttribute("#detalhe", "aria-labelledby");
+  assert.equal(await page.locator("#" + titulo).innerText(), "Clínica Modelo 4");
+  const foco = await focoAtual(page);
+  assert.ok(foco.dentro && foco.id === titulo, "foco no título: " + JSON.stringify(foco));
+  assert.equal(await page.evaluate(() => getComputedStyle(document.body).overflow), "hidden", "rolagem do fundo travada");
+  // o primeiro foco da tabulação é o Fechar
+  assert.equal(await page.evaluate(() => document.querySelector("#detalhe button, #detalhe a[href]").textContent), "Fechar", "Fechar é o primeiro foco do detalhe");
+  await page.keyboard.press("Shift+Tab");
+  assert.deepEqual([(await focoAtual(page)).texto, (await focoAtual(page)).dentro], ["Fechar", true]);
+  await page.keyboard.press("Escape");
+  await page.waitForSelector("#detalhe.aberto", { state: "detached" }).catch(() => {});
+  assert.equal(await page.locator("#detalhe.aberto").count(), 0);
+  const f2 = await focoAtual(page);
+  assert.ok(f2.ehLinha && f2.linha === "R0004", "foco volta à linha: " + JSON.stringify(f2));
+  assert.notEqual(await page.evaluate(() => getComputedStyle(document.body).overflow), "hidden");
+  // o véu também fecha; Enviar na linha não abre
+  await page.click("#fila [data-id=R0003] .nome");
+  await page.waitForSelector("#detalhe.aberto");
+  await page.mouse.click(20, 400);
+  assert.equal(await page.locator("#detalhe.aberto").count(), 0);
+  await page.click("#fila [data-id=R0001] a.enviar");
+  await page.waitForFunction(() => window.__escritas.length > 0);
+  assert.equal(await page.locator("#detalhe.aberto").count(), 0, "Enviar não abre o detalhe");
+  // Enter numa linha focada abre
+  await page.focus("#fila [data-id=R0003]");
+  await page.keyboard.press("Enter");
+  await page.waitForSelector("#detalhe.aberto");
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("390px: detalhe em tela cheia com Voltar", async () => {
+  const h = await abrirPequeno(390, 844);
+  const { page } = h;
+  await page.click("#fila [data-id=R0004] .nome");
+  await page.waitForSelector("#detalhe.aberto");
+  const c = await caixa(page, "#detalhe");
+  assert.ok(c.x <= 0 && c.y <= 0 && c.w >= 390 && c.h >= 843, "tela cheia: " + JSON.stringify(c));
+  assert.ok(await semRolagemLateral(page));
+  const voltar = page.locator("#detalhe .fechar-detalhe");
+  assert.equal(await voltar.innerText(), "Voltar");
+  assert.ok((await voltar.boundingBox()).height >= 44);
+  await page.evaluate(() => document.querySelector("#detalhe").scrollTo(0, 300));
+  assert.ok((await page.locator("#detalhe .barra-detalhe").boundingBox()).y <= 1, "barra do topo fica fixa ao rolar");
+  await voltar.click();
+  assert.equal(await page.locator("#detalhe.aberto").count(), 0);
+  const f = await focoAtual(page);
+  assert.ok(f.ehLinha && f.linha === "R0004", JSON.stringify(f));
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("390px: botões, linhas e abas com 44px ou mais", async () => {
+  const h = await abrirPequeno(390, 844);
+  const { page } = h;
+  const baixos = () => page.evaluate(() => {
+    const ruins = [];
+    document.querySelectorAll("button, a.btn, select, input:not([type=hidden]), textarea, summary, [role=tab], .linha, tr[data-id]").forEach((n) => {
+      const r = n.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0 || getComputedStyle(n).visibility === "hidden") return;
+      if (n.closest("[hidden]")) return;
+      if (r.height < 43.5) ruins.push((n.id || n.className || n.tagName) + " " + n.textContent.trim().slice(0, 20) + " h=" + r.height);
+    });
+    return ruins;
+  });
+  assert.deepEqual(await baixos(), [], "fila");
+  await page.click("#fila [data-id=R0004] .nome");
+  await page.waitForSelector("#detalhe.aberto");
+  for (const aba of ["Perfil", "Cadência", "Histórico"]) {
+    await page.click('#detalhe [role=tab]:has-text("' + aba + '")');
+    assert.deepEqual(await baixos(), [], "detalhe " + aba);
+  }
+  await page.click("#detalhe .fechar-detalhe");
+  await page.click("#f-pv");
+  assert.deepEqual(await baixos(), [], "pós-venda");
+  await page.click("#fila [data-id=C0001] .nome");
+  await page.waitForSelector("#detalhe.aberto");
+  for (const aba of ["Etapa", "Cliente", "Histórico"]) {
+    await page.click('#detalhe [role=tab]:has-text("' + aba + '")');
+    assert.deepEqual(await baixos(), [], "cliente " + aba);
+  }
+  await page.click("#detalhe .fechar-detalhe");
+  await page.click("#f-ld");
+  assert.deepEqual(await baixos(), [], "leads");
+  await page.click("#fila [data-id=R0001] .nome");
+  await page.waitForSelector("#detalhe.aberto");
+  assert.deepEqual(await baixos(), [], "lead aberto em Leads");
+});
+
+test("pós-venda: Enviar mostra o aviso com Desfazer e desfaz a marca", async () => {
+  const h = await abrirFunil("pv");
+  await h.page.click("#fila [data-id=C0001] a.enviar");
+  await h.page.waitForFunction(() => window.__escritas.length > 0);
+  assert.match(await h.page.locator("#toast").innerText(), /^Mensagem da etapa 1 marcada · Desfazer$/);
+  await h.page.click("#toast button");
+  await h.page.waitForFunction(() => window.__escritas.length > 1);
+  const e = (await h.escritas.lista())[1];
+  assert.equal(e.caminho, "clientes/C0001");
+  assert.equal(e.dados.pvEnviado1, null);
+  assert.equal(await h.page.locator("#toast").isHidden(), true);
+  // se o cliente já andou para a etapa 2, Desfazer não mexe
+  await h.page.click("#fila [data-id=C0001] a.enviar");
+  await h.page.waitForFunction(() => window.__escritas.length > 2);
+  await h.empurrar("clientes/C0001", { etapa: 2 });
+  await h.page.click("#toast button");
+  assert.equal((await h.escritas.lista()).length, 3, "nada a desfazer");
+  assert.deepEqual(h.erros.map(String), []);
+});

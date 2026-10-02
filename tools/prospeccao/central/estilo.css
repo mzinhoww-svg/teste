@@ -17,6 +17,7 @@
     --btn-texto: #FAF7F2;
     --borda-campo: #8F826B;
     --desativado: #7C7365;
+    --veu: rgba(20, 36, 62, .45);
     --t12: 12px; --t13: 13px; --t14: 14px; --t16: 16px; --t20: 20px; --t24: 24px;
     --sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -27,7 +28,7 @@
       --navy: #F0EBE1; --creme: #0E1726; --papel: #16223A; --pergaminho: #1E2C47; --linha: #2B3B5A;
       --suave: #A9B2C3; --ouro: #C4A15A; --ouro-texto: #E0C27F; --ouro-fundo: #33291A;
       --ok: #85D3A6; --ok-fundo: #173325; --alerta: #F2A49A; --alerta-fundo: #3B1D1A;
-      --btn: #E8D9B5; --btn-texto: #14243E; --borda-campo: #7D8BA6; --desativado: #8590A5;
+      --btn: #E8D9B5; --btn-texto: #14243E; --borda-campo: #7D8BA6; --desativado: #8590A5; --veu: rgba(0, 0, 0, .6);
     }
   }
   :root[data-theme="dark"] {
@@ -35,7 +36,7 @@
     --navy: #F0EBE1; --creme: #0E1726; --papel: #16223A; --pergaminho: #1E2C47; --linha: #2B3B5A;
     --suave: #A9B2C3; --ouro: #C4A15A; --ouro-texto: #E0C27F; --ouro-fundo: #33291A;
     --ok: #85D3A6; --ok-fundo: #173325; --alerta: #F2A49A; --alerta-fundo: #3B1D1A;
-    --btn: #E8D9B5; --btn-texto: #14243E; --borda-campo: #7D8BA6; --desativado: #8590A5;
+    --btn: #E8D9B5; --btn-texto: #14243E; --borda-campo: #7D8BA6; --desativado: #8590A5; --veu: rgba(0, 0, 0, .6);
   }
 
 
@@ -48,8 +49,24 @@
   /* ===== Grade: uma coluna por padrão (abaixo de 1024px) ===== */
   .central { display: block; max-width: 1600px; margin-inline: auto; padding-inline: 16px; padding-block: 0 48px; }
   .detalhe { display: none; }
-  .detalhe.aberto { display: block; position: fixed; inset: 0 0 0 auto; width: min(560px, 100%); z-index: 20;
-                    background: var(--creme); border-left: 1px solid var(--linha); overflow: auto; padding: 16px; }
+  /* Gaveta (760–1023px): painel pela direita sobre a fila, com véu. Tela cheia (<760px): cobre tudo, com barra Voltar no topo. */
+  .detalhe.aberto { display: block; position: fixed; inset: 0 0 0 auto; width: min(560px, 92vw); z-index: 20;
+                    background: var(--creme); border-left: 1px solid var(--linha); overflow: auto; overscroll-behavior: contain; padding: 0 16px 16px;
+                    animation: detalhe-entra .18s ease-out; }
+  body[data-layout="uma"] .detalhe.aberto { inset: 0; width: auto; border-left: 0; animation-name: detalhe-sobe; }
+  .veu { position: fixed; inset: 0; z-index: 19; border: 0; padding: 0; margin: 0; background: var(--veu); cursor: default; animation: veu-entra .18s ease-out; }
+  body[data-layout="uma"] .veu { display: none; }
+  .barra-detalhe { display: none; }
+  .detalhe.aberto .barra-detalhe { display: flex; position: sticky; top: 0; z-index: 3; margin: 0 -16px 12px; padding: 8px 16px;
+                                   background: var(--creme); border-bottom: 1px solid var(--linha); justify-content: flex-end; }
+  body[data-layout="uma"] .detalhe.aberto .barra-detalhe { justify-content: flex-start; padding-top: calc(8px + env(safe-area-inset-top, 0px)); }
+  .detalhe h2:focus { outline: none; }
+  .detalhe h2:focus-visible { outline: 2px solid var(--ouro); outline-offset: 4px; border-radius: 4px; }
+  html.detalhe-aberto, body.detalhe-aberto { overflow: hidden; }
+  @keyframes detalhe-entra { from { transform: translateX(32px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes detalhe-sobe { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes veu-entra { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .detalhe.aberto, .veu { animation: none; } }
   /* O trilho some como caixa; o seletor de funil e a linha da meta grudam no topo, o resto rola com a página. */
   #trilho.trilho { display: contents; }
   header.topo { padding-block: 14px 8px; }
@@ -248,7 +265,8 @@
   .etapas li.agora { background: var(--pergaminho); border-radius: 6px; padding-inline: 8px; }
   .etapas li.agora b, .etapas li.agora span { color: var(--navy); }
   /* Tabela de Leads (a partir de 1024px) */
-  .tabela-wrap { overflow-x: auto; }
+  /* A rolagem (vertical e lateral) é da própria #fila, para o cabeçalho da tabela grudar no topo dela. */
+  #fila[data-modo="ldtab"] { overflow-x: auto; padding-top: 0; }
   .tabela { width: 100%; border-collapse: collapse; font-size: var(--t13); line-height: 1.4; }
   .tabela thead th { position: sticky; top: 0; z-index: 1; background: var(--creme); text-align: left; padding: 0; border-bottom: 1px solid var(--navy); }
   .tabela .ordenar { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 6px; width: 100%; min-height: 40px; padding: 4px 10px; cursor: pointer;
@@ -298,12 +316,15 @@
     .grade { grid-template-columns: 1fr; }
     .btn.sair { margin-left: 0; }
   }
-  @media (max-width: 759px) { .btn { min-height: 44px; } }
+  @media (max-width: 759px) {
+    .btn, .desfazer-h, summary, .toques summary, select, input, textarea { min-height: 44px; }
+    .toques summary { align-items: center; }
+  }
 
   /* ===== >=1024px: o detalhe aparece ao lado da fila ===== */
   @media (min-width: 1024px) {
     .central { display: grid; height: 100vh; height: 100dvh; padding: 0; overflow: hidden; }
-    .detalhe { display: block; position: static; width: auto; border: 0; padding: 0; background: none; overflow: auto; }
+    .detalhe { display: block; position: static; width: auto; border: 0; padding: 0; background: none; overflow: auto; animation: none; }
     .fila, .detalhe { overflow-y: auto; min-height: 0; padding: 16px; }
     .detalhe { border-left: 1px solid var(--linha); }
     #trilho.trilho { display: flex; background: var(--creme); min-height: 0; }
