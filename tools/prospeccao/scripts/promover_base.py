@@ -8,6 +8,7 @@ e grava JSON, e quem grava na central é o Claude (ArtifactData).
 
     python3 -m scripts.promover_base promover --base dados/explee/base.json \
         --existentes dados/explee/existentes_docs.json --tier A --saida dados/explee/promover.json
+    python3 -m scripts.promover_base recompor --entrada dados/explee/promover.json --saida dados/explee/promover.json
 
 Decisões:
 - Id `B` + 4 dígitos, depois do maior B dos existentes. A ordem é score desc e domínio, então rodar de novo com a
@@ -18,6 +19,9 @@ Decisões:
 - Canal WhatsApp sem telefone: `waLink` fica vazio, e a página só monta o link quando há destino (o contato que o
   enriquecimento achar e a Letícia escolher em "Usar na cadência"). Até lá o Enviar fica desativado.
 - `fraseUnica` é uma linha por segmento, sem nenhum fato sobre a empresa: a base não traz pesquisa do lead.
+- Região (msg/regiao.py): a copy de cada lead sai na versão da região ("MT", "fora" ou "?"), gravada em `regiao`.
+  Sem telefone, a região vem do nome e do domínio; quando o enriquecimento acha o celular, o DDD passa a decidir, e
+  `recompor` refaz os toques de quem ainda não recebeu nada (etapa 0 e nenhum `enviadoN`).
 - Saudação: primeiro nome do decisor escolhido pela classificação (com "Dr."/"Dra." como no resto da central). Conta
   institucional no lugar de pessoa ("ANEAC Oficial", "CDL Anápolis") não serve: vale a próxima pessoa e, sem
   nenhuma, "pessoal da <empresa>".
@@ -32,11 +36,12 @@ from datetime import datetime, timezone
 
 from central.seed import CAMPOS, ESTADO_INICIAL
 from msg.checks import SAUDACAO, SEO_NOME, Personal, check_personal, check_toque, tem_emoji
-from msg.compose import compose_whatsapp
+from msg.compose import compose_whatsapp, wa_link
 from msg.copy_v1 import TOQUES, VERSAO
 from msg.enriquecimento import primeiro_nome
 from msg.fotos import foto_para, linha_foto
 from msg.prep import Lead
+from msg.regiao import regiao as regiao_do_lead
 from scripts.classificar_base import peso_pessoa
 from scripts.enriquecer_leads import _dominio
 
@@ -144,12 +149,12 @@ def perfil_segmento(emp: dict):
 
 # --------------------------------------------------------------------------- documento
 
-def toques(icp: str, saudacao: str, curto: str, frase: str, foto: str) -> list[dict]:
-    """Os três toques de WhatsApp, sem link: o telefone vem do enriquecimento."""
+def toques(icp: str, saudacao: str, curto: str, frase: str, foto: str, regiao: str = "MT") -> list[dict]:
+    """Os três toques de WhatsApp na versão da região, sem link: o telefone vem do enriquecimento."""
     out = []
     for t in TOQUES:
         lf = linha_foto(foto) if t == 1 else ""
-        out.append({"n": t, "mensagem": compose_whatsapp(t, icp, saudacao, curto, frase, lf), "waLink": "",
+        out.append({"n": t, "mensagem": compose_whatsapp(t, icp, saudacao, curto, frase, lf, regiao), "waLink": "",
                     "assunto": "", "corpo": ""})
     return out
 
@@ -161,9 +166,10 @@ def checar(lid: str, doc: dict) -> list[str]:
     p = Personal(id=lid, saudacao=doc["saudacao"], nome_curto=nome_curto(doc["nome"]) or doc["nome"],
                  frase=doc["fraseUnica"], fonte="Neutra")
     erros = check_personal(l, p)
+    reg = doc.get("regiao") or "MT"
     for t in doc["toques"]:
         lf = linha_foto(doc["foto"]) if t["n"] == 1 else ""
-        erros += check_toque(l, p, t["n"], t["mensagem"], t["waLink"], lf)
+        erros += check_toque(l, p, t["n"], t["mensagem"], t["waLink"], lf, reg)
     return erros
 
 
@@ -179,13 +185,14 @@ def doc_promovido(emp: dict, num: int, agora: str) -> dict:
     decisores = [{"nome": (p.get("nome") or "").strip(), "cargo": (p.get("cargo") or "").strip(),
                   "linkedin": p.get("linkedin") or "", "fonte": f"Explee · campanha {p.get('campanha') or principal}"}
                  for p in pessoas if (p.get("nome") or "").strip()]
+    reg = regiao_do_lead({"nome": nome, "site": emp["dominio"]})
     dados = {k: "" for k in CAMPOS}
     dados.update({
         "ordem": ORDEM_BASE + num, "nome": nome, "saudacao": saudacao, "icp": icp, "segmento": emp.get("segmento"),
         "categoria": categoria, "faixa": emp.get("tier") or "", "score": emp.get("score"), "bairro": "",
         "canal": CANAL, "telefone": "", "email": "", "site": emp["dominio"], "instagram": "",
-        "fraseUnica": frase, "flags": [FLAG], "versaoCopy": VERSAO,
-        "toques": toques(icp, saudacao, curto, frase, foto), "foto": foto,
+        "fraseUnica": frase, "flags": [FLAG], "versaoCopy": VERSAO, "regiao": reg,
+        "toques": toques(icp, saudacao, curto, frase, foto, reg), "foto": foto,
     })
     dados.update(ESTADO_INICIAL)
     dados.update({
@@ -259,6 +266,70 @@ def promover(base: dict, existentes: list[dict], tier: str = "A", agora: str | N
     return {"novos": novos, "pulados": pulados}
 
 
+# --------------------------------------------------------------------------- recompor
+
+_LINK_TEL = re.compile(r"^https://wa\.me/(\d+)\?")
+
+
+def motivo_travado(doc: dict) -> str:
+    """Por que os toques do lead não podem mais mudar ("" se podem): algo já saiu ou ele não é da base Explee."""
+    if not (doc.get("baseExplee") or FLAG in (doc.get("flags") or [])):
+        return "não é da base Explee"
+    if (doc.get("etapa") or 0) != 0:
+        return f"etapa {doc.get('etapa')}"
+    if any(doc.get(f"enviado{t}") for t in TOQUES):
+        return "já teve envio"
+    return ""
+
+
+def recompor_doc(lid: str, doc: dict, agora: str) -> tuple[dict, str]:
+    """(doc, motivo). Refaz os toques na versão da região atual (o DDD dos telefones, se já houver). Devolve o
+    próprio doc, sem mudança, quando ele está travado (motivo) ou quando a região não mudou nada (motivo "")."""
+    travado = motivo_travado(doc)
+    if travado:
+        return doc, travado
+    reg = regiao_do_lead(doc)
+    curto = nome_curto(doc["nome"]) or doc["nome"]
+    novos = toques(doc["icp"], doc["saudacao"], curto, doc["fraseUnica"], doc["foto"], reg)
+    antigos = {t.get("n"): t for t in doc.get("toques") or []}
+    for t in novos:
+        m = _LINK_TEL.match((antigos.get(t["n"]) or {}).get("waLink") or "")
+        if m:
+            t["waLink"] = wa_link(m.group(1), t["mensagem"])
+    if reg == doc.get("regiao") and [t["mensagem"] for t in novos] == [t.get("mensagem") for t in doc.get("toques") or []]:
+        return doc, ""
+    novo = {**doc, "regiao": reg, "toques": novos}
+    erros = checar(lid, novo)
+    if erros:
+        return doc, "copy reprovada: " + "; ".join(erros)
+    novo["historico"] = (list(doc.get("historico") or []) + [
+        {"em": agora, "texto": f"Toques refeitos para a região {reg} (antes {doc.get('regiao') or 'MT'})",
+         "tipo": TIPO_HIST}])[-100:]
+    return novo, ""
+
+
+def recompor(entrada, agora: str | None = None):
+    """Refaz os toques dos docs ({novos: [{id, data}]} do promover ou lista de leads da central), na mesma forma
+    da entrada. Devolve (saida, relatorio)."""
+    agora = agora or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    itens = entrada["novos"] if isinstance(entrada, dict) else entrada
+    rel = {"recompostos": [], "iguais": [], "travados": []}
+    saida_itens = []
+    for item in itens:
+        embrulhado = isinstance(item.get("data"), dict) and "nome" not in item
+        lid, doc = item["id"], (item["data"] if embrulhado else {k: v for k, v in item.items() if k != "id"})
+        novo, motivo = recompor_doc(lid, doc, agora)
+        if novo is not doc:
+            rel["recompostos"].append({"id": lid, "de": doc.get("regiao") or "MT", "para": novo["regiao"]})
+        elif motivo:
+            rel["travados"].append({"id": lid, "motivo": motivo})
+        else:
+            rel["iguais"].append(lid)
+        saida_itens.append({"id": lid, "data": novo} if embrulhado else {"id": lid, **novo})
+    saida = {**entrada, "novos": saida_itens} if isinstance(entrada, dict) else saida_itens
+    return saida, rel
+
+
 # --------------------------------------------------------------------------- CLI
 
 def _ler(caminho):
@@ -280,17 +351,28 @@ def main(argv=None):
     p.add_argument("--existentes", required=True, help="JSON com os leads da central ({id, ...} ou {id, data})")
     p.add_argument("--tier", default="A")
     p.add_argument("--saida", required=True)
+    r = sub.add_parser("recompor", help="refaz os toques pela região depois do enriquecimento (só etapa 0, sem envio)")
+    r.add_argument("--entrada", required=True, help="promover.json ou lista de leads da central")
+    r.add_argument("--saida", required=True)
     a = ap.parse_args(argv)
+    if a.cmd == "recompor":
+        saida, rel = recompor(_ler(a.entrada))
+        _gravar(a.saida, saida)
+        print(json.dumps({"recompostos": len(rel["recompostos"]), "iguais": len(rel["iguais"]),
+                          "travados": rel["travados"], "mudancas": rel["recompostos"]}, ensure_ascii=False))
+        return 0
     res = promover(_ler(a.base), _ler(a.existentes), a.tier)
     _gravar(a.saida, res)
-    por_seg = {}
+    por_seg, por_reg = {}, {}
     for n in res["novos"]:
         por_seg[n["data"]["segmento"]] = por_seg.get(n["data"]["segmento"], 0) + 1
+        por_reg[n["data"]["regiao"]] = por_reg.get(n["data"]["regiao"], 0) + 1
     motivos = {}
     for x in res["pulados"]:
         m = x["motivo"].split(":")[0]
         motivos[m] = motivos.get(m, 0) + 1
-    print(json.dumps({"novos": len(res["novos"]), "porSegmento": por_seg, "pulados": motivos}, ensure_ascii=False))
+    print(json.dumps({"novos": len(res["novos"]), "porSegmento": por_seg, "porRegiao": por_reg, "pulados": motivos},
+                     ensure_ascii=False))
 
 
 if __name__ == "__main__":

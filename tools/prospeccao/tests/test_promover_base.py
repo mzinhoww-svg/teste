@@ -5,7 +5,7 @@ from central.seed import CAMPOS, ESTADO_INICIAL
 from msg.copy_v1 import O_QUE_FAZEMOS
 from scripts.enriquecer_leads import selecionar
 from scripts.explee_hot_leads import lead_novo
-from scripts.promover_base import checar, main, nome_curto, promover
+from scripts.promover_base import checar, main, nome_curto, promover, recompor
 
 AGORA = "2026-10-02T12:00:00Z"
 
@@ -158,6 +158,77 @@ def test_toques_dos_eventos_passam_na_checagem():
     n = um(empresa(segmento="produtores de evento e feiras", nome="Feira Modelo"))
     assert O_QUE_FAZEMOS["ICP6"] in n["data"]["toques"][0]["mensagem"]
     assert checar(n["id"], n["data"]) == []
+
+
+# ---------------------------------------------------------------- região
+
+def test_promover_escolhe_a_versao_pela_regiao():
+    fora = um(empresa(nome="CNC - Confederação Nacional do Comércio", dominio="cnc.example"))["data"]
+    assert fora["regiao"] == "fora" and "Cuiabá (MT)" in fora["toques"][0]["mensagem"]
+    assert "café" not in fora["toques"][0]["mensagem"] and "por vídeo" in fora["toques"][1]["mensagem"]
+    mt = um(empresa(nome="OAB MT", dominio="oabmt.example"))["data"]
+    assert mt["regiao"] == "MT" and "aqui em Cuiabá" in mt["toques"][0]["mensagem"]
+    assert "um café" in mt["toques"][0]["mensagem"]
+    inc = um(empresa(nome="Feira Modelo Eventos", dominio="feiramodelo.example", segmento="produtores de evento e feiras"))["data"]
+    assert inc["regiao"] == "?" and "estúdio de podcast em Cuiabá." in inc["toques"][0]["mensagem"]
+    for n, d in (("B1", fora), ("B2", mt), ("B3", inc)):
+        assert checar(n, d) == []
+
+
+def _promovido(nome="Feira Modelo Eventos", dominio="feiramodelo.example"):
+    n = um(empresa(nome=nome, dominio=dominio, segmento="produtores de evento e feiras"))
+    return {"novos": [n], "pulados": []}
+
+
+def test_recompor_usa_o_ddd_do_telefone_achado():
+    entrada = _promovido()
+    assert entrada["novos"][0]["data"]["regiao"] == "?"
+    entrada["novos"][0]["data"]["contatos"] = [{"id": "k1", "papel": "decisor", "telefone": "5511988887777"}]
+    saida, rel = recompor(entrada, AGORA)
+    d = saida["novos"][0]["data"]
+    assert rel["recompostos"] == [{"id": "B0001", "de": "?", "para": "fora"}]
+    assert d["regiao"] == "fora" and "Cuiabá (MT)" in d["toques"][0]["mensagem"] and checar("B0001", d) == []
+    assert d["historico"][-1]["texto"] == "Toques refeitos para a região fora (antes ?)"
+    assert saida["pulados"] == [] and entrada["novos"][0]["data"]["regiao"] == "?"  # entrada intacta
+    # de novo: nada muda
+    saida2, rel2 = recompor(saida, AGORA)
+    assert rel2["recompostos"] == [] and rel2["iguais"] == ["B0001"] and saida2 == saida
+
+
+def test_recompor_mantem_o_telefone_do_link():
+    entrada = _promovido()
+    d = entrada["novos"][0]["data"]
+    d["telefone"] = "5565999991234"
+    d["toques"][0]["waLink"] = "https://wa.me/5565999991234?text=x"
+    saida, rel = recompor(entrada, AGORA)
+    t = saida["novos"][0]["data"]["toques"]
+    assert saida["novos"][0]["data"]["regiao"] == "MT"
+    assert t[0]["waLink"].startswith("https://wa.me/5565999991234?text=Oi%2C") and t[1]["waLink"] == ""
+    assert checar("B0001", saida["novos"][0]["data"]) == []
+
+
+def test_recompor_nao_mexe_em_quem_ja_teve_envio():
+    for estado in ({"etapa": 1}, {"etapa": 0, "enviado1": "2026-10-01T12:00:00Z"}):
+        entrada = _promovido()
+        d = entrada["novos"][0]["data"]
+        d.update(estado)
+        d["contatos"] = [{"telefone": "5511988887777"}]
+        antes = json.loads(json.dumps(entrada))
+        saida, rel = recompor(entrada, AGORA)
+        assert saida == antes and rel["recompostos"] == [] and rel["travados"][0]["id"] == "B0001"
+
+
+def test_recompor_lista_de_leads_da_central(tmp_path, capsys):
+    n = _promovido()["novos"][0]
+    lista = [{"id": n["id"], **n["data"], "telefone": "11 98888-7777"},
+             {"id": "R0001", "nome": "Lead antigo", "etapa": 0, "toques": []}]
+    e, s = tmp_path / "e.json", tmp_path / "s.json"
+    e.write_text(json.dumps(lista, ensure_ascii=False), encoding="utf-8")
+    main(["recompor", "--entrada", str(e), "--saida", str(s)])
+    out = json.loads(s.read_text(encoding="utf-8"))
+    assert out[0]["id"] == "B0001" and out[0]["regiao"] == "fora" and out[1] == lista[1]
+    rel = json.loads(capsys.readouterr().out)
+    assert rel["recompostos"] == 1 and rel["travados"] == [{"id": "R0001", "motivo": "não é da base Explee"}]
 
 
 # ---------------------------------------------------------------- enriquecimento

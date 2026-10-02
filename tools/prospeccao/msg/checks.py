@@ -95,7 +95,8 @@ def check_personal(l: Lead, p: Personal) -> list[str]:
     return erros
 
 
-def check_toque(l: Lead, p: Personal, toque: int, texto: str, link: str, linha_foto: str = "") -> list[str]:
+def check_toque(l: Lead, p: Personal, toque: int, texto: str, link: str, linha_foto: str = "",
+                regiao: str = "MT") -> list[str]:
     erros: list[str] = []
     e = lambda msg: erros.append(f"{l.id} toque {toque}: {msg}")  # noqa: E731
     if "—" in texto:
@@ -111,7 +112,7 @@ def check_toque(l: Lead, p: Personal, toque: int, texto: str, link: str, linha_f
         e("placeholder sem preencher")
 
     esperado = [b.format(saudacao=p.saudacao, nome_curto=p.nome_curto, frase=p.frase, linha_foto=linha_foto)
-                for b in blocos(toque, l.icp, foto=bool(linha_foto))]
+                for b in blocos(toque, l.icp, foto=bool(linha_foto), regiao=regiao)]
     if texto.split(SEPARADOR) != esperado:
         e("mensagem difere dos blocos da copy")
     if "\n\n\n" in texto:
