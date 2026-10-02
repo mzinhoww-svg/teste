@@ -32,10 +32,10 @@
     fechando: null,
     novoCliente: false,
     filtro: {
-      aq: { grupo: "hoje", segmento: "", faixa: "", canal: "" },
+      aq: { grupo: "hoje", segmento: "", faixa: "", canal: "", pais: "", uf: "", cidade: "" },
       pv: { grupo: "hoje", etapa: "", produto: "" },
-      ld: { grupo: "todos", segmento: "" },
-      bs: { grupo: "base", segmento: "", faixa: "", persona: "", contato: "" }
+      ld: { grupo: "todos", segmento: "", pais: "", uf: "", cidade: "" },
+      bs: { grupo: "base", segmento: "", faixa: "", persona: "", contato: "", pais: "", uf: "", cidade: "" }
     },
     busca: "",                                      // só em memória; vale para os três funis
     novoContato: null,
@@ -135,6 +135,22 @@
     while (s.options.length > 1) s.remove(1);
     pares.forEach(function (v) { s.add(new Option(v[1], v[0])); });
     s.value = pares.some(function (v) { return v[0] === atual; }) ? atual : "";
+  }
+
+  // País, Estado e Cidade de um funil: as opções saem da lista (o estado e a cidade só mostram o que cabe no recorte
+  // acima) e o filtro guardado acompanha o select quando a opção escolhida deixou de existir.
+  var GEO_CAMPOS = [["pais", "paises"], ["uf", "ufs"], ["cidade", "cidades"]];
+  function selectsGeo(prefixo, lista, f) {
+    GEO_CAMPOS.forEach(function (c) {  // país, depois estado, depois cidade: cada um já enxerga o recorte corrigido do anterior
+      var id = prefixo + c[0];
+      preencherSelect(id, Regras.opcoesGeo(lista, f)[c[1]]);
+      f[c[0]] = $(id).value;
+    });
+  }
+  function ligarGeo(prefixo, f) {
+    GEO_CAMPOS.forEach(function (c) {
+      $(prefixo + c[0]).addEventListener("change", function (e) { f()[c[0]] = e.target.value; render(); });
+    });
   }
 
   // ---------- escrita ----------
@@ -577,6 +593,7 @@
     preencherSelect("f-segmento", unicos("segmento"));
     preencherSelect("f-faixa", unicos("faixa"));
     preencherSelect("f-canal", unicos("canal"));
+    selectsGeo("f-", reais, estado.filtro.aq);
 
     var f = estado.filtro.aq;
     var visiveis = todos.filter(function (l) {
@@ -586,7 +603,7 @@
       if (f.segmento && l.segmento !== f.segmento) return false;
       if (f.faixa && l.faixa !== f.faixa) return false;
       if (f.canal && l.canal !== f.canal) return false;
-      return true;
+      return Regras.casaGeo(l, f);
     });
     if (!estado.carregado.leads) { limparFila(); carregando($("fila")); return desenharDetalhe(); }
     if (!todos.length) { limparFila(); vazio($("fila"), "Nenhum lead na fila", "Quando o Claude semear a central, as linhas aparecem aqui."); return desenharDetalhe(); }
@@ -654,7 +671,7 @@
     if (semCad) acoes = l.explee && emailExplee(l) ? [el("a", { class: "btn abrir-email" + (sel() === l.id ? " principal" : ""), href: mailtoExplee(l), target: "_blank", rel: "noopener",
       "aria-label": "Abrir e-mail para " + (l.nome || l.id) }, ["Abrir e-mail"])] : [];
     var x = l.explee || {};
-    var sub = teste ? "WhatsApp da própria Reiners" : l.explee ? [x.pessoa, l.segmento].filter(Boolean).join(" · ") : [l.categoria, l.bairro].filter(Boolean).join(" · ");
+    var sub = teste ? "WhatsApp da própria Reiners" : l.explee ? [x.pessoa, l.segmento, Regras.rotuloGeo(l)].filter(Boolean).join(" · ") : [l.categoria, l.bairro, Regras.rotuloGeo(l)].filter(Boolean).join(" · ");
     var quandoTxt = semCad && l.explee ? ["respondeu na Explee", x.quenteEm ? " · " : "", x.quenteEm ? el("span", { class: "num", text: dataCurta(x.quenteEm) }) : null] : quandoDe(l);
     return el("div", { class: "linha" + (teste ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : ""), "data-id": l.id, tabindex: "0",
       role: "group", "aria-label": teste ? "Card de teste" : (l.nome || l.id), "aria-current": sel() === l.id ? "true" : null }, [
@@ -1199,7 +1216,7 @@
     return el("div", { class: "linha", "data-id": l.id, tabindex: "0", role: "group", "aria-label": l.nome || l.id, "aria-current": sel() === l.id ? "true" : null }, [
       el("div", { class: "info" }, [
         el("span", { class: "nome", text: l.nome || l.id }),
-        el("span", { class: "sub", text: [l.segmento, l.categoria].filter(Boolean).join(" · ") }),
+        el("span", { class: "sub", text: [l.segmento, l.categoria, Regras.rotuloGeo(l)].filter(Boolean).join(" · ") }),
         el("div", { class: "situacao" }, [
           el("span", { class: "estado " + st, text: ROTULO_ENRIQ[st] }),
           lider ? el("span", { class: "quando", text: "Lidera: " + lider }) : null,
@@ -1233,7 +1250,7 @@
   function linhaTabelaLD(l) {
     var st = statusLD(l), alertas = (l.alertas || []).length;
     return el("tr", { "data-id": l.id, tabindex: "0", "aria-current": sel() === l.id ? "true" : null }, [
-      el("th", { scope: "row", class: "nome" }, [l.nome || l.id, l.explee ? " " : null, chipExplee(l)]),
+      el("th", { scope: "row", class: "nome" }, [l.nome || l.id, l.explee ? " " : null, chipExplee(l), Regras.rotuloGeo(l) ? el("span", { class: "local", text: Regras.rotuloGeo(l) }) : null]),
       el("td", null, [el("span", { class: "estado " + st, text: ROTULO_ENRIQ[st] })]),
       el("td", { text: liderDe(l) || "—" }),
       el("td", { text: diretoDe(l) || "—" }),
@@ -1280,10 +1297,12 @@
     var segs = {};
     todos.forEach(function (l) { if (l.segmento) segs[l.segmento] = 1; });
     preencherSelect("f-ld-segmento", Object.keys(segs).sort());
+    selectsGeo("f-ld-", todos, estado.filtro.ld);
     var f = estado.filtro.ld;
     var visiveis = todos.filter(function (l) {
       if (f.grupo === "setor" ? !deSetor(l) : (f.grupo !== "todos" && statusLD(l) !== f.grupo)) return false;
       if (f.segmento && l.segmento !== f.segmento) return false;
+      if (!Regras.casaGeo(l, f)) return false;
       return Regras.casaBusca(l, estado.busca);
     });
     var tabelaLayout = document.body.dataset.layout === "tres" || document.body.dataset.layout === "dois";
@@ -1297,7 +1316,7 @@
       prepararFila("ld");
       reconciliar(visiveis, { alvo: alvoEl, fabrica: linhaLeadEnriq, colecao: "leads", ctx: "" });
     }
-    if (!visiveis.length) vazio(alvoEl, "Nada neste filtro", "Troque a aba, o segmento ou a busca.");
+    if (!visiveis.length) vazio(alvoEl, "Nada neste filtro", "Troque a aba, os filtros ou a busca.");
     desenharDetalhe();
   }
 
@@ -1540,7 +1559,7 @@
     if (foco && $(foco)) $(foco).focus({ preventScroll: true });
   }
   function irParaLead(id) {
-    estado.filtro.ld = { grupo: "todos", segmento: "" };
+    estado.filtro.ld = { grupo: "todos", segmento: "", pais: "", uf: "", cidade: "" };
     guardarSel("ld", id);
     trocarFunil("ld");
   }
@@ -1580,7 +1599,7 @@
     return el("div", { class: "linha bs", "data-id": d.id, role: "group", "aria-label": d.nome || d.dominio }, [
       el("div", { class: "info" }, [
         el("span", { class: "nome", text: d.nome || d.dominio }),
-        el("span", { class: "sub", text: [d.segmento, d.tier ? "faixa " + d.tier : ""].filter(Boolean).join(" · ") }),
+        el("span", { class: "sub", text: [d.segmento, d.tier ? "faixa " + d.tier : "", Regras.rotuloGeo(d)].filter(Boolean).join(" · ") }),
         el("span", { class: "sub", text: dec ? "Decide: " + dec : "Sem decisor na lista" }),
         contatoEmpresaBase(d),
         el("div", { class: "situacao" }, [p.estado])
@@ -1592,7 +1611,8 @@
   function linhaTabelaBase(d) {
     var p = partesBase(d);
     return el("tr", { "data-id": d.id }, [
-      el("th", { scope: "row", class: "nome" }, [d.nome || d.dominio, el("span", { class: "dominio", text: d.dominio }), contatoEmpresaBase(d)]),
+      el("th", { scope: "row", class: "nome" }, [d.nome || d.dominio, el("span", { class: "dominio", text: d.dominio }),
+        Regras.rotuloGeo(d) ? el("span", { class: "local", text: Regras.rotuloGeo(d) }) : null, contatoEmpresaBase(d)]),
       el("td", { text: d.segmento || "—" }),
       el("td", { class: "faixa", text: d.tier || "—" }),
       el("td", { text: quemDecide(d) || "—" }),
@@ -1637,6 +1657,7 @@
     abas(cont);
     preencherSelect("f-bs-segmento", Object.keys(segs).sort());
     preencherSelect("f-bs-faixa", Object.keys(faixas).sort().map(function (f) { return [f, "Faixa " + f]; }));
+    selectsGeo("f-bs-", todos, estado.filtro.bs);
     preencherSelect("f-bs-persona", Object.keys(PERSONAS).filter(function (k) { return personas[k]; }).map(function (k) { return [k, PERSONAS[k]]; }));
     var filtrados = filtradosBase();
     desenharLote(filtrados);
@@ -2114,6 +2135,9 @@
     $("f-bs-" + k).addEventListener("change", function (e) { estado.filtro.bs[k] = e.target.value; render(); });
   });
   $("f-ld-segmento").addEventListener("change", function (e) { estado.filtro.ld.segmento = e.target.value; render(); });
+  ligarGeo("f-", function () { return estado.filtro.aq; });
+  ligarGeo("f-ld-", function () { return estado.filtro.ld; });
+  ligarGeo("f-bs-", function () { return estado.filtro.bs; });
   var buscaTimer;
   function aplicarBusca(v) { clearTimeout(buscaTimer); estado.busca = v; render(); }
   $("btn-filtros").addEventListener("click", function () { painel(!painelAberto()); });

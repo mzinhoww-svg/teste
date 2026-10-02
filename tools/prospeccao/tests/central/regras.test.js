@@ -148,3 +148,63 @@ test("contato da empresa (site): lead só com ele segue em semcontato até Usar 
   assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", contato: "sim" }, "").map((d) => d.id), ["D1"]);
   assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", contato: "" }, "").length, 3);
 });
+
+// ---------- geografia: país, estado e cidade ----------
+const GEO_LISTA = [
+  { id: "D1", pais: "Brasil", uf: "MT", cidade: "Cuiabá" },
+  { id: "D2", pais: "Brasil", uf: "MT", cidade: "Sinop" },
+  { id: "D3", pais: "Brasil", uf: "SP", cidade: "Campinas" },
+  { id: "D4", pais: "Brasil", uf: "SP", cidade: "" },
+  { id: "D5", pais: "Portugal", uf: "", cidade: "" },
+  { id: "D6", pais: "", uf: "", cidade: "" },
+  { id: "D7", pais: "Brasil", uf: "MT", cidade: "CUIABA" },
+];
+const idsDe = (l) => l.map((d) => d.id);
+test("geo: casaGeo filtra por país, estado e cidade (cidade sem acento nem caixa) e por Sem informação", () => {
+  const f = (o) => idsDe(GEO_LISTA.filter((d) => R.casaGeo(d, Object.assign({ pais: "", uf: "", cidade: "" }, o))));
+  assert.deepEqual(f({}), ["D1", "D2", "D3", "D4", "D5", "D6", "D7"]);
+  assert.deepEqual(f({ uf: "MT" }), ["D1", "D2", "D7"]);
+  assert.deepEqual(f({ uf: "MT", cidade: "Cuiabá" }), ["D1", "D7"]);
+  assert.deepEqual(f({ pais: "Portugal" }), ["D5"]);
+  assert.deepEqual(f({ uf: R.SEM_GEO }), ["D5", "D6"]);
+  assert.deepEqual(f({ uf: "SP", cidade: R.SEM_GEO }), ["D4"]);
+  assert.deepEqual(f({ pais: R.SEM_GEO }), ["D6"]);
+  assert.ok(R.casaGeo({}, null), "sem filtro, passa");
+});
+test("geo: opcoesGeo estreita estado e cidade pelo recorte e termina com Sem informação", () => {
+  const o = R.opcoesGeo(GEO_LISTA, {});
+  assert.deepEqual(o.paises, [["Brasil", "Brasil"], ["Portugal", "Portugal"], [R.SEM_GEO, "Sem informação"]], "Brasil primeiro");
+  assert.deepEqual(o.ufs, [["MT", "MT"], ["SP", "SP"], [R.SEM_GEO, "Sem informação"]]);
+  assert.deepEqual(o.cidades.map((c) => c[0]), ["Campinas", "Cuiabá", "Sinop", R.SEM_GEO], "Cuiabá e CUIABA são uma cidade só");
+  assert.deepEqual(R.opcoesGeo(GEO_LISTA, { uf: "MT" }).cidades, [["Cuiabá", "Cuiabá"], ["Sinop", "Sinop"]], "todo MT tem cidade: sem opção Sem informação");
+  assert.deepEqual(R.opcoesGeo(GEO_LISTA, { uf: "SP" }).cidades, [["Campinas", "Campinas"], [R.SEM_GEO, "Sem informação"]]);
+  assert.deepEqual(R.opcoesGeo(GEO_LISTA, { pais: "Portugal" }).ufs, [[R.SEM_GEO, "Sem informação"]]);
+  assert.deepEqual(R.opcoesGeo([{ id: "x" }], {}).paises, [[R.SEM_GEO, "Sem informação"]]);
+});
+test("geo: rótulo Cidade/UF e busca por cidade e por sigla de estado", () => {
+  assert.equal(R.rotuloGeo({ uf: "MT", cidade: "Cuiabá" }), "Cuiabá/MT");
+  assert.equal(R.rotuloGeo({ uf: "MT" }), "MT");
+  assert.equal(R.rotuloGeo({ cidade: "Sinop" }), "Sinop");
+  assert.equal(R.rotuloGeo({ pais: "Portugal" }), "Portugal");
+  assert.equal(R.rotuloGeo({ pais: "Brasil" }), "");
+  assert.equal(R.rotuloGeo({ perfil: { cidade: "Cuiabá" } }), "Cuiabá", "lead R sem cidade própria usa a do perfil");
+  assert.equal(R.rotuloGeo({ cidade: "Sinop", perfil: { cidade: "Cuiabá" } }), "Sinop");
+  const l = { id: "R1", nome: "Clínica Alfa", uf: "MT", cidade: "Várzea Grande" };
+  assert.ok(R.casaBusca(l, "varzea"));
+  assert.ok(R.casaBusca(l, "MT"));
+  assert.ok(!R.casaBusca(l, "SP"));
+  assert.ok(!R.casaBusca({ id: "R2", nome: "Alfa", uf: "MT" }, "m"), "a sigla só casa inteira");
+  assert.ok(R.casaBusca({ id: "R2", nome: "Alfa", uf: "MT" }, "mt"));
+});
+test("geo: filtrarBase e casaBase com uf, cidade, país, Sem informação e busca", () => {
+  const lista = GEO_LISTA.map((d) => Object.assign({ nome: "Empresa " + d.id, dominio: d.id.toLowerCase() + ".example", status: "base" }, d));
+  const f = (o, busca) => idsDe(R.filtrarBase(lista, Object.assign({ grupo: "todos" }, o), busca || ""));
+  assert.deepEqual(f({ uf: "SP" }), ["D3", "D4"]);
+  assert.deepEqual(f({ uf: "MT", cidade: "Sinop" }), ["D2"]);
+  assert.deepEqual(f({ uf: R.SEM_GEO }), ["D5", "D6"]);
+  assert.deepEqual(f({ pais: "Portugal", uf: R.SEM_GEO }), ["D5"]);
+  assert.deepEqual(f({ uf: "MT" }, "cuiaba"), ["D1", "D7"]);
+  assert.deepEqual(f({}, "campinas"), ["D3"]);
+  assert.deepEqual(f({}, "sp"), ["D3", "D4"]);
+  assert.deepEqual(f({ grupo: "todos", segmento: "" , uf: "MT", cidade: "" }), ["D1", "D2", "D7"]);
+});
