@@ -35,7 +35,7 @@
       aq: { grupo: "hoje", segmento: "", faixa: "", canal: "" },
       pv: { grupo: "hoje", etapa: "", produto: "" },
       ld: { grupo: "todos", segmento: "" },
-      bs: { grupo: "base", segmento: "", faixa: "", persona: "" }
+      bs: { grupo: "base", segmento: "", faixa: "", persona: "", contato: "" }
     },
     busca: "",                                      // só em memória; vale para os três funis
     novoContato: null,
@@ -665,13 +665,18 @@
           semCad || g === "semcontato" ? null : el("span", { class: "pontos", role: "img", "aria-label": pontos.fala }, pontos.classes.map(function (c) { return el("i", { class: c }); })),
           el("span", { class: "quando" }, quandoTxt),
           chipExplee(l),
-          achado ? el("span", { class: "achado", text: (email ? "E-mail encontrado: " : "Celular encontrado: ") + (achado.nome || PAPEIS[achado.papel] || "contato") }) : null,
+          achado ? el("span", { class: "achado", text: textoAchado(achado, email) }) : null,
           g === "semcontato" && !achado ? chipMigrado(l) : null,
           (l.alertas || []).length ? el("span", { class: "chip alerta", text: "Alerta" }) : null
         ])
       ]),
       acoes.length ? el("div", { class: "acoes" }, acoes) : null
     ]);
+  }
+  // "Contato da empresa: +55 (65) 3000-0000" para o do site; "Celular encontrado: Paulo" para o de um decisor.
+  function textoAchado(c, email) {
+    if (daEmpresa(c)) return "Contato da empresa: " + (email ? c.email : Regras.telefoneFormatado(c.telefone));
+    return (email ? "E-mail encontrado: " : "Celular encontrado: ") + (c.nome || PAPEIS[c.papel] || "contato");
   }
   function assinaturaLinha(item, ctx, colecao) {
     return JSON.stringify(item) + ctx + (sel() === item.id ? "1" : "0") + (estado.gravando[colecao + "/" + item.id] ? "g" : "");
@@ -971,14 +976,17 @@
       acoes.length ? el("div", { class: "acoes" }, acoes) : null
     ]));
   }
+  // Contato da empresa (site): papel geral, sem nome, cargo "Contato da empresa (site)".
+  function daEmpresa(c) { return c.papel === "geral" && !c.nome && /^Contato da empresa/.test(c.cargo || ""); }
+  function nomeContato(c) { return c.nome || (daEmpresa(c) ? "o contato da empresa" : PAPEIS[c.papel]); }
   // "Usar na cadência": a mesma ação no cartão de contato e na linha de Sem contato (que tira o lead do filtro).
   function usarContato(l, c) {
-    var quem = c.nome || PAPEIS[c.papel];
+    var quem = nomeContato(c);
     return gravar("leads/" + l.id, registrar(l, { contatoAtivo: c.id }, "Cadência passou para " + quem), "Cadência vai para " + quem);
   }
   function botaoUsarContato(l, c, semMarca, naLinha) {
     return el("button", { type: "button", id: (naLinha ? "usar-" : "contato-") + l.id + "-" + c.id, class: "btn ok" + (naLinha ? " usar" : ""), disabled: semMarca,
-      "aria-label": naLinha ? "Usar " + (c.nome || PAPEIS[c.papel]) + " na cadência de " + (l.nome || l.id) : null,
+      "aria-label": naLinha ? "Usar " + nomeContato(c) + " na cadência de " + (l.nome || l.id) : null,
       onclick: function () { if (naLinha) comVizinho(l, function () { return usarContato(l, c); }); else usarContato(l, c); } }, ["Usar na cadência"]);
   }
   // Erro de formulário: anunciado (role="alert"), ligado ao campo que falhou (aria-invalid + aria-describedby) e com o foco nele.
@@ -1553,6 +1561,20 @@
         onclick: function () { pedirUma(d); } }, ["Enriquecer e iniciar cadência"])
     };
   }
+  // Contato público da empresa, compacto: um de cada, com a fonte (a página do site onde foi achado).
+  function contatoEmpresaBase(d) {
+    var c = d.contatoEmpresa || {};
+    if (!Regras.temContatoEmpresa(d)) return null;
+    var itens = [];
+    if (c.whatsapp) itens.push(["WhatsApp da empresa", Regras.telefoneFormatado(c.whatsapp)]);
+    if (c.telefone) itens.push(["Telefone", Regras.telefoneFormatado(c.telefone)]);
+    if (c.email) itens.push(["E-mail", c.email]);
+    var fonte = c.fonte || d.site;
+    return el("div", { class: "contato-emp" }, itens.map(function (i) {
+      return el("span", { class: "ce" }, [i[0] + ": ", el("span", { class: "num", text: i[1] })]);
+    }).concat([/^https?:\/\//.test(fonte || "") ? el("a", { class: "ce-fonte", href: fonte, target: "_blank", rel: "noopener",
+      "aria-label": "Fonte do contato de " + (d.nome || d.dominio) + ": site" }, ["Fonte: site"]) : null]));
+  }
   function linhaBase(d) {
     var p = partesBase(d), dec = quemDecide(d);
     return el("div", { class: "linha bs", "data-id": d.id, role: "group", "aria-label": d.nome || d.dominio }, [
@@ -1560,6 +1582,7 @@
         el("span", { class: "nome", text: d.nome || d.dominio }),
         el("span", { class: "sub", text: [d.segmento, d.tier ? "faixa " + d.tier : ""].filter(Boolean).join(" · ") }),
         el("span", { class: "sub", text: dec ? "Decide: " + dec : "Sem decisor na lista" }),
+        contatoEmpresaBase(d),
         el("div", { class: "situacao" }, [p.estado])
       ]),
       // no celular os links viram botões de 44px
@@ -1569,7 +1592,7 @@
   function linhaTabelaBase(d) {
     var p = partesBase(d);
     return el("tr", { "data-id": d.id }, [
-      el("th", { scope: "row", class: "nome" }, [d.nome || d.dominio, el("span", { class: "dominio", text: d.dominio })]),
+      el("th", { scope: "row", class: "nome" }, [d.nome || d.dominio, el("span", { class: "dominio", text: d.dominio }), contatoEmpresaBase(d)]),
       el("td", { text: d.segmento || "—" }),
       el("td", { class: "faixa", text: d.tier || "—" }),
       el("td", { text: quemDecide(d) || "—" }),
@@ -2087,7 +2110,7 @@
   $("f-pv").addEventListener("click", function () { trocarFunil("pv"); });
   $("f-ld").addEventListener("click", function () { trocarFunil("ld"); });
   $("f-bs").addEventListener("click", function () { trocarFunil("bs"); });
-  ["segmento", "faixa", "persona"].forEach(function (k) {
+  ["segmento", "faixa", "persona", "contato"].forEach(function (k) {
     $("f-bs-" + k).addEventListener("change", function (e) { estado.filtro.bs[k] = e.target.value; render(); });
   });
   $("f-ld-segmento").addEventListener("change", function (e) { estado.filtro.ld.segmento = e.target.value; render(); });

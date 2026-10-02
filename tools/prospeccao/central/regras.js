@@ -237,18 +237,24 @@ var Regras = (function () {
     var dec = d.decisor || {};
     return [d.nome, d.dominio, d.id, d.segmento, dec.nome, dec.cargo].map(semAcento).join(" | ").indexOf(q) >= 0;
   }
+  // Contato público da empresa tirado do site (WhatsApp, telefone, e-mail), um de cada: só conta se achou algum.
+  function temContatoEmpresa(d) {
+    var c = (d && d.contatoEmpresa) || {};
+    return !!(String(c.whatsapp || "").trim() || String(c.telefone || "").trim() || String(c.email || "").trim());
+  }
   // Faixa, depois score maior, depois nome.
   function ordenarBase(a, b) {
     return String(a.tier || "").localeCompare(String(b.tier || "")) || (Number(b.score) || 0) - (Number(a.score) || 0) ||
       String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR");
   }
-  // f = { grupo: "todos"|"base"|"pedido"|"na_cadencia", segmento, faixa, persona }
+  // f = { grupo: "todos"|"base"|"pedido"|"na_cadencia", segmento, faixa, persona, contato: "sim" (só com contato da empresa) }
   function filtrarBase(lista, f, busca) {
     return lista.filter(function (d) {
       if (f.grupo && f.grupo !== "todos" && statusBase(d) !== f.grupo) return false;
       if (f.segmento && d.segmento !== f.segmento) return false;
       if (f.faixa && d.tier !== f.faixa) return false;
       if (f.persona && (d.decisor || {}).persona !== f.persona) return false;
+      if (f.contato === "sim" && !temContatoEmpresa(d)) return false;
       return casaBase(d, busca);
     });
   }
@@ -259,7 +265,7 @@ var Regras = (function () {
   }
 
   return {
-    LOTE_BASE: LOTE_BASE, statusBase: statusBase, casaBase: casaBase, ordenarBase: ordenarBase, filtrarBase: filtrarBase, loteBase: loteBase,
+    LOTE_BASE: LOTE_BASE, temContatoEmpresa: temContatoEmpresa, statusBase: statusBase, casaBase: casaBase, ordenarBase: ordenarBase, filtrarBase: filtrarBase, loteBase: loteBase,
     dinheiroMicro: dinheiroMicro, porcento: porcento, motivoParada: motivoParada, enriqOcupado: enriqOcupado,
     casaBusca: casaBusca, DIA: DIA, inicioDoDia: inicioDoDia, dataCurta: dataCurta, quando: quando, waLink: waLink, telefoneFormatado: telefoneFormatado,
     etapa: etapa, vencimento: vencimento, grupo: grupo, toque: toque,

@@ -135,3 +135,16 @@ test("Base: sem_cadencia é status próprio, fora do lote e do filtro Na base", 
   assert.deepEqual(R.filtrarBase(lista, { grupo: "sem_cadencia" }, "").map((d) => d.id), ["D1"]);
   assert.deepEqual(R.loteBase(lista).ids, ["D2", "D3"]);
 });
+
+test("contato da empresa (site): lead só com ele segue em semcontato até Usar na cadência; filtro da Base", () => {
+  const geral = { id: "k1", papel: "geral", nome: "", cargo: "Contato da empresa (site)", telefone: "5565999991111", whatsapp: "sim", email: "", fonte: "https://a.example/contato", confianca: "média" };
+  const l = { id: "B0001", canal: "WhatsApp", telefone: "", email: "", contatoAtivo: null, etapa: 0, contatos: [geral] };
+  const agora = new Date("2026-10-02T12:00:00");
+  assert.equal(R.grupo(l, {}, agora), "semcontato", "o contato achado não tira o lead da aba");
+  assert.equal(R.contatoEncontrado(l).id, "k1");
+  assert.equal(R.grupo(Object.assign({}, l, { contatoAtivo: "k1" }), {}, agora), "hoje");
+  const lista = [{ id: "D1", contatoEmpresa: { whatsapp: "", telefone: "556530000000", email: "", fonte: "https://a.example" } },
+    { id: "D2" }, { id: "D3", contatoEmpresa: { whatsapp: "", telefone: "", email: "", fonte: "" } }];
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", contato: "sim" }, "").map((d) => d.id), ["D1"]);
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", contato: "" }, "").length, 3);
+});

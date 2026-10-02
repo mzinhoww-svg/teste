@@ -399,3 +399,61 @@ test("Funis cabem a 360px e 320px: rótulo curto à vista, nome inteiro no nome 
     assert.deepEqual(h.erros.map(String), []);
   }
 });
+
+// ---------- contato da empresa (site) ----------
+const CE = (i) => (i % 5 === 0 ? { contatoEmpresa: { whatsapp: "5565999991111", telefone: "556530000000", email: "contato@empresa" + (i + 1) + ".example", fonte: "https://empresa" + (i + 1) + ".example/contato" } } : null);
+
+test("Base: a linha mostra o contato da empresa com a fonte, e o filtro Com contato da empresa o isola", async () => {
+  const h = await abrirBase({ base: dados.empresasBase(250, (i, d) => Object.assign({}, PEDIDO(i), CE(i))) });
+  const { page } = h;
+  await irParaBase(h);
+  const linha = page.locator('#fila tr[data-id="D10001"]');
+  const t = await linha.innerText();
+  assert.match(t, /WhatsApp da empresa: \+55 \(65\) 99999-1111/);
+  assert.match(t, /Telefone: \+55 \(65\) 3000-0000/);
+  assert.match(t, /E-mail: contato@empresa1\.example/);
+  const fonte = linha.locator("a.ce-fonte");
+  assert.equal(await fonte.innerText(), "Fonte: site");
+  assert.equal(await fonte.getAttribute("href"), "https://empresa1.example/contato");
+  assert.equal(await page.locator('#fila tr[data-id="D10002"] .contato-emp').count(), 0, "sem contato achado, sem linha");
+  await page.selectOption("#f-bs-contato", "sim");
+  const lista = await ids(page);
+  assert.ok(lista.length > 0 && lista.every((id) => (Number(id.slice(1)) - 10000 - 1) % 5 === 0), lista.join());
+  assert.match(await page.locator(".bs-conta").innerText(), new RegExp("de " + lista.length + "$"));
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("Base no celular: contato da empresa na linha, texto >= 12px e Fonte: site com alvo de 44px", async () => {
+  const h = await abrirBase({ largura: 390, altura: 844, base: dados.empresasBase(30, (i, d) => CE(i)) });
+  const { page } = h;
+  await irParaBase(h);
+  const linha = page.locator('#fila .linha.bs[data-id="D10001"]');
+  assert.match(await linha.locator(".contato-emp").innerText(), /WhatsApp da empresa: \+55 \(65\) 99999-1111/);
+  const caixa = await linha.locator("a.ce-fonte").boundingBox();
+  assert.ok(caixa.height >= 44, "alvo de " + caixa.height);
+  const menor = await page.evaluate(() => Math.min(...Array.from(document.querySelectorAll(".contato-emp, .contato-emp *")).map((e) => parseFloat(getComputedStyle(e).fontSize))));
+  assert.ok(menor >= 12, "fonte de " + menor + "px");
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, "sem rolagem lateral");
+  assert.equal(await page.locator("[aria-live]").count(), 1, "#toast é a única região aria-live");
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("Sem contato: só o contato da empresa (site) aparece com o telefone e o Usar na cadência o ativa", async () => {
+  const geral = { id: "k1", papel: "geral", nome: "", cargo: "Contato da empresa (site)", telefone: "556530000000", whatsapp: "?", email: "", fonte: "https://a.example/contato", confianca: "média" };
+  const h = await abrir({ largura: 1440, leads: dados.leads(7).concat([migrado(1, { contatos: [geral] })]) });
+  abertos.push(h);
+  const { page } = h;
+  await page.waitForSelector("#fila [data-id]");
+  await page.click('#abas [data-grupo="semcontato"]');
+  assert.equal(await page.locator('#abas [data-grupo="semcontato"] .n').innerText(), "1");
+  const linha = page.locator("#fila [data-id=B0001]");
+  assert.equal(await linha.locator(".achado").innerText(), "Contato da empresa: +55 (65) 3000-0000");
+  assert.equal(await linha.locator("button.usar").innerText(), "Usar na cadência");
+  await linha.locator("button.usar").click();
+  const esc = await h.escritas.lista();
+  assert.equal(esc.length, 1);
+  assert.equal(esc[0].dados.contatoAtivo, "k1");
+  assert.match(esc[0].dados.historico.slice(-1)[0].texto, /contato da empresa/);
+  assert.equal(await page.locator('#abas [data-grupo="semcontato"] .n').innerText(), "0");
+  assert.deepEqual(h.erros.map(String), []);
+});

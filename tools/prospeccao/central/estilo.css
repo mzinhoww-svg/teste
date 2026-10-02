@@ -383,6 +383,12 @@
   .bs-lista { display: grid; gap: 8px; align-content: start; }
   tbody.bs-lista { display: table-row-group; }
   .linha.bs { cursor: default; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  /* contato público da empresa (site), uma linha corrida que quebra; sem caixa própria */
+  .contato-emp { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; font: 400 var(--t13)/1.4 var(--sans); color: var(--navy); min-width: 0; }
+  .contato-emp .ce { overflow-wrap: anywhere; }
+  .contato-emp .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .contato-emp .ce-fonte { color: var(--ouro-texto); font-size: var(--t12); text-underline-offset: 2px; }
+  @media (max-width: 759px) { .contato-emp .ce-fonte { display: inline-flex; align-items: center; min-height: 44px; } }
   .linha.bs .acoes { flex-wrap: wrap; }
   .linha.bs .situacao { flex-wrap: wrap; }
   a.ir-lead { color: var(--ouro-texto); font-size: var(--t13); text-underline-offset: 2px; }
