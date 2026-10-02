@@ -651,16 +651,16 @@
   function fecharDetalhe() {
     if (!estado.detalheAberto) return;
     estado.detalheAberto = false;
-    render();
-    var linha = $("fila").querySelector('[data-id="' + estado.origemDetalhe + '"]') || $("fila").querySelector('[data-id="' + sel() + '"]');
-    if (linha) linha.focus();
+    render();  // aplicarDetalhe devolve o foco à linha
   }
   // Mantém a classe, o papel de diálogo, o título focável, o véu e a trava de rolagem de acordo com o estado.
   function aplicarDetalhe() {
     var d = $("detalhe"), titulo = d.querySelector("h2");
     if (estado.detalheAberto && (!emGaveta() || !titulo || !sel())) estado.detalheAberto = false;
-    var aberto = !!estado.detalheAberto;
+    var aberto = !!estado.detalheAberto, estava = !!estado.detalheVisto;
+    estado.detalheVisto = aberto;
     d.classList.toggle("aberto", aberto);
+    ["trilho", "fila"].forEach(function (id) { if (aberto) $(id).setAttribute("inert", ""); else $(id).removeAttribute("inert"); });
     $("veu").hidden = !aberto;
     document.documentElement.classList.toggle("detalhe-aberto", aberto);
     document.body.classList.toggle("detalhe-aberto", aberto);
@@ -673,11 +673,18 @@
       if (estado.focarTitulo || !ativo || ativo === document.body || !d.contains(ativo)) { estado.focarTitulo = false; titulo.focus({ preventScroll: true }); }
     } else {
       ["role", "aria-modal", "aria-labelledby"].forEach(function (a) { d.removeAttribute(a); });
+      if (estava) {  // fechou por qualquer caminho: o foco volta à linha de origem, ou à fila
+        var ativo2 = document.activeElement;
+        if (!ativo2 || ativo2 === document.body || d.contains(ativo2)) {
+          var linha = $("fila").querySelector('[data-id="' + estado.origemDetalhe + '"]') || $("fila").querySelector('[data-id="' + sel() + '"]') || $("fila").querySelector("[data-id]");
+          if (linha) linha.focus(); else { $("fila").tabIndex = -1; $("fila").focus(); }
+        }
+      }
     }
   }
   $("veu").addEventListener("click", fecharDetalhe);
-  $("detalhe").addEventListener("keydown", function (e) {
-    if (!estado.detalheAberto) return;
+  document.addEventListener("keydown", function (e) {
+    if (!estado.detalheAberto || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === "Escape") { e.preventDefault(); fecharDetalhe(); return; }
     if (e.key !== "Tab") return;
     var foc = Array.prototype.filter.call($("detalhe").querySelectorAll("button, a[href], input, select, textarea, summary, [tabindex]:not([tabindex='-1'])"),

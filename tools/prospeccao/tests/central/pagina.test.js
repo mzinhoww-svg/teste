@@ -761,3 +761,26 @@ test("pós-venda: Enviar mostra o aviso com Desfazer e desfaz a marca", async ()
   assert.equal((await h.escritas.lista()).length, 3, "nada a desfazer");
   assert.deepEqual(h.erros.map(String), []);
 });
+
+test("900px: Esc fecha a gaveta mesmo com o foco fora do detalhe; Tab não escapa", async () => {
+  const h = await abrirPequeno(900, 800);
+  const { page } = h;
+  await page.click("#fila [data-id=R0004] .nome");
+  await page.waitForSelector("#detalhe.aberto");
+  await page.evaluate(() => document.activeElement.blur());
+  await page.keyboard.press("Tab");
+  assert.equal((await focoAtual(page)).dentro, true, "Tab com o foco no body cai dentro do detalhe");
+  await page.evaluate(() => document.activeElement.blur());
+  await page.keyboard.press("Escape");
+  assert.equal(await page.locator("#detalhe.aberto").count(), 0);
+  assert.equal(await page.locator("#fila[inert]").count(), 0);
+  const f = await focoAtual(page);
+  assert.ok(f.ehLinha && f.linha === "R0004", JSON.stringify(f));
+  // fecha por outro caminho (troca de funil por mudança de largura): foco na fila, não no body
+  await page.click("#fila [data-id=R0004] .nome");
+  await page.waitForSelector("#detalhe.aberto");
+  await page.setViewportSize({ width: 1300, height: 800 });
+  await page.waitForFunction(() => !document.querySelector("#detalhe.aberto"));
+  assert.notEqual(await page.evaluate(() => document.activeElement.tagName), "BODY");
+  assert.deepEqual(h.erros.map(String), []);
+});
