@@ -51,6 +51,18 @@ Na central, a seção **Leads** mostra tudo isso e tem dois botões. **Usar na c
 
 Regra: só entra contato publicado pela própria empresa ou pela pessoa para fins profissionais (site, Instagram, LinkedIn), com o link de onde veio. Nada de lista vazada nem e-mail deduzido.
 
+## Perfil do lead no card
+
+Nos funis Aquecimento e Leads, clicar no nome do lead abre o perfil dentro do próprio card:
+
+- **O que faz**: especialidade, porte, bairro e cidade, nota no Google, site e redes, e a fonte da pesquisa (campo `perfil`, semeado com `python3 central/seed.py --perfil`, sem telefones nem a observação da pesquisa).
+- **Gancho da abordagem** (na aba Leads) e **O que já tem**: os sinais, como canal no YouTube ou podcast.
+- **Mensagens da cadência**: os três toques já com a saudação, o contato e a foto escolhidos, cada um com a data em que saiu ou em que vai sair. O próximo vem aberto.
+- **Quem lidera**, **Contatos** (com "Usar na cadência" e "Adicionar contato"), **Empresa na Receita** e **Cuidado e pendências**.
+- **Histórico**: os envios, o enriquecimento e tudo o que a central faz no lead (desfazer toque, respondeu, saiu, fechou, troca de contato e de foto), mais as anotações escritas no próprio card. Fica no campo `historico` do lead, com as últimas 100 linhas.
+
+O perfil aberto fica lembrado no navegador.
+
 ## O pós-venda
 
 Segue o pipeline Produção e Entrega da Reiners (`docs/reiners-media-seed.md`) e o agente de Onboarding (`lib/agents/catalog.ts`). Cada etapa tem uma mensagem da Letícia, montada na hora com o produto e as datas do cliente.

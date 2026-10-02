@@ -179,7 +179,39 @@
   #toast { position: fixed; left: 50%; transform: translateX(-50%);
            bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--navy); color: var(--creme);
            padding: 8px 14px; border-radius: 8px; font-size: 14px; z-index: 10; }
+  /* Perfil do lead: abre dentro do próprio card */
+  .abrir { all: unset; cursor: pointer; display: grid; gap: 3px; min-width: 0; border-radius: 6px; font: inherit; }
+  .abrir:focus-visible { outline: 2px solid var(--ouro); outline-offset: 3px; }
+  .abrir .nome-lead { text-decoration: underline; text-decoration-color: var(--linha); text-underline-offset: 4px; }
+  .abrir:hover .nome-lead { text-decoration-color: var(--ouro); }
+  .abrir .ver { font: 500 10.5px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ouro-texto); }
+  .perfil { display: grid; gap: 16px; border-top: 1px solid var(--linha); padding-top: 14px; }
+  .secao { display: grid; gap: 8px; min-width: 0; }
+  .secao > h3 { margin: 0; display: flex; justify-content: space-between; gap: 8px; align-items: baseline;
+                font: 500 10.5px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ouro-texto); }
+  .secao > h3 small { font: inherit; color: var(--suave); letter-spacing: .06em; }
+  .faz { margin: 0; font: 500 19px/1.35 var(--display); text-wrap: pretty; }
+  .fonte-p { font-size: 12px; color: var(--suave); overflow-wrap: anywhere; }
+  .fonte-p a { color: inherit; }
+  .vazio-p { margin: 0; font-size: 13px; color: var(--suave); }
+  .resumo { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; color: var(--suave); }
+  .resumo b { color: var(--navy); font-weight: 500; }
+  .toques { display: grid; gap: 6px; }
+  .toques details { border: 1px solid var(--linha); border-radius: 8px; padding: 8px 10px; }
+  .toques details.proximo { border-color: var(--navy); }
+  .toques summary { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; color: var(--navy); font-weight: 500; }
+  .toques summary span { font: 12px var(--mono); color: var(--suave); font-weight: 400; }
+  .toques .msg { margin-top: 8px; }
+  .tempo { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .tempo li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; padding: 7px 0; border-top: 1px solid var(--linha); font-size: 13.5px; }
+  .tempo li:first-child { border-top: 0; }
+  .tempo time { font: 12px/1.5 var(--mono); color: var(--suave); font-variant-numeric: tabular-nums; }
+  .tempo li.nota span { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .tempo li.nota time::after { content: " · nota"; color: var(--ouro-texto); }
+  textarea.nota { width: 100%; min-height: 64px; padding: 8px; border: 1px solid var(--linha); border-radius: 8px;
+                  background: var(--papel); color: var(--navy); font: 14px/1.4 var(--sans); resize: vertical; }
   @media (max-width: 460px) {
+    .tempo li { grid-template-columns: 1fr; gap: 0; }
     .placar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .selects, .selects.dois { grid-template-columns: 1fr 1fr; }
     .funis button { padding-inline: 4px; font-size: 14px; }
@@ -268,6 +300,7 @@
       ld: { grupo: "todos", segmento: "", busca: "" }
     },
     novoContato: null,
+    aberto: {},
     rascunho: {}
   };
   var $ = function (id) { return document.getElementById(id); };
@@ -284,7 +317,7 @@
     });
     (filhos || []).forEach(function (f) { if (f) n.appendChild(typeof f === "string" ? document.createTextNode(f) : f); });
     // Formulários sobrevivem ao redesenho: o que foi digitado volta do rascunho.
-    if (n.id && /^(nc|nk)-/.test(n.id) && estado.rascunho[n.id] != null) n.value = estado.rascunho[n.id];
+    if (n.id && /^(nc|nk|nh)-/.test(n.id) && estado.rascunho[n.id] != null) n.value = estado.rascunho[n.id];
     return n;
   }
   function inicioDoDia(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
@@ -410,9 +443,17 @@
     if (e < 1) return;
     var dados = { etapa: e - 1 };
     dados["enviado" + e] = null;
-    gravar("leads/" + l.id, dados, "Toque " + e + " desfeito");
+    gravar("leads/" + l.id, registrar(l, dados, "Toque " + e + " desfeito"), "Toque " + e + " desfeito");
   }
-  function situacao(l, s, msg) { gravar("leads/" + l.id, { situacao: s }, msg); }
+  // Histórico do lead: cada ação da central entra como uma linha com data. Os envios vêm de enviado1..3.
+  function registrar(l, dados, texto, tipo) {
+    var item = { em: new Date().toISOString(), texto: texto };
+    if (tipo) item.tipo = tipo;
+    dados.historico = (l.historico || []).concat([item]).slice(-100);
+    return dados;
+  }
+  var SITUACOES = { respondeu: "Marcado como respondeu", sair: "Pediu para sair", ativo: "Voltou para a cadência", fechou: "Fechou negócio" };
+  function situacao(l, s, msg) { gravar("leads/" + l.id, registrar(l, { situacao: s }, SITUACOES[s] || s), msg); }
 
   function fecharNegocio(l, produto) {
     var cliente = {
@@ -423,7 +464,7 @@
     gravar("clientes/" + l.id, cliente, null, true).then(function (ok) {
       if (!ok) return;
       estado.fechando = null;
-      gravar("leads/" + l.id, { situacao: "fechou" }, "Foi para o pós-venda: boas-vindas para hoje");
+      gravar("leads/" + l.id, registrar(l, { situacao: "fechou" }, "Fechou negócio: " + produto), "Foi para o pós-venda: boas-vindas para hoje");
     });
   }
 
@@ -514,7 +555,7 @@
     if (!f) return null;
     var opcoes = Object.keys(cat).sort(function (a, b) { return cat[a].cenario.localeCompare(cat[b].cenario) || a.localeCompare(b); });
     var sel = el("select", { id: "foto-" + l.id, disabled: semMarca,
-      onchange: function (ev) { gravar("leads/" + l.id, { fotoEscolhida: ev.target.value === l.foto ? null : ev.target.value }, "Foto trocada"); } },
+      onchange: function (ev) { gravar("leads/" + l.id, registrar(l, { fotoEscolhida: ev.target.value === l.foto ? null : ev.target.value }, "Foto do toque 1 trocada para " + ((cat[ev.target.value] || {}).cenario || ev.target.value)), "Foto trocada"); } },
       opcoes.map(function (k) {
         return el("option", { value: k, text: cat[k].cenario + " · " + cat[k].descricao + (k === l.foto ? " (sugerida)" : "") });
       }));
@@ -550,16 +591,15 @@
       el("span", { class: "chip", text: l.canal || "" }),
       l.bairro ? el("span", { class: "chip", text: l.bairro }) : null
     ].concat((l.flags || []).map(function (f) { return el("span", { class: "chip flag", text: f }); }))
-     .concat((l.alertas || []).length ? [el("span", { class: "chip flag", text: "Cuidado: ver alertas em Leads" })] : []));
+     .concat((l.alertas || []).length ? [el("span", { class: "chip flag", text: "Cuidado: ver alertas no perfil" })] : []));
 
     var rotulo = { hoje: "Toque " + n + " hoje", aguardando: "Aguardando", respondeu: "Respondeu", fechou: "Fechou",
                    encerrado: "Sem resposta", sair: "Saiu" }[g];
     var cab = el("div", { class: "cab" }, [
-      el("div", null, [
-        el("h2", { text: l.id === "TESTE" ? "Card de teste" : (l.nome || l.id) }),
-        el("div", { class: "meta", text: l.id === "TESTE" ? "Manda as mensagens para o WhatsApp da própria Reiners." :
-          [l.id, l.categoria, l.score != null ? "score " + l.score : ""].filter(Boolean).join(" · ") })
-      ]),
+      l.id === "TESTE" ? el("div", null, [
+        el("h2", { text: "Card de teste" }),
+        el("div", { class: "meta", text: "Manda as mensagens para o WhatsApp da própria Reiners." })
+      ]) : tituloAbrir(l, [l.id, l.categoria, l.score != null ? "score " + l.score : ""].filter(Boolean).join(" · ")),
       el("span", { class: "estado " + g, text: rotulo })
     ]);
 
@@ -619,7 +659,8 @@
       detalhes,
       destino ? el("div", { class: "destino", text: destino }) : null,
       el("div", { class: "acoes" }, acoes),
-      estado.fechando === l.id ? formFechar(l) : null
+      estado.fechando === l.id ? formFechar(l) : null,
+      estado.aberto[l.id] && l.id !== "TESTE" ? perfil(l) : null
     ]);
   }
 
@@ -696,8 +737,8 @@
     var acoes = [];
     if (ehContato && (c.telefone || c.email)) {
       acoes.push(ativo ?
-        el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { gravar(caminho, { contatoAtivo: null }, "A cadência volta para o contato original"); } }, ["Voltar ao contato original"]) :
-        el("button", { type: "button", class: "btn ok", disabled: semMarca, onclick: function () { gravar(caminho, { contatoAtivo: c.id }, "Cadência vai para " + (c.nome || PAPEIS[c.papel])); } }, ["Usar na cadência"]));
+        el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { gravar(caminho, registrar(l, { contatoAtivo: null }, "Cadência voltou para o contato original"), "A cadência volta para o contato original"); } }, ["Voltar ao contato original"]) :
+        el("button", { type: "button", class: "btn ok", disabled: semMarca, onclick: function () { gravar(caminho, registrar(l, { contatoAtivo: c.id }, "Cadência passou para " + (c.nome || PAPEIS[c.papel])), "Cadência vai para " + (c.nome || PAPEIS[c.papel])); } }, ["Usar na cadência"]));
     }
     return el("div", { class: "pessoa" + (ativo ? " ativo" : "") }, [
       el("div", { class: "topo" }, [
@@ -733,7 +774,7 @@
       var n = lista.reduce(function (m, c) { return Math.max(m, Number(String(c.id).slice(1)) || 0); }, 0) + 1;
       lista.push({ id: "k" + n, papel: campos.papel.value, nome: campos.nome.value.trim(), cargo: campos.cargo.value.trim(),
         telefone: tel, whatsapp: campos.whatsapp.value, email: email, fonte: campos.fonte.value.trim() + " (manual)", confianca: "alta" });
-      gravar("leads/" + id, { contatos: lista }, "Contato adicionado").then(function (ok) { if (ok) { estado.novoContato = null; limparRascunho("nk-"); render(); } });
+      gravar("leads/" + id, registrar(l, { contatos: lista }, "Contato adicionado: " + (campos.nome.value.trim() || PAPEIS[campos.papel.value])), "Contato adicionado").then(function (ok) { if (ok) { estado.novoContato = null; limparRascunho("nk-"); render(); } });
     }
     return el("div", { class: "card form" }, [
       el("div", { class: "grade" }, [campo("Papel", "papel"), campo("Nome", "nome"), campo("Cargo", "cargo"),
@@ -745,58 +786,162 @@
       ])
     ]);
   }
-  function cardEnriq(l) {
-    var st = statusLD(l), emp = l.empresa || {}, enr = l.enriquecimento || {};
-    var rotulo = { completo: "Completo", parcial: "Parcial", bruto: "Sem enriquecimento" }[st];
-    var corpo = [el("div", { class: "cab" }, [
-      el("div", null, [el("h2", { text: l.nome || l.id }),
-        el("div", { class: "meta", text: [l.id, l.segmento, l.categoria].filter(Boolean).join(" · ") })]),
-      el("span", { class: "estado " + st, text: rotulo })
-    ])];
-    var linhaEmp = [];
-    if (emp.cnpj) linhaEmp.push(el("span", null, ["CNPJ ", el("b", { text: emp.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5") })]));
-    if (emp.razaoSocial) linhaEmp.push(el("span", { text: emp.razaoSocial }));
-    if (emp.porte) linhaEmp.push(el("span", { text: "Porte " + emp.porte }));
-    if (emp.abertura) linhaEmp.push(el("span", { text: "Desde " + emp.abertura.slice(0, 4) }));
-    if (emp.situacao && !/ativa/i.test(emp.situacao)) linhaEmp.push(el("b", { text: "Situação: " + emp.situacao }));
+  // ---------- perfil do lead (abre dentro do card, nos dois funis) ----------
+  function alternarPerfil(id) {
+    if (estado.aberto[id]) delete estado.aberto[id]; else estado.aberto[id] = 1;
+    try { localStorage.setItem("central-abertos", JSON.stringify(Object.keys(estado.aberto))); } catch (e) { /* tudo bem */ }
+    render();
+  }
+  // Título do card que abre e fecha o perfil.
+  function tituloAbrir(l, meta) {
+    var aberto = !!estado.aberto[l.id];
+    return el("div", null, [
+      el("h2", null, [el("button", { type: "button", class: "abrir", "aria-expanded": String(aberto),
+        onclick: function () { alternarPerfil(l.id); } }, [
+        el("span", { class: "nome-lead", text: l.nome || l.id }),
+        el("span", { class: "ver", text: aberto ? "Fechar perfil" : "Ver perfil" })
+      ])]),
+      el("div", { class: "meta", text: meta })
+    ]);
+  }
+  function secao(titulo, filhos, extra) {
+    return el("section", { class: "secao" }, [el("h3", null, [titulo, extra ? el("small", { text: extra }) : null])].concat(filhos));
+  }
+  function linksDe(l) {
     var redes = l.redes || {};
-    var links = [["Site", l.site], ["Instagram", redes.instagram || l.instagram], ["LinkedIn", redes.linkedinEmpresa], ["YouTube", redes.youtube]]
+    return [["Site", l.site], ["Instagram", redes.instagram || l.instagram], ["LinkedIn", redes.linkedinEmpresa], ["YouTube", redes.youtube]]
       .filter(function (x) { return x[1]; }).map(function (x) {
         var href = /^https?:/.test(x[1]) ? x[1] : x[0] === "Instagram" ? "https://instagram.com/" + String(x[1]).replace(/^@/, "") : "https://" + x[1];
         return el("a", { href: href, target: "_blank", rel: "noopener", text: x[0] });
       });
-    corpo.push(el("div", { class: "ficha" }, [
-      linhaEmp.length ? el("div", { class: "linha" }, linhaEmp) : el("div", { class: "linha", text: "CNPJ não confirmado" }),
-      emp.cnae ? el("div", { class: "linha", text: emp.cnae }) : null,
-      links.length ? el("div", { class: "linha" }, links) : null
-    ]));
-    if ((l.decisores || []).length) {
-      corpo.push(el("div", { class: "grupo" }, [el("h3", { text: "Quem lidera" })].concat(l.decisores.map(function (d) { return blocoPessoa(l, d, false); }))));
-    }
+  }
+  function secaoFaz(l) {
+    var p = l.perfil || {};
+    var linha = [l.categoria, p.porte ? "porte " + p.porte : "", [l.bairro, p.cidade].filter(Boolean).join(", ")].filter(Boolean)
+      .map(function (t) { return el("span", { text: t }); });
+    if (p.nota) linha.push(el("b", { text: "Google " + String(p.nota).replace(".", ",") + (p.avaliacoes ? " (" + p.avaliacoes + " avaliações)" : "") }));
+    var links = linksDe(l);
+    var filhos = [
+      p.especialidade ? el("p", { class: "faz", text: p.especialidade.charAt(0).toUpperCase() + p.especialidade.slice(1) + "." }) : null,
+      linha.length ? el("div", { class: "resumo" }, linha) : null,
+      links.length ? el("div", { class: "resumo" }, links) : null,
+      p.fonteDados ? el("span", { class: "fonte-p" }, ["Fonte da pesquisa: ", linkFonte(p.fonteDados)]) : null
+    ];
+    return secao("O que faz", filhos);
+  }
+  function secaoGancho(l) {
+    if (!l.fraseUnica || estado.funil === "aq") return null;  // no aquecimento a frase já está no card
+    var fonte = (l.perfil || {}).fonteFrase;
+    return secao("Gancho da abordagem", [el("p", { class: "frase", text: l.fraseUnica })], fonte ? "baseado em " + fonte.toLowerCase() : "");
+  }
+  function secaoJaTem(l) {
+    var sinais = l.sinais || [];
+    return secao("O que já tem", sinais.length ? sinais.map(function (s) {
+      return el("div", { class: "pessoa" }, [el("span", { text: s.texto }), s.fonte ? el("span", { class: "fonte" }, ["Fonte: ", linkFonte(s.fonte)]) : null]);
+    }) : [el("p", { class: "vazio-p", text: "A pesquisa não registrou canal, podcast ou vídeo próprio. Vale perguntar na conversa." })]);
+  }
+  function secaoEmpresa(l) {
+    var emp = l.empresa || {}, linha = [];
+    if (emp.cnpj) linha.push(el("span", null, ["CNPJ ", el("b", { text: emp.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5") })]));
+    if (emp.razaoSocial) linha.push(el("span", { text: emp.razaoSocial }));
+    if (emp.porte) linha.push(el("span", { text: "Porte " + emp.porte }));
+    if (emp.abertura) linha.push(el("span", { text: "Desde " + emp.abertura.slice(0, 4) }));
+    if (emp.situacao && !/ativa/i.test(emp.situacao)) linha.push(el("b", { text: "Situação: " + emp.situacao }));
+    var filhos = [linha.length ? el("div", { class: "resumo" }, linha) : el("p", { class: "vazio-p", text: "CNPJ ainda não confirmado na Receita." }),
+      emp.cnae ? el("div", { class: "resumo", text: emp.cnae }) : null];
     if ((l.socios || []).length) {
-      corpo.push(el("details", null, [el("summary", { text: "Quadro de sócios na Receita (" + l.socios.length + ")" }),
+      filhos.push(el("details", null, [el("summary", { text: "Quadro de sócios (" + l.socios.length + ")" }),
         el("ul", { class: "socios" }, l.socios.map(function (s) { return el("li", { text: s.nome + (s.qualificacao ? " · " + s.qualificacao : "") }); }))]));
     }
+    return secao("Empresa na Receita", filhos);
+  }
+  function secaoPessoas(l) {
     var contatos = l.contatos || [];
-    corpo.push(el("div", { class: "grupo" }, [el("h3", { text: "Contatos" + (l.contatoAtivo ? "" : " · a cadência usa o contato original (+" + (l.telefone || l.email || "") + ")") })]
-      .concat(contatos.map(function (c) { return blocoPessoa(l, c, true); }))
-      .concat(contatos.length ? [] : [el("p", { class: "meta", text: "Nenhum contato enriquecido ainda." })])));
-    if ((l.sinais || []).length) {
-      corpo.push(el("div", { class: "grupo" }, [el("h3", { text: "Sinais para a conversa" })].concat(l.sinais.map(function (s) {
-        return el("div", { class: "fonte" }, [s.texto + " · ", linkFonte(s.fonte)]);
-      }))));
+    var filhos = [];
+    if ((l.decisores || []).length) {
+      filhos.push(secao("Quem lidera", l.decisores.map(function (d) { return blocoPessoa(l, d, false); })));
     }
-    if ((l.alertas || []).length) {
-      corpo.push(el("div", { class: "grupo" }, [el("h3", { text: "Cuidado na abordagem" })].concat(l.alertas.map(function (s) {
-        return el("div", { class: "aviso" }, [s.texto + (s.fonte ? " · " : ""), linkFonte(s.fonte)]);
-      }))));
-    }
-    var pend = (l.pendencias || []).concat(enr.observacao ? [enr.observacao] : []);
-    if (pend.length) corpo.push(el("p", { class: "dica", text: pend.join(" · ") }));
-    if (estado.novoContato === l.id) corpo.push(formContato(l));
-    else corpo.push(el("div", { class: "acoes" }, [el("button", { type: "button", class: "btn", disabled: !estado.podeMarcar,
-      onclick: function () { estado.novoContato = l.id; render(); } }, ["Adicionar contato"])]));
-    return el("article", { class: "card" }, corpo);
+    filhos.push(secao("Contatos", contatos.map(function (c) { return blocoPessoa(l, c, true); })
+      .concat(contatos.length ? [] : [el("p", { class: "vazio-p", text: "Nenhum contato enriquecido ainda." })])
+      .concat([estado.novoContato === l.id ? formContato(l) : el("div", { class: "acoes" }, [el("button", { type: "button", class: "btn", disabled: !estado.podeMarcar,
+        onclick: function () { estado.novoContato = l.id; render(); } }, ["Adicionar contato"])])]),
+      l.contatoAtivo ? "a cadência usa o contato marcado" : "a cadência usa o contato original"));
+    return filhos;
+  }
+  function secaoCuidado(l) {
+    var pend = (l.pendencias || []).concat((l.enriquecimento || {}).observacao ? [l.enriquecimento.observacao] : []);
+    var filhos = (l.alertas || []).map(function (s) { return el("div", { class: "aviso" }, [s.texto + (s.fonte ? " · " : ""), linkFonte(s.fonte)]); });
+    if (pend.length) filhos.push(el("p", { class: "dica", text: pend.join(" · ") }));
+    return filhos.length ? secao("Cuidado e pendências", filhos) : null;
+  }
+  // As três mensagens da cadência, já com a saudação, o contato e a foto escolhidos.
+  function secaoCadencia(l) {
+    var e = etapa(l), g = grupo(l), v = vencimento(l), email = l.canal === "E-mail";
+    var ativo = g === "hoje" || g === "aguardando";
+    return secao("Mensagens da cadência", [el("div", { class: "toques" }, [1, 2, 3].map(function (n) {
+      var t = toque(l, n), enviado = l["enviado" + n], proximo = ativo && n === e + 1;
+      var quandoTxt = enviado ? "enviado " + dataCurta(enviado) :
+        proximo ? (g === "hoje" ? "sai hoje" : "a partir de " + dataCurta(v)) :
+        ativo && n > e + 1 ? espera(n) + " dias depois do toque " + (n - 1) : "não vai sair";
+      var texto = email ? "Assunto: " + (t.assunto || "") + "\n\n" + (t.corpo || "") : mensagemToque(l, t);
+      return el("details", { class: proximo ? "proximo" : null, open: proximo ? "" : null }, [
+        el("summary", null, ["Toque " + n + " · " + NOMES_TOQUE[n], el("span", { text: quandoTxt })]),
+        el("p", { class: "msg", text: texto || "Mensagem não semeada." })
+      ]);
+    }))], email ? "por e-mail" : "por WhatsApp");
+  }
+  function eventos(l) {
+    var lista = (l.historico || []).slice();
+    [1, 2, 3].forEach(function (n) { if (l["enviado" + n]) lista.push({ em: l["enviado" + n], texto: "Toque " + n + " (" + NOMES_TOQUE[n].toLowerCase() + ") enviado" }); });
+    var enr = l.enriquecimento || {};
+    if (enr.atualizadoEm) lista.push({ em: enr.atualizadoEm + "T12:00:00", texto: "Enriquecimento atualizado: " + ({ completo: "completo", parcial: "parcial", bruto: "sem enriquecimento" }[enr.status] || enr.status) });
+    return lista.filter(function (x) { return x.em && !isNaN(new Date(x.em)); })
+      .sort(function (a, b) { return new Date(b.em) - new Date(a.em); });
+  }
+  function secaoHistorico(l) {
+    var lista = eventos(l), id = "nh-" + l.id;
+    var campo = el("textarea", { id: id, class: "nota", placeholder: "Ex.: Falei com a secretária, pediu para ligar na segunda." });
+    var salvar = el("button", { type: "button", class: "btn principal", disabled: !estado.podeMarcar || !!estado.gravando["leads/" + l.id],
+      onclick: function () {
+        var txt = campo.value.trim();
+        if (!txt) { toast("Escreva a anotação antes de salvar."); return; }
+        gravar("leads/" + l.id, registrar(l, {}, txt, "nota"), "Anotação salva").then(function (ok) { if (ok) { delete estado.rascunho[id]; render(); } });
+      } }, ["Salvar anotação"]);
+    return secao("Histórico", [
+      lista.length ? el("ol", { class: "tempo" }, lista.map(function (x) {
+        var d = new Date(x.em);
+        return el("li", { class: x.tipo === "nota" ? "nota" : null }, [
+          el("time", { datetime: x.em, text: dataCurta(d) + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0") }),
+          el("span", { text: x.texto })
+        ]);
+      })) : el("p", { class: "vazio-p", text: "Nada registrado ainda. Envios, respostas, trocas de contato e anotações aparecem aqui." }),
+      el("label", { class: "campo", for: id }, ["Nova anotação", campo]),
+      el("div", { class: "acoes" }, [salvar])
+    ], lista.length ? lista.length + (lista.length === 1 ? " registro" : " registros") : "");
+  }
+  function perfil(l) {
+    return el("div", { class: "perfil" }, [secaoFaz(l), secaoGancho(l), secaoJaTem(l), secaoCadencia(l)]
+      .concat(secaoPessoas(l)).concat([secaoEmpresa(l), secaoCuidado(l), secaoHistorico(l)]));
+  }
+
+  function cardEnriq(l) {
+    var st = statusLD(l), enr = l.enriquecimento || {};
+    var rotulo = { completo: "Completo", parcial: "Parcial", bruto: "Sem enriquecimento" }[st];
+    var lider = (l.decisores || [])[0];
+    var sug = (l.contatos || []).filter(function (c) { return c.id === enr.contatoSugerido; })[0];
+    var resumo = [
+      lider ? el("span", null, ["Lidera: ", el("b", { text: lider.nome + (lider.cargo ? ", " + lider.cargo : "") })]) : null,
+      sug ? el("span", null, ["Contato direto: ", el("b", { text: (sug.nome || PAPEIS[sug.papel]) + (sug.telefone ? (sug.whatsapp === "sim" ? " · WhatsApp" : " · telefone") : " · e-mail") })]) : null,
+      (l.alertas || []).length ? el("b", { text: "Tem alerta" }) : null
+    ].filter(Boolean);
+    return el("article", { class: "card" }, [
+      el("div", { class: "cab" }, [
+        tituloAbrir(l, [l.id, l.segmento, l.categoria].filter(Boolean).join(" · ")),
+        el("span", { class: "estado " + st, text: rotulo })
+      ]),
+      resumo.length ? el("div", { class: "resumo" }, resumo) : null,
+      estado.aberto[l.id] ? perfil(l) : null
+    ]);
   }
   function renderLD() {
     var todos = Object.keys(estado.leads).filter(function (k) { return k !== "TESTE"; }).map(function (k) { return estado.leads[k]; })
@@ -1155,7 +1300,7 @@
   });
   $("novo-cliente").addEventListener("click", function () { estado.novoCliente = true; render(); });
   document.addEventListener("input", function (e) {
-    if (e.target.id && /^(nc|nk)-/.test(e.target.id)) estado.rascunho[e.target.id] = e.target.value;
+    if (e.target.id && /^(nc|nk|nh)-/.test(e.target.id)) estado.rascunho[e.target.id] = e.target.value;
   });
   document.addEventListener("change", function (e) {
     if (e.target.id && /^(nc|nk)-/.test(e.target.id)) estado.rascunho[e.target.id] = e.target.value;
@@ -1209,6 +1354,7 @@
   try {
     var salvo = location.hash === "#posvenda" ? "pv" : location.hash === "#leads" ? "ld" : localStorage.getItem("central-funil");
     if (salvo === "pv" || salvo === "aq" || salvo === "ld") estado.funil = salvo;
+    (JSON.parse(localStorage.getItem("central-abertos") || "[]") || []).forEach(function (id) { estado.aberto[id] = 1; });
   } catch (e) { /* sem armazenamento: começa no aquecimento */ }
   render();
   var usar = window.claude && typeof window.claude.use === "function" ? window.claude.use("db") : Promise.resolve(null);

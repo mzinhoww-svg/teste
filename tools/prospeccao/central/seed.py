@@ -28,6 +28,18 @@ def doc_lead(linha: dict) -> dict:
     return dados
 
 
+def perfil_lead(lead: dict, pessoal: dict) -> dict:
+    """O que a central mostra no perfil do lead: o que faz, porte, cidade, nota e de onde veio o dado.
+
+    Fica de fora a observação da pesquisa, que costuma trazer telefones.
+    """
+    nota = lead.get("nota")
+    return {"especialidade": lead.get("especialidade") or "", "porte": lead.get("porte") or "",
+            "cidade": lead.get("cidade") or "", "nota": nota if isinstance(nota, (int, float)) else None,
+            "avaliacoes": lead.get("avaliacoes") if isinstance(lead.get("avaliacoes"), int) else None,
+            "fonteDados": lead.get("fonte") or "", "fonteFrase": pessoal.get("fonte") or ""}
+
+
 def doc_teste() -> dict:
     frase = "Este é o card de teste: abre o seu próprio WhatsApp para conferir acentos e quebras de linha."
     toques = []
@@ -67,8 +79,22 @@ def main() -> None:
     ap.add_argument("--leads", default="dados/leads.json")
     ap.add_argument("--personal", default="msg/personal.json")
     ap.add_argument("--out", default="central/lotes")
+    ap.add_argument("--perfil", action="store_true", help="só os lotes de update do campo perfil")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
+    if a.perfil:
+        with open(a.personal, encoding="utf-8") as fh:
+            pessoal = {p["id"]: p for p in json.load(fh)}
+        with open(a.leads, encoding="utf-8") as fh:
+            leads = {l["id"]: l for l in json.load(fh)}
+        escritas = [{"op": "update", "collection": "leads", "doc_id": lid,
+                     "data": {"perfil": perfil_lead(leads[lid], pessoal.get(lid, {}))}}
+                    for lid in sorted(pessoal) if lid in leads]
+        for i in range(0, len(escritas), LOTE):
+            with open(os.path.join(a.out, f"perfil_{i // LOTE:02d}.json"), "w", encoding="utf-8") as fh:
+                json.dump(escritas[i:i + LOTE], fh, ensure_ascii=False, indent=1)
+        print(f"{len(escritas)} perfis em {a.out}")
+        return
     linhas, erros = gerar(a.leads, a.personal, "dados/enriquecimento.json")
     if erros:
         sys.exit("\n".join(erros))

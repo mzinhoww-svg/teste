@@ -1,6 +1,6 @@
 from openpyxl import load_workbook
 
-from central.seed import doc_lead, doc_teste, seed
+from central.seed import doc_lead, doc_teste, perfil_lead, seed
 from msg.gerar import exportar_planilha, gerar
 from msg.prep import carregar
 
@@ -74,3 +74,13 @@ def test_email_que_ganhou_whatsapp_do_decisor_vira_whatsapp(arquivos, tmp_path):
     assert x["canal"] == "WhatsApp" and x["telefone"] == "5565988887777"
     assert x["toques"][0]["mensagem"].startswith("Oi, Mariana, tudo bem?")
     assert "WhatsApp do enriquecimento" in x["flags"]
+
+
+def test_perfil_do_lead_sem_telefone_nem_observacao():
+    lead = {"id": "R0001", "especialidade": "dermatologia clínica", "porte": "pequeno", "cidade": "Cuiabá",
+            "nota": 4.9, "avaliacoes": 120, "fonte": "https://exemplo.com.br/", "obs": "WhatsApp (65) 99999-1111",
+            "telefone": "5565999991111"}
+    p = perfil_lead(lead, {"fonte": "Especialidade"})
+    assert p == {"especialidade": "dermatologia clínica", "porte": "pequeno", "cidade": "Cuiabá", "nota": 4.9,
+                 "avaliacoes": 120, "fonteDados": "https://exemplo.com.br/", "fonteFrase": "Especialidade"}
+    assert perfil_lead({"id": "R2"}, {})["especialidade"] == ""
