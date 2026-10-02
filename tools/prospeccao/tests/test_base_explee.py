@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timezone
 
-from scripts.base_explee import atribuir_ids, doc_base, main, montar_base, processar
+from scripts.base_explee import atribuir_ids, doc_base, main, montar_base, processar, site_leads
 from scripts.enriquecer_leads import aplicar, selecionar
 from scripts.promover_base import promover
 
@@ -32,19 +32,19 @@ def base(*emps):
 def test_doc_base_enxuto_com_os_campos_da_lista():
     d = doc_base(empresa())
     assert set(d) == {"dominio", "nome", "segmento", "tier", "score", "regiao", "decisor", "pessoas", "comLinkedin",
-                      "campanhas", "status", "pedidoEm", "leadId", "migradoEm"}
+                      "campanhas", "status", "pedidoEm", "leadId", "migradoEm", "site", "contatos"}
     assert d["decisor"] == {"nome": "Paulo Pereira", "cargo": "President", "persona": "decisor",
                             "linkedin": "https://linkedin.com/in/x"}
     assert (d["pessoas"], d["comLinkedin"], d["status"], d["pedidoEm"], d["leadId"]) == (2, 1, "base", None, None)
     assert d["regiao"] in ("MT", "fora", "?")
-    assert len(json.dumps(d, ensure_ascii=False).encode()) < 1024
+    assert len(json.dumps(d, ensure_ascii=False).encode()) < 2048
 
 
 def test_doc_base_corta_texto_longo_e_fica_abaixo_de_1kb():
     p = pessoa("p1", "Nome " * 60, "Cargo " * 80, linkedin="https://linkedin.com/in/" + "x" * 400)
     e = empresa(nome="Empresa " * 60, pessoas=[p])
     e["campanhas"] = ["Campanha comprida número %d" % i for i in range(20)]
-    assert len(json.dumps(doc_base(e), ensure_ascii=False).encode()) <= 1024
+    assert len(json.dumps(doc_base(e), ensure_ascii=False).encode()) <= 2048
 
 
 def test_montar_base_so_faixas_pedidas_e_fora_quem_ja_esta_em_leads():
@@ -84,7 +84,7 @@ def test_cli_base(tmp_path, capsys):
     out = json.loads((tmp_path / "out.json").read_text())
     assert [d["data"]["dominio"] for d in out] == ["a.example"]
     resumo = json.loads(capsys.readouterr().out)
-    assert resumo["docs"] == 1 and resumo["porFaixa"] == {"B": 1} and resumo["maiorDocBytes"] < 1024
+    assert resumo["docs"] == 1 and resumo["porFaixa"] == {"B": 1} and resumo["maiorDocBytes"] < 2048
 
 
 # ---------------------------------------------------------------- processar
@@ -111,7 +111,7 @@ def test_processar_monta_lead_completo_e_atualiza_a_base():
     assert d["icp"] == "ICP3" and d["categoria"] == "Entidade do agro" and d["faixa"] == "B"
     assert d["flags"] == ["base Explee", "migrado sem enriquecer"] and d["telefone"] == "" and d["etapa"] == 0
     assert d["baseExplee"]["baseId"] == "D00001" and d["baseExplee"]["dominio"] == "a.example"
-    assert [x["nome"] for x in d["decisores"]] == ["Paulo Pereira"]  # sem a base completa, só o decisor
+    assert [x["nome"] for x in d["decisores"]] == ["Paulo Pereira", "Mariana Souza"]  # o documento da base já traz os contatos
     assert len(d["toques"]) == 3 and all(t["mensagem"] for t in d["toques"])
     assert "a pedido da Letícia" in d["historico"][0]["texto"]
 
@@ -182,3 +182,86 @@ def test_enriquecer_seleciona_os_pedidos_da_base_primeiro_e_tira_da_fila_depois(
     assert cands[0]["linkedin"] == "https://linkedin.com/in/x" and cands[0]["dominio"] == "a.example"
     depois = aplicar(lead_novo, {"resultado": "nao_achou", "callIds": ["c1"]}, 0, agora, "E1")
     assert "fila" not in depois["enriquecimento"] and depois["contatoAtivo"] is None
+
+
+# ---------------------------------------------------------------- contato da empresa (site)
+
+SITE = {"a.example": {"whatsapp": ["5565999991111", "5565999992222"], "telefones": ["556530000000"],
+                      "emails": ["Contato@a.example", "x@a.example"], "vazio": None, "fonte": "https://a.example/contato"},
+        "b.example": {"whatsapp": [], "telefones": ["556530001111"], "emails": [], "fonte": None},
+        "c.example": {"whatsapp": [], "telefones": [], "emails": [], "fonte": None}}
+
+
+def test_doc_base_contato_empresa_um_de_cada_e_omitido_quando_nao_achou():
+    d = doc_base(empresa("a.example"), SITE["a.example"])
+    assert d["contatoEmpresa"] == {"whatsapp": "5565999991111", "telefone": "556530000000",
+                                   "email": "contato@a.example", "fonte": "https://a.example/contato"}
+    assert d["status"] == "base" and len(json.dumps(d, ensure_ascii=False).encode()) <= 2048
+    assert doc_base(empresa("b.example"), SITE["b.example"])["contatoEmpresa"] == {
+        "whatsapp": "", "telefone": "556530001111", "email": "", "fonte": "https://b.example"}
+    assert "contatoEmpresa" not in doc_base(empresa("c.example"), SITE["c.example"])
+    assert "contatoEmpresa" not in doc_base(empresa("d.example"))
+
+
+def test_doc_base_com_contato_continua_abaixo_de_2kb_cortando_pessoas():
+    ps = [pessoa("p%d" % i, "Nome " * 14, "Cargo " * 14, linkedin="https://linkedin.com/in/" + "x" * 190) for i in range(8)]
+    d = doc_base(empresa("a.example", nome="Empresa " * 15, pessoas=ps), SITE["a.example"])
+    assert "contatoEmpresa" in d and len(json.dumps(d, ensure_ascii=False).encode()) <= 2048
+
+
+def test_cli_base_site_contatos(tmp_path, capsys):
+    (tmp_path / "base.json").write_text(json.dumps(base(empresa("a.example"), empresa("c.example"))))
+    (tmp_path / "site.json").write_text(json.dumps(SITE))
+    main(["base", "--entrada", str(tmp_path / "base.json"), "--site-contatos", str(tmp_path / "site.json"),
+          "--saida", str(tmp_path / "out.json")])
+    out = {d["data"]["dominio"]: d["data"] for d in json.loads((tmp_path / "out.json").read_text())}
+    assert out["a.example"]["contatoEmpresa"]["whatsapp"] == "5565999991111" and "contatoEmpresa" not in out["c.example"]
+    assert json.loads(capsys.readouterr().out)["comContatoEmpresa"] == 1
+
+
+def test_processar_leva_contato_da_empresa_depois_dos_decisores_sem_contato_ativo():
+    ped = pedido(empresa("a.example"))
+    ped["data"]["contatoEmpresa"] = doc_base(empresa("a.example"), SITE["a.example"])["contatoEmpresa"]
+    d = processar([ped], [], None, AGORA)["novosLeads"][0]["data"]
+    assert d["contatos"] == [{"id": "k1", "papel": "geral", "nome": "", "cargo": "Contato da empresa (site)",
+                              "telefone": "5565999991111", "whatsapp": "sim", "email": "contato@a.example",
+                              "fonte": "https://a.example/contato", "confianca": "média"}]
+    assert d["contatoAtivo"] is None and d["telefone"] == ""
+
+
+def test_processar_telefone_fixo_nao_marca_whatsapp_e_sem_contato_nao_cria():
+    ped = pedido(empresa("b.example"))
+    ped["data"]["contatoEmpresa"] = doc_base(empresa("b.example"), SITE["b.example"])["contatoEmpresa"]
+    c = processar([ped], [], None, AGORA)["novosLeads"][0]["data"]["contatos"][0]
+    assert (c["telefone"], c["whatsapp"], c["email"]) == ("556530001111", "?", "")
+    assert processar([pedido(empresa("c.example"))], [], None, AGORA)["novosLeads"][0]["data"]["contatos"] == []
+
+
+def _lead(i, dominio, contatos=None, **extra):
+    return {"id": i, "version": 3, "data": {"nome": i, "telefone": "", "email": "", "contatoAtivo": None,
+                                            "contatos": contatos or [], "baseExplee": {"dominio": dominio}, **extra}}
+
+
+def test_site_leads_acrescenta_e_pula_quem_ja_tem_ou_nao_achou_nada():
+    k = {"id": "k1", "papel": "decisor", "nome": "Paulo", "telefone": "5565988887777", "email": ""}
+    dup = {"id": "k4", "papel": "geral", "telefone": "", "email": "CONTATO@a.example"}
+    leads = [_lead("B0001", "a.example", [k]), _lead("B0002", "c.example"), _lead("B0003", "a.example", [dup]),
+             _lead("B0004", "zzz.example"), _lead("B0005", "b.example", telefone="(65) 3000-1111"),
+             {"id": "R0001", "version": 1, "data": {"nome": "sem base"}}]
+    res = site_leads(leads, SITE)
+    assert [r["id"] for r in res] == ["B0001"]
+    r = res[0]
+    assert r["if_version"] == 3 and set(r) == {"id", "if_version", "data"} and set(r["data"]) == {"contatos"}
+    assert r["data"]["contatos"][0] == k
+    assert r["data"]["contatos"][1]["id"] == "k2" and r["data"]["contatos"][1]["telefone"] == "5565999991111"
+    assert r["data"]["contatos"][1]["cargo"] == "Contato da empresa (site)" and "contatoAtivo" not in r["data"]
+
+
+def test_cli_site_leads(tmp_path, capsys):
+    (tmp_path / "leads.json").write_text(json.dumps([_lead("B0001", "a.example"), _lead("B0002", "c.example")]))
+    (tmp_path / "site.json").write_text(json.dumps(SITE))
+    main(["site-leads", "--leads", str(tmp_path / "leads.json"), "--site-contatos", str(tmp_path / "site.json"),
+          "--saida", str(tmp_path / "out.json")])
+    out = json.loads((tmp_path / "out.json").read_text())
+    assert [o["id"] for o in out] == ["B0001"] and out[0]["data"]["contatos"][0]["id"] == "k1"
+    assert json.loads(capsys.readouterr().out)["comContatoNovo"] == 1
