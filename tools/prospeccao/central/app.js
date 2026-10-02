@@ -122,6 +122,7 @@
   }
 
   // ---------- escrita ----------
+  var SEM_ACESSO = { revoked: 1, not_granted: 1, capability_disabled: 1, capability_removed: 1, invalid_argument: 1 };
   function falhou(e) {
     var code = e && e.code;
     if (code === "revoked" || code === "not_granted" || code === "capability_disabled" || code === "capability_removed") {
@@ -134,13 +135,14 @@
       toast("Não foi possível salvar. Tente de novo em instantes.");
     }
   }
-  function gravar(caminho, dados, msg, criar) {
+  // aoFalhar troca o aviso genérico de erro (exceto quando a conta perdeu o acesso: aí vale o aviso fixo do topo).
+  function gravar(caminho, dados, msg, criar, aoFalhar) {
     if (!estado.podeMarcar || estado.gravando[caminho]) return Promise.resolve(false);
     estado.gravando[caminho] = true;
     render();
     var ref = estado.db.doc(caminho);
     return (criar ? ref.set(dados) : ref.update(dados)).then(function () { if (msg) toast(msg); return true; },
-      function (e) { falhou(e); return false; })
+      function (e) { if (aoFalhar && !SEM_ACESSO[e && e.code]) aoFalhar(e); else falhou(e); return false; })
       .then(function (ok) { delete estado.gravando[caminho]; render(); focarSePerdido(); return ok; });
   }
   // Depois de uma ação o foco fica no lead: no título do detalhe aberto em gaveta, senão na linha selecionada.
@@ -175,12 +177,24 @@
   // Envio de um clique (WhatsApp e e-mail): o link abre no navegador; aqui só marca, avisa com Desfazer e avança.
   function enviar(l) {
     if (!estado.podeMarcar || estado.gravando["leads/" + l.id]) return;
-    var n = Math.min(etapa(l) + 1, 3);
+    marcarToque(l, Math.min(etapa(l) + 1, 3), new Date().toISOString());
+  }
+  // Grava o toque n; se a gravação falhar, a conversa já abriu: o aviso fica até ela marcar de novo (sem reabrir) ou fechar.
+  function marcarToque(l, n, quando) {
     var fila = estado.visiveis.aq;
     var dados = { etapa: n };
-    dados["enviado" + n] = new Date().toISOString();
-    gravar("leads/" + l.id, registrar(l, dados, "Toque " + n + " enviado")).then(function (ok) {
-      if (!ok) return;  // falha: o erro já foi avisado e a seleção fica onde está
+    dados["enviado" + n] = quando;
+    var falha = function () {
+      avisoFalhaEnvio("A conversa abriu, mas o toque " + n + " não foi marcado", function () {
+        var atual = estado.leads[l.id];
+        if (!atual) { toast("Este lead não está mais na central"); return; }
+        if (etapa(atual) >= n) { toast("O toque " + n + " já está marcado"); return; }
+        if (etapa(atual) !== n - 1) { toast("Nada a marcar: o lead mudou de etapa"); return; }  // nunca pula um toque
+        marcarToque(atual, n, quando);
+      });
+    };
+    gravar("leads/" + l.id, registrar(l, dados, "Toque " + n + " enviado"), null, false, falha).then(function (ok) {
+      if (!ok) return;  // falha: o aviso fixo já está na tela e a seleção fica onde está
       avisoDesfazer(l, n);
       var prox = estado.funil === "aq" ? Regras.proximoDoDia(fila, l.id, grupo) : null;  // fora do Aquecimento o envio não mexe na seleção
       // o foco segue para o próximo quando estava na fila ou se perdeu (a linha enviada saiu de Para hoje)
@@ -191,6 +205,15 @@
   function avisoComDesfazer(texto, desfazer) {
     var b = el("button", { type: "button", class: "desfazer", onclick: desfazer }, ["Desfazer"]);
     toast(texto + " · ", b, DESFAZER_MS);
+  }
+  // Aviso fixo de envio não marcado: "Marcar como enviado" só regrava (o link não abre de novo); Fechar descarta.
+  function avisoFalhaEnvio(texto, marcar) {
+    var acoes = el("span", null, [
+      el("button", { type: "button", class: "marcar", onclick: marcar }, ["Marcar como enviado"]),
+      " · ",
+      el("button", { type: "button", class: "fechar", "aria-label": "Fechar o aviso", onclick: function () { limparToast(); focarSePerdido(); } }, ["Fechar"])
+    ]);
+    toast(texto + ". ", acoes, FIXO);
   }
   function avisoDesfazer(l, n) { avisoComDesfazer("Toque " + n + " marcado", function () { desfazerToque(l, n); }); }
   // n = o toque que o aviso ou a linha do histórico promete desfazer; se o lead já andou, não desfaz outro.
@@ -542,7 +565,8 @@
     var link = !destinoDe(l, email) ? "" : email ? mailtoToque(l, t) : linkToque(l, t);
     // enquanto a gravação deste lead não volta, o link não abre de novo (sem banco ele abre normalmente)
     var podeEnviar = g === "hoje" && !!link && !estado.gravando["leads/" + l.id];
-    var btnEnviar = el("a", { class: "btn principal enviar", href: podeEnviar ? link : null, target: podeEnviar ? "_blank" : null, rel: podeEnviar ? "noopener" : null,
+    // só a linha selecionada leva o Enviar cheio; nas outras ele é contornado, para a fila não virar uma coluna de primários
+    var btnEnviar = el("a", { class: "btn enviar" + (sel() === l.id ? " principal" : ""), href: podeEnviar ? link : null, target: podeEnviar ? "_blank" : null, rel: podeEnviar ? "noopener" : null,
       "aria-disabled": podeEnviar ? null : "true", "aria-label": "Enviar toque " + n + " para " + (l.nome || l.id),
       onclick: function () { if (podeEnviar) enviar(l); } }, ["Enviar"]);
     var btnCopiar = el("button", { type: "button", class: "btn copiar", disabled: !ativo, "aria-label": "Copiar mensagem do toque " + n + " de " + (l.nome || l.id),
@@ -726,6 +750,7 @@
   function mostrarAtalhos(v) {
     if (v === atalhosAbertos()) return;
     $("atalhos").hidden = !v;
+    $("btn-atalhos").setAttribute("aria-expanded", String(v));
     if (v) { focoAntesAtalhos = document.activeElement; $("atalhos-fechar").focus(); }
     else {
       var volta = focoAntesAtalhos; focoAntesAtalhos = null;
@@ -824,6 +849,7 @@
   }
   document.addEventListener("keydown", teclado);
   $("atalhos-fechar").addEventListener("click", function () { mostrarAtalhos(false); });
+  $("btn-atalhos").addEventListener("click", function () { mostrarAtalhos(!atalhosAbertos()); });
 
   // ================= LEADS: estrutura e enriquecimento =================
   function statusLD(l) { return (l.enriquecimento && l.enriquecimento.status) || "bruto"; }
@@ -1145,10 +1171,18 @@
   function vencimentoPV(c) { return Regras.vencimentoPV(c, etapasPV()); }
   function grupoPV(c) { return Regras.grupoPV(c, etapasPV(), new Date()); }
 
-  function marcarPV(c, n) {
+  function marcarPV(c, n, quando) {
     var dados = {};
-    dados["pvEnviado" + n] = new Date().toISOString();
-    var ok = comVizinho(c, function () { return gravar("clientes/" + c.id, dados); });
+    dados["pvEnviado" + n] = quando || new Date().toISOString();
+    var falha = function () {
+      avisoFalhaEnvio("A conversa abriu, mas a mensagem da etapa " + n + " não foi marcada", function () {
+        var atual = estado.clientes[c.id];
+        if (!atual) { toast("Este cliente não está mais na central"); return; }
+        if (atual["pvEnviado" + n] || etapaPV(atual) !== n) { toast("A mensagem da etapa " + n + " já está marcada"); return; }
+        marcarPV(atual, n, dados["pvEnviado" + n]);
+      });
+    };
+    var ok = comVizinho(c, function () { return gravar("clientes/" + c.id, dados, null, false, falha); });
     ok.then(function (feito) { if (feito) avisoComDesfazer("Mensagem da etapa " + n + " marcada", function () { desfazerPV(c, n); }); });
     return ok;
   }
@@ -1225,7 +1259,7 @@
   function linhaCliente(c) {
     var p = infoPV(c), total = etapasPV().length;
     var podeEnviar = p.g === "hoje" && !!p.link && !estado.gravando["clientes/" + c.id];
-    var btnEnviar = el("a", { class: "btn principal enviar", href: podeEnviar ? p.link : null, target: podeEnviar ? "_blank" : null, rel: podeEnviar ? "noopener" : null,
+    var btnEnviar = el("a", { class: "btn enviar" + (sel() === c.id ? " principal" : ""), href: podeEnviar ? p.link : null, target: podeEnviar ? "_blank" : null, rel: podeEnviar ? "noopener" : null,
       "aria-disabled": podeEnviar ? null : "true", "aria-label": "Enviar mensagem de " + (p.e ? p.e.nome.toLowerCase() : "etapa") + " para " + (c.nome || c.id),
       onclick: function () { if (podeEnviar && !p.semMarca && !p.enviado) marcarPV(c, p.n); } }, ["Enviar"]);
     var btnCopiar = el("button", { type: "button", class: "btn copiar", disabled: !(p.ativo && p.e && !p.precisaData), "aria-label": "Copiar mensagem de " + (c.nome || c.id),
@@ -1465,6 +1499,8 @@
     });
     var meta = metaDiaria(), batida = n >= meta;
     var texto = batida ? "Meta do dia batida · " + hoje + " ainda vencem hoje" : n + " de " + meta + " toques · " + hoje + " para hoje";
+    // fora do Aquecimento a linha diz de que meta se trata, para não ser lida como contagem do pós-venda ou de Leads
+    if (estado.funil !== "aq") texto = batida ? "Meta de toques batida · " + hoje + " leads ainda vencem hoje" : "Meta de toques: " + n + " de " + meta + " · " + hoje + " leads para hoje";
     var barra = $("barra");
     barra.max = meta;
     barra.value = Math.min(n, meta);

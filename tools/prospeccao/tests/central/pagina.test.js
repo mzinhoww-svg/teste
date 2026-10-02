@@ -292,11 +292,21 @@ test("Desfazer no aviso volta o toque e a seleção", async () => {
 
 test("aviso some depois de 8 segundos", async () => {
   const h = await abrirEnvio({ relogio: true });
+  // anota, no relógio da página, quando o texto do aviso apareceu
+  await h.page.evaluate(() => {
+    const t = document.getElementById("toast");
+    new MutationObserver(() => { if (t.querySelector("button") && !window.__avisoEm) window.__avisoEm = Date.now(); }).observe(t, { childList: true, subtree: true });
+  });
+  const janela = h.page.waitForEvent("popup");
   await h.page.click("#fila [data-id=R0001] a.enviar");
   await h.page.waitForSelector("#toast button");
-  // o relógio vale para o contexto inteiro: espera a janela do WhatsApp fechar antes de adiantar o tempo
-  for (let i = 0; i < 100 && h.page.context().pages().length > 1; i++) await new Promise((r) => setTimeout(r, 20));
-  await h.page.clock.fastForward(7500);
+  // o relógio vale para o contexto inteiro: espera a janela do WhatsApp abrir e fechar antes de adiantar o tempo
+  const p = await janela;
+  if (!p.isClosed()) await p.waitForEvent("close");
+  // o relógio continua andando enquanto a janela fecha: desconta o que já passou desde que o aviso apareceu
+  const passou = await h.page.evaluate(() => Date.now() - window.__avisoEm);
+  assert.ok(passou < 7000, "passou " + passou + " ms antes de adiantar");
+  await h.page.clock.fastForward(7500 - passou);
   assert.equal(await h.page.locator("#toast").isVisible(), true);
   await h.page.clock.fastForward(700);
   assert.equal(await h.page.locator("#toast").isHidden(), true);
@@ -319,9 +329,9 @@ test("falha ao gravar não avança e mostra o erro", async () => {
   const h = await abrirEnvio({ falharGravacao: true });
   const atual = await selecionadaId(h.page);
   await h.page.click("#fila [data-id=" + atual + "] a.enviar");
-  await h.page.waitForFunction(() => /Não foi possível salvar/.test(document.getElementById("toast").textContent));
+  await h.page.waitForFunction(() => /não foi marcado/.test(document.getElementById("toast").textContent));
   assert.equal(await selecionadaId(h.page), atual);
-  assert.equal(await h.page.locator("#toast button").count(), 0);
+  assert.deepEqual(await h.page.evaluate(() => Array.from(document.querySelectorAll("#toast button")).map((b) => b.textContent)), ["Marcar como enviado", "Fechar"]);
   assert.equal(await h.page.locator("#fila [data-id=" + atual + "] a.enviar").getAttribute("aria-disabled"), null);
 });
 
@@ -980,9 +990,9 @@ test("meta mostra N de 20 e muda ao bater", async () => {
   assert.match(await h.page.locator("#meta-texto").textContent(), /^Meta do dia batida · \d+ ainda vencem hoje$/);
   assert.equal(await h.page.evaluate(() => document.querySelector("progress#barra").classList.contains("batida")), true);
   assert.equal(await h.page.evaluate(() => document.getElementById("linha-meta").textContent), await h.page.locator("#meta-texto").textContent());
-  // vale em qualquer funil
+  // vale em qualquer funil; fora do Aquecimento diz que é a meta de toques
   await h.page.click("#f-ld");
-  assert.match(await h.page.locator("#meta-texto").textContent(), /^Meta do dia batida/);
+  assert.match(await h.page.locator("#meta-texto").textContent(), /^Meta de toques batida · \d+ leads ainda vencem hoje$/);
   assert.deepEqual(h.erros.map(String), []);
 });
 
@@ -1298,4 +1308,119 @@ test("Cuidado mostra alertas no formato real e em texto simples", async () => {
   t = await h.page.locator("#detalhe .perfil-esq").innerText();
   assert.match(t, /Telefone desatualizado/);
   assert.ok(!/undefined/.test(t), t);
+});
+
+// ---------- Crítica de design ----------
+test("envio com gravação falha: aviso fixo, Marcar como enviado só regrava e Fechar descarta", async () => {
+  const h = await abrirEnvio({ falharGravacao: true });
+  let popups = 0;
+  h.page.on("popup", () => popups++);
+  const atual = await selecionadaId(h.page);
+  await h.page.click("#fila [data-id=" + atual + "] a.enviar");
+  assert.match(await textoAviso(h.page), /^A conversa abriu, mas o toque \d não foi marcado\. Marcar como enviado · Fechar$/);
+  assert.equal(popups, 1);
+  await h.page.waitForTimeout(2700);  // mais que o aviso comum (2,4 s): continua na tela
+  assert.match(await h.page.locator("#toast").innerText(), /não foi marcado/);
+  // nova tentativa ainda falhando: o aviso volta, nada abre
+  await h.page.click('#toast button:has-text("Marcar como enviado")');
+  await h.page.waitForFunction(() => /não foi marcado/.test(document.getElementById("toast").textContent));
+  assert.equal(popups, 1, "Marcar como enviado não abre a conversa de novo");
+  assert.equal(await selecionadaId(h.page), atual, "a seleção não avança na falha");
+  assert.notEqual(await h.page.evaluate(() => document.activeElement.tagName), "BODY");
+  // o banco volta: marca com a hora do envio, mostra o Desfazer e avança
+  await h.falhar(false);
+  await h.page.click('#toast button:has-text("Marcar como enviado")');
+  await h.page.waitForFunction(() => window.__escritas.length === 1);
+  const e = (await h.escritas.lista())[0];
+  assert.equal(e.caminho, "leads/" + atual);
+  assert.ok(e.dados["enviado" + e.dados.etapa]);
+  assert.match(await textoAviso(h.page), /^Toque \d marcado · Desfazer$/);
+  assert.equal(popups, 1);
+  assert.notEqual(await selecionadaId(h.page), atual);
+  // Fechar descarta o aviso fixo
+  await h.falhar(true);
+  const outro = await selecionadaId(h.page);
+  await h.page.click("#fila [data-id=" + outro + "] a.enviar");
+  await h.page.waitForFunction(() => /não foi marcado/.test(document.getElementById("toast").textContent));
+  await h.page.click('#toast button:has-text("Fechar")');
+  assert.equal(await h.page.evaluate(() => document.getElementById("toast").textContent), "");
+  assert.equal((await h.escritas.lista()).length, 1);
+});
+
+test("pós-venda: envio com gravação falha mostra o aviso fixo e Marcar como enviado regrava", async () => {
+  const h = await abrirFunil("pv", { falharGravacao: true });
+  let popups = 0;
+  h.page.on("popup", () => popups++);
+  await h.page.click("#fila [data-id=C0001] a.enviar");
+  assert.match(await textoAviso(h.page), /^A conversa abriu, mas a mensagem da etapa 1 não foi marcada\. Marcar como enviado · Fechar$/);
+  await h.falhar(false);
+  await h.page.click('#toast button:has-text("Marcar como enviado")');
+  await h.page.waitForFunction(() => window.__escritas.length === 1);
+  const e = (await h.escritas.lista())[0];
+  assert.equal(e.caminho, "clientes/C0001");
+  assert.ok(e.dados.pvEnviado1);
+  assert.match(await textoAviso(h.page), /^Mensagem da etapa 1 marcada · Desfazer$/);
+  assert.equal(popups, 1, "a conversa abriu uma vez só");
+});
+
+test("só a linha selecionada tem o Enviar cheio; o detalhe mantém o primário", async () => {
+  for (const funil of ["aq", "pv"]) {
+    const h = await abrirFunil(funil);
+    const r = await h.page.evaluate(() => ({
+      cheios: Array.from(document.querySelectorAll("#fila a.enviar.principal")).map((a) => a.closest("[data-id]").dataset.id),
+      contornados: document.querySelectorAll("#fila a.enviar:not(.principal)").length,
+      sel: document.querySelector('#fila [aria-current="true"]').dataset.id,
+      detalhe: document.querySelectorAll("#detalhe .acoes a.enviar.principal").length,
+    }));
+    assert.deepEqual(r.cheios, [r.sel], funil);
+    assert.ok(r.contornados >= 1, funil);
+    assert.equal(r.detalhe, 1, funil + ": Enviar do detalhe continua primário");
+  }
+});
+
+test("mensagem do detalhe com no máximo 68ch de largura", async () => {
+  const h = await abrirDetalhe();
+  await abrirLead(h, "R0001");
+  const r = await h.page.evaluate(() => {
+    const m = document.querySelector("#detalhe .toque-atual .msg");
+    const ch = document.createElement("span"); ch.textContent = "0"; ch.style.font = getComputedStyle(m).font; document.body.appendChild(ch);
+    const largura = ch.getBoundingClientRect().width; ch.remove();
+    return { max: getComputedStyle(m).maxWidth, w: m.getBoundingClientRect().width, ch: largura, detalhe: document.getElementById("detalhe").clientWidth };
+  });
+  assert.notEqual(r.max, "none");
+  assert.ok(r.w <= 68 * r.ch + 1 && r.w < r.detalhe - 100, JSON.stringify(r));
+});
+
+test("fora do Aquecimento a meta diz que é de toques", async () => {
+  const h = await abrirFunil("pv");
+  assert.match(await h.page.locator("#meta-texto").textContent(), /^Meta de toques: \d+ de 20 · \d+ leads para hoje$/);
+  await h.page.click("#f-ld");
+  assert.match(await h.page.locator("#meta-texto").textContent(), /^Meta de toques: \d+ de 20/);
+  await h.page.click("#f-aq");
+  assert.match(await h.page.locator("#meta-texto").textContent(), /^\d+ de 20 toques · \d+ para hoje$/);
+});
+
+test("barra da meta sem transição de largura", () => {
+  const css = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "..", "central", "estilo.css"), "utf8");
+  assert.ok(!/transition:\s*width/.test(css));
+});
+
+test("1440px: botão Atalhos no trilho abre e fecha a lista; some abaixo de 1280px", async () => {
+  const h = await abrir({ largura: 1440 });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  const b = h.page.locator("#btn-atalhos");
+  assert.equal(await b.isVisible(), true);
+  assert.equal((await b.innerText()).replace(/\s+/g, " ").trim(), "Atalhos: ?");
+  const caixaB = await b.boundingBox(), trilho = await h.page.locator("#trilho").boundingBox();
+  assert.ok(caixaB.x >= trilho.x && caixaB.x + caixaB.width <= trilho.x + trilho.width, "dentro do trilho");
+  await b.click();
+  assert.equal(await h.page.locator("#atalhos").isVisible(), true);
+  assert.equal(await b.getAttribute("aria-expanded"), "true");
+  await h.page.keyboard.press("Escape");
+  assert.equal(await h.page.locator("#atalhos").isVisible(), false);
+  assert.equal(await b.getAttribute("aria-expanded"), "false");
+  assert.equal(await h.page.evaluate(() => document.activeElement.id), "btn-atalhos", "o foco volta ao botão");
+  await h.page.setViewportSize({ width: 1100, height: 900 });
+  assert.equal(await b.isVisible(), false);
 });
