@@ -447,6 +447,7 @@ test("Desfazer no Histórico depois do aviso", async () => {
   await abrirLead(h, "R0001");
   await h.page.click('#detalhe [role=tab]:has-text("Histórico")');
   assert.equal(await h.page.locator("#detalhe .tempo button").count(), 1, "só a linha do último envio tem Desfazer");
+  assert.equal(await h.page.locator("#detalhe .tempo li", { hasText: "Toque 1" }).count(), 1, "o envio aparece uma vez só");
   await h.page.click("#detalhe .tempo >> text=Desfazer");
   await h.page.waitForFunction(() => window.__escritas.length > 1);
   const e = (await h.escritas.lista())[1];

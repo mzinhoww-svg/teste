@@ -355,7 +355,7 @@
       el("div", { class: "perfil-esq" }, [secaoFaz(l), secaoGancho(l), secaoJaTem(l), secaoEmpresa(l), secaoCuidado(l)]),
       el("div", { class: "perfil-dir" }, secaoPessoas(l))
     ]);
-    return [lista, el("div", { role: "tabpanel", id: "painel-detalhe", "aria-labelledby": "tab-" + atual, class: "painel" }, [conteudo])];
+    return [lista, el("div", { role: "tabpanel", tabindex: "0", id: "painel-detalhe", "aria-labelledby": "tab-" + atual, class: "painel" }, [conteudo])];
   }
 
   function cardLead(l) {
@@ -771,9 +771,17 @@
     }))], email ? "por e-mail" : "por WhatsApp");
   }
   function eventos(l) {
-    var lista = (l.historico || []).slice();
+    var lista = (l.historico || []).map(function (x) { return Object.assign({}, x); });
     var g = grupo(l), e = etapa(l), desfazivel = e >= 1 && g !== "respondeu" && g !== "fechou" && g !== "sair";
-    [1, 2, 3].forEach(function (n) { if (l["enviado" + n]) lista.push({ em: l["enviado" + n], texto: "Toque " + n + " (" + NOMES_TOQUE[n].toLowerCase() + ") enviado", desfazer: desfazivel && n === e ? n : 0 }); });
+    [1, 2, 3].forEach(function (n) {
+      var quando = l["enviado" + n];
+      if (!quando) return;
+      var marca = desfazivel && n === e ? n : 0;
+      // o envio da central já grava "Toque N enviado" no histórico; só deriva a linha quando for dado antigo
+      var guardado = lista.filter(function (x) { return x.texto === "Toque " + n + " enviado" && Math.abs(new Date(x.em) - new Date(quando)) < 5000; })[0];
+      if (guardado) { if (marca) guardado.desfazer = marca; return; }
+      lista.push({ em: quando, texto: "Toque " + n + " (" + NOMES_TOQUE[n].toLowerCase() + ") enviado", desfazer: marca });
+    });
     var enr = l.enriquecimento || {};
     if (enr.atualizadoEm) lista.push({ em: enr.atualizadoEm + "T12:00:00", texto: "Enriquecimento atualizado: " + ({ completo: "completo", parcial: "parcial", bruto: "sem enriquecimento" }[enr.status] || enr.status) });
     return lista.filter(function (x) { return x.em && !isNaN(new Date(x.em)); })
