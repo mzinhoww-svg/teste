@@ -40,7 +40,7 @@ def um(emp, existentes=()):
 def test_mapeia_campos_e_tem_todos_os_campos_da_pagina():
     n = um(empresa())
     d = n["data"]
-    esperado = set(CAMPOS) | set(ESTADO_INICIAL) | set(lead_novo({"name": "A", "email": "a@b.c"}, "c", 1))
+    esperado = (set(CAMPOS) | set(ESTADO_INICIAL) | set(lead_novo({"name": "A", "email": "a@b.c"}, "c", 1)) | {"baseExplee"}) - {"explee"}
     assert esperado <= set(d)
     assert all(d[k] is not None for k in CAMPOS if k != "score")
     assert d["nome"] == "Abex - Associação Brasileira de Exemplo" and d["site"] == "abex.example"
