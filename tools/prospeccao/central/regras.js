@@ -166,7 +166,7 @@ var Regras = (function () {
   }
 
   return {
-    DIA: DIA, inicioDoDia: inicioDoDia, quando: quando, waLink: waLink, telefoneFormatado: telefoneFormatado,
+    DIA: DIA, inicioDoDia: inicioDoDia, dataCurta: dataCurta, quando: quando, waLink: waLink, telefoneFormatado: telefoneFormatado,
     etapa: etapa, vencimento: vencimento, grupo: grupo, toque: toque,
     contatoAtivo: contatoAtivo, primeiroNome: primeiroNome, comSaudacao: comSaudacao,
     telefoneDestino: telefoneDestino, emailDestino: emailDestino, fotoDe: fotoDe,
