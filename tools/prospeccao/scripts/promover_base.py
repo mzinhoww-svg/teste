@@ -11,7 +11,7 @@ e grava JSON, e quem grava na central é o Claude (ArtifactData).
 
 Decisões:
 - Id `B` + 4 dígitos, depois do maior B dos existentes. A ordem é score desc e domínio, então rodar de novo com a
-  mesma entrada dá os mesmos ids; empresa cujo domínio já está na central (`explee.dominio` ou o domínio do `site`)
+  mesma entrada dá os mesmos ids; empresa cujo domínio já está na central (`baseExplee.dominio` ou o domínio do `site`)
   é pulada, o que torna o passo idempotente.
 - Segmento -> ICP da copy: associações vão no ICP3 (entidades), produtores de evento no ICP6 (eventos e feiras) e
   conselhos e advocacia no ICP2 (jurídico), ou no ICP3 se o nome é de conselho ou ordem. Segmento sem ICP é pulado.
@@ -197,7 +197,7 @@ def doc_promovido(emp: dict, num: int, agora: str) -> dict:
         "enriquecimento": {"status": "bruto"},
         "historico": [{"em": agora, "texto": f"Entrou da base Explee (faixa {emp.get('tier')}, campanha {principal}): "
                                              "já recebeu e-mail da Explee sem responder", "tipo": TIPO_HIST}],
-        "explee": {"dominio": emp["dominio"], "campanhas": campanhas,
+        "baseExplee": {"dominio": emp["dominio"], "campanhas": campanhas,
                    "personIds": [p.get("person_id") for p in pessoas if p.get("person_id")],
                    "tier": emp.get("tier"), "score": emp.get("score")},
     })
@@ -216,7 +216,7 @@ def _dominios_existentes(existentes: list[dict]) -> dict:
     doms = {}
     for x in existentes or []:
         x = _achatar(x)
-        for d in (_dominio((x.get("explee") or {}).get("dominio") or ""), _dominio(x.get("site") or "")):
+        for d in (_dominio(((x.get("baseExplee") or x.get("explee") or {}).get("dominio")) or ""), _dominio(x.get("site") or "")):
             if d:
                 doms.setdefault(d, x.get("id"))
     return doms
