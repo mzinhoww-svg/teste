@@ -69,7 +69,7 @@ async function abrir(opts) {
   const inicial = {
     leads: opts.leads === undefined ? dados.leads(7) : opts.leads,
     clientes: opts.clientes === undefined ? dados.clientes() : opts.clientes,
-    config: { meta: dados.meta(), fotos: dados.fotos(), posvenda: dados.posvenda() },
+    config: { meta: opts.meta || dados.meta(), fotos: dados.fotos(), posvenda: dados.posvenda() },
   };
   const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
   const ctx = await browser.newContext({ viewport: { width: largura, height: opts.altura || 900 } });

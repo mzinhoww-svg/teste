@@ -980,3 +980,24 @@ test("meta mostra N de 20 e muda ao bater", async () => {
   assert.match(await h.page.locator("#meta-texto").textContent(), /^Meta do dia batida/);
   assert.deepEqual(h.erros.map(String), []);
 });
+
+test("metaDiaria inválida cai para 20", async () => {
+  const h = await abrir({ largura: 1440, meta: { metaDiaria: -5, esperaDias: { "1": 0, "2": 4, "3": 6 } } });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  assert.match(await h.page.locator("#meta-texto").textContent(), /de 20 toques/);
+});
+
+test("390px: topo fixo ≤120px também com a meta batida", async () => {
+  const dados = require("./dados.js");
+  const hoje = new Date().toISOString();
+  const leads = dados.leads(20);
+  leads.forEach((d, i) => { if (i > 0) Object.assign(d.data, { etapa: 1, enviado1: hoje }); });
+  const h = await abrir({ largura: 390, altura: 844, leads });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  assert.match(await h.page.locator(".linha-meta").textContent(), /^Meta do dia batida · \d+ ainda vencem hoje$/);
+  const fixo = await caixa(h.page, ".fixo");
+  assert.ok(fixo.h <= 120, "topo ≤120px, veio " + fixo.h);
+  assert.ok(await semRolagemLateral(h.page));
+});

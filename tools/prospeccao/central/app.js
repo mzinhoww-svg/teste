@@ -446,7 +446,7 @@
       cont[grupo(l)]++;
       [1, 2, 3].forEach(function (n) { if (mesmoDia(l["enviado" + n], agora)) toquesHoje++; });
     });
-    placar([cont.hoje, "Para hoje"], [toquesHoje, "Toques hoje / " + (Number(estado.meta.metaDiaria) || 20)], [cont.hoje + cont.aguardando, "Em cadência"],
+    placar([cont.hoje, "Para hoje"], [toquesHoje, "Toques hoje / " + metaDiaria()], [cont.hoje + cont.aguardando, "Em cadência"],
       [cont.respondeu + cont.fechou, "Responderam"]);
     abas(cont);
     var unicos = function (campo) {
@@ -1412,6 +1412,7 @@
   function placar(a, b, c, d) {
     [a, b, c, d].forEach(function (x, i) { $("p" + (i + 1)).textContent = x[0]; $("p" + (i + 1) + "l").textContent = x[1]; });
   }
+  function metaDiaria() { var m = Number(estado.meta.metaDiaria); return isFinite(m) && m > 0 ? m : 20; }
   // Meta do dia: toques de aquecimento enviados hoje (sem o card TESTE), em qualquer funil. Sem animação nem confete.
   function desenharMeta() {
     var agora = new Date(), n = 0, hoje = 0;
@@ -1421,7 +1422,7 @@
       if (grupo(l) === "hoje") hoje++;
       [1, 2, 3].forEach(function (i) { if (mesmoDia(l["enviado" + i], agora)) n++; });
     });
-    var meta = Number(estado.meta.metaDiaria) || 20, batida = n >= meta;
+    var meta = metaDiaria(), batida = n >= meta;
     var texto = batida ? "Meta do dia batida · " + hoje + " ainda vencem hoje" : n + " de " + meta + " toques · " + hoje + " para hoje";
     var barra = $("barra");
     barra.max = meta;
