@@ -1424,3 +1424,25 @@ test("1440px: botão Atalhos no trilho abre e fecha a lista; some abaixo de 1280
   await h.page.setViewportSize({ width: 1100, height: 900 });
   assert.equal(await b.isVisible(), false);
 });
+
+test("aviso de envio não marcado volta depois de um aviso comum (c)", async () => {
+  const h = await abrirEnvio({ falharGravacao: true });
+  const atual = await selecionadaId(h.page);
+  await h.page.click("#fila [data-id=" + atual + "] a.enviar");
+  await h.page.waitForSelector('#toast button:has-text("Marcar como enviado")');
+  await h.page.focus("#fila [data-id=" + atual + "]");
+  await h.page.keyboard.press("c");
+  await h.page.waitForFunction(() => /copiado|Não deu para copiar/.test(document.getElementById("toast").textContent));
+  // o aviso comum sai sozinho e o fixo volta com o botão
+  await h.page.waitForSelector('#toast button:has-text("Marcar como enviado")', { timeout: 4000 });
+  assert.match(await h.page.locator("#toast").innerText(), /não foi marcado/);
+  // um envio bem-sucedido do mesmo toque solta o aviso: depois do Desfazer de 8 s ele não volta
+  await h.falhar(false);
+  await h.page.click('#toast button:has-text("Marcar como enviado")');
+  await h.page.waitForFunction(() => window.__escritas.length === 1);
+  assert.match(await textoAviso(h.page), /^Toque \d marcado · Desfazer$/);
+  await h.page.keyboard.press("c");
+  await h.page.waitForFunction(() => /copiado|Não deu para copiar/.test(document.getElementById("toast").textContent));
+  await h.page.waitForFunction(() => document.getElementById("toast").textContent === "", null, { timeout: 4000 });
+  assert.equal(await h.page.locator('#toast button:has-text("Marcar como enviado")').count(), 0);
+});

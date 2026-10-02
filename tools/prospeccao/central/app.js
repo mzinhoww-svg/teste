@@ -67,6 +67,11 @@
   var toastTimer, toastVez = 0;
   var DESFAZER_MS = 8000;
   var FIXO = -1;  // aviso que só sai por ação dela
+  // Envio não marcado: o aviso fixo fica pendente. Um aviso comum aparece no lugar dele e, ao sumir, ele volta.
+  // Só sai com "Marcar como enviado" dando certo, com Fechar ou com um envio bem-sucedido do mesmo toque.
+  var avisoFixo = null;
+  function esconderToast() { limparToast(); if (avisoFixo) avisoFixo.mostrar(); }
+  function soltarFixo(chave) { if (avisoFixo && avisoFixo.chave === chave) avisoFixo = null; }
   function limparToast() {
     toastVez++;
     clearTimeout(toastTimer);
@@ -80,7 +85,7 @@
       if (vez !== toastVez) return;  // outro aviso já tomou o lugar
       t.appendChild(document.createTextNode(txt));
       if (conteudo) t.appendChild(conteudo);
-      if (ms !== FIXO) toastTimer = setTimeout(function () { if (vez === toastVez) limparToast(); }, ms || 2400);
+      if (ms !== FIXO) toastTimer = setTimeout(function () { if (vez === toastVez) esconderToast(); }, ms || 2400);
     }, 0);
   }
   function copiar(texto, rotulo) {
@@ -184,17 +189,19 @@
     var fila = estado.visiveis.aq;
     var dados = { etapa: n };
     dados["enviado" + n] = quando;
+    var chave = "leads/" + l.id + "/" + n;
     var falha = function () {
-      avisoFalhaEnvio("A conversa abriu, mas o toque " + n + " não foi marcado", function () {
+      avisoFalhaEnvio(chave, "A conversa abriu, mas o toque " + n + " não foi marcado", function () {
         var atual = estado.leads[l.id];
-        if (!atual) { toast("Este lead não está mais na central"); return; }
-        if (etapa(atual) >= n) { toast("O toque " + n + " já está marcado"); return; }
-        if (etapa(atual) !== n - 1) { toast("Nada a marcar: o lead mudou de etapa"); return; }  // nunca pula um toque
+        if (!atual) { soltarFixo(chave); toast("Este lead não está mais na central"); return; }
+        if (etapa(atual) >= n) { soltarFixo(chave); toast("O toque " + n + " já está marcado"); return; }
+        if (etapa(atual) !== n - 1) { soltarFixo(chave); toast("Nada a marcar: o lead mudou de etapa"); return; }  // nunca pula um toque
         marcarToque(atual, n, quando);
       });
     };
     gravar("leads/" + l.id, registrar(l, dados, "Toque " + n + " enviado"), null, false, falha).then(function (ok) {
       if (!ok) return;  // falha: o aviso fixo já está na tela e a seleção fica onde está
+      soltarFixo(chave);
       avisoDesfazer(l, n);
       var prox = estado.funil === "aq" ? Regras.proximoDoDia(fila, l.id, grupo) : null;  // fora do Aquecimento o envio não mexe na seleção
       // o foco segue para o próximo quando estava na fila ou se perdeu (a linha enviada saiu de Para hoje)
@@ -207,20 +214,23 @@
     toast(texto + " · ", b, DESFAZER_MS);
   }
   // Aviso fixo de envio não marcado: "Marcar como enviado" só regrava (o link não abre de novo); Fechar descarta.
-  function avisoFalhaEnvio(texto, marcar) {
-    var acoes = el("span", null, [
-      el("button", { type: "button", class: "marcar", onclick: marcar }, ["Marcar como enviado"]),
-      " · ",
-      el("button", { type: "button", class: "fechar", "aria-label": "Fechar o aviso", onclick: function () { limparToast(); focarSePerdido(); } }, ["Fechar"])
-    ]);
-    toast(texto + ". ", acoes, FIXO);
+  function avisoFalhaEnvio(chave, texto, marcar) {
+    avisoFixo = { chave: chave, mostrar: function () {
+      var acoes = el("span", null, [
+        el("button", { type: "button", class: "marcar", onclick: marcar }, ["Marcar como enviado"]),
+        " · ",
+        el("button", { type: "button", class: "fechar", "aria-label": "Fechar o aviso", onclick: function () { avisoFixo = null; limparToast(); focarSePerdido(); } }, ["Fechar"])
+      ]);
+      toast(texto + ". ", acoes, FIXO);
+    } };
+    avisoFixo.mostrar();
   }
   function avisoDesfazer(l, n) { avisoComDesfazer("Toque " + n + " marcado", function () { desfazerToque(l, n); }); }
   // n = o toque que o aviso ou a linha do histórico promete desfazer; se o lead já andou, não desfaz outro.
   function desfazerToque(l, n) {
     var atual = estado.leads[l.id] || l;
     var e = etapa(atual);
-    limparToast();
+    esconderToast();
     if (e < 1 || (n != null && e !== n)) { toast("Nada a desfazer"); return; }
     var dados = { etapa: e - 1 };
     dados["enviado" + e] = null;
@@ -1174,22 +1184,23 @@
   function marcarPV(c, n, quando) {
     var dados = {};
     dados["pvEnviado" + n] = quando || new Date().toISOString();
+    var chave = "clientes/" + c.id + "/" + n;
     var falha = function () {
-      avisoFalhaEnvio("A conversa abriu, mas a mensagem da etapa " + n + " não foi marcada", function () {
+      avisoFalhaEnvio(chave, "A conversa abriu, mas a mensagem da etapa " + n + " não foi marcada", function () {
         var atual = estado.clientes[c.id];
-        if (!atual) { toast("Este cliente não está mais na central"); return; }
-        if (atual["pvEnviado" + n] || etapaPV(atual) !== n) { toast("A mensagem da etapa " + n + " já está marcada"); return; }
+        if (!atual) { soltarFixo(chave); toast("Este cliente não está mais na central"); return; }
+        if (atual["pvEnviado" + n] || etapaPV(atual) !== n) { soltarFixo(chave); toast("A mensagem da etapa " + n + " já está marcada"); return; }
         marcarPV(atual, n, dados["pvEnviado" + n]);
       });
     };
     var ok = comVizinho(c, function () { return gravar("clientes/" + c.id, dados, null, false, falha); });
-    ok.then(function (feito) { if (feito) avisoComDesfazer("Mensagem da etapa " + n + " marcada", function () { desfazerPV(c, n); }); });
+    ok.then(function (feito) { if (feito) { soltarFixo(chave); avisoComDesfazer("Mensagem da etapa " + n + " marcada", function () { desfazerPV(c, n); }); } });
     return ok;
   }
   // Só desfaz se a marca ainda está lá e o cliente continua nessa etapa.
   function desfazerPV(c, n) {
     var atual = estado.clientes[c.id] || c;
-    limparToast();
+    esconderToast();
     if (!atual["pvEnviado" + n] || etapaPV(atual) !== n) { toast("Nada a desfazer"); return; }
     var dados = {};
     dados["pvEnviado" + n] = null;
