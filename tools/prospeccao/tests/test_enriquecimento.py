@@ -1,4 +1,5 @@
-from msg.enriquecimento import cnpj_valido, contato_direto, doc_lead, normalizar, status, telefone_valido
+from msg.enriquecimento import (cnpj_valido, contato_direto, contatos_hunter, doc_lead, normalizar, somar_contatos,
+                                status, telefone_valido)
 
 
 def test_cnpj_com_digito_verificador():
@@ -76,3 +77,37 @@ def test_noticia_de_risco_vai_para_alertas_e_nao_para_sinais():
     assert [x["texto"] for x in limpo["alertas"]] == ["professores acusaram a direção de assédio moral",
                                                       "Sócio citado em suspeita de propina"]
     assert doc_lead(limpo, "x")["alertas"] == limpo["alertas"]
+
+
+def _hunter(*emails):
+    return {"domain": "exemplo.com.br", "emails": list(emails)}
+
+
+def test_hunter_casa_socio_pelo_nome_e_ignora_email_conhecido():
+    limpo, _ = normalizar(_reg())
+    h = _hunter(
+        {"value": "fulana@exemplo.com.br", "first_name": "Fulana", "last_name": "Tal", "position": "Sócia",
+         "seniority": "executive", "confidence": 95, "verification": {"status": "valid"},
+         "sources": [{"uri": "https://exemplo.com.br/equipe"}]},
+        {"value": "diretor@exemplo.com.br", "first_name": "Ciclano", "last_name": "Souza", "position": "Diretor comercial",
+         "seniority": "executive", "confidence": 80, "sources": []},
+        {"value": "estagio@exemplo.com.br", "first_name": "Joao", "last_name": "Silva", "position": "Estagiário",
+         "seniority": "junior", "confidence": 90, "sources": []},
+        {"value": "imprensa@exemplo.com.br", "first_name": "Beltrano", "last_name": "", "confidence": 99, "sources": []})
+    novos = contatos_hunter(limpo, h)
+    assert [(c["email"], c["papel"], c["confianca"]) for c in novos] == [
+        ("fulana@exemplo.com.br", "decisor", "alta"), ("diretor@exemplo.com.br", "geral", "baixa")]
+    assert novos[0]["fonte"] == "Hunter.io · https://exemplo.com.br/equipe"
+    assert novos[1]["fonte"] == "Hunter.io · exemplo.com.br"
+
+
+def test_hunter_sem_verificacao_fica_media_e_somar_renumera():
+    limpo, _ = normalizar(_reg(contatos=[{"papel": "geral", "telefone": "6530000000", "fonte": "site"}]))
+    novos = contatos_hunter(limpo, _hunter(
+        {"value": "fulana@exemplo.com.br", "first_name": "Fulana", "last_name": "de Tal", "confidence": 97,
+         "verification": {"status": "accept_all"}, "sources": []}))
+    assert novos[0]["confianca"] == "media"
+    junto = somar_contatos(limpo, novos)
+    assert [c["id"] for c in junto["contatos"]] == ["k1", "k2"]
+    assert contato_direto(junto)["email"] == "fulana@exemplo.com.br"
+    assert limpo["contatos"][0]["id"] == "k1" and len(limpo["contatos"]) == 1  # não altera o original

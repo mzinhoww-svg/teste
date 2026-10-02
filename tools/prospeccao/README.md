@@ -43,6 +43,8 @@ Cada lead tem, além do contato da pesquisa inicial:
 
 As pesquisas gravam um JSON por segmento em `dados/enriq_brutos/` (formato em `msg/enriquecimento.py`). `python3 -m msg.enriquecimento dados/enriq_brutos/*.json` valida tudo: descarta CNPJ com dígito errado, telefone sem DDD e qualquer dado sem fonte, e grava `dados/enriquecimento.json`. Lead que só tinha e-mail e ganha o WhatsApp de quem decide passa a ser lead de WhatsApp, com saudação pelo primeiro nome.
 
+**Hunter.io**: `python3 -m msg.enriquecimento dados/enriq_brutos/*.json --hunter dados/hunter` soma os e-mails do domain-search do Hunter (um JSON por domínio em `dados/hunter/`). O e-mail cujo nome e sobrenome batem com um sócio da Receita ou com quem lidera entra como **Decisor**, com confiança alta (nota do Hunter ≥ 90 e e-mail verificado), média (≥ 70) ou baixa. Cargo alto que não bate com ninguém conhecido entra como **Geral**, com confiança baixa. O resto fica de fora. A fonte fica como "Hunter.io · página onde o e-mail aparece".
+
 Na central, a seção **Leads** mostra tudo isso e tem dois botões. **Usar na cadência** manda as próximas mensagens para o contato escolhido, com a saudação pelo nome dele. **Adicionar contato** registra à mão um contato com a fonte.
 
 Regra: só entra contato publicado pela própria empresa ou pela pessoa para fins profissionais (site, Instagram, LinkedIn), com o link de onde veio. Nada de lista vazada nem e-mail deduzido.
@@ -99,7 +101,7 @@ Python 3 com `openpyxl` e `pytest`. Rodar dentro desta pasta.
 python3 -m pytest -q                                      # testes
 python3 -m msg.prep dados/brutos/*.json --out dados/leads.json
 python3 -m msg.personal_v1                                # regrava msg/personal.json
-python3 -m msg.enriquecimento dados/enriq_brutos/*.json   # valida o enriquecimento
+python3 -m msg.enriquecimento dados/enriq_brutos/*.json --hunter dados/hunter   # valida o enriquecimento
 python3 -m msg.gerar --planilha dados/Reiners_Leads_Cuiaba.xlsx   # precisa dar "0 erros"
 python3 central/seed.py                                   # lotes em central/lotes/
 ```

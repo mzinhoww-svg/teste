@@ -1,6 +1,6 @@
 # Status · Prospecção, pós-venda e central · Reiners Media
 
-Atualizado em 01/10/2026.
+Atualizado em 02/10/2026.
 
 ## Mensagens e central
 
@@ -26,7 +26,10 @@ Atualizado em 01/10/2026.
 | Por segmento (completos / contato direto) | Saúde 3/3 · Jurídico e contábil 14/14 · Entidades 7/7 · Mentores e imobiliário 11/11 · Médio porte 1/1 |
 | WhatsApp do decisor | Nos 19 leads com WhatsApp direto, o número que já estava na cadência é o do próprio decisor (advogados, médicos, corretores); a mensagem já chega a quem decide |
 | Alertas | 2 leads com notícia de risco separada dos sinais (Colégio São Gonçalo e Colégio Isaac Newton); a TMF tem a nota na observação |
-| Testes | 83 passando (`python3 -m pytest -q` em `tools/prospeccao/`) |
+| Hunter.io | 35 buscas (plano grátis, 50 por mês). 10 e-mails de decisor em 8 leads (3 de confiança alta, 5 média, 2 baixa) e 9 de cargo alto como contato geral; 13 leads atualizados no banco, só `contatos` e `enriquecimento`. Contato direto passou de 36 para 41 (14 por e-mail); completos 41, parciais 82 |
+| Casa dos Dados | Os 104 CNPJs consultados: 28 celulares que ainda não tínhamos (9 em empresa pequena de sócio único). Fora da central até a decisão da Letícia |
+| Apollo e Vibe Prospecting | Apollo grátis não libera busca nem revelação de pessoa pela API ou pelo conector; os 30 decisores estão em `dados/apollo_importar.csv` para importar no app. Vibe tem só 4 decisores com telefone em todo o MT |
+| Testes | 85 passando (`python3 -m pytest -q` em `tools/prospeccao/`) |
 
 ## Pontos para a Letícia olhar
 
@@ -58,6 +61,7 @@ Atualizado em 01/10/2026.
 
 ## Log
 
+- 02/10/2026: Casa dos Dados nos 104 CNPJs (local), Hunter em 35 domínios e e-mails de decisor aplicados em 13 leads da central, sem mexer em envios nem no contato da cadência.
 - 01/10/2026 23:45: enriquecimento dos 128 leads (cinco pesquisas por segmento, BrasilAPI e sites), seção Leads na central, alertas de risco separados, saudação do R0100 corrigida; banco atualizado sem mexer nos envios do R0002 e do R0003.
 - 01/10/2026 23:30: fotos do Drive normalizadas e rotuladas, foto por lead no toque 1, mensagens em parágrafos (copy v2); banco atualizado sem mexer nos envios.
 - 01/10/2026 23:10: funil de pós-venda (7 etapas), botão Fechou negócio e formulário Novo cliente; config/posvenda semeado e verificado.

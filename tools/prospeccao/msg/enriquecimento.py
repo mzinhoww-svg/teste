@@ -166,6 +166,59 @@ def doc_lead(reg: dict, hoje_iso: str) -> dict:
     }
 
 
+_LIGA = {"de", "da", "do", "das", "dos", "e"}
+_CARGO_ALTO = re.compile(r"(?i)s[oó]ci|diretor|ceo|fundador|presid|propriet|owner|partner")
+
+
+def _tokens(nome: str) -> set[str]:
+    import unicodedata
+    s = unicodedata.normalize("NFKD", nome or "").encode("ascii", "ignore").decode().lower()
+    return {t for t in re.findall(r"[a-z]+", s) if t not in _LIGA}
+
+
+def contatos_hunter(reg: dict, hunter: dict) -> list[dict]:
+    """E-mails do Hunter (domain-search) que valem como contato do lead, já no formato normalizado.
+
+    Decisor: nome e sobrenome batem com um sócio da Receita ou com quem lidera. Cargo alto que não
+    bate com ninguém conhecido entra como "geral", com confiança baixa, e não vira contato sugerido.
+    O resto (júnior, sem cargo) fica de fora, assim como e-mail que o lead já tem.
+    """
+    nomes = [_tokens(p["nome"]) for p in reg.get("socios", []) + reg.get("decisores", [])]
+    conhecidos = {c["email"] for c in reg.get("contatos", []) if c.get("email")}
+    dominio = _txt(hunter.get("domain"))
+    novos = []
+    for e in hunter.get("emails") or []:
+        email = _txt(e.get("value")).lower()
+        if not email or email in conhecidos or not re.fullmatch(r"[^@\s]+@[^@\s]+\.[a-z]{2,}", email):
+            continue
+        pessoa = _tokens(f"{e.get('first_name') or ''} {e.get('last_name') or ''}")
+        cargo = _txt(e.get("position"))
+        if len(pessoa) >= 2 and any(pessoa <= n for n in nomes):
+            nota, valido = e.get("confidence") or 0, (e.get("verification") or {}).get("status") == "valid"
+            papel, conf = "decisor", "alta" if nota >= 90 and valido else "media" if nota >= 70 else "baixa"
+        elif e.get("seniority") == "executive" or _CARGO_ALTO.search(cargo):
+            papel, conf = "geral", "baixa"
+        else:
+            continue
+        uri = next((_txt(s.get("uri")) for s in e.get("sources") or [] if _txt(s.get("uri"))), "")
+        conhecidos.add(email)
+        novos.append({"id": "", "papel": papel, "nome": f"{_txt(e.get('first_name'))} {_txt(e.get('last_name'))}".strip(),
+                      "cargo": cargo, "telefone": "", "whatsapp": "?", "email": email,
+                      "fonte": f"Hunter.io · {uri or dominio}", "confianca": conf})
+    return novos
+
+
+def _dominio(url: str) -> str:
+    m = re.search(r"^(?:https?://)?(?:www\.)?([^/\s?#]+)", (url or "").strip().lower())
+    return m.group(1) if m else ""
+
+
+def somar_contatos(reg: dict, novos: list[dict]) -> dict:
+    """Cópia do registro com os contatos novos no fim, renumerados k1, k2..."""
+    contatos = [dict(c, id=f"k{i + 1}") for i, c in enumerate(reg.get("contatos", []) + novos)]
+    return {**reg, "contatos": contatos}
+
+
 def primeiro_nome(nome: str) -> str:
     """Como a Letícia chamaria a pessoa: "Dra. Lara", "Charles" (mesma regra da central)."""
     partes = (nome or "").split()
@@ -194,6 +247,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("brutos", nargs="+")
     ap.add_argument("--out", default="dados/enriquecimento.json")
+    ap.add_argument("--hunter", help="pasta com um domain-search do Hunter por domínio (dominio.json)")
+    ap.add_argument("--leads", default="dados/leads.json", help="para ligar o domínio do site ao lead")
     a = ap.parse_args()
     regs, avisos = [], []
     for caminho in a.brutos:
@@ -202,6 +257,25 @@ def main() -> None:
                 limpo, av = normalizar(r)
                 regs.append(limpo)
                 avisos += av
+    if a.hunter:
+        import glob
+        import os
+        with open(a.leads, encoding="utf-8") as fh:
+            site = {l["id"]: _dominio(l.get("site") or "") for l in json.load(fh)}
+        por_dominio = {d: i for i, d in site.items() if d}
+        ganhos = Counter()
+        for caminho in sorted(glob.glob(os.path.join(a.hunter, "*.json"))):
+            with open(caminho, encoding="utf-8") as fh:
+                h = json.load(fh)
+            lid = por_dominio.get(_dominio(h.get("domain") or os.path.basename(caminho)[:-5]))
+            i = next((k for k, r in enumerate(regs) if r["id"] == lid), None)
+            if i is None:
+                continue
+            novos = contatos_hunter(regs[i], h)
+            if novos:
+                regs[i] = somar_contatos(regs[i], novos)
+                ganhos.update(c["papel"] for c in novos)
+        print("Hunter:", dict(ganhos))
     with open(a.out, "w", encoding="utf-8") as fh:
         json.dump(regs, fh, ensure_ascii=False, indent=1)
     print(f"{len(regs)} registros em {a.out}")
