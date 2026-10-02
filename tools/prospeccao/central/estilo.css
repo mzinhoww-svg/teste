@@ -350,6 +350,17 @@
   .tempo time { font-size: var(--t13); line-height: 1.5; color: var(--suave); }
   .tempo li.nota span { white-space: pre-wrap; overflow-wrap: anywhere; }
   .tempo li.nota time::after { content: " · nota"; color: var(--ouro-texto); }
+  .tempo li.explee span { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .tempo li.explee time::after { content: " · Explee"; color: var(--ouro-texto); }
+  /* Hot lead da Explee: chip na linha e no cabeçalho; a resposta dela logo abaixo do nome, antes de tudo */
+  .chip.explee { background: var(--ouro-fundo); color: var(--ouro-texto); font-weight: 500; flex: none; }
+  .tabela th.nome .chip { font-weight: 500; }
+  .resposta-explee { display: grid; gap: 6px; padding: 12px 14px; border-radius: 8px; background: var(--pergaminho); min-width: 0; }
+  .resposta-explee h3 { margin: 0; font: 600 var(--t14)/1.3 var(--sans); color: var(--ouro-texto); }
+  .resposta-explee .resposta { margin: 0; max-width: 58ch; white-space: pre-wrap; overflow-wrap: anywhere; font: var(--t16)/1.5 var(--sans); color: var(--navy); }
+  .explee-meta { margin: 0; font-size: var(--t13); line-height: 1.4; color: var(--suave); }
+  .explee-completo summary { display: flex; align-items: center; }
+  .explee-completo .resposta { margin-top: 8px; font-size: var(--t14); }
   /* Placeholder com o mesmo cinza dos rótulos: AA nos dois temas (o padrão do navegador fica em 3,4:1 no escuro) */
   input::placeholder, textarea::placeholder { color: var(--suave); opacity: 1; }
   textarea.nota { width: 100%; min-height: 64px; padding: 8px; border: 1px solid var(--borda-campo); border-radius: 8px;

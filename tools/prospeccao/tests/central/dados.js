@@ -55,6 +55,32 @@ function leads(n) {
   return docs;
 }
 
+// Hot lead da Explee no formato que scripts/explee_hot_leads.py (mapear) grava: sem toques, já "respondeu".
+function explee(num, sobre) {
+  const id = "X" + String(num || 1).padStart(4, "0");
+  const resposta = "Oi Aurimar,\n\nTenho interesse. Consegue me mandar o material com mais detalhes?\n\nObrigado,\nYuri";
+  const completa = resposta + "\n\nEm sex., 25 de set. de 2026 às 08:07, Aurimar <a@exemplo.org>\nescreveu:\n\n> Olá Yuri,\n> Proposta de programa.";
+  const quenteEm = atras(1);
+  const l = {
+    ordem: 9000 + (num || 1), nome: "Associação Modelo " + (num || 1), saudacao: "Yuri", icp: "", segmento: "Associações setoriais",
+    categoria: "Explee", faixa: "", score: null, bairro: "", canal: "E-mail", telefone: "", email: "yuri" + (num || 1) + "@associacao.example",
+    site: "associacao.example", instagram: "", fraseUnica: "", flags: ["hot lead Explee"], versaoCopy: "", toques: [], foto: "",
+    etapa: 0, situacao: "respondeu", enviado1: null, enviado2: null, enviado3: null, contatoAtivo: null,
+    perfil: { especialidade: "", porte: "", cidade: "", nota: null, avaliacoes: null, fonteDados: "Explee", fonteFrase: "" },
+    empresa: {}, socios: [], redes: { linkedinEmpresa: "", instagram: "", youtube: "" },
+    decisores: [{ nome: "Yuri Araujo", cargo: "Chief Executive Officer", linkedin: "https://linkedin.example/in/yuri", fonte: "Explee · campanha Associações setoriais" }],
+    contatos: [{ id: "k1", papel: "decisor", nome: "Yuri Araujo", cargo: "Chief Executive Officer", telefone: "", whatsapp: "?",
+      email: "yuri" + (num || 1) + "@associacao.example", linkedin: "https://linkedin.example/in/yuri", fonte: "Explee · campanha Associações setoriais", confianca: "alta" }],
+    sinais: [], alertas: [], pendencias: ["Responder pelo e-mail da Explee ou ligar"], enriquecimento: { status: "parcial" },
+    historico: [{ em: quenteEm, texto: "Respondeu na Explee (campanha Associações setoriais): " + resposta, tipo: "explee" }],
+    explee: { personId: "p-" + (num || 1), campanhaId: 101, campanha: "Associações setoriais", quente: true, quenteEm, resposta: completa,
+      respostaCurta: resposta, pessoa: "Yuri Araujo", cargo: "Chief Executive Officer", email: "yuri" + (num || 1) + "@associacao.example",
+      linkedin: "https://linkedin.example/in/yuri" },
+  };
+  Object.assign(l, sobre || {});
+  return { id, data: l };
+}
+
 function clientes(n) {
   const todos = [
     { id: "C0001", data: { nome: "Cliente Um", saudacao: "pessoal da Cliente Um", telefone: "5565922220001", email: "um@cliente.example", produto: "Hora de Estúdio", origem: "Prospecção", leadId: "R0001", segmento: "Odontologia", etapa: 1, situacao: "ativo", criadoEm: atras(2), dataKickoff: null, dataGravacao: null } },
@@ -76,4 +102,4 @@ function fotos() {
   };
 }
 
-module.exports = { leads, clientes, posvenda, meta, fotos };
+module.exports = { leads, explee, clientes, posvenda, meta, fotos };

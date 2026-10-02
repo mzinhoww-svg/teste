@@ -135,6 +135,22 @@ Nos dois funis, abrir o link do WhatsApp marca a mensagem como enviada. No e-mai
 
 No funil Leads, o bloco **Enriquecer base** (no trilho a partir de 1024px; acima das abas no celular) pede ao Claude uma execução de `/enriquecer-leads`: buscar via treg o celular de quem decide em cada lead ainda não buscado, com teto de US$ 10 por execução. O botão grava só `status: "pedido"` e `pedidoEm` em `config/enriquecimento` (com `update`; `set` dos mesmos dois campos se o documento ainda não existe) e nunca toca em `leads`. A execução começa no próximo turno da conversa com o Claude, que confere esse documento no início de cada turno (`CLAUDE.md`). O cartão de andamento lê o documento ao vivo: pedido, estimativa (candidatos, custo, taxa), execução (lote, consultados, achados, taxa, gasto e barra), resumo final ou motivo da parada, e as três últimas execuções. Enquanto o status é `pedido`, `estimando` ou `executando`, ou sem acesso para gravar, o botão fica desativado com o motivo escrito. Só o clique avisa no `#toast`; as mudanças vindas do banco não são anunciadas.
 
+### Hot leads da Explee
+
+Hot lead é quem respondeu uma campanha de cold e-mail da Explee com interesse. O `scripts/explee_hot_leads.py` traz essas pessoas para `leads` em dois passos, só com JSON (o script nunca toca no banco; quem grava é o Claude, com ArtifactData):
+
+```bash
+python3 -m scripts.explee_hot_leads buscar --since "<config/explee.ultimoQuenteEm ou vazio>" --saida dados/explee/hot.json
+python3 -m scripts.explee_hot_leads mapear --entrada dados/explee/hot.json --existentes dados/explee/leads.json --saida dados/explee/mapa.json
+```
+
+- `buscar` pagina os hot leads mais novos que o cursor (estritamente depois dele), junta o nome das campanhas de todos os projetos e grava `{leads, campanhas, maisRecente}`. Repete em 429 e 5xx.
+- `mapear` recebe também os leads atuais da central e devolve `{novos, atualizacoes, ignorados}`. Quem já está na central (pelo `explee.personId`, pelo e-mail do lead ou de um contato, ou pelo domínio do site, sem `www`) ganha só `historico`, `explee` e, se a pessoa for nova, um contato; `situacao`, `etapa`, `enviadoN` e `contatoAtivo` nunca mudam. Quem não está vira um lead `X0001…` com `categoria` "Explee", `segmento` igual ao nome da campanha (o filtro Segmento agrupa por campanha), `situacao` "respondeu" e sem toques. Rodar de novo não duplica nada.
+- O Claude grava os novos com `set`, as atualizações com `update` e, por fim, `maisRecente` em `config/explee.ultimoQuenteEm`, que é o cursor da próxima busca.
+- A chave vem só de `EXPLEE_API_KEY` (ou do arquivo `~/.explee/key`); nunca vai para o repositório, a página ou o banco.
+
+Na página, esses leads aparecem em Responderam com o chip **Explee**. O detalhe abre com o bloco **Resposta na Explee** (a resposta, a campanha e a data; o e-mail completo fica recolhido) e o primário é **Abrir e-mail**, um `mailto:` com "Re: " e o nome da empresa, que não marca nada. A aba Cadência diz "Sem cadência: veio da Explee já respondendo", e `Enter` e `c` não fazem nada nesses leads.
+
 ### Publicação
 
 A central são quatro arquivos que sobem juntos no mesmo Artifact: `index.html` é a página e `estilo.css`, `regras.js` e `app.js` vão em `files`, mantendo `fotos/`. Publicar só o HTML deixa a página sem estilo e sem lógica.

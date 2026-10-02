@@ -343,6 +343,37 @@
     return mailto(emailDestino(l), t.assunto, comSaudacao(l, t.corpo || "").replace("Olá, " + l.saudacao + ",", "Olá, " + (ca && ca.nome ? primeiroNome(ca.nome) : l.saudacao) + ","));
   }
 
+  // ---------- hot leads da Explee ----------
+  // Quem respondeu uma campanha da Explee chega sem cadência (toques: []) e já como "respondeu". O primário é
+  // responder o e-mail; nada aqui marca envio.
+  function semCadencia(l) { return !(l.toques || []).length; }
+  function temMensagem(t) { return !!(t && (t.mensagem || t.corpo)); }
+  function emailExplee(l) { return ((l.explee && l.explee.email) || emailDestino(l) || "").trim(); }
+  function mailtoExplee(l) { return mailto(emailExplee(l), "Re: " + (l.nome || ""), ""); }
+  function chipExplee(l) { return l.explee ? el("span", { class: "chip explee", text: "Explee" }) : null; }
+  function dataHora(iso) {
+    var d = new Date(iso);
+    if (!iso || isNaN(d)) return "";
+    return dataCurta(d) + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+  function blocoExplee(l) {
+    var x = l.explee || {};
+    var curta = x.respostaCurta || x.resposta || "";
+    var completa = x.resposta && x.resposta.trim() !== curta.trim() ? x.resposta : "";
+    var quem = [x.pessoa, x.cargo].filter(Boolean).join(", ");
+    var meta = [quem, x.campanha ? "campanha " + x.campanha : ""].filter(Boolean).join(" · ");
+    return el("section", { class: "resposta-explee", id: "explee-" + l.id, "aria-labelledby": "explee-titulo-" + l.id }, [
+      el("h3", { id: "explee-titulo-" + l.id, text: "Resposta na Explee" }),
+      el("p", { class: "resposta", text: curta || "A Explee não mandou o texto da resposta." }),
+      el("p", { class: "explee-meta" }, [meta ? meta + (x.quenteEm ? " · " : "") : "",
+        x.quenteEm ? el("time", { datetime: x.quenteEm, text: dataHora(x.quenteEm) }) : null]),
+      completa ? el("details", { class: "explee-completo" }, [
+        el("summary", { text: "E-mail completo, com a mensagem da campanha" }),
+        el("p", { class: "resposta", text: completa })
+      ]) : null
+    ]);
+  }
+
   // Detalhe do lead selecionado: o topo decide o toque (mensagem, destino, Enviar, Copiar, foto, Resultado);
   // o que ajuda a decidir vem em três abas: Perfil, Cadência e Histórico.
   function destinoDe(l, email) {
@@ -372,7 +403,8 @@
       return el("button", { type: "button", id: id + "-" + l.id, class: "btn" + (cls ? " " + cls : ""), disabled: semMarca, onclick: fn }, [txt]);
     };
     var filhos;
-    if (g === "hoje" || g === "aguardando" || g === "encerrado") {
+    var semVolta = g === "respondeu" && semCadencia(l);  // sem cadência não há para onde voltar
+    if (g === "hoje" || g === "aguardando" || g === "encerrado" || semVolta) {
       if (estado.confirmarSair === l.id) {
         filhos = [
           b("r-sair-ok", "Confirmar saída", function () { estado.confirmarSair = null; situacao(l, "sair", "Não contatar de novo"); }, "alerta"),
@@ -380,7 +412,7 @@
         ];
       } else {
         filhos = [
-          b("r-resp", "Respondeu", function () { situacao(l, "respondeu", "Marcado como respondeu"); }),
+          semVolta ? null : b("r-resp", "Respondeu", function () { situacao(l, "respondeu", "Marcado como respondeu"); }),
           b("r-fecha", "Fechou negócio", function () { estado.fechando = l.id; render(); }),
           b("r-sair", "Pediu para sair", function () { estado.confirmarSair = l.id; render(); $("r-sair-nao-" + l.id) && $("r-sair-nao-" + l.id).focus(); })
         ];
@@ -391,7 +423,7 @@
     } else {
       filhos = [b("r-volta", "Voltar para a cadência", function () { situacao(l, "ativo", "De volta à cadência"); })];
     }
-    return el("div", { class: "resultado", role: "group", "aria-label": "Resultado" }, filhos);
+    return el("div", { class: "resultado", role: "group", "aria-label": "Resultado" }, filhos.filter(Boolean));
   }
 
   var ABAS_DETALHE = {
@@ -423,7 +455,7 @@
   }
   function abasLead(l) {
     return abasDetalhe("Sobre o lead", function (atual) {
-      if (atual === "cadencia") return el("div", { class: "perfil" }, [trilho(l), secaoCadencia(l)]);
+      if (atual === "cadencia") return el("div", { class: "perfil" }, semCadencia(l) ? [secaoCadencia(l)] : [trilho(l), secaoCadencia(l)]);
       if (atual === "historico") return el("div", { class: "perfil" }, [secaoHistorico(l)]);
       return el("div", { class: "perfil perfil-cols" }, [
         el("div", { class: "perfil-esq" }, [secaoFaz(l), secaoGancho(l), secaoJaTem(l), secaoEmpresa(l), secaoCuidado(l)]),
@@ -448,7 +480,7 @@
         el("div", { class: "meta", text: "Manda as mensagens para o WhatsApp da própria Reiners." })
       ]) : el("div", null, [
         el("h2", { text: l.nome || l.id }),
-        el("div", { class: "meta" }, [el("span", { class: "num", text: l.id }), l.categoria ? " · " + l.categoria : null,
+        el("div", { class: "meta" }, [el("span", { class: "num", text: l.id }), l.categoria && !(l.explee && l.categoria === "Explee") ? " · " + l.categoria : null, chipExplee(l),
           (l.alertas || []).length ? el("a", { class: "chip alerta", href: "#alertas-" + l.id, onclick: function (ev) { ev.preventDefault(); irParaAlertas(l); } },
             [(l.alertas.length === 1 ? "1 alerta" : l.alertas.length + " alertas")]) : null])
       ]),
@@ -463,13 +495,19 @@
     var dest = destinoDe(l, email);
     var ca = contatoAtivo(l);
     var semDestino = email ? "Sem e-mail cadastrado" : "Sem telefone cadastrado";
+    var semCad = semCadencia(l);
+    var comExplee = !!l.explee && !teste;
 
     var acoes = [];
-    if (ativo) {
+    // Hot lead da Explee: o primário é responder o e-mail dela. Mailto simples, que não marca nada.
+    if (comExplee && emailExplee(l)) {
+      acoes.push(el("a", { id: "acao-email-" + l.id, class: "btn principal abrir-email", href: mailtoExplee(l), target: "_blank", rel: "noopener" }, ["Abrir e-mail"]));
+    }
+    if (ativo && !semCad) {
       var podeHoje = g === "hoje";
-      var link = !dest ? "" : email ? mailtoToque(l, t) : linkToque(l, t);
+      var link = !dest || !temMensagem(t) ? "" : email ? mailtoToque(l, t) : linkToque(l, t);
       var liberado = podeHoje && !!link;
-      acoes.push(el("a", { id: "acao-enviar-" + l.id, class: "btn principal enviar", href: liberado ? link : null, target: liberado ? "_blank" : null, rel: liberado ? "noopener" : null,
+      acoes.push(el("a", { id: "acao-enviar-" + l.id, class: "btn enviar" + (comExplee ? "" : " principal"), href: liberado ? link : null, target: liberado ? "_blank" : null, rel: liberado ? "noopener" : null,
         "aria-disabled": liberado ? null : "true", onclick: function () { if (liberado) enviar(l); } }, ["Enviar"]));
       if (email) {
         acoes.push(el("button", { type: "button", id: "acao-copiar-assunto-" + l.id, class: "btn copiar", onclick: function () { copiar(t.assunto || "", "Assunto"); } }, ["Copiar assunto"]));
@@ -481,7 +519,8 @@
 
     return el("article", { "data-detalhe": l.id, class: "lead" + (teste ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : "") }, [
       cab,
-      emLeads && !ativo ? null : el("div", { class: "toque-atual" }, [
+      comExplee ? blocoExplee(l) : null,
+      (emLeads && !ativo) || semCad ? null : el("div", { class: "toque-atual" }, [
         el("div", { class: "toque-rotulo", text: "Toque " + verToque + " · " + NOMES_TOQUE[verToque] + (email ? " · e-mail" : " · WhatsApp") }),
         el("p", { class: "msg", text: texto }),
         el("div", { class: "destino" + (dest ? "" : " sem") }, dest
@@ -576,7 +615,8 @@
     var n = Math.min(e + 1, 3), t = toque(l, n);
     var teste = l.id === "TESTE";
     var pontos = pontosDe(l);
-    var link = !destinoDe(l, email) ? "" : email ? mailtoToque(l, t) : linkToque(l, t);
+    var semCad = semCadencia(l);
+    var link = !destinoDe(l, email) || !temMensagem(t) ? "" : email ? mailtoToque(l, t) : linkToque(l, t);
     // enquanto a gravação deste lead não volta, o link não abre de novo (sem banco ele abre normalmente)
     var podeEnviar = g === "hoje" && !!link && !estado.gravando["leads/" + l.id];
     // só a linha selecionada leva o Enviar cheio; nas outras ele é contornado, para a fila não virar uma coluna de primários
@@ -585,18 +625,26 @@
       onclick: function () { if (podeEnviar) enviar(l); } }, ["Enviar"]);
     var btnCopiar = el("button", { type: "button", class: "btn copiar", disabled: !ativo, "aria-label": "Copiar mensagem do toque " + n + " de " + (l.nome || l.id),
       onclick: function () { copiar(email ? (t.corpo || "") : mensagemToque(l, t), email ? "Corpo" : "Mensagem"); } }, ["Copiar"]);
+    // Sem cadência (hot lead da Explee): nada de Enviar/Copiar; a linha leva o Abrir e-mail, que não marca nada.
+    var acoes = [btnEnviar, btnCopiar];
+    if (semCad) acoes = l.explee && emailExplee(l) ? [el("a", { class: "btn abrir-email" + (sel() === l.id ? " principal" : ""), href: mailtoExplee(l), target: "_blank", rel: "noopener",
+      "aria-label": "Abrir e-mail para " + (l.nome || l.id) }, ["Abrir e-mail"])] : [];
+    var x = l.explee || {};
+    var sub = teste ? "WhatsApp da própria Reiners" : l.explee ? [x.pessoa, l.segmento].filter(Boolean).join(" · ") : [l.categoria, l.bairro].filter(Boolean).join(" · ");
+    var quandoTxt = semCad && l.explee ? ["respondeu na Explee", x.quenteEm ? " · " : "", x.quenteEm ? el("span", { class: "num", text: dataCurta(x.quenteEm) }) : null] : quandoDe(l);
     return el("div", { class: "linha" + (teste ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : ""), "data-id": l.id, tabindex: "0",
       role: "group", "aria-label": teste ? "Card de teste" : (l.nome || l.id), "aria-current": sel() === l.id ? "true" : null }, [
       el("div", { class: "info" }, [
         el("span", { class: "nome", text: teste ? "Card de teste" : (l.nome || l.id) }),
-        el("span", { class: "sub", text: teste ? "WhatsApp da própria Reiners" : [l.categoria, l.bairro].filter(Boolean).join(" · ") }),
+        el("span", { class: "sub", text: sub }),
         el("div", { class: "situacao" }, [
-          el("span", { class: "pontos", role: "img", "aria-label": pontos.fala }, pontos.classes.map(function (c) { return el("i", { class: c }); })),
-          el("span", { class: "quando" }, quandoDe(l)),
+          semCad ? null : el("span", { class: "pontos", role: "img", "aria-label": pontos.fala }, pontos.classes.map(function (c) { return el("i", { class: c }); })),
+          el("span", { class: "quando" }, quandoTxt),
+          chipExplee(l),
           (l.alertas || []).length ? el("span", { class: "chip alerta", text: "Alerta" }) : null
         ])
       ]),
-      el("div", { class: "acoes" }, [btnEnviar, btnCopiar])
+      acoes.length ? el("div", { class: "acoes" }, acoes) : null
     ]);
   }
   function assinaturaLinha(item, ctx, colecao) {
@@ -1031,6 +1079,10 @@
   }
   // As três mensagens da cadência, já com a saudação, o contato e a foto escolhidos.
   function secaoCadencia(l) {
+    if (semCadencia(l)) {
+      return secao("Mensagens da cadência", [el("p", { class: "vazio-p", text: l.explee ?
+        "Sem cadência: veio da Explee já respondendo. Responda pelo e-mail da Explee ou ligue." : "Sem cadência: este lead não tem mensagens semeadas." })]);
+    }
     var e = etapa(l), g = grupo(l), v = vencimento(l), email = l.canal === "E-mail";
     var ativo = g === "hoje" || g === "aguardando";
     return secao("Mensagens da cadência", [el("div", { class: "toques" }, [1, 2, 3].map(function (n) {
@@ -1074,7 +1126,7 @@
     return secao("Histórico", [
       lista.length ? el("ol", { class: "tempo" }, lista.map(function (x) {
         var d = new Date(x.em);
-        return el("li", { class: x.tipo === "nota" ? "nota" : null }, [
+        return el("li", { class: x.tipo === "nota" || x.tipo === "explee" ? x.tipo : null }, [
           el("time", { datetime: x.em, text: dataCurta(d) + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0") }),
           el("span", null, [x.texto, x.desfazer ? el("button", { type: "button", class: "btn desfazer-h", disabled: !estado.podeMarcar || !!estado.gravando["leads/" + l.id],
             onclick: function () { desfazerToque(l, x.desfazer); } }, ["Desfazer"]) : null])
@@ -1105,6 +1157,7 @@
         el("div", { class: "situacao" }, [
           el("span", { class: "estado " + st, text: ROTULO_ENRIQ[st] }),
           lider ? el("span", { class: "quando", text: "Lidera: " + lider }) : null,
+          chipExplee(l),
           (l.alertas || []).length ? el("span", { class: "chip alerta", text: "Alerta" }) : null
         ])
       ])
@@ -1134,7 +1187,7 @@
   function linhaTabelaLD(l) {
     var st = statusLD(l), alertas = (l.alertas || []).length;
     return el("tr", { "data-id": l.id, tabindex: "0", "aria-current": sel() === l.id ? "true" : null }, [
-      el("th", { scope: "row", class: "nome", text: l.nome || l.id }),
+      el("th", { scope: "row", class: "nome" }, [l.nome || l.id, l.explee ? " " : null, chipExplee(l)]),
       el("td", null, [el("span", { class: "estado " + st, text: ROTULO_ENRIQ[st] })]),
       el("td", { text: liderDe(l) || "—" }),
       el("td", { text: diretoDe(l) || "—" }),
