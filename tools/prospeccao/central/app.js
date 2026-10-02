@@ -6,7 +6,8 @@
     aq: [["hoje", "Para hoje"], ["aguardando", "Aguardando"], ["semcontato", "Sem contato"], ["respondeu", "Responderam"], ["fechou", "Fecharam"],
          ["encerrado", "Sem resposta"], ["sair", "Saíram"], ["todos", "Todos"]],
     pv: [["hoje", "Para hoje"], ["andamento", "Em andamento"], ["pausado", "Pausados"], ["concluido", "Concluídos"], ["todos", "Todos"]],
-    ld: [["todos", "Todos"], ["completo", "Completos"], ["parcial", "Parciais"], ["bruto", "Sem enriquecimento"], ["setor", "Contato de setor"]]
+    ld: [["todos", "Todos"], ["completo", "Completos"], ["parcial", "Parciais"], ["bruto", "Sem enriquecimento"], ["setor", "Contato de setor"]],
+    bs: [["base", "Na base"], ["pedido", "Na fila do Claude"], ["na_cadencia", "Na cadência"], ["todos", "Todas"]]
   };
   var PAPEIS = { decisor: "Decisor", comunicacao: "Comunicação", secretaria: "Secretaria", comercial: "Comercial", geral: "Geral", setor: "Setor" };
   var estado = {
@@ -21,20 +22,27 @@
     podeMarcar: false,
     gravando: {},
     enriq: null,                                    // config/enriquecimento (o Claude grava; a página só pede)
-    carregado: { leads: false, clientes: false, enriq: false },
+    base: {},                                       // coleção base (faixas B e C da Explee), assinada só quando o funil Base abre
+    baseLista: [],                                  // a mesma coleção já ordenada (faixa, score)
+    baseAssinada: false,
+    bsLimite: 100,                                  // linhas mostradas; "Mostrar mais" soma 100
+    bsConfirmar: false,                             // confirmação do pedido dos filtrados, no próprio lugar
+    bsLote: null,                                   // { feitos, total } enquanto o pedido em lote grava
+    carregado: { leads: false, clientes: false, enriq: false, base: false },
     fechando: null,
     novoCliente: false,
     filtro: {
       aq: { grupo: "hoje", segmento: "", faixa: "", canal: "" },
       pv: { grupo: "hoje", etapa: "", produto: "" },
-      ld: { grupo: "todos", segmento: "" }
+      ld: { grupo: "todos", segmento: "" },
+      bs: { grupo: "base", segmento: "", faixa: "", persona: "" }
     },
     busca: "",                                      // só em memória; vale para os três funis
     novoContato: null,
-    sel: { aq: null, pv: null, ld: null },          // um item selecionado por funil
-    selIni: { aq: false, pv: false, ld: false },    // a seleção salva já foi conferida com a fila?
+    sel: { aq: null, pv: null, ld: null, bs: null }, // um item selecionado por funil (a Base não usa)
+    selIni: { aq: false, pv: false, ld: false, bs: false },  // a seleção salva já foi conferida com a fila?
     abaDetalhe: { aq: "perfil", pv: "etapa", ld: "perfil" },
-    visiveis: { aq: [], pv: [], ld: [] },
+    visiveis: { aq: [], pv: [], ld: [], bs: [] },
     ordemLD: { col: null, dir: "asc" },
     confirmarSair: null,
     rascunho: {}
@@ -118,13 +126,15 @@
   function limparRascunho(prefixo) {
     Object.keys(estado.rascunho).forEach(function (k) { if (k.indexOf(prefixo) === 0) delete estado.rascunho[k]; });
   }
+  // valores: ["a", "b"] ou [["valor", "rótulo"], ...]
   function preencherSelect(id, valores) {
-    var s = $(id), atual = s.value, chave = valores.join("|");
+    var s = $(id), atual = s.value, pares = valores.map(function (v) { return Array.isArray(v) ? v : [v, v]; });
+    var chave = JSON.stringify(pares);
     if (s.dataset.chave === chave) return;
     s.dataset.chave = chave;
     while (s.options.length > 1) s.remove(1);
-    valores.forEach(function (v) { s.add(new Option(v, v)); });
-    s.value = valores.indexOf(atual) >= 0 ? atual : "";
+    pares.forEach(function (v) { s.add(new Option(v[1], v[0])); });
+    s.value = pares.some(function (v) { return v[0] === atual; }) ? atual : "";
   }
 
   // ---------- escrita ----------
@@ -637,8 +647,10 @@
       onclick: function () { copiar(email ? (t.corpo || "") : mensagemToque(l, t), email ? "Corpo" : "Mensagem"); } }, ["Copiar"]);
     // Sem cadência (hot lead da Explee): nada de Enviar/Copiar; a linha leva o Abrir e-mail, que não marca nada.
     var acoes = [btnEnviar, btnCopiar];
-    // Sem contato: em vez de um Enviar desativado, a linha só diz o que falta (em "situação") e leva a flag.
-    if (g === "semcontato") acoes = [];
+    // Sem contato: em vez de um Enviar desativado, a linha só diz o que falta (em "situação") e leva a flag. Se o
+    // enriquecimento já achou o contato, a linha mostra quem é e o "Usar na cadência" (a escolha é dela).
+    var achado = g === "semcontato" && !teste ? Regras.contatoEncontrado(l) : null;
+    if (g === "semcontato") acoes = achado ? [botaoUsarContato(l, achado, semMarca, true)] : [];
     if (semCad) acoes = l.explee && emailExplee(l) ? [el("a", { class: "btn abrir-email" + (sel() === l.id ? " principal" : ""), href: mailtoExplee(l), target: "_blank", rel: "noopener",
       "aria-label": "Abrir e-mail para " + (l.nome || l.id) }, ["Abrir e-mail"])] : [];
     var x = l.explee || {};
@@ -653,7 +665,8 @@
           semCad || g === "semcontato" ? null : el("span", { class: "pontos", role: "img", "aria-label": pontos.fala }, pontos.classes.map(function (c) { return el("i", { class: c }); })),
           el("span", { class: "quando" }, quandoTxt),
           chipExplee(l),
-          g === "semcontato" ? chipMigrado(l) : null,
+          achado ? el("span", { class: "achado", text: (email ? "E-mail encontrado: " : "Celular encontrado: ") + (achado.nome || PAPEIS[achado.papel] || "contato") }) : null,
+          g === "semcontato" && !achado ? chipMigrado(l) : null,
           (l.alertas || []).length ? el("span", { class: "chip alerta", text: "Alerta" }) : null
         ])
       ]),
@@ -706,7 +719,7 @@
   }
 
   // ---------- seleção (uma por funil) ----------
-  function colecaoDoFunil() { return estado.funil === "pv" ? estado.clientes : estado.leads; }
+  function colecaoDoFunil() { return estado.funil === "pv" ? estado.clientes : estado.funil === "bs" ? estado.base : estado.leads; }
   function escolherSelecao(visiveis) {
     var f = estado.funil, ids = visiveis.map(function (l) { return l.id; });
     var primeiro = ids.filter(function (id) { return id !== "TESTE"; })[0] || ids[0] || null;  // o card de teste não abre sozinho
@@ -772,7 +785,7 @@
   // ---------- detalhe como gaveta (760–1023px) ou tela cheia (<760px) ----------
   function emGaveta() { var l = document.body.dataset.layout; return l === "gaveta" || l === "uma"; }
   function abrirDetalhe(id) {
-    if (!emGaveta()) return;
+    if (!emGaveta() || estado.funil === "bs") return;
     var item = id || sel();
     if (!item || !colecaoDoFunil()[item]) return;
     if (sel() !== item) guardarSel(estado.funil, item);
@@ -903,11 +916,12 @@
       $("f-busca").focus();
       return;
     }
-    if (k === "1" || k === "2" || k === "3") {
-      var f = { "1": "aq", "2": "pv", "3": "ld" }[k];
+    if (k === "1" || k === "2" || k === "3" || k === "4") {
+      var f = { "1": "aq", "2": "pv", "3": "ld", "4": "bs" }[k];
       if (f !== estado.funil) trocarFunil(f);
       return;
     }
+    if (estado.funil === "bs") return;  // a Base não tem seleção nem envio: j, k, c, r e Enter não fazem nada
     if (k === "j" || k === "k") { e.preventDefault(); andar(k === "j" ? 1 : -1, t); return; }
     if (k === "c") { copiarSelecionado(); return; }
     if (k === "r") { e.preventDefault(); focarResultado(); return; }
@@ -944,7 +958,7 @@
     if (ehContato && (c.telefone || c.email)) {
       acoes.push(ativo ?
         el("button", { type: "button", id: "contato-" + l.id + "-" + c.id, class: "btn", disabled: semMarca, onclick: function () { gravar(caminho, registrar(l, { contatoAtivo: null }, "Cadência voltou para o contato original"), "A cadência volta para o contato original"); } }, ["Voltar ao contato original"]) :
-        el("button", { type: "button", id: "contato-" + l.id + "-" + c.id, class: "btn ok", disabled: semMarca, onclick: function () { gravar(caminho, registrar(l, { contatoAtivo: c.id }, "Cadência passou para " + (c.nome || PAPEIS[c.papel])), "Cadência vai para " + (c.nome || PAPEIS[c.papel])); } }, ["Usar na cadência"]));
+        botaoUsarContato(l, c, semMarca, false));
     }
     return el("div", { class: "pessoa" + (ativo ? " ativo" : "") }, [
       el("div", { class: "topo" }, [
@@ -956,6 +970,16 @@
       el("span", { class: "fonte" }, ["Fonte: ", linkFonte(c.fonte), c.confianca ? el("span", { class: "conf", text: " · confiança " + c.confianca }) : null]),
       acoes.length ? el("div", { class: "acoes" }, acoes) : null
     ]));
+  }
+  // "Usar na cadência": a mesma ação no cartão de contato e na linha de Sem contato (que tira o lead do filtro).
+  function usarContato(l, c) {
+    var quem = c.nome || PAPEIS[c.papel];
+    return gravar("leads/" + l.id, registrar(l, { contatoAtivo: c.id }, "Cadência passou para " + quem), "Cadência vai para " + quem);
+  }
+  function botaoUsarContato(l, c, semMarca, naLinha) {
+    return el("button", { type: "button", id: (naLinha ? "usar-" : "contato-") + l.id + "-" + c.id, class: "btn ok" + (naLinha ? " usar" : ""), disabled: semMarca,
+      "aria-label": naLinha ? "Usar " + (c.nome || PAPEIS[c.papel]) + " na cadência de " + (l.nome || l.id) : null,
+      onclick: function () { if (naLinha) comVizinho(l, function () { return usarContato(l, c); }); else usarContato(l, c); } }, ["Usar na cadência"]);
   }
   // Erro de formulário: anunciado (role="alert"), ligado ao campo que falhou (aria-invalid + aria-describedby) e com o foco nele.
   function mostrarErro(erro, campos, ruim, msg) {
@@ -1373,6 +1397,220 @@
   }
   $("btn-enriq").addEventListener("click", pedirEnriq);
 
+  // ================= BASE: faixas B e C da Explee =================
+  // Lista leve (coleção base, um documento enxuto por empresa). A página só pede: grava status "pedido" e pedidoEm
+  // no documento da base. Quem monta o lead (e o põe na fila do enriquecimento) é o Claude, na conversa.
+  var ROTULO_BASE = { base: "Na base", pedido: "Na fila do Claude", na_cadencia: "Na cadência" };
+  var PERSONAS = { decisor: "Decisor", comunicacao: "Comunicação", gestao: "Gestão", operacional: "Operacional" };
+  var PAGINA_BASE = 100;
+  var TEXTO_PEDIDO = " na fila. Abra a conversa com o Claude para ele montar os cards.";
+  function assinarBase() {
+    if (estado.baseAssinada || !estado.db) return;
+    estado.baseAssinada = true;
+    estado.db.collection("base").onSnapshot(function (snap) {
+      var novo = {};
+      snap.docs.forEach(function (d) {
+        if (!d.exists) return;
+        var dados = Object.assign({}, d.data());
+        dados.id = d.id;
+        novo[d.id] = dados;
+      });
+      estado.base = novo;
+      estado.baseLista = Object.keys(novo).map(function (k) { return novo[k]; }).sort(Regras.ordenarBase);
+      estado.carregado.base = true;
+      render();
+    }, function () {
+      estado.carregado.base = true;
+      estado.baseErro = true;
+      render();
+    });
+  }
+  function empresasNaFila(n) { return (n === 1 ? "1 empresa" : n + " empresas") + TEXTO_PEDIDO; }
+  function pedidoBase() { return { status: "pedido", pedidoEm: new Date().toISOString() }; }
+  function pedirUma(d) {
+    if (!estado.podeMarcar || estado.bsLote || Regras.statusBase(estado.base[d.id] || d) !== "base") return;
+    gravar("base/" + d.id, pedidoBase()).then(function (ok) { if (ok) toast(empresasNaFila(1), null, 10000); });
+  }
+  // Pedido em lote: um update por documento, em sequência (um de cada vez, para não estourar o limite de escritas).
+  // Para no primeiro erro; quem já mudou de status no meio do caminho é pulado.
+  function pedirLote(ids) {
+    if (!estado.podeMarcar || estado.bsLote || !ids.length) return;
+    estado.bsConfirmar = false;
+    estado.bsLote = { feitos: 0, total: ids.length };
+    var feitos = 0, falhou = false;
+    var passo = ids.reduce(function (p, id) {
+      return p.then(function () {
+        var d = estado.base[id];
+        if (falhou || !d || Regras.statusBase(d) !== "base") return;
+        return gravar("base/" + id, pedidoBase(), null, false, function () { falhou = true; }).then(function (ok) {
+          if (ok) feitos++; else falhou = true;
+          if (estado.bsLote) estado.bsLote.feitos = feitos;
+        });
+      });
+    }, Promise.resolve());
+    render();
+    return passo.then(function () {
+      estado.bsLote = null;
+      render();
+      if (feitos) toast(empresasNaFila(feitos) + (falhou ? " As outras não foram gravadas: tente de novo." : ""), null, 10000);
+      else if (falhou) toast("Não foi possível pedir. Tente de novo em instantes.");
+      var b = $("bs-lote-btn");
+      if (b && focoPerdido()) b.focus();
+    });
+  }
+  function filtradosBase() { return Regras.filtrarBase(estado.baseLista, estado.filtro.bs, estado.busca); }
+  function desenharLote(filtrados) {
+    var caixa = $("bs-lote");
+    caixa.hidden = estado.funil !== "bs";
+    if (caixa.hidden) return;
+    var lote = Regras.loteBase(filtrados), n = Math.min(lote.total, Regras.LOTE_BASE);
+    var sig = JSON.stringify([lote.total, estado.bsConfirmar, estado.bsLote, estado.podeMarcar, estado.carregado.base]);
+    if (caixa._sig === sig) return;
+    caixa._sig = sig;
+    var foco = document.activeElement && caixa.contains(document.activeElement) ? document.activeElement.id : null;
+    caixa.textContent = "";
+    if (estado.bsLote) {
+      caixa.appendChild(el("p", { class: "bs-lote-texto", text: "Pedindo " + estado.bsLote.feitos + " de " + estado.bsLote.total + " empresas…" }));
+    } else if (estado.bsConfirmar && lote.total) {
+      caixa.appendChild(el("p", { class: "bs-lote-texto", id: "bs-lote-pergunta", text: lote.total > n
+        ? "Pedir as primeiras " + n + " de " + lote.total + " empresas filtradas? Elas vão para a fila do Claude."
+        : "Pedir " + (n === 1 ? "1 empresa" : n + " empresas") + "? Elas vão para a fila do Claude." }));
+      caixa.appendChild(el("div", { class: "acoes" }, [
+        el("button", { type: "button", id: "bs-lote-ok", class: "btn principal", "aria-describedby": "bs-lote-pergunta",
+          onclick: function () { pedirLote(lote.ids); } }, ["Confirmar (" + n + ")"]),
+        el("button", { type: "button", id: "bs-lote-nao", class: "btn", onclick: function () { estado.bsConfirmar = false; render(); if ($("bs-lote-btn")) $("bs-lote-btn").focus(); } }, ["Cancelar"])
+      ]));
+      if (foco && foco !== "bs-lote-nao") foco = "bs-lote-ok";
+    } else {
+      caixa.appendChild(el("button", { type: "button", id: "bs-lote-btn", class: "btn principal", disabled: !estado.podeMarcar || !lote.total,
+        onclick: function () { estado.bsConfirmar = true; render(); if ($("bs-lote-ok")) $("bs-lote-ok").focus(); } },
+        ["Enriquecer e iniciar cadência dos filtrados (" + lote.total + ")"]));
+      if (lote.total > Regras.LOTE_BASE) caixa.appendChild(el("p", { class: "bs-lote-texto", text: "Até " + Regras.LOTE_BASE + " por clique." }));
+      if (foco) foco = "bs-lote-btn";
+    }
+    if (foco && $(foco)) $(foco).focus({ preventScroll: true });
+  }
+  function irParaLead(id) {
+    estado.filtro.ld = { grupo: "todos", segmento: "" };
+    guardarSel("ld", id);
+    trocarFunil("ld");
+  }
+  function quemDecide(d) { var x = d.decisor || {}; return [x.nome, x.cargo].filter(Boolean).join(" · "); }
+  function partesBase(d) {
+    var st = Regras.statusBase(d), x = d.decisor || {};
+    var semMarca = !estado.podeMarcar || !!estado.gravando["base/" + d.id] || !!estado.bsLote;
+    var nome = d.nome || d.dominio || d.id;
+    return {
+      st: st,
+      estado: el("span", { class: "estado bs-" + st, id: "bs-st-" + d.id, text: ROTULO_BASE[st] }),
+      linkedin: x.linkedin ? el("a", { href: x.linkedin, target: "_blank", rel: "noopener", "aria-label": "LinkedIn de " + (x.nome || nome) }, ["LinkedIn"]) : null,
+      lead: d.leadId ? el("a", { class: "ir-lead", href: "#leads", "aria-label": "Ver o lead " + d.leadId + " de " + nome,
+        onclick: function (ev) { ev.preventDefault(); irParaLead(d.leadId); } }, ["Ver lead ", el("span", { class: "num", text: d.leadId })]) : null,
+      // contornado: numa lista de 100 linhas, botão cheio em todas vira uma coluna de primários; o cheio é o dos filtrados
+      botao: el("button", { type: "button", class: "btn pedir", id: "bs-pedir-" + d.id,
+        disabled: st !== "base" || semMarca, "aria-describedby": st === "base" ? null : "bs-st-" + d.id, "aria-label": "Enriquecer e iniciar cadência de " + nome,
+        onclick: function () { pedirUma(d); } }, ["Enriquecer e iniciar cadência"])
+    };
+  }
+  function linhaBase(d) {
+    var p = partesBase(d), dec = quemDecide(d);
+    return el("div", { class: "linha bs", "data-id": d.id, role: "group", "aria-label": d.nome || d.dominio }, [
+      el("div", { class: "info" }, [
+        el("span", { class: "nome", text: d.nome || d.dominio }),
+        el("span", { class: "sub", text: [d.segmento, d.tier ? "faixa " + d.tier : ""].filter(Boolean).join(" · ") }),
+        el("span", { class: "sub", text: dec ? "Decide: " + dec : "Sem decisor na lista" }),
+        el("div", { class: "situacao" }, [p.estado])
+      ]),
+      // no celular os links viram botões de 44px
+      el("div", { class: "acoes" }, [p.botao, p.lead ? (p.lead.classList.add("btn"), p.lead) : null, p.linkedin ? el("a", { class: "btn", href: d.decisor.linkedin, target: "_blank", rel: "noopener",
+        "aria-label": "LinkedIn de " + (d.decisor.nome || d.nome) }, ["LinkedIn"]) : null])
+    ]);
+  }
+  function linhaTabelaBase(d) {
+    var p = partesBase(d);
+    return el("tr", { "data-id": d.id }, [
+      el("th", { scope: "row", class: "nome" }, [d.nome || d.dominio, el("span", { class: "dominio", text: d.dominio })]),
+      el("td", { text: d.segmento || "—" }),
+      el("td", { class: "faixa", text: d.tier || "—" }),
+      el("td", { text: quemDecide(d) || "—" }),
+      el("td", null, [p.linkedin || "—"]),
+      el("td", null, [p.estado, p.lead ? " " : null, p.lead]),
+      el("td", { class: "acao" }, [p.botao])
+    ]);
+  }
+  function listaBase(tabela) {
+    var alvo = prepararFila(tabela ? "bstab" : "bs"), lista = alvo.querySelector(".bs-lista");
+    if (!lista) {
+      if (tabela) {
+        var cab = el("tr", null, [["Empresa"], ["Segmento"], ["Faixa"], ["Quem decide"], ["LinkedIn"], ["Status"], ["Ação", "sr"]].map(function (c) {
+          return el("th", { scope: "col" }, [c[1] ? el("span", { class: c[1], text: c[0] }) : c[0]]);
+        }));
+        var t = el("table", { class: "tabela base" }, [el("caption", { class: "sr", text: "Base Explee: empresas das faixas B e C" }), el("thead", null, [cab]), el("tbody", { class: "bs-lista" })]);
+        alvo.appendChild(el("div", { class: "tabela-wrap" }, [t]));
+        lista = t.tBodies[0];
+      } else {
+        lista = el("div", { class: "bs-lista" });
+        alvo.appendChild(lista);
+      }
+      alvo.appendChild(el("div", { class: "bs-mais", id: "bs-mais" }));
+    }
+    return { alvo: alvo, lista: lista, mais: alvo.querySelector(".bs-mais") };
+  }
+  function renderBS() {
+    assinarBase();
+    var chave = JSON.stringify([estado.filtro.bs, estado.busca]);
+    if (estado.bsChave !== chave) { estado.bsChave = chave; estado.bsLimite = PAGINA_BASE; estado.bsConfirmar = false; }
+    var todos = estado.baseLista;
+    var cont = { todos: todos.length, base: 0, pedido: 0, na_cadencia: 0 }, comLinkedin = 0;
+    var segs = {}, faixas = {}, personas = {};
+    todos.forEach(function (d) {
+      cont[Regras.statusBase(d)]++;
+      if ((d.decisor || {}).linkedin) comLinkedin++;
+      if (d.segmento) segs[d.segmento] = 1;
+      if (d.tier) faixas[d.tier] = 1;
+      if ((d.decisor || {}).persona) personas[d.decisor.persona] = 1;
+    });
+    placar([cont.base, "Na base"], [cont.pedido, "Na fila do Claude"], [cont.na_cadencia, "Na cadência"], [comLinkedin, "Decisor com LinkedIn"]);
+    abas(cont);
+    preencherSelect("f-bs-segmento", Object.keys(segs).sort());
+    preencherSelect("f-bs-faixa", Object.keys(faixas).sort().map(function (f) { return [f, "Faixa " + f]; }));
+    preencherSelect("f-bs-persona", Object.keys(PERSONAS).filter(function (k) { return personas[k]; }).map(function (k) { return [k, PERSONAS[k]]; }));
+    var filtrados = filtradosBase();
+    desenharLote(filtrados);
+    if (!estado.carregado.base) { limparFila(); carregando($("fila")); return; }
+    if (estado.baseErro) { limparFila(); vazio($("fila"), "Não deu para ler a base", "Recarregue a página para tentar de novo."); return; }
+    if (!todos.length) { limparFila(); vazio($("fila"), "A base está vazia", "Quando o Claude gravar as empresas das faixas B e C, elas aparecem aqui."); return; }
+    var tabela = document.body.dataset.layout === "tres" || document.body.dataset.layout === "dois";
+    var mostrados = filtrados.slice(0, estado.bsLimite);
+    estado.visiveis.bs = mostrados;
+    var r = listaBase(tabela);
+    Array.prototype.forEach.call(r.alvo.querySelectorAll(":scope > .vazio"), function (v) { r.alvo.removeChild(v); });
+    reconciliar(mostrados, { alvo: r.lista, fabrica: tabela ? linhaTabelaBase : linhaBase, colecao: "base", ctx: JSON.stringify([estado.podeMarcar, !!estado.bsLote]) });
+    r.lista.closest(".tabela-wrap") && (r.lista.closest(".tabela-wrap").hidden = !mostrados.length);
+    var faltam = filtrados.length - mostrados.length;
+    var sigMais = filtrados.length + "/" + mostrados.length;
+    if (r.mais._sig !== sigMais) {
+      r.mais._sig = sigMais;
+      var tinhaFoco = r.mais.contains(document.activeElement);
+      r.mais.textContent = "";
+      if (mostrados.length) r.mais.appendChild(el("p", { class: "bs-conta", text: "Mostrando " + mostrados.length + " de " + filtrados.length }));
+      if (faltam > 0) {
+        r.mais.appendChild(el("button", { type: "button", class: "btn", id: "bs-mais-btn", onclick: function () {
+          var antes = estado.bsLimite;
+          estado.bsLimite += PAGINA_BASE;
+          render();
+          if (!$("bs-mais-btn")) {  // acabou a lista: o foco vai para a primeira linha nova
+            var nova = estado.visiveis.bs[antes], alvo = nova && $("bs-pedir-" + nova.id);
+            if (alvo && alvo.disabled) alvo = $("fila").querySelector('[data-id="' + nova.id + '"] a');
+            if (alvo) alvo.focus();
+          }
+        } }, ["Mostrar mais " + Math.min(PAGINA_BASE, faltam)]));
+        if (tinhaFoco) $("bs-mais-btn").focus({ preventScroll: true });
+      }
+    }
+    if (!filtrados.length) vazio(r.alvo, "Nada neste filtro", estado.filtro.bs.grupo === "pedido" ? "Nenhuma empresa esperando o Claude." : "Troque a aba, os filtros ou a busca.");
+  }
+
   // ================= PÓS-VENDA =================
   function etapasPV() { return (estado.pv && estado.pv.etapas) || []; }
   var etapaPV = Regras.etapaPV;
@@ -1743,13 +1981,17 @@
     alvo.appendChild(el("div", { class: "vazio" }, [el("b", { text: titulo }), texto]));
   }
   function render() {
-    var pv = estado.funil === "pv", ld = estado.funil === "ld";
+    var pv = estado.funil === "pv", ld = estado.funil === "ld", bs = estado.funil === "bs";
     $("f-aq").setAttribute("aria-pressed", String(estado.funil === "aq"));
     $("f-pv").setAttribute("aria-pressed", String(pv));
     $("f-ld").setAttribute("aria-pressed", String(ld));
+    $("f-bs").setAttribute("aria-pressed", String(bs));
     $("sel-aq").hidden = estado.funil !== "aq";
     $("sel-pv").hidden = !pv;
     $("sel-ld").hidden = !ld;
+    $("sel-bs").hidden = !bs;
+    if (!bs) $("bs-lote").hidden = true;
+    $("f-busca").placeholder = bs ? "Empresa, domínio ou pessoa" : "Empresa, pessoa ou CNPJ";
     $("novo-cliente").hidden = !pv;
     $("novo-cliente").disabled = !estado.podeMarcar || !estado.pv;
     var leads = Object.keys(estado.leads).filter(function (k) { return k !== "TESTE"; }).map(function (k) { return estado.leads[k]; });
@@ -1764,8 +2006,15 @@
       nld.textContent = "";
       if (faltam) { nld.appendChild(document.createTextNode(String(faltam))); nld.appendChild(el("span", { class: "rot", text: " a completar" })); }
     }
+    // Base: o número é de quem espera o Claude montar o card (só depois que a base foi aberta uma vez).
+    var nbs = $("n-bs"), naFila = estado.baseLista.filter(function (d) { return d.status === "pedido"; }).length;
+    if (nbs.dataset.v !== String(naFila)) {
+      nbs.dataset.v = String(naFila);
+      nbs.textContent = "";
+      if (naFila) { nbs.appendChild(document.createTextNode(String(naFila))); nbs.appendChild(el("span", { class: "rot", text: " na fila" })); }
+    }
     document.body.dataset.funil = estado.funil;
-    if (pv) renderPV(); else if (ld) renderLD(); else renderAQ();
+    if (pv) renderPV(); else if (ld) renderLD(); else if (bs) renderBS(); else renderAQ();
     desenharMeta();
     desenharEnriq();
     contarFiltros();
@@ -1796,6 +2045,10 @@
   $("f-aq").addEventListener("click", function () { trocarFunil("aq"); });
   $("f-pv").addEventListener("click", function () { trocarFunil("pv"); });
   $("f-ld").addEventListener("click", function () { trocarFunil("ld"); });
+  $("f-bs").addEventListener("click", function () { trocarFunil("bs"); });
+  ["segmento", "faixa", "persona"].forEach(function (k) {
+    $("f-bs-" + k).addEventListener("change", function (e) { estado.filtro.bs[k] = e.target.value; render(); });
+  });
   $("f-ld-segmento").addEventListener("change", function (e) { estado.filtro.ld.segmento = e.target.value; render(); });
   var buscaTimer;
   function aplicarBusca(v) { clearTimeout(buscaTimer); estado.busca = v; render(); }
@@ -1823,7 +2076,7 @@
   var LINHA = ".linha[data-id], tr[data-id]";
   $("fila").addEventListener("click", function (e) {
     var linha = e.target.closest(LINHA);
-    if (!linha || e.target.closest("a, button")) return;  // Enviar e Copiar têm ação própria
+    if (!linha || e.target.closest("a, button") || estado.funil === "bs") return;  // Enviar e Copiar têm ação própria; a Base não seleciona
     selecionar(linha.dataset.id, { foco: true });
     abrirDetalhe(linha.dataset.id);
   });
@@ -1911,8 +2164,8 @@
   sincronizarLayout();
 
   try {
-    var salvo = location.hash === "#posvenda" ? "pv" : location.hash === "#leads" ? "ld" : localStorage.getItem("central-funil");
-    if (salvo === "pv" || salvo === "aq" || salvo === "ld") estado.funil = salvo;
+    var salvo = location.hash === "#posvenda" ? "pv" : location.hash === "#leads" ? "ld" : location.hash === "#base" ? "bs" : localStorage.getItem("central-funil");
+    if (salvo === "pv" || salvo === "aq" || salvo === "ld" || salvo === "bs") estado.funil = salvo;
     ["aq", "pv", "ld"].forEach(function (f) { estado.sel[f] = localStorage.getItem("central-sel-" + f) || null; });
     if (!estado.sel.aq) estado.sel.aq = localStorage.getItem("central-selecionado") || null;  // chave da versão anterior: era só do Aquecimento
   } catch (e) { /* sem armazenamento: começa no aquecimento */ }

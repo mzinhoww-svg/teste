@@ -20,6 +20,7 @@
       <button type="button" id="f-aq" data-funil="aq" aria-pressed="true">Aquecimento <span class="n" id="n-aq"></span></button>
       <button type="button" id="f-pv" data-funil="pv" aria-pressed="false">Pós-venda <span class="n" id="n-pv"></span></button>
       <button type="button" id="f-ld" data-funil="ld" aria-pressed="false">Leads <span class="n" id="n-ld"></span></button>
+      <button type="button" id="f-bs" data-funil="bs" aria-pressed="false">Base <span class="n" id="n-bs"></span></button>
     </div>
     <p class="linha-meta" id="linha-meta"></p>
   </div>
@@ -48,6 +49,7 @@
     <div class="abas" id="abas"></div>
     <button type="button" class="btn" id="btn-filtros" aria-expanded="false" aria-controls="painel-filtros"><span id="btn-filtros-rot">Filtros</span></button>
     <button type="button" class="btn principal" id="novo-cliente" hidden>Novo cliente</button>
+    <div class="bs-lote" id="bs-lote" role="group" aria-label="Pedir os filtrados" hidden></div>
     <div class="painel-filtros" id="painel-filtros">
     <label class="campo busca" for="f-busca">Buscar<input id="f-busca" type="search" placeholder="Empresa, pessoa ou CNPJ" aria-keyshortcuts="/" autocomplete="off"></label>
     <div class="selects" id="sel-aq">
@@ -57,6 +59,11 @@
     </div>
     <div class="selects dois" id="sel-ld" hidden>
       <label class="campo" for="f-ld-segmento">Segmento<select id="f-ld-segmento"><option value="">Todos</option></select></label>
+    </div>
+    <div class="selects" id="sel-bs" hidden>
+      <label class="campo" for="f-bs-segmento">Segmento<select id="f-bs-segmento"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-bs-faixa">Faixa<select id="f-bs-faixa"><option value="">Todas</option></select></label>
+      <label class="campo" for="f-bs-persona">Quem decide<select id="f-bs-persona"><option value="">Todos</option></select></label>
     </div>
     <div class="selects dois" id="sel-pv" hidden>
       <label class="campo" for="f-etapa">Etapa<select id="f-etapa"><option value="">Todas</option></select></label>
@@ -82,7 +89,7 @@
     <div><dt><kbd>Enter</kbd></dt><dd>Enviar o lead selecionado</dd></div>
     <div><dt><kbd>c</kbd></dt><dd>Copiar a mensagem</dd></div>
     <div><dt><kbd>/</kbd></dt><dd>Ir para a busca</dd></div>
-    <div><dt><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></dt><dd>Aquecimento, Pós-venda, Leads</dd></div>
+    <div><dt><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></dt><dd>Aquecimento, Pós-venda, Leads, Base</dd></div>
     <div><dt><kbd>r</kbd></dt><dd>Abrir Resultado</dd></div>
     <div><dt><kbd>Esc</kbd></dt><dd>Fechar o detalhe e sair da busca</dd></div>
     <div><dt><kbd>?</kbd></dt><dd>Mostrar e esconder esta lista</dd></div>

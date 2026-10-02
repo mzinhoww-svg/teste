@@ -85,9 +85,9 @@
   .conexao { font: 500 var(--t12)/1 var(--sans); color: var(--suave); }
   .conexao.on { color: var(--ok); }
 
-  .funis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--navy); border-radius: 8px; overflow: hidden; }
+  .funis { display: grid; grid-template-columns: repeat(4, auto);  /* cada funil do tamanho do rótulo; a sobra se divide */ border: 1px solid var(--navy); border-radius: 8px; overflow: hidden; }
   .funis button { border: 0; background: var(--papel); color: var(--navy); padding: 8px 10px; min-height: 44px; cursor: pointer;
-                  font-weight: 500; display: flex; justify-content: center; gap: 6px; align-items: center; }
+                  font-weight: 500; display: flex; justify-content: center; gap: 6px; align-items: center; white-space: nowrap; }
   .funis button + button { border-left: 1px solid var(--navy); }
   .funis button[aria-pressed="true"] { background: var(--navy); color: var(--creme); }
   .funis .n { font: 500 var(--t12) var(--mono); font-variant-numeric: tabular-nums; }
@@ -311,7 +311,7 @@
   .etapas li.agora b, .etapas li.agora span { color: var(--navy); }
   /* Tabela de Leads (a partir de 1024px) */
   /* A rolagem (vertical e lateral) é da própria #fila, para o cabeçalho da tabela grudar no topo dela. */
-  #fila[data-modo="ldtab"] { overflow-x: auto; padding-top: 0; }
+  #fila[data-modo="ldtab"], #fila[data-modo="bstab"] { overflow-x: auto; padding-top: 0; }
   .tabela { width: 100%; border-collapse: collapse; font-size: var(--t13); line-height: 1.4; }
   .tabela thead th { position: sticky; top: 0; z-index: 1; background: var(--creme); text-align: left; padding: 0; border-bottom: 1px solid var(--navy); }
   .tabela .ordenar { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 6px; width: 100%; min-height: 40px; padding: 4px 10px; cursor: pointer;
@@ -362,12 +362,45 @@
   .explee-meta { margin: 0; font-size: var(--t13); line-height: 1.4; color: var(--suave); }
   .explee-completo summary { display: flex; align-items: center; }
   .explee-completo .resposta { margin-top: 8px; font-size: var(--t14); }
+  /* Sem contato: o contato que o enriquecimento achou, na própria linha, ao lado do "Usar na cadência" */
+  .linha .achado { font-weight: 500; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+  /* ===== Base (faixas B e C da Explee): lista leve, sem detalhe ao lado ===== */
+  body[data-funil="bs"] #detalhe, body[data-funil="bs"] #veu { display: none !important; }
+  .estado.bs-base { background: var(--pergaminho); color: var(--suave); }
+  .estado.bs-pedido { background: var(--ouro-fundo); color: var(--ouro-texto); }
+  .estado.bs-na_cadencia { background: var(--ok-fundo); color: var(--ok); }
+  .bs-lote { display: grid; gap: 6px; min-width: 0; }
+  .bs-lote .btn { white-space: normal; text-align: left; }
+  .bs-lote-texto { margin: 0; font-size: var(--t13); line-height: 1.4; color: var(--suave); }
+  .bs-lista { display: grid; gap: 8px; align-content: start; }
+  tbody.bs-lista { display: table-row-group; }
+  .linha.bs { cursor: default; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .linha.bs .acoes { flex-wrap: wrap; }
+  .linha.bs .situacao { flex-wrap: wrap; }
+  a.ir-lead { color: var(--ouro-texto); font-size: var(--t13); text-underline-offset: 2px; }
+  .bs-mais { display: grid; justify-items: start; gap: 8px; padding-block: 12px 4px; }
+  .bs-conta { margin: 0; font: 500 var(--t13)/1.3 var(--mono); font-variant-numeric: tabular-nums; color: var(--suave); }
+  .tabela.base tbody tr { cursor: default; }
+  .tabela.base thead th { padding: 8px 10px; font: 600 var(--t13)/1.3 var(--sans); color: var(--suave); }
+  .tabela.base .nome .dominio { display: block; font: 400 var(--t12)/1.3 var(--mono); color: var(--suave); }
+  .tabela.base td.faixa { font-family: var(--mono); text-align: center; }
+  .tabela.base td.acao { width: 1%; }
+  .tabela.base td.acao .btn { white-space: nowrap; min-height: 36px; padding: 4px 12px; }
+  .tabela.base a { color: var(--ouro-texto); text-underline-offset: 2px; }
+  .tabela.base .estado { display: inline-block; }
+  @media (min-width: 760px) {
+    .linha.bs { grid-template-columns: minmax(0, 1fr) auto; }
+    .linha.bs .acoes { flex-wrap: nowrap; }
+  }
+
   /* Placeholder com o mesmo cinza dos rótulos: AA nos dois temas (o padrão do navegador fica em 3,4:1 no escuro) */
   input::placeholder, textarea::placeholder { color: var(--suave); opacity: 1; }
   textarea.nota { width: 100%; min-height: 64px; padding: 8px; border: 1px solid var(--borda-campo); border-radius: 8px;
                   background: var(--papel); color: var(--navy); font: var(--t14)/1.4 var(--sans); resize: vertical; }
   @media (max-width: 759px) { .linha { min-height: 72px; } .linha .btn { min-height: 44px; } }
   @media (max-width: 460px) {
+    .funis button { font-size: var(--t13); gap: 4px; }
     .tempo li { grid-template-columns: 1fr; gap: 0; }
     .selects, .selects.dois { grid-template-columns: 1fr 1fr; }
     .funis button { padding-inline: 4px; }
@@ -380,7 +413,7 @@
                      scroll-snap-type: x proximity; scrollbar-width: thin; padding: 4px; margin: -4px; }
     .filtros .abas button { flex: none; white-space: nowrap; scroll-snap-align: start; }
     #btn-filtros { flex: none; }
-    #novo-cliente, .painel-filtros { flex: 1 1 100%; }
+    #novo-cliente, .painel-filtros, .bs-lote { flex: 1 1 100%; }
   }
   @media (max-width: 759px) {
     .btn, .desfazer-h, summary, .toques summary, select, input, textarea { min-height: 44px; }
@@ -405,7 +438,7 @@
     body[data-funil="ld"] .central { grid-template-columns: minmax(0, 1fr) minmax(340px, 420px); }
     .central { grid-template-columns: minmax(340px, 420px) 1fr; grid-template-rows: auto minmax(0, 1fr); }
     #trilho.trilho { grid-column: 1 / -1; flex-flow: row wrap; align-items: end; gap: 10px 20px; padding: 12px 16px; border-bottom: 1px solid var(--linha); }
-    .fixo { width: 360px; }
+    .fixo { width: 400px; }
     .resumo-topo { flex: 1 1 280px; min-width: 260px; }
     .placar b { font-size: var(--t20); }
     .aviso { margin: 0; flex-basis: 100%; }
@@ -417,11 +450,14 @@
     .painel-filtros.aberto { display: flex; flex: 1 1 100%; flex-wrap: wrap; align-items: end; gap: 8px 12px; }
     .painel-filtros .busca { flex: 1 1 260px; }
     .painel-filtros .selects { flex: 2 1 420px; }
+    .bs-lote { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+    body[data-funil="bs"] .central { grid-template-columns: minmax(0, 1fr); }
   }
   /* ===== >=1280px: trilho, fila e detalhe em três colunas, cada uma com a própria rolagem ===== */
   @media (min-width: 1280px) {
     .central { grid-template-columns: 240px minmax(340px, 420px) 1fr; grid-template-rows: minmax(0, 1fr); }
     body[data-funil="ld"] .central { grid-template-columns: 240px minmax(0, 1fr) minmax(340px, 420px); }
+    body[data-funil="bs"] .central { grid-template-columns: 240px minmax(0, 1fr); }
     .funis .rot { position: static; width: auto; height: auto; overflow: visible; clip: auto; font: 400 var(--t12) var(--sans); color: inherit; }
     #trilho.trilho { flex-direction: column; gap: 16px; padding: 16px; overflow-y: auto; border-right: 1px solid var(--linha); }
     .funis { grid-template-columns: 1fr; }

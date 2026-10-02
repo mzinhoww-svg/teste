@@ -12,13 +12,15 @@ function simulador(inicial, falharGravacao, atraso) {
   window.__falhar = falharGravacao;  // o teste pode trocar no meio (h.falhar)
   // com atraso, o dado aparece no snapshot na hora (como no banco real) e a promessa só resolve depois
   const resolver = () => (atraso ? new Promise((r) => setTimeout(r, atraso)) : Promise.resolve());
-  const docs = { leads: {}, clientes: {}, config: {} };
+  const docs = { leads: {}, clientes: {}, config: {}, base: {} };
   const assinantes = [];
   const escritas = [];
   window.__escritas = escritas;
   const copia = (x) => JSON.parse(JSON.stringify(x));
   inicial.leads.forEach((d) => { docs.leads[d.id] = copia(d.data); });
   inicial.clientes.forEach((d) => { docs.clientes[d.id] = copia(d.data); });
+  (inicial.base || []).forEach((d) => { docs.base[d.id] = copia(d.data); });
+  window.__assinaturas = {};  // coleção -> quantas vezes a página assinou (a Base só assina quando abre)
   Object.keys(inicial.config).forEach((k) => { if (inicial.config[k]) docs.config[k] = copia(inicial.config[k]); });
   const notificar = () => assinantes.slice().forEach((a) => a());
   const parte = (caminho) => caminho.split("/");
@@ -48,6 +50,7 @@ function simulador(inicial, falharGravacao, atraso) {
   };
   const collection = (nome) => ({
     onSnapshot(cb) {
+      window.__assinaturas[nome] = (window.__assinaturas[nome] || 0) + 1;
       const emitir = () => cb({ docs: Object.keys(docs[nome]).map((id) => ({ id, exists: true, data: () => copia(docs[nome][id]) })) });
       assinantes.push(emitir); emitir();
       return () => {};
@@ -72,6 +75,8 @@ async function abrir(opts) {
   const inicial = {
     leads: opts.leads === undefined ? dados.leads(7) : opts.leads,
     clientes: opts.clientes === undefined ? dados.clientes() : opts.clientes,
+    // base: documentos da coleção base (funil Base); dados.empresasBase(n) gera n empresas
+    base: opts.base === undefined ? [] : opts.base,
     // enriquecimento: o documento config/enriquecimento (ausente quando não vem); h.empurrar("config/enriquecimento", {...}) mescla depois
     config: { meta: opts.meta || dados.meta(), fotos: dados.fotos(), posvenda: dados.posvenda(), enriquecimento: opts.enriquecimento || null },
   };

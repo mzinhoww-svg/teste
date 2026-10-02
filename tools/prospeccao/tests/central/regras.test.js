@@ -99,3 +99,32 @@ test("linkToque monta o link quando o toque foi semeado sem link e o telefone ch
   assert.equal(R.linkToque(l, l.toques[0]), "https://wa.me/5565999991111?text=Oi%2C%20Paulo.");
   assert.equal(R.linkToque({ telefone: "", toques: [] }, { n: 1, mensagem: "x", waLink: "" }), "");
 });
+test("Base: status, busca sem acento, filtros, ordem e lote com teto de 50", () => {
+  const d = (id, sobre) => Object.assign({ id, nome: "Empresa " + id, dominio: id.toLowerCase() + ".example", segmento: "Entidades do agro", tier: "B", score: 50,
+    decisor: { nome: "Paulo Pereira", cargo: "Presidente", persona: "decisor", linkedin: "" }, status: "base" }, sobre || {});
+  assert.equal(R.statusBase({}), "base");
+  assert.equal(R.statusBase({ status: "pedido" }), "pedido");
+  assert.ok(R.casaBase(d("D1", { nome: "Associação Agrícola" }), "agricola"));
+  assert.ok(R.casaBase(d("D1"), "PEREIRA"));
+  assert.ok(R.casaBase(d("D1"), "d1.example"));
+  assert.ok(!R.casaBase(d("D1"), "zzz"));
+  const lista = [d("D1", { tier: "C", score: 90 }), d("D2", { score: 40 }), d("D3", { score: 60, status: "pedido" }),
+    d("D4", { segmento: "Gestão pública", decisor: { persona: "comunicacao" } })].sort(R.ordenarBase);
+  assert.deepEqual(lista.map((x) => x.id), ["D3", "D4", "D2", "D1"]);
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "base" }, "").map((x) => x.id), ["D4", "D2", "D1"]);
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", faixa: "C" }, "").map((x) => x.id), ["D1"]);
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", segmento: "Gestão pública" }, "").map((x) => x.id), ["D4"]);
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", persona: "comunicacao" }, "").map((x) => x.id), ["D4"]);
+  const muitos = Array.from({ length: 80 }, (_, i) => d("D" + (100 + i), i % 10 === 0 ? { status: "pedido" } : {}));
+  const lote = R.loteBase(muitos);
+  assert.equal(lote.total, 72);
+  assert.equal(lote.ids.length, 50);
+  assert.ok(!lote.ids.includes("D100"));
+});
+test("contatoEncontrado: decisor com telefone ainda não escolhido; nada se já é o ativo", () => {
+  const l = { canal: "WhatsApp", contatos: [{ id: "k1", papel: "geral", telefone: "5565911112222" }, { id: "k2", papel: "decisor", nome: "Paulo", telefone: "5565988887777" }] };
+  assert.equal(R.contatoEncontrado(l).id, "k2");
+  assert.equal(R.contatoEncontrado(Object.assign({}, l, { contatoAtivo: "k2" })).id, "k1");
+  assert.equal(R.contatoEncontrado({ canal: "WhatsApp", contatos: [{ id: "k1", papel: "decisor", telefone: "1", invalido: true }] }), null);
+  assert.equal(R.contatoEncontrado({ canal: "E-mail", contatos: [{ id: "k1", papel: "decisor", telefone: "5565988887777" }] }), null);
+});

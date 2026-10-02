@@ -102,4 +102,25 @@ function fotos() {
   };
 }
 
-module.exports = { leads, explee, clientes, posvenda, meta, fotos };
+// Coleção base (faixas B e C da Explee), no formato de scripts/base_explee.py base. Os campos variam com i para os filtros:
+// segmento alterna entre três, faixa B nos primeiros 40%, persona e LinkedIn alternados; status pela função sobre(i).
+const SEGMENTOS_BASE = ["Entidades do agro", "produtores de evento e feiras", "Gestão pública"];
+const PERSONAS_BASE = ["decisor", "comunicacao", "gestao", "decisor"];
+function empresasBase(n, sobre) {
+  return Array.from({ length: n }, (_, i) => {
+    const num = i + 1;
+    const id = "D" + String(10000 + num).padStart(5, "0");
+    const data = {
+      dominio: "empresa" + num + ".example", nome: "Empresa Base " + num, segmento: SEGMENTOS_BASE[i % 3],
+      tier: i < n * 0.4 ? "B" : "C", score: 70 - (i % 50), regiao: "MT",
+      decisor: { nome: "Pessoa " + num + " Souza", cargo: i % 2 ? "Presidente" : "Diretora de Comunicação", persona: PERSONAS_BASE[i % 4],
+        linkedin: i % 2 ? "https://linkedin.example/in/p" + num : "" },
+      pessoas: 1 + (i % 3), comLinkedin: i % 2, campanhas: [SEGMENTOS_BASE[i % 3]],
+      status: "base", pedidoEm: null, leadId: null, migradoEm: null,
+    };
+    Object.assign(data, (sobre && sobre(i, data)) || {});
+    return { id, data };
+  });
+}
+
+module.exports = { leads, explee, clientes, posvenda, meta, fotos, empresasBase };

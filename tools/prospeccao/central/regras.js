@@ -79,6 +79,14 @@ var Regras = (function () {
     return !!String(d || "").trim();
   }
 
+  // Contato achado (pelo enriquecimento ou à mão) que serviria ao canal, mas que ainda não foi escolhido para a
+  // cadência: o decisor primeiro. A regra é dela: nada passa a contatoAtivo sozinho.
+  function contatoEncontrado(l) {
+    var campo = l.canal === "E-mail" ? "email" : "telefone";
+    var uteis = (l.contatos || []).filter(function (c) { return c.id !== l.contatoAtivo && !c.invalido && String(c[campo] || "").trim(); });
+    return uteis.filter(function (c) { return c.papel === "decisor"; })[0] || uteis[0] || null;
+  }
+
   // ---------- foto do toque 1 ----------
   function fotoDe(l, fotos) {
     var cat = fotos || {};
@@ -218,12 +226,43 @@ var Regras = (function () {
   // Enquanto o pedido espera o Claude ou a execução roda, não cabe outro pedido.
   function enriqOcupado(status) { return status === "pedido" || status === "estimando" || status === "executando"; }
 
+  // ---------- Base (coleção base: faixas B e C da Explee) ----------
+  var LOTE_BASE = 50;  // teto de pedidos por clique no botão dos filtrados
+  function statusBase(d) { return d.status === "pedido" || d.status === "na_cadencia" ? d.status : "base"; }
+  function casaBase(d, busca) {
+    var q = semAcento(busca).trim();
+    if (!q) return true;
+    var dec = d.decisor || {};
+    return [d.nome, d.dominio, d.id, d.segmento, dec.nome, dec.cargo].map(semAcento).join(" | ").indexOf(q) >= 0;
+  }
+  // Faixa, depois score maior, depois nome.
+  function ordenarBase(a, b) {
+    return String(a.tier || "").localeCompare(String(b.tier || "")) || (Number(b.score) || 0) - (Number(a.score) || 0) ||
+      String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR");
+  }
+  // f = { grupo: "todos"|"base"|"pedido"|"na_cadencia", segmento, faixa, persona }
+  function filtrarBase(lista, f, busca) {
+    return lista.filter(function (d) {
+      if (f.grupo && f.grupo !== "todos" && statusBase(d) !== f.grupo) return false;
+      if (f.segmento && d.segmento !== f.segmento) return false;
+      if (f.faixa && d.tier !== f.faixa) return false;
+      if (f.persona && (d.decisor || {}).persona !== f.persona) return false;
+      return casaBase(d, busca);
+    });
+  }
+  // Quem do filtro ainda pode ser pedido, já no teto de um clique.
+  function loteBase(filtrados) {
+    var livres = filtrados.filter(function (d) { return statusBase(d) === "base"; });
+    return { total: livres.length, ids: livres.slice(0, LOTE_BASE).map(function (d) { return d.id; }) };
+  }
+
   return {
+    LOTE_BASE: LOTE_BASE, statusBase: statusBase, casaBase: casaBase, ordenarBase: ordenarBase, filtrarBase: filtrarBase, loteBase: loteBase,
     dinheiroMicro: dinheiroMicro, porcento: porcento, motivoParada: motivoParada, enriqOcupado: enriqOcupado,
     casaBusca: casaBusca, DIA: DIA, inicioDoDia: inicioDoDia, dataCurta: dataCurta, quando: quando, waLink: waLink, telefoneFormatado: telefoneFormatado,
     etapa: etapa, vencimento: vencimento, grupo: grupo, toque: toque,
     contatoAtivo: contatoAtivo, primeiroNome: primeiroNome, comSaudacao: comSaudacao,
-    telefoneDestino: telefoneDestino, emailDestino: emailDestino, temDestino: temDestino, fotoDe: fotoDe,
+    contatoEncontrado: contatoEncontrado, telefoneDestino: telefoneDestino, emailDestino: emailDestino, temDestino: temDestino, fotoDe: fotoDe,
     mensagemToque: mensagemToque, linkToque: linkToque, proximoDoDia: proximoDoDia, ordenarLeads: ordenarLeads,
     etapaPV: etapaPV, vencimentoPV: vencimentoPV, grupoPV: grupoPV, textoPV: textoPV, ordenarClientes: ordenarClientes,
     registrar: registrar
