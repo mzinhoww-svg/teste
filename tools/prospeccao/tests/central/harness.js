@@ -74,6 +74,7 @@ async function abrir(opts) {
   const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
   const ctx = await browser.newContext({ viewport: { width: largura, height: opts.altura || 900 } });
   const page = await ctx.newPage();
+  if (opts.relogio) await page.clock.install();
   const erros = [];
   page.on("pageerror", (e) => erros.push(e));
   await page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());

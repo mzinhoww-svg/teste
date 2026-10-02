@@ -238,3 +238,80 @@ test("Enviar no WhatsApp marca o toque como hoje (comportamento atual)", async (
   assert.equal(e.caminho, "leads/R0001");
   assert.equal(e.dados.etapa, 1);
 });
+
+// ---------- Task 5: enviar com Desfazer e próximo do dia ----------
+async function abrirEnvio(opts) {
+  const h = await abrir(Object.assign({ largura: 1440 }, opts || {}));
+  abertos.push(h);
+  h.page.on("popup", (p) => p.close());
+  await h.page.context().route(/wa\.me/, (r) => r.abort());
+  await h.page.waitForSelector("#fila .linha[data-id]");
+  await h.page.click('#abas [data-grupo="hoje"]');
+  return h;
+}
+const selecionadaId = (page) => page.getAttribute('#fila [aria-current="true"]', "data-id");
+
+test("Enviar marca o toque, mostra o aviso e seleciona o próximo do dia", async () => {
+  const h = await abrirEnvio();
+  // (ids adaptados: na aba hoje a ordem é R0004, R0007, R0001, R0003; o primeiro selecionado não é R0001)
+  const atual = await selecionadaId(h.page);
+  const ordem = await h.page.evaluate(() => Array.from(document.querySelectorAll("#fila .linha")).map((n) => n.dataset.id).filter((id) => id !== "TESTE"));
+  const esperado = ordem[(ordem.indexOf(atual) + 1) % ordem.length];
+  await h.page.click("#fila [data-id=" + atual + "] a.enviar");
+  await h.page.waitForFunction(() => window.__escritas.length > 0);
+  const e = (await h.escritas.lista())[0];
+  assert.equal(e.caminho, "leads/" + atual);
+  assert.ok(e.dados.etapa >= 1 && e.dados["enviado" + e.dados.etapa]);
+  assert.match(await h.page.locator("#toast").innerText(), /^Toque \d marcado · Desfazer$/);
+  assert.equal(await h.page.locator("#toast button").innerText(), "Desfazer");
+  assert.equal(await selecionadaId(h.page), esperado);
+  assert.notEqual(esperado, atual);
+});
+
+test("Desfazer no aviso volta o toque e a seleção", async () => {
+  const h = await abrirEnvio();
+  await h.page.click("#fila [data-id=R0001] a.enviar");
+  await h.page.waitForSelector("#toast button");
+  await h.page.click("#toast button");
+  await h.page.waitForFunction(() => window.__escritas.length > 1);
+  const e = (await h.escritas.lista())[1];
+  assert.equal(e.caminho, "leads/R0001");
+  assert.equal(e.dados.etapa, 0);
+  assert.equal(e.dados.enviado1, null);
+  assert.ok(e.dados.historico.some((x) => x.texto === "Toque 1 desfeito"));
+  assert.equal(await h.page.locator("#toast").isHidden(), true);
+  assert.equal(await selecionadaId(h.page), "R0001");
+});
+
+test("aviso some depois de 8 segundos", async () => {
+  const h = await abrirEnvio({ relogio: true });
+  await h.page.click("#fila [data-id=R0001] a.enviar");
+  await h.page.waitForSelector("#toast button");
+  await h.page.clock.fastForward(7500);
+  assert.equal(await h.page.locator("#toast").isVisible(), true);
+  await h.page.clock.fastForward(700);
+  assert.equal(await h.page.locator("#toast").isHidden(), true);
+});
+
+test("e-mail: um botão Enviar e nenhum Marcar enviado", async () => {
+  const h = await abrirEnvio();
+  await h.page.click("#fila [data-id=R0004] .nome");
+  const textos = await h.page.evaluate(() => Array.from(document.querySelectorAll("#detalhe .acoes .btn")).map((b) => b.textContent));
+  assert.equal(textos.filter((t) => t === "Enviar").length, 1, textos.join("|"));
+  assert.ok(!textos.some((t) => /Marcar toque/.test(t) || /Desfazer toque/.test(t)), textos.join("|"));
+  await h.page.click("#detalhe a.principal");
+  await h.page.waitForFunction(() => window.__escritas.length > 0);
+  const e = (await h.escritas.lista())[0];
+  assert.equal(e.caminho, "leads/R0004");
+  assert.equal(e.dados.etapa, 2);
+});
+
+test("falha ao gravar não avança e mostra o erro", async () => {
+  const h = await abrirEnvio({ falharGravacao: true });
+  const atual = await selecionadaId(h.page);
+  await h.page.click("#fila [data-id=" + atual + "] a.enviar");
+  await h.page.waitForFunction(() => /Não foi possível salvar/.test(document.getElementById("toast").textContent));
+  assert.equal(await selecionadaId(h.page), atual);
+  assert.equal(await h.page.locator("#toast button").count(), 0);
+  assert.equal(await h.page.locator("#fila [data-id=" + atual + "] a.enviar").getAttribute("aria-disabled"), null);
+});

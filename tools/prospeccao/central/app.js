@@ -57,11 +57,13 @@
   var dataCurta = Regras.dataCurta;
   var quando = Regras.quando;
   var toastTimer;
-  function toast(txt) {
+  var DESFAZER_MS = 8000;
+  function toast(txt, conteudo, ms) {
     var t = $("toast");
-    t.textContent = txt; t.hidden = false;
+    t.textContent = ""; t.hidden = false;
+    if (conteudo) { t.appendChild(document.createTextNode(txt)); t.appendChild(conteudo); } else t.textContent = txt;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.hidden = true; }, 2400);
+    toastTimer = setTimeout(function () { t.hidden = true; }, ms || 2400);
   }
   function copiar(texto, rotulo) {
     function reserva() {
@@ -139,17 +141,34 @@
   function grupo(l) { return Regras.grupo(l, estado.meta.esperaDias, new Date()); }
   var toque = Regras.toque;
 
-  function marcarToque(l, n) {
+  // Envio de um clique (WhatsApp e e-mail): o link abre no navegador; aqui só marca, avisa com Desfazer e avança.
+  function enviar(l) {
+    if (!estado.podeMarcar || estado.gravando["leads/" + l.id]) return;
+    var n = Math.min(etapa(l) + 1, 3);
+    var fila = estado.visiveisAQ || [];
     var dados = { etapa: n };
     dados["enviado" + n] = new Date().toISOString();
-    gravar("leads/" + l.id, dados, "Toque " + n + " marcado como enviado");
+    gravar("leads/" + l.id, registrar(l, dados, "Toque " + n + " enviado")).then(function (ok) {
+      if (!ok) return;  // falha: o erro já foi avisado e a seleção fica onde está
+      avisoDesfazer(l, n);
+      var prox = Regras.proximoDoDia(fila, l.id, grupo);
+      if (prox) selecionar(prox);
+    });
+  }
+  function avisoDesfazer(l, n) {
+    var b = el("button", { type: "button", class: "desfazer", onclick: function () { desfazerToque(l); } }, ["Desfazer"]);
+    toast("Toque " + n + " marcado · ", b, DESFAZER_MS);
   }
   function desfazerToque(l) {
-    var e = etapa(l);
+    var atual = estado.leads[l.id] || l;
+    var e = etapa(atual);
     if (e < 1) return;
     var dados = { etapa: e - 1 };
     dados["enviado" + e] = null;
-    gravar("leads/" + l.id, registrar(l, dados, "Toque " + e + " desfeito"), "Toque " + e + " desfeito");
+    $("toast").hidden = true;
+    gravar("leads/" + l.id, registrar(atual, dados, "Toque " + e + " desfeito")).then(function (ok) {
+      if (ok) selecionar(l.id);
+    });
   }
   // Histórico do lead: cada ação da central entra como uma linha com data. Os envios vêm de enviado1..3.
   function registrar(l, dados, texto, tipo) {
@@ -299,21 +318,16 @@
       var podeHoje = g === "hoje";
       if (email) {
         acoes.push(el("a", { class: "btn principal", href: mailtoToque(l, t), target: "_blank", rel: "noopener",
-          "aria-disabled": podeHoje ? null : "true" }, ["Abrir e-mail " + n]));
+          "aria-disabled": podeHoje ? null : "true", onclick: function () { if (podeHoje) enviar(l); } }, ["Enviar"]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.assunto || "", "Assunto"); } }, ["Copiar assunto"]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.corpo || "", "Corpo"); } }, ["Copiar corpo"]));
-        acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca || !podeHoje,
-          onclick: function () { marcarToque(l, n); } }, ["Marcar toque " + n + " enviado"]));
       } else {
         var link = linkToque(l, t);
         acoes.push(el("a", { class: "btn principal", href: link || "#", target: "_blank", rel: "noopener",
           "aria-disabled": (podeHoje && link) ? null : "true",
-          onclick: function () { if (!semMarca) marcarToque(l, n); } }, ["Abrir WhatsApp · toque " + n]));
+          onclick: function () { if (podeHoje && link) enviar(l); } }, ["Enviar"]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(mensagemToque(l, t), "Mensagem"); } }, ["Copiar"]));
       }
-    }
-    if (e > 0 && (ativo || g === "encerrado")) {
-      acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca, onclick: function () { desfazerToque(l); } }, ["Desfazer toque " + e]));
     }
     if (g !== "fechou" && g !== "sair") {
       acoes.push(el("button", { type: "button", class: "btn ok", disabled: semMarca,
@@ -384,6 +398,7 @@
     });
     if (!estado.carregado.leads) { limparFila(); carregando($("fila")); return desenharDetalhe(); }
     if (!todos.length) { limparFila(); vazio($("fila"), "Nenhum lead na fila", "Quando o Claude semear a central, as linhas aparecem aqui."); return desenharDetalhe(); }
+    estado.visiveisAQ = visiveis;
     escolherSelecao(visiveis);
     desenharFila(visiveis);
     var alvo = $("fila");
@@ -430,8 +445,7 @@
     var podeEnviar = g === "hoje" && !!link;
     var btnEnviar = el("a", { class: "btn principal enviar", href: podeEnviar ? link : null, target: podeEnviar ? "_blank" : null, rel: podeEnviar ? "noopener" : null,
       "aria-disabled": podeEnviar ? null : "true", "aria-label": "Enviar toque " + n + " para " + (l.nome || l.id),
-      // Hoje: o clique no WhatsApp marca o toque; no e-mail o link só abre (a Task 5 muda isso).
-      onclick: function () { if (podeEnviar && !email && !semMarca) marcarToque(l, n); } }, ["Enviar"]);
+      onclick: function () { if (podeEnviar) enviar(l); } }, ["Enviar"]);
     var btnCopiar = el("button", { type: "button", class: "btn copiar", disabled: !ativo, "aria-label": "Copiar mensagem do toque " + n + " de " + (l.nome || l.id),
       onclick: function () { copiar(email ? (t.corpo || "") : mensagemToque(l, t), email ? "Corpo" : "Mensagem"); } }, ["Copiar"]);
     return el("div", { class: "linha" + (teste ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : ""), "data-id": l.id, tabindex: "0",

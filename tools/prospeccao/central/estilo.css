@@ -210,6 +210,10 @@
   #toast { position: fixed; left: 50%; transform: translateX(-50%);
            bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--navy); color: var(--creme);
            padding: 8px 14px; border-radius: 8px; font-size: var(--t14); z-index: 30; }
+  #toast .desfazer { all: unset; cursor: pointer; font: inherit; font-weight: 600; color: var(--ouro); text-decoration: underline; text-underline-offset: 3px;
+                     padding: 6px 4px; margin: -6px 0 -6px 4px; min-height: 20px; }
+  #toast .desfazer:focus-visible { outline: 2px solid var(--creme); outline-offset: 2px; border-radius: 4px; }
+  @media (max-width: 759px) { #toast .desfazer { padding: 12px 8px; margin: -12px 0 -12px 4px; } }
   /* Perfil do lead: abre dentro do próprio card */
   .abrir { all: unset; cursor: pointer; display: grid; gap: 3px; min-width: 0; border-radius: 6px; font: inherit; }
   .abrir:focus-visible { outline: 2px solid var(--ouro); outline-offset: 3px; }
