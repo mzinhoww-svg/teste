@@ -71,6 +71,29 @@ SEGMENTOS = {
 CONSELHO = re.compile(r"(?i)\b(conselho|ordem|oab|cr[a-z]{1,3})\b")
 SEGMENTO_CONSELHO = ("ICP3", "Conselho profissional", "Conselho profissional",
                      "Um conselho profissional recebe muita dúvida da categoria, e cada resposta pode virar conversa gravada.")
+# Segmentos que a faixa A deixou de fora ("segmento sem cadência") e que entram quando a Letícia pede pela Base
+# (scripts/base_explee.py processar): agro, cooperativas e gestão pública falam como entidade (ICP3); revendas,
+# empresas médias e indústrias, como empresa de médio porte (ICP5).
+SEGMENTOS_AMPLIADOS = {
+    "Entidades do agro": (
+        "ICP3", "Entidade do agro", "Entidade que representa produtores do agro",
+        "Uma entidade do agro acompanha de perto o que muda no campo, e quem vive isso explica melhor numa conversa."),
+    "Cooperativas agro": (
+        "ICP3", "Cooperativa agro", "Cooperativa do agro",
+        "Uma cooperativa tem muita história de cooperado para contar, e cada uma rende uma boa conversa gravada."),
+    "Gestão pública": (
+        "ICP3", "Gestão pública", "Órgão ou entidade de gestão pública",
+        "Quem cuida de gestão pública tem muito a explicar para a população, e uma conversa gravada deixa isso mais claro."),
+    "Revendas e agtechs": (
+        "ICP5", "Revenda e agtech", "Revenda de insumos ou empresa de tecnologia para o agro",
+        "Quem vende para o produtor sabe o valor de uma explicação bem feita, e ela fica melhor numa conversa gravada."),
+    "Empresas B2B médias": (
+        "ICP5", "Empresa B2B", "Empresa que vende para outras empresas",
+        "Empresa que vende para outras empresas ganha confiança quando os próprios líderes explicam o que fazem."),
+    "Indústrias regionais": (
+        "ICP5", "Indústria regional", "Indústria regional",
+        "Uma indústria regional tem processo e gente que pouca gente conhece, e isso rende conversa gravada."),
+}
 
 _UF = {"AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI",
        "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"}
@@ -142,8 +165,12 @@ def escolher_saudacao(emp: dict, pessoas: list[dict]) -> str:
     return saudacao_empresa(emp.get("nome") or emp.get("dominio") or "")
 
 
-def perfil_segmento(emp: dict):
+def perfil_segmento(emp: dict, ampliado: bool = False):
+    """(ICP, categoria, especialidade, frase) do segmento; None se ele não tem cadência. `ampliado` inclui os
+    segmentos que só entram a pedido, pela Base."""
     seg = emp.get("segmento") or ""
+    if ampliado and seg in SEGMENTOS_AMPLIADOS:
+        return SEGMENTOS_AMPLIADOS[seg]
     if seg not in SEGMENTOS:
         return None
     if seg == "Conselhos e advocacia" and CONSELHO.search(emp.get("nome") or ""):
@@ -177,8 +204,8 @@ def checar(lid: str, doc: dict) -> list[str]:
     return erros
 
 
-def doc_promovido(emp: dict, num: int, agora: str) -> dict:
-    icp, categoria, especialidade, frase = perfil_segmento(emp)
+def doc_promovido(emp: dict, num: int, agora: str, ampliado: bool = False) -> dict:
+    icp, categoria, especialidade, frase = perfil_segmento(emp, ampliado)
     pessoas = pessoas_ordenadas(emp)
     saudacao = escolher_saudacao(emp, pessoas)
     nome = (emp.get("nome") or "").strip() or emp["dominio"]

@@ -160,7 +160,7 @@ def _tem_decisor_com_telefone(lead: dict) -> bool:
 
 
 def selecionar(leads: list[dict], agora: datetime) -> list[dict]:
-    """Candidatos à busca, na ordem: faixa A, score desc, etapa 0, id.
+    """Candidatos à busca, na ordem: pedidos pela Base (`enriquecimento.fila`), faixa A, score desc, etapa 0, id.
 
     Leads sem LinkedIn e sem site ficam de fora: não há com o que buscar."""
     if agora.tzinfo is None:
@@ -189,7 +189,7 @@ def selecionar(leads: list[dict], agora: datetime) -> list[dict]:
         achados.append({
             "leadId": lead.get("id"), "decisorIndex": i, "nome": d.get("nome") or "", "primeiro": ps[0],
             "sobrenome": ps[-1] if len(ps) > 1 else "", "cargo": d.get("cargo") or "", "linkedin": linkedin,
-            "dominio": dominio, "_ord": (lead.get("faixa") != "A", -(lead.get("score") or 0),
+            "dominio": dominio, "_ord": (not (lead.get("enriquecimento") or {}).get("fila"), lead.get("faixa") != "A", -(lead.get("score") or 0),
                                          lead.get("etapa") != 0, str(lead.get("id"))),
         })
     achados.sort(key=lambda c: c["_ord"])
@@ -523,6 +523,7 @@ def aplicar(lead: dict, r: dict, decisor_index: int, agora: datetime, execucao_i
     novo["historico"] = (list(novo.get("historico") or []) +
                          [{"em": em, "texto": f"Busca de telefone (treg): {texto}", "tipo": "enriquecimento"}])[-100:]
     enr = dict(novo.get("enriquecimento") or {})
+    enr.pop("fila", None)  # pedido pela Base e já buscado: sai da frente da fila
     enr["atualizadoEm"] = em[:10]
     enr["status"] = _status_lead(novo)
     novo["enriquecimento"] = enr
