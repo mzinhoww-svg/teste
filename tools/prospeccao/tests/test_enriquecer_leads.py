@@ -76,7 +76,7 @@ def test_selecionar_exclusoes():
     novo = (AGORA - timedelta(days=10)).isoformat()
     ls = [
         lead("ok"), lead("sair", situacao="sair"), lead("fechou", situacao="fechou"),
-        lead("recente", buscaTreg={"em": novo}), lead("antigo", buscaTreg={"em": velho}),
+        lead("recente", buscaTreg={"em": novo, "resultado": "nao_achou"}), lead("antigo", buscaTreg={"em": velho, "resultado": "nao_achou"}),
         lead("tem", contatos=[{"id": "k1", "papel": "decisor", "telefone": TEL}]),
         lead("invalido", contatos=[{"id": "k1", "papel": "decisor", "telefone": "1", "invalido": True}]),
         lead("geral", contatos=[{"id": "k1", "papel": "geral", "telefone": TEL}]),
@@ -186,7 +186,7 @@ def test_rejeita_numero_nao_brasileiro_e_pega_o_primeiro_valido():
     r = executar([cand()], cli, "E1", 5_000_000)
     assert r["porLead"]["R1"]["resultado"] == "nao_achou" and r["achados"] == 0
     corpo = {"output": {"phones": ["+1 555 010 1000", "(65) 3000-0000", "65 99999-1111"], "employee_phone_type": "mobile"}}
-    assert extrair_telefone(corpo) == "556530000000"
+    assert extrair_telefone(corpo) == TEL  # celular antes de fixo
     assert extrair_telefone({"data": {"mobile": 65999991111}}) == TEL
     assert extrair_telefone({"data": {"name": "65999991111"}}) == ""
 
@@ -348,3 +348,86 @@ def test_cli_ponta_a_ponta_simulado(tmp_path):
     atu = json.loads((tmp_path / "atualizados.json").read_text())
     assert len(atu) == res["consultados"] + sum(1 for v in res["porLead"].values() if v["resultado"] == "erro")
     assert all(a["buscaTreg"]["execucaoId"] == "SIM1" and a["contatoAtivo"] == "k1" for a in atu)
+
+
+# ---------------------------------------------------------------- correções da revisão
+
+def test_excecao_de_rede_vira_erro_e_segue_mantendo_custo():
+    import urllib.error
+    n = {"i": 0}
+
+    def fn(c):
+        n["i"] += 1
+        if n["i"] == 1:
+            raise urllib.error.URLError("caiu")
+        if n["i"] == 2:
+            raise ConnectionResetError()
+        return ok_phone()
+    cli, _ = cliente(fn)
+    r = executar([cand("R1"), cand("R2"), cand("R3")], cli, "E1", 5_000_000)
+    assert [r["porLead"][i]["resultado"] for i in ("R1", "R2", "R3")] == ["erro", "erro", "achou"]
+
+
+def test_custo_ja_contado_do_enrich_se_telefone_falha_por_rede():
+    def fn(c):
+        if "enrich" in c["url"]:
+            return 200, {"X-Treg-Cost-Micro": "2600", "X-Treg-Call-Id": "e1"}, {"output": {"u": "https://linkedin.com/in/a"}}
+        raise TimeoutError()
+    cli, _ = cliente(fn)
+    r = executar([cand(linkedin="")], cli, "E1", 5_000_000)
+    assert r["porLead"]["R1"]["resultado"] == "erro" and r["gastoMicro"] == 2600 and r["porLead"]["R1"]["custoMicro"] == 2600
+
+
+def test_para_com_10_erros_consecutivos():
+    cli, t = cliente(lambda c: (401, {}, {"detail": "token revogado"}))
+    r = executar([cand(f"R{i}") for i in range(30)], cli, "E1", 5_000_000, lote=100)
+    assert r["motivoParada"] == "erros consecutivos" and len(t.chamadas) == 10
+
+
+def test_erro_isolado_zera_contagem_de_consecutivos():
+    n = {"i": 0}
+
+    def fn(c):
+        n["i"] += 1
+        return (500, {}, {}) if n["i"] % 10 else ok_phone()
+    cli, _ = cliente(fn)
+    r = executar([cand(f"R{i}") for i in range(30)], cli, "E1", 50_000_000, lote=100)
+    assert r["motivoParada"] is None
+
+
+def test_503_saturado_pelo_texto_ou_pelo_retry_after():
+    for resp in [(503, {}, {"detail": "treg_saturated, tente de novo"}),
+                 (503, {"Retry-After": "2"}, {"detail": "busy"})]:
+        esperas, seq = [], iter([resp])
+        cli, t = cliente(lambda c: next(seq, None) or ok_phone(), dormir=esperas.append)
+        r = executar([cand()], cli, "E1", 5_000_000)
+        assert len(t.chamadas) == 2 and r["porLead"]["R1"]["resultado"] == "achou"
+        assert len(esperas) == 1
+    # 503 sem sinal de saturação não repete
+    cli, t = cliente(lambda c: (503, {}, {"detail": "bad gateway"}))
+    executar([cand()], cli, "E1", 5_000_000)
+    assert len(t.chamadas) == 1
+
+
+def test_erro_anterior_nao_bloqueia_90_dias():
+    novo = (AGORA - timedelta(days=5)).isoformat()
+    ls = [lead("e", buscaTreg={"em": novo, "resultado": "erro"}), lead("a", buscaTreg={"em": novo, "resultado": "achou"}),
+          lead("n", buscaTreg={"em": novo, "resultado": "nao_achou"})]
+    assert [c["leadId"] for c in selecionar(ls, AGORA)] == ["e"]
+
+
+def test_extracao_prefere_celular_e_ignora_empresa():
+    movel, fixo = TEL, "556530000000"
+    assert extrair_telefone({"output": {"company_phone": "(65) 3000-0000", "mobile": "65 99999-1111"}}) == movel
+    assert extrair_telefone({"output": {"company_phone": "(65) 3000-0000"}}) == ""
+    assert extrair_telefone({"output": {"phone": "(65) 3000-0000"}, "raw": {"mobile": "65999991111"}}) == movel
+    assert extrair_telefone({"output": {"phone": "(65) 3000-0000"}}) == fixo
+    assert extrair_telefone({"output": {"org": {"phone": "65999991111"}, "work_phone": "65999991111"}}) == ""
+
+
+def test_aplicar_nao_duplica_contato_existente():
+    l = lead(contatos=[{"id": "k1", "papel": "geral", "telefone": "(65) 99999-1111"}])
+    n = aplicar(l, r_achou(), 0, AGORA, "E1")
+    assert len(n["contatos"]) == 1
+    assert n["buscaTreg"]["resultado"] == "achou"
+    assert n["historico"][-1]["texto"] == "Busca de telefone (treg): achou"

@@ -42,6 +42,7 @@ PILOTO_CUSTO_ACERTO_MICRO = 125_000
 TETO_PADRAO_MICRO = 10_000_000
 DIAS_SEM_REBUSCAR = 90
 IGNORADAS = ("sair", "fechou")
+ERROS_SEGUIDOS_MAX = 10
 
 
 # --------------------------------------------------------------------------- limpeza
@@ -170,7 +171,7 @@ def selecionar(leads: list[dict], agora: datetime) -> list[dict]:
         if lead.get("situacao") in IGNORADAS:
             continue
         em = _parse_data((lead.get("buscaTreg") or {}).get("em"))
-        if em and em > corte:
+        if em and em > corte and (lead.get("buscaTreg") or {}).get("resultado") in ("achou", "nao_achou"):
             continue
         if _tem_decisor_com_telefone(lead):
             continue
@@ -283,7 +284,8 @@ class TregCliente:
         for tentativa in range(self.tentativas_503 + 1):
             status, hs, bruto = self.transporte(metodo, url, headers, corpo)
             dados = _json(bruto)
-            saturado = status == 503 and isinstance(dados, dict) and dados.get("treg_saturated")
+            texto = bruto.decode("utf-8", "ignore") if isinstance(bruto, bytes) else str(bruto or "")
+            saturado = status == 503 and ("treg_saturated" in texto or _header(hs, "Retry-After") is not None)
             if saturado and tentativa < self.tentativas_503:
                 try:
                     espera = float(_header(hs, "Retry-After") or 1)
@@ -345,15 +347,21 @@ def achar_linkedin(obj):
     return None
 
 
+_CHAVES_IGNORADAS = ("company", "org", "organization", "work", "office", "hq")
+
+
 def _chave_telefone(k) -> bool:
     k = str(k).lower()
     return "phone" in k or "mobile" in k or "telefone" in k
 
 
 def candidatos_telefone(obj, sob_chave=False):
-    """Strings/números sob chaves com phone/mobile/telefone (inclusive em listas), na ordem do JSON."""
+    """Strings/números sob chaves com phone/mobile/telefone (inclusive em listas), na ordem do JSON.
+    Ignora o que está sob chaves de empresa (company/org/work/office/hq)."""
     if isinstance(obj, dict):
         for k, v in obj.items():
+            if any(x in str(k).lower() for x in _CHAVES_IGNORADAS):
+                continue
             yield from candidatos_telefone(v, sob_chave or _chave_telefone(k))
     elif isinstance(obj, list):
         for v in obj:
@@ -363,12 +371,17 @@ def candidatos_telefone(obj, sob_chave=False):
 
 
 def extrair_telefone(corpo) -> str:
-    """Primeiro número brasileiro válido (regra estrita de msg.enriquecimento), ou ""."""
-    for c in candidatos_telefone(corpo):
-        t = telefone_valido(c)
-        if t:
-            return t
-    return ""
+    """Número brasileiro válido (regra estrita). Valores de `output` primeiro; celular antes de fixo."""
+    fontes = [corpo]
+    if isinstance(corpo, dict) and "output" in corpo:
+        fontes = [corpo["output"], corpo]
+    validos = []
+    for f in fontes:
+        for c in candidatos_telefone(f):
+            t = telefone_valido(c)
+            if t and t not in validos:
+                validos.append(t)
+    return next((t for t in validos if re.fullmatch(r"55\d\d9\d{8}", t)), validos[0] if validos else "")
 
 
 # --------------------------------------------------------------------------- execução
@@ -406,6 +419,7 @@ def executar(candidatos, cliente, execucao_id, saldo_micro, teto_micro=TETO_PADR
             r["callIds"].append(resp["callId"])
         return resp
 
+    seguidos = 0
     for n, c in enumerate(candidatos, 1):
         lead_id = c["leadId"]
         r = {"resultado": "nao_achou", "callIds": [], "custoMicro": 0}
@@ -434,7 +448,16 @@ def executar(candidatos, cliente, execucao_id, saldo_micro, teto_micro=TETO_PADR
         except TregErro as e:
             r["resultado"] = "erro"
             r["erro"] = f"HTTP {e.status}"
+        except OSError as e:  # URLError, timeout, conexão resetada
+            r["resultado"] = "erro"
+            r["erro"] = f"rede: {type(e).__name__}"
         por_lead[lead_id] = r
+        seguidos = seguidos + 1 if r["resultado"] == "erro" else 0
+        if seguidos >= ERROS_SEGUIDOS_MAX:
+            estado["motivo"] = "erros consecutivos"
+            if ao_fim_do_lote:
+                ao_fim_do_lote(parcial())
+            break
         if n % lote == 0 or n == len(candidatos):
             p = parcial()
             if ao_fim_do_lote:
@@ -481,11 +504,14 @@ def aplicar(lead: dict, r: dict, decisor_index: int, agora: datetime, execucao_i
         contatos = novo.setdefault("contatos", [])
         numeros = [int(m.group(1)) for c in contatos if (m := re.fullmatch(r"k(\d+)", str(c.get("id"))))]
         d = (novo.get("decisores") or [{}])[decisor_index] if novo.get("decisores") else {}
-        contatos.append({
-            "id": f"k{max(numeros, default=0) + 1}", "papel": "decisor", "nome": d.get("nome", ""),
-            "cargo": d.get("cargo", ""), "telefone": r["telefone"], "whatsapp": "?", "email": "",
-            "fonte": f"treg · {r.get('provedor') or 'desconhecido'} · call {(r.get('callIds') or ['?'])[-1]}",
-            "confianca": "média"})
+        ja_tem = any(r["telefone"] in (limpar_telefone(c.get("telefone")), telefone_valido(str(c.get("telefone") or "")))
+                     for c in contatos)
+        if not ja_tem:
+            contatos.append({
+                "id": f"k{max(numeros, default=0) + 1}", "papel": "decisor", "nome": d.get("nome", ""),
+                "cargo": d.get("cargo", ""), "telefone": r["telefone"], "whatsapp": "?", "email": "",
+                "fonte": f"treg · {r.get('provedor') or 'desconhecido'} · call {(r.get('callIds') or ['?'])[-1]}",
+                "confianca": "média"})
         pend = [p for p in pend if not _PEND_TELEFONE.search(p) and not _PEND_BUSCA.search(p)]
     elif resultado == "nao_achou":
         pend = [p for p in pend if not _PEND_BUSCA.search(p)]
