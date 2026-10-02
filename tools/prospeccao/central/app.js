@@ -347,7 +347,7 @@
     });
     var meta = Number(estado.meta.metaDiaria) || 20;
     placar([cont.hoje, "Para hoje"], [toquesHoje, "Toques hoje / " + meta], [cont.hoje + cont.aguardando, "Em cadência"],
-      [cont.respondeu + cont.fechou, "Responderam"], toquesHoje / meta);
+      [cont.respondeu + cont.fechou, "Responderam"], toquesHoje / meta, toquesHoje + "/" + meta + " toques · " + cont.hoje + " para hoje");
     abas(cont);
     var unicos = function (campo) {
       var vs = {};
@@ -845,8 +845,9 @@
   }
 
   // ================= comum =================
-  function placar(a, b, c, d, progresso) {
+  function placar(a, b, c, d, progresso, linha) {
     [a, b, c, d].forEach(function (x, i) { $("p" + (i + 1)).textContent = x[0]; $("p" + (i + 1) + "l").textContent = x[1]; });
+    $("linha-meta").textContent = linha || (a[0] + " " + a[1].toLowerCase() + " · " + b[0] + " " + b[1].toLowerCase());
     $("barra").style.transform = "scaleX(" + (progresso == null ? 0 : Math.min(1, progresso)) + ")";
     $("barra").parentNode.hidden = progresso == null;
   }
@@ -970,6 +971,18 @@
       render();
     }, function () {});
   }
+
+  // Layout por largura: o CSS decide a grade; o atributo só espelha a faixa para os testes e para o drawer.
+  function layoutAtual() {
+    var w = window.matchMedia;
+    return w("(min-width: 1280px)").matches ? "tres" : w("(min-width: 1024px)").matches ? "dois" : w("(min-width: 760px)").matches ? "gaveta" : "uma";
+  }
+  function sincronizarLayout() { document.body.dataset.layout = layoutAtual(); }
+  ["(min-width: 1280px)", "(min-width: 1024px)", "(min-width: 760px)"].forEach(function (q) {
+    var m = window.matchMedia(q);
+    if (m.addEventListener) m.addEventListener("change", sincronizarLayout); else m.addListener(sincronizarLayout);
+  });
+  sincronizarLayout();
 
   try {
     var salvo = location.hash === "#posvenda" ? "pv" : location.hash === "#leads" ? "ld" : localStorage.getItem("central-funil");

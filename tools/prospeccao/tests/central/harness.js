@@ -67,7 +67,7 @@ async function abrir(opts) {
   opts = opts || {};
   const largura = opts.largura || 1440;
   const inicial = {
-    leads: opts.leads === undefined ? dados.leads(6) : opts.leads,
+    leads: opts.leads === undefined ? dados.leads(7) : opts.leads,
     clientes: opts.clientes === undefined ? dados.clientes() : opts.clientes,
     config: { meta: dados.meta(), fotos: dados.fotos(), posvenda: dados.posvenda() },
   };

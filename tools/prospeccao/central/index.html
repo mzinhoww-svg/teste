@@ -1,21 +1,26 @@
 <title>Reiners · Central de disparo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="estilo.css">
 
-<div class="wrap">
-  <div id="trilho">
+<div class="central">
+  <div id="trilho" class="trilho">
   <header class="topo">
     <div class="marca">
       <h1>Reiners Media<small>Central de disparo</small></h1>
       <span id="conexao" class="conexao">Conectando</span>
     </div>
+  </header>
+  <div class="fixo">
     <div class="funis" role="group" aria-label="Funil">
       <button type="button" id="f-aq" data-funil="aq" aria-pressed="true">Aquecimento <span class="n" id="n-aq"></span></button>
       <button type="button" id="f-pv" data-funil="pv" aria-pressed="false">Pós-venda <span class="n" id="n-pv"></span></button>
       <button type="button" id="f-ld" data-funil="ld" aria-pressed="false">Leads <span class="n" id="n-ld"></span></button>
     </div>
+    <p class="linha-meta" id="linha-meta"></p>
+  </div>
+  <div class="resumo-topo">
     <div class="placar">
       <div><b id="p1">0</b><span id="p1l">Para hoje</span></div>
       <div><b id="p2">0</b><span id="p2l">Toques hoje</span></div>
@@ -23,7 +28,7 @@
       <div><b id="p4">0</b><span id="p4l">Responderam</span></div>
     </div>
     <div class="barra" aria-hidden="true"><i id="barra"></i></div>
-  </header>
+  </div>
 
   <div id="aviso" class="aviso" hidden></div>
 
@@ -46,11 +51,14 @@
   </nav>
   </div>
 
-  <main id="fila" aria-live="polite">
+  <main id="fila" class="fila" aria-live="polite">
     <div class="vazio"><b>Carregando</b>Conectando ao banco da central.</div>
   </main>
+
+  <aside id="detalhe" class="detalhe" aria-label="Detalhe do lead">
+    <div class="vazio"><b>Nenhum lead selecionado</b>Selecione um lead na fila para ver a mensagem, o perfil e o histórico.</div>
+  </aside>
 </div>
-<aside id="detalhe" hidden></aside>
 <div id="atalhos" hidden></div>
 <div id="toast" role="status" hidden></div>
 
