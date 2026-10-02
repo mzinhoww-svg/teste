@@ -156,6 +156,7 @@ test("rascunho e foco da anotação sobrevivem a um snapshot", async () => {
   abertos.push(h);
   await h.page.waitForSelector("#fila .linha[data-id]");
   await h.page.click("#fila [data-id=R0001] .nome");
+  await h.page.click('#detalhe [role=tab]:has-text("Histórico")');
   await h.page.waitForSelector("#nh-R0001");
   await h.page.click("#nh-R0001");
   await h.page.keyboard.type("falei com a secretária");
@@ -287,6 +288,8 @@ test("aviso some depois de 8 segundos", async () => {
   const h = await abrirEnvio({ relogio: true });
   await h.page.click("#fila [data-id=R0001] a.enviar");
   await h.page.waitForSelector("#toast button");
+  // o relógio vale para o contexto inteiro: espera a janela do WhatsApp fechar antes de adiantar o tempo
+  for (let i = 0; i < 100 && h.page.context().pages().length > 1; i++) await new Promise((r) => setTimeout(r, 20));
   await h.page.clock.fastForward(7500);
   assert.equal(await h.page.locator("#toast").isVisible(), true);
   await h.page.clock.fastForward(700);
@@ -314,4 +317,167 @@ test("falha ao gravar não avança e mostra o erro", async () => {
   assert.equal(await selecionadaId(h.page), atual);
   assert.equal(await h.page.locator("#toast button").count(), 0);
   assert.equal(await h.page.locator("#fila [data-id=" + atual + "] a.enviar").getAttribute("aria-disabled"), null);
+});
+
+// ---------- Task 6: detalhe com Resultado e abas ----------
+const dadosT = require("./dados.js");
+async function abrirDetalhe(opts) {
+  const h = await abrir(Object.assign({ largura: 1440 }, opts || {}));
+  abertos.push(h);
+  h.page.on("popup", (p) => p.close());
+  await h.page.context().route(/wa\.me/, (r) => r.abort());
+  await h.page.waitForSelector("#fila .linha[data-id]");
+  await h.page.click('#abas [data-grupo="hoje"]');
+  return h;
+}
+const abrirLead = (h, id) => h.page.click("#fila [data-id=" + id + "] .nome");
+
+test("detalhe mostra a mensagem do toque atual e o destino formatado", async () => {
+  const h = await abrirDetalhe();
+  await abrirLead(h, "R0001");
+  const r = await h.page.evaluate(() => ({
+    msg: document.querySelector("#detalhe .msg").textContent,
+    destino: document.querySelector("#detalhe .destino").textContent,
+    h2: document.querySelector("#detalhe h2").textContent,
+    ordem: ["h2", ".msg", ".acoes", ".resultado", '[role=tablist]'].map((s) => { const e = document.querySelector("#detalhe " + s); return e ? e.getBoundingClientRect().top : -1; }),
+  }));
+  assert.match(r.msg, /Toque 1 da cadência para Clínica Modelo 1/);
+  assert.match(r.destino, /^Para: .*\+55 \(65\) 90000-0001/);
+  assert.equal(r.h2, "Clínica Modelo 1");
+  assert.deepEqual(r.ordem.slice().sort((a, b) => a - b), r.ordem, "ordem vertical: nome, mensagem, ações, resultado, abas");
+  await abrirLead(h, "R0004");
+  const em = await h.page.evaluate(() => ({ msg: document.querySelector("#detalhe .msg").textContent, destino: document.querySelector("#detalhe .destino").textContent }));
+  assert.match(em.msg, /^Assunto: Ideia para Clínica Modelo 4 \(2\)/);
+  assert.match(em.destino, /contato4@modelo\.example/);
+  assert.deepEqual(h.erros.map(String), []);
+});
+
+test("Pediu para sair pede confirmação", async () => {
+  const h = await abrirDetalhe();
+  await abrirLead(h, "R0001");
+  await h.page.click("#detalhe .resultado >> text=Pediu para sair");
+  assert.deepEqual(await h.escritas.lista(), [], "o primeiro clique não grava");
+  const botoes = await h.page.evaluate(() => Array.from(document.querySelectorAll("#detalhe .resultado button")).map((b) => b.textContent));
+  assert.deepEqual(botoes, ["Confirmar saída", "Cancelar"]);
+  await h.page.click("#detalhe .resultado >> text=Cancelar");
+  assert.deepEqual(await h.page.evaluate(() => Array.from(document.querySelectorAll("#detalhe .resultado button")).map((b) => b.textContent)), ["Respondeu", "Fechou negócio", "Pediu para sair"]);
+  await h.page.click("#detalhe .resultado >> text=Pediu para sair");
+  await h.page.click("#detalhe .resultado >> text=Confirmar saída");
+  await h.page.waitForFunction(() => window.__escritas.length > 0);
+  const e = (await h.escritas.lista())[0];
+  assert.equal(e.caminho, "leads/R0001");
+  assert.equal(e.dados.situacao, "sair");
+  assert.ok(e.dados.historico.some((x) => x.texto === "Pediu para sair"));
+});
+
+test("lead que sai do filtro passa a seleção para o próximo", async () => {
+  const h = await abrirDetalhe();
+  await abrirLead(h, "R0001");
+  await h.page.click("#detalhe .resultado >> text=Respondeu");
+  await h.page.waitForFunction(() => window.__escritas.length > 0);
+  assert.equal(await selecionadaId(h.page), "R0003");
+  assert.equal(await h.page.locator("#fila [data-id=R0001]").count(), 0);
+  assert.match(await h.page.locator("#detalhe h2").innerText(), /Clínica Modelo 3/);
+  // o último da fila volta para o anterior
+  await h.page.click("#detalhe .resultado >> text=Respondeu");
+  await h.page.waitForFunction(() => window.__escritas.length > 1);
+  assert.equal(await selecionadaId(h.page), "R0007");
+});
+
+test("Resultado com gravação falha não avança a seleção", async () => {
+  const h = await abrirDetalhe({ falharGravacao: true });
+  await abrirLead(h, "R0001");
+  await h.page.click("#detalhe .resultado >> text=Respondeu");
+  await h.page.waitForFunction(() => /Não foi possível salvar/.test(document.getElementById("toast").textContent));
+  assert.equal(await selecionadaId(h.page), "R0001");
+});
+
+test("abas Perfil, Cadência, Histórico", async () => {
+  const h = await abrirDetalhe();
+  await abrirLead(h, "R0001");
+  const abas = async () => h.page.evaluate(() => ({
+    nomes: Array.from(document.querySelectorAll('#detalhe [role=tablist] [role=tab]')).map((b) => b.textContent),
+    sel: Array.from(document.querySelectorAll('#detalhe [role=tab]')).filter((b) => b.getAttribute("aria-selected") === "true").map((b) => b.textContent),
+    paineis: document.querySelectorAll("#detalhe [role=tabpanel]").length,
+    titulo: (document.querySelector("#detalhe [role=tabpanel]") || {}).innerText || "",
+  }));
+  let a = await abas();
+  assert.deepEqual(a.nomes, ["Perfil", "Cadência", "Histórico"]);
+  assert.deepEqual(a.sel, ["Perfil"]);
+  assert.equal(a.paineis, 1);
+  assert.match(a.titulo, /O que faz/);
+  await h.page.click('#detalhe [role=tab]:has-text("Cadência")');
+  a = await abas();
+  assert.deepEqual(a.sel, ["Cadência"]);
+  assert.match(a.titulo, /Toque 1/);
+  // a aba escolhida persiste ao trocar de lead
+  await abrirLead(h, "R0003");
+  assert.deepEqual((await abas()).sel, ["Cadência"]);
+  await h.page.click('#detalhe [role=tab]:has-text("Histórico")');
+  assert.ok(await h.page.locator("#nh-R0003").count());
+  // setas movem entre as abas
+  await h.page.focus('#detalhe [role=tab][aria-selected=true]');
+  await h.page.keyboard.press("ArrowLeft");
+  assert.deepEqual((await abas()).sel, ["Cadência"]);
+});
+
+test("perfil em duas colunas a 1440px", async () => {
+  const h = await abrirDetalhe();
+  await abrirLead(h, "R0001");
+  const col = (page) => page.evaluate(() => {
+    const e = document.querySelector("#detalhe .perfil-esq"), d = document.querySelector("#detalhe .perfil-dir");
+    const a = e.getBoundingClientRect(), b = d.getBoundingClientRect();
+    return { lado: b.x > a.x + 50 && Math.abs(a.y - b.y) < 4, esq: e.innerText, dir: d.innerText };
+  });
+  const c = await col(h.page);
+  assert.equal(c.lado, true);
+  assert.match(c.esq, /O que faz[\s\S]*Gancho[\s\S]*O que já tem[\s\S]*Empresa na Receita/);
+  assert.match(c.dir, /Quem lidera[\s\S]*Contatos[\s\S]*Usar na cadência[\s\S]*Adicionar contato/);
+  const h2 = await abrirDetalhe({ largura: 1100 });
+  await abrirLead(h2, "R0001");
+  assert.equal((await col(h2.page)).lado, false, "uma coluna abaixo de 1280px");
+});
+
+test("Desfazer no Histórico depois do aviso", async () => {
+  const h = await abrirDetalhe();
+  await abrirLead(h, "R0001");
+  await h.page.click("#fila [data-id=R0001] a.enviar");
+  await h.page.waitForFunction(() => window.__escritas.length > 0);
+  await h.page.click('#abas [data-grupo="todos"]'); // R0001 saiu de "Para hoje"
+  await abrirLead(h, "R0001");
+  await h.page.click('#detalhe [role=tab]:has-text("Histórico")');
+  assert.equal(await h.page.locator("#detalhe .tempo button").count(), 1, "só a linha do último envio tem Desfazer");
+  await h.page.click("#detalhe .tempo >> text=Desfazer");
+  await h.page.waitForFunction(() => window.__escritas.length > 1);
+  const e = (await h.escritas.lista())[1];
+  assert.equal(e.dados.etapa, 0);
+  assert.equal(e.dados.enviado1, null);
+  assert.equal(await h.page.locator("#detalhe .tempo button").count(), 0);
+});
+
+test("Desfazer do aviso só age se o toque ainda for o último", async () => {
+  const h = await abrirDetalhe();
+  await h.page.click("#fila [data-id=R0001] a.enviar");
+  await h.page.waitForSelector("#toast button");
+  await h.empurrar("leads/R0001", { etapa: 2, enviado2: agoraIso() });
+  await h.page.click("#toast button");
+  await h.page.waitForFunction(() => /Nada a desfazer/.test(document.getElementById("toast").textContent));
+  assert.equal((await h.escritas.lista()).length, 1, "nenhuma escrita nova");
+  assert.equal(await h.page.locator("#toast button").count(), 0);
+});
+
+test("Enviar fica desativado sem e-mail ou sem telefone, com o motivo", async () => {
+  const leads = dadosT.leads(7);
+  const por = (id) => leads.find((d) => d.id === id).data;
+  por("R0004").email = ""; por("R0004").contatos = [];
+  por("R0001").telefone = ""; por("R0001").contatos = [];
+  const h = await abrirDetalhe({ leads });
+  await abrirLead(h, "R0004");
+  let r = await h.page.evaluate(() => { const a = document.querySelector("#detalhe .acoes a.principal"); return { dis: a.getAttribute("aria-disabled"), href: a.getAttribute("href"), txt: document.querySelector("#detalhe .destino").textContent }; });
+  assert.equal(r.dis, "true"); assert.equal(r.href, null); assert.match(r.txt, /Sem e-mail cadastrado/);
+  await abrirLead(h, "R0001");
+  r = await h.page.evaluate(() => { const a = document.querySelector("#detalhe .acoes a.principal"); return { dis: a.getAttribute("aria-disabled"), href: a.getAttribute("href"), txt: document.querySelector("#detalhe .destino").textContent }; });
+  assert.equal(r.dis, "true"); assert.equal(r.href, null); assert.match(r.txt, /Sem telefone cadastrado/);
+  await h.page.click("#detalhe a.principal", { force: true });
+  assert.deepEqual(await h.escritas.lista(), []);
 });

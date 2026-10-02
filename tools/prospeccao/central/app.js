@@ -31,6 +31,8 @@
     novoContato: null,
     aberto: {},  // só a aba Leads ainda abre o perfil dentro do card (Task 7 migra)
     selecionado: null,
+    abaDetalhe: "perfil",
+    confirmarSair: null,
     selecaoInicial: false,
     rascunho: {}
   };
@@ -156,16 +158,17 @@
     });
   }
   function avisoDesfazer(l, n) {
-    var b = el("button", { type: "button", class: "desfazer", onclick: function () { desfazerToque(l); } }, ["Desfazer"]);
+    var b = el("button", { type: "button", class: "desfazer", onclick: function () { desfazerToque(l, n); } }, ["Desfazer"]);
     toast("Toque " + n + " marcado · ", b, DESFAZER_MS);
   }
-  function desfazerToque(l) {
+  // n = o toque que o aviso ou a linha do histórico promete desfazer; se o lead já andou, não desfaz outro.
+  function desfazerToque(l, n) {
     var atual = estado.leads[l.id] || l;
     var e = etapa(atual);
-    if (e < 1) return;
+    $("toast").hidden = true;
+    if (e < 1 || (n != null && e !== n)) { toast("Nada a desfazer"); return; }
     var dados = { etapa: e - 1 };
     dados["enviado" + e] = null;
-    $("toast").hidden = true;
     gravar("leads/" + l.id, registrar(atual, dados, "Toque " + e + " desfeito")).then(function (ok) {
       if (ok) selecionar(l.id);
     });
@@ -178,7 +181,7 @@
     return dados;
   }
   var SITUACOES = { respondeu: "Marcado como respondeu", sair: "Pediu para sair", ativo: "Voltou para a cadência", fechou: "Fechou negócio" };
-  function situacao(l, s, msg) { gravar("leads/" + l.id, registrar(l, { situacao: s }, SITUACOES[s] || s), msg); }
+  function situacao(l, s, msg) { return comVizinho(l, function () { return gravar("leads/" + l.id, registrar(l, { situacao: s }, SITUACOES[s] || s), msg); }); }
 
   function fecharNegocio(l, produto) {
     var cliente = {
@@ -189,13 +192,13 @@
     gravar("clientes/" + l.id, cliente, null, true).then(function (ok) {
       if (!ok) return;
       estado.fechando = null;
-      gravar("leads/" + l.id, registrar(l, { situacao: "fechou" }, "Fechou negócio: " + produto), "Foi para o pós-venda: boas-vindas para hoje");
+      comVizinho(l, function () { return gravar("leads/" + l.id, registrar(l, { situacao: "fechou" }, "Fechou negócio: " + produto), "Foi para o pós-venda: boas-vindas para hoje"); });
     });
   }
 
   function trilho(l) {
     var e = etapa(l), g = grupo(l), v = vencimento(l);
-    return el("div", { class: "trilho", "aria-label": "Cadência" }, [1, 2, 3].map(function (n) {
+    return el("div", { class: "passos", "aria-label": "Cadência" }, [1, 2, 3].map(function (n) {
       var feito = n <= e, agora = !feito && n === e + 1 && (g === "hoje" || g === "aguardando");
       var sub = feito ? "Enviado " + dataCurta(l["enviado" + n]) :
         agora ? (g === "hoje" ? "Enviar hoje" : "A partir de " + dataCurta(v)) : "";
@@ -274,32 +277,105 @@
     return mailto(emailDestino(l), t.assunto, comSaudacao(l, t.corpo || "").replace("Olá, " + l.saudacao + ",", "Olá, " + (ca && ca.nome ? primeiroNome(ca.nome) : l.saudacao) + ","));
   }
 
-  // Detalhe do lead selecionado: o conteúdo do antigo card + o perfil completo (Task 6 reorganiza em Resultado e abas).
+  // Detalhe do lead selecionado: o topo decide o toque (mensagem, destino, Enviar, Copiar, foto, Resultado);
+  // o que ajuda a decidir vem em três abas: Perfil, Cadência e Histórico.
+  function destinoDe(l, email) {
+    if (email) return emailDestino(l) || "";
+    var t = telefoneDestino(l);
+    return t ? Regras.telefoneFormatado(t) : "";
+  }
+  // Próxima linha da fila visível depois desta; se ela era a última, a anterior. O card de teste não conta.
+  function vizinhoNaFila(id) {
+    var fila = (estado.visiveisAQ || []).filter(function (x) { return x.id !== "TESTE"; });
+    var i = fila.map(function (x) { return x.id; }).indexOf(id);
+    if (i < 0) return null;
+    var v = fila[i + 1] || fila[i - 1];
+    return v ? v.id : null;
+  }
+  // Roda uma gravação que pode tirar o lead do filtro; se tirou e deu certo, a seleção vai para o vizinho.
+  function comVizinho(l, gravacao) {
+    var viz = vizinhoNaFila(l.id);
+    return gravacao().then(function (ok) {
+      var ainda = (estado.visiveisAQ || []).some(function (x) { return x.id === l.id; });
+      if (ok && viz && !ainda && estado.selecionado === l.id) selecionar(viz);
+      return ok;
+    });
+  }
+  function resultado(l, g, semMarca) {
+    var b = function (id, txt, fn, cls) {
+      return el("button", { type: "button", id: id + "-" + l.id, class: "btn" + (cls ? " " + cls : ""), disabled: semMarca, onclick: fn }, [txt]);
+    };
+    var filhos;
+    if (g === "hoje" || g === "aguardando" || g === "encerrado") {
+      if (estado.confirmarSair === l.id) {
+        filhos = [
+          b("r-sair-ok", "Confirmar saída", function () { estado.confirmarSair = null; situacao(l, "sair", "Não contatar de novo"); }, "alerta"),
+          b("r-sair-nao", "Cancelar", function () { estado.confirmarSair = null; render(); $("r-sair-" + l.id) && $("r-sair-" + l.id).focus(); })
+        ];
+      } else {
+        filhos = [
+          b("r-resp", "Respondeu", function () { situacao(l, "respondeu", "Marcado como respondeu"); }),
+          b("r-fecha", "Fechou negócio", function () { estado.fechando = l.id; render(); }),
+          b("r-sair", "Pediu para sair", function () { estado.confirmarSair = l.id; render(); $("r-sair-nao-" + l.id) && $("r-sair-nao-" + l.id).focus(); })
+        ];
+      }
+    } else if (g === "fechou") {
+      filhos = [b("r-pv", "Ver no pós-venda", function () { trocarFunil("pv"); })];
+      filhos[0].disabled = false;
+    } else {
+      filhos = [b("r-volta", "Voltar para a cadência", function () { situacao(l, "ativo", "De volta à cadência"); })];
+    }
+    return el("div", { class: "resultado", role: "group", "aria-label": "Resultado" }, filhos);
+  }
+
+  var ABAS_DETALHE = [["perfil", "Perfil"], ["cadencia", "Cadência"], ["historico", "Histórico"]];
+  function abasDetalhe(l) {
+    var atual = estado.abaDetalhe;
+    function ir(k, foco) {
+      estado.abaDetalhe = k;
+      render();
+      if (foco && $("tab-" + k)) $("tab-" + k).focus();
+    }
+    var lista = el("div", { class: "abas-detalhe", role: "tablist", "aria-label": "Sobre o lead" }, ABAS_DETALHE.map(function (a, i) {
+      return el("button", { type: "button", role: "tab", id: "tab-" + a[0], class: "aba", "aria-selected": String(a[0] === atual),
+        "aria-controls": "painel-detalhe", tabindex: a[0] === atual ? "0" : "-1",
+        onclick: function () { ir(a[0], false); },
+        onkeydown: function (e) {
+          var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0, alvo = null;
+          if (d) alvo = ABAS_DETALHE[(i + d + ABAS_DETALHE.length) % ABAS_DETALHE.length][0];
+          else if (e.key === "Home") alvo = ABAS_DETALHE[0][0];
+          else if (e.key === "End") alvo = ABAS_DETALHE[ABAS_DETALHE.length - 1][0];
+          if (alvo) { e.preventDefault(); ir(alvo, true); }
+        } }, [a[1]]);
+    }));
+    var conteudo;
+    if (atual === "cadencia") conteudo = el("div", { class: "perfil" }, [trilho(l), secaoCadencia(l)]);
+    else if (atual === "historico") conteudo = el("div", { class: "perfil" }, [secaoHistorico(l)]);
+    else conteudo = el("div", { class: "perfil perfil-cols" }, [
+      el("div", { class: "perfil-esq" }, [secaoFaz(l), secaoGancho(l), secaoJaTem(l), secaoEmpresa(l), secaoCuidado(l)]),
+      el("div", { class: "perfil-dir" }, secaoPessoas(l))
+    ]);
+    return [lista, el("div", { role: "tabpanel", id: "painel-detalhe", "aria-labelledby": "tab-" + atual, class: "painel" }, [conteudo])];
+  }
+
   function cardLead(l) {
     var g = grupo(l), e = etapa(l);
     var ativo = g === "hoje" || g === "aguardando";
     var semMarca = !estado.podeMarcar || !!estado.gravando["leads/" + l.id];
     var email = l.canal === "E-mail";
     var n = Math.min(e + 1, 3), t = toque(l, n);
-
-    var chips = el("div", { class: "chips" }, [
-      l.segmento ? el("span", { class: "chip", text: l.segmento }) : null,
-      l.faixa ? el("span", { class: "chip", text: "Faixa " + l.faixa }) : null,
-      el("span", { class: "chip", text: l.canal || "" }),
-      l.bairro ? el("span", { class: "chip", text: l.bairro }) : null
-    ].concat((l.flags || []).map(function (f) { return el("span", { class: "chip flag", text: f }); }))
-     .concat((l.alertas || []).length ? [el("span", { class: "chip flag", text: "Cuidado: ver alertas no perfil" })] : []));
+    var teste = l.id === "TESTE";
 
     var rotulo = { hoje: "Toque " + n + " hoje", aguardando: "Aguardando", respondeu: "Respondeu", fechou: "Fechou",
                    encerrado: "Sem resposta", sair: "Saiu" }[g];
     var cab = el("div", { class: "cab" }, [
-      l.id === "TESTE" ? el("div", null, [
+      teste ? el("div", null, [
         el("h2", { text: "Card de teste" }),
         el("div", { class: "meta", text: "Manda as mensagens para o WhatsApp da própria Reiners." })
       ]) : el("div", null, [
         el("h2", { text: l.nome || l.id }),
         el("div", { class: "meta" }, [el("span", { class: "num", text: l.id }), l.categoria ? " · " + l.categoria : null,
-          l.score != null ? " · score " : null, l.score != null ? el("span", { class: "num", text: String(l.score) }) : null])
+          (l.alertas || []).length ? el("span", { class: "chip alerta", text: "Alerta no perfil" }) : null])
       ]),
       el("span", { class: "estado " + g, text: rotulo })
     ]);
@@ -308,58 +384,39 @@
     var tv = toque(l, verToque);
     var texto = email ? ("Assunto: " + (tv.assunto || "") + "\n\n" + (tv.corpo || "")) : mensagemToque(l, tv);
     var comFoto = !email && ativo && n === 1;
-    var detalhes = el("details", null, [
-      el("summary", { text: "Toque " + verToque + " · " + NOMES_TOQUE[verToque] + (email ? " · e-mail completo" : " · mensagem completa") }),
-      el("p", { class: "msg", text: texto })
-    ]);
+    var dest = destinoDe(l, email);
+    var ca = contatoAtivo(l);
+    var semDestino = email ? "Sem e-mail cadastrado" : "Sem telefone cadastrado";
 
     var acoes = [];
     if (ativo) {
       var podeHoje = g === "hoje";
+      var link = !dest ? "" : email ? mailtoToque(l, t) : linkToque(l, t);
+      var liberado = podeHoje && !!link;
+      acoes.push(el("a", { class: "btn principal", href: liberado ? link : null, target: liberado ? "_blank" : null, rel: liberado ? "noopener" : null,
+        "aria-disabled": liberado ? null : "true", onclick: function () { if (liberado) enviar(l); } }, ["Enviar"]));
       if (email) {
-        acoes.push(el("a", { class: "btn principal", href: mailtoToque(l, t), target: "_blank", rel: "noopener",
-          "aria-disabled": podeHoje ? null : "true", onclick: function () { if (podeHoje) enviar(l); } }, ["Enviar"]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.assunto || "", "Assunto"); } }, ["Copiar assunto"]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(t.corpo || "", "Corpo"); } }, ["Copiar corpo"]));
       } else {
-        var link = linkToque(l, t);
-        acoes.push(el("a", { class: "btn principal", href: link || "#", target: "_blank", rel: "noopener",
-          "aria-disabled": (podeHoje && link) ? null : "true",
-          onclick: function () { if (podeHoje && link) enviar(l); } }, ["Enviar"]));
         acoes.push(el("button", { type: "button", class: "btn", onclick: function () { copiar(mensagemToque(l, t), "Mensagem"); } }, ["Copiar"]));
       }
     }
-    if (g !== "fechou" && g !== "sair") {
-      acoes.push(el("button", { type: "button", class: "btn ok", disabled: semMarca,
-        onclick: function () { estado.fechando = l.id; render(); } }, ["Fechou negócio"]));
-    }
-    if (ativo || g === "encerrado") {
-      acoes.push(el("button", { type: "button", class: "btn ok", disabled: semMarca,
-        onclick: function () { situacao(l, "respondeu", "Marcado como respondeu"); } }, ["Respondeu"]));
-      acoes.push(el("button", { type: "button", class: "btn sair", disabled: semMarca,
-        onclick: function () { situacao(l, "sair", "Não contatar de novo"); } }, ["Pediu para sair"]));
-    } else if (g === "fechou") {
-      acoes.push(el("button", { type: "button", class: "btn", onclick: function () { trocarFunil("pv"); } }, ["Ver no pós-venda"]));
-    } else {
-      acoes.push(el("button", { type: "button", class: "btn", disabled: semMarca,
-        onclick: function () { situacao(l, "ativo", "De volta à cadência"); } }, ["Voltar para a cadência"]));
-    }
 
-    var ca = contatoAtivo(l);
-    var tel = !email && telefoneDestino(l) ? "+" + telefoneDestino(l) : "";
-    var destino = (email ? emailDestino(l) : tel) +
-      (ca ? " · " + [ca.nome, ca.cargo || PAPEIS[ca.papel]].filter(Boolean).join(", ") : "");
-    return el("article", { "data-detalhe": l.id, class: "card" + (l.id === "TESTE" ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : "") }, [
-      cab, chips, trilho(l),
-      l.fraseUnica ? el("p", { class: "frase", text: l.fraseUnica }) : null,
+    return el("article", { "data-detalhe": l.id, class: "lead" + (teste ? " teste" : "") + (g === "sair" || g === "encerrado" ? " apagado" : "") }, [
+      cab,
+      el("div", { class: "toque-atual" }, [
+        el("div", { class: "toque-rotulo", text: "Toque " + verToque + " · " + NOMES_TOQUE[verToque] + (email ? " · e-mail" : " · WhatsApp") }),
+        el("p", { class: "msg", text: texto }),
+        el("div", { class: "destino" + (dest ? "" : " sem") }, dest
+          ? ["Para: ", ca && ca.nome ? ca.nome + " · " : "", email ? dest : el("span", { class: "num", text: dest })]
+          : [semDestino])
+      ]),
+      acoes.length ? el("div", { class: "acoes" }, acoes) : null,
       comFoto ? blocoFoto(l, semMarca) : null,
-      detalhes,
-      destino ? el("div", { class: "destino" }, [tel ? el("span", { class: "num", text: tel }) : (email ? emailDestino(l) : ""),
-        ca ? " · " + [ca.nome, ca.cargo || PAPEIS[ca.papel]].filter(Boolean).join(", ") : ""]) : null,
-      el("div", { class: "acoes" }, acoes),
-      estado.fechando === l.id ? formFechar(l) : null,
-      l.id !== "TESTE" ? perfil(l) : null
-    ]);
+      resultado(l, g, semMarca),
+      estado.fechando === l.id ? formFechar(l) : null
+    ].concat(teste ? [] : abasDetalhe(l)));
   }
 
   function ordenarLeads(a, b) { return Regras.ordenarLeads(a, b, estado.filtro.aq.grupo, estado.meta.esperaDias); }
@@ -441,7 +498,7 @@
     var n = Math.min(e + 1, 3), t = toque(l, n);
     var teste = l.id === "TESTE";
     var pontos = pontosDe(l);
-    var link = email ? mailtoToque(l, t) : linkToque(l, t);
+    var link = !destinoDe(l, email) ? "" : email ? mailtoToque(l, t) : linkToque(l, t);
     var podeEnviar = g === "hoje" && !!link;
     var btnEnviar = el("a", { class: "btn principal enviar", href: podeEnviar ? link : null, target: podeEnviar ? "_blank" : null, rel: podeEnviar ? "noopener" : null,
       "aria-disabled": podeEnviar ? null : "true", "aria-label": "Enviar toque " + n + " para " + (l.nome || l.id),
@@ -507,6 +564,7 @@
     }
   }
   function selecionar(id, opcoes) {
+    if (estado.selecionado !== id) estado.confirmarSair = null;
     estado.selecionado = id;
     try { localStorage.setItem("central-selecionado", id); } catch (e) { /* tudo bem */ }
     render();
@@ -520,7 +578,7 @@
   function desenharDetalhe() {
     var alvo = $("detalhe");
     var l = estado.funil === "aq" && estado.selecionado ? estado.leads[estado.selecionado] : null;
-    var sig = l ? JSON.stringify([l, estado.podeMarcar, !!estado.gravando["leads/" + l.id], estado.fechando === l.id, estado.novoContato === l.id,
+    var sig = l ? JSON.stringify([l, estado.podeMarcar, !!estado.gravando["leads/" + l.id], estado.fechando === l.id, estado.novoContato === l.id, estado.abaDetalhe, estado.confirmarSair === l.id,
       estado.fotos, !!estado.downloads, estado.meta.esperaDias, Object.keys((estado.pv && estado.pv.produtos) || {}), hoje().getTime()]) : "vazio";
     if (alvo._sig === sig) return;
     var mesmo = !!l && alvo._id === l.id;
@@ -652,7 +710,7 @@
     return secao("O que faz", filhos);
   }
   function secaoGancho(l) {
-    if (!l.fraseUnica || estado.funil === "aq") return null;  // no aquecimento a frase já está no card
+    if (!l.fraseUnica) return null;
     var fonte = (l.perfil || {}).fonteFrase;
     return secao("Gancho da abordagem", [el("p", { class: "frase", text: l.fraseUnica })], fonte ? "baseado em " + fonte.toLowerCase() : "");
   }
@@ -714,7 +772,8 @@
   }
   function eventos(l) {
     var lista = (l.historico || []).slice();
-    [1, 2, 3].forEach(function (n) { if (l["enviado" + n]) lista.push({ em: l["enviado" + n], texto: "Toque " + n + " (" + NOMES_TOQUE[n].toLowerCase() + ") enviado" }); });
+    var g = grupo(l), e = etapa(l), desfazivel = e >= 1 && g !== "respondeu" && g !== "fechou" && g !== "sair";
+    [1, 2, 3].forEach(function (n) { if (l["enviado" + n]) lista.push({ em: l["enviado" + n], texto: "Toque " + n + " (" + NOMES_TOQUE[n].toLowerCase() + ") enviado", desfazer: desfazivel && n === e ? n : 0 }); });
     var enr = l.enriquecimento || {};
     if (enr.atualizadoEm) lista.push({ em: enr.atualizadoEm + "T12:00:00", texto: "Enriquecimento atualizado: " + ({ completo: "completo", parcial: "parcial", bruto: "sem enriquecimento" }[enr.status] || enr.status) });
     return lista.filter(function (x) { return x.em && !isNaN(new Date(x.em)); })
@@ -734,7 +793,8 @@
         var d = new Date(x.em);
         return el("li", { class: x.tipo === "nota" ? "nota" : null }, [
           el("time", { datetime: x.em, text: dataCurta(d) + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0") }),
-          el("span", { text: x.texto })
+          el("span", null, [x.texto, x.desfazer ? el("button", { type: "button", class: "btn desfazer-h", disabled: !estado.podeMarcar || !!estado.gravando["leads/" + l.id],
+            onclick: function () { desfazerToque(l, x.desfazer); } }, ["Desfazer"]) : null])
         ]);
       })) : el("p", { class: "vazio-p", text: "Nada registrado ainda. Envios, respostas, trocas de contato e anotações aparecem aqui." }),
       el("label", { class: "campo", for: id }, ["Nova anotação", campo]),
