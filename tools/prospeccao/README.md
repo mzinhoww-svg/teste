@@ -124,16 +124,52 @@ python3 central/seed.py                                   # lotes em central/lot
 
 ## A central
 
-Um seletor no topo troca entre **Aquecimento**, **Pós-venda** e **Leads**, cada um com placar e abas próprios.
+Um seletor no topo troca entre **Aquecimento**, **Pós-venda**, **Leads** e **Base**, cada um com placar e abas próprios.
 
 - Aquecimento: cada lead é um documento em `leads` com os três toques prontos. A página só escreve `etapa`, `enviado1..3` e `situacao` (`ativo`, `respondeu`, `fechou` ou `sair`). As abas são Para hoje, Aguardando (com a data do próximo toque), Responderam, Fecharam, Sem resposta, Saíram e Todos.
 - Pós-venda: cada cliente é um documento em `clientes` (o id é o do lead, ou `C…` no cadastro manual). A página escreve `etapa`, `pvEnviado1..7`, `pvConcluido1..7`, `dataKickoff`, `dataGravacao` e `situacao` (`ativo`, `pausado` ou `concluido`). As abas são Para hoje, Em andamento, Pausados, Concluídos e Todos.
+
+- Base: as empresas das faixas B e C da Explee (2.274) numa coleção separada, `base`, com um documento enxuto por empresa (abaixo).
 
 Nos dois funis, abrir o link do WhatsApp marca a mensagem como enviada. No e-mail, o envio é marcado no botão, porque o `mailto:` pode não abrir dentro do Artifact.
 
 ### Enriquecer base
 
 No funil Leads, o bloco **Enriquecer base** (no trilho a partir de 1024px; acima das abas no celular) pede ao Claude uma execução de `/enriquecer-leads`: buscar via treg o celular de quem decide em cada lead ainda não buscado, com teto de US$ 10 por execução. O botão grava só `status: "pedido"` e `pedidoEm` em `config/enriquecimento` (com `update`; `set` dos mesmos dois campos se o documento ainda não existe) e nunca toca em `leads`. A execução começa no próximo turno da conversa com o Claude, que confere esse documento no início de cada turno (`CLAUDE.md`). O cartão de andamento lê o documento ao vivo: pedido, estimativa (candidatos, custo, taxa), execução (lote, consultados, achados, taxa, gasto e barra), resumo final ou motivo da parada, e as três últimas execuções. Enquanto o status é `pedido`, `estimando` ou `executando`, ou sem acesso para gravar, o botão fica desativado com o motivo escrito. Só o clique avisa no `#toast`; as mudanças vindas do banco não são anunciadas.
+
+### Base (faixas B e C da Explee)
+
+A faixa A da base classificada (`scripts/classificar_base.py`) entrou como leads completos (`scripts/promover_base.py`, ids `B0001…`). As faixas B e C ficam numa lista leve, para a Letícia escolher quem entra:
+
+```bash
+python3 -m scripts.base_explee base --entrada dados/explee/base.json --tiers B,C \
+    --existentes dados/explee/existentes_docs.json --existentes dados/explee/promover.json \
+    --saida dados/explee/base_docs.json [--anteriores base_docs_antigo.json]
+```
+
+- Um documento por empresa em `base`, id `D` + 5 dígitos estável pelo domínio (sha1 do domínio; colisão vai para o próximo número livre; `--anteriores` mantém os ids de uma rodada anterior). Campos: `dominio`, `nome`, `segmento`, `tier`, `score`, `regiao`, `decisor` (`nome`, `cargo`, `persona`, `linkedin`), `pessoas`, `comLinkedin`, `campanhas`, `status` (`base`, `pedido` ou `na_cadencia`), `pedidoEm`, `leadId`, `migradoEm`. Cada um fica abaixo de 1 KB (a coleção toda, ~1 MB).
+- Quem já está em `leads` (site, `baseExplee.dominio`, `explee.dominio` ou e-mails) fica de fora.
+
+Na página, o funil **Base** (atalho `4`) só assina a coleção quando é aberto. A partir de 1024px é uma tabela (empresa, segmento, faixa, quem decide, LinkedIn, status); no celular, linhas. Mostra 100 por vez, com **Mostrar mais**. As abas são os status (Na base, Na fila do Claude, Na cadência, Todas), com a contagem; os filtros são segmento, faixa e quem decide (persona), mais a busca (empresa, domínio ou pessoa).
+
+- **Enriquecer e iniciar cadência**, em cada linha, grava só `status: "pedido"` e `pedidoEm` em `base/{id}`. A página nunca cria lead.
+- **Enriquecer e iniciar cadência dos filtrados (N)**, na barra de filtros, pede confirmação ali mesmo (sem modal) e grava até 50 por clique, um `update` por documento, um de cada vez; para no primeiro erro.
+- O aviso no `#toast` diz "N empresas na fila. Abra a conversa com o Claude para ele montar os cards."
+- Linha já pedida ou na cadência mostra o status, o botão desativado e, com `leadId`, o link **Ver lead**, que abre o lead no funil Leads.
+
+O Claude confere no início de cada turno se há documentos `pedido` (`CLAUDE.md`) e segue `.claude/skills/base-explee/SKILL.md`:
+
+```bash
+python3 -m scripts.base_explee processar --pedidos pedidos.json --existentes leads.json --saida processar.json [--base dados/explee/base.json]
+```
+
+- `processar` monta os leads completos com o mesmo mapeamento do promover (toques na versão da região, flags "base Explee" e "migrado sem enriquecer"), agora também para os segmentos que a faixa A pulava: Entidades do agro, Cooperativas agro e Gestão pública como entidade (ICP3); Revendas e agtechs, Empresas B2B médias e Indústrias regionais como médio porte (ICP5). Os ids `B` continuam depois do maior existente.
+- Devolve `novosLeads` (gravados com `set`), `baseUpdates` (`status: "na_cadencia"`, `leadId`, `migradoEm`, gravados com `update` e `if_version`) e `pulados`. Empresa que já virou lead só ganha a atualização da base.
+- Cada lead novo leva `enriquecimento.fila: true`: o próximo **Enriquecer base** busca esses primeiro, e a marca sai depois da busca.
+
+### Sem contato → Para hoje
+
+O lead migrado sem telefone fica em **Sem contato** até ter destino. Quando o enriquecimento acha o celular do decisor, ele entra em `contatos`, mas `contatoAtivo` nunca muda sozinho: a escolha é da Letícia. A linha de Sem contato passa a mostrar "Celular encontrado: <nome>" (ou "E-mail encontrado", no canal e-mail) e o botão **Usar na cadência**, a mesma ação do cartão de contato, que grava `contatoAtivo` e leva o lead para Para hoje com um clique.
 
 ### Hot leads da Explee
 
@@ -172,7 +208,7 @@ Abaixo de 1280px a busca e os seletores ficam num painel que o botão **Filtros*
 | `Enter` | Enviar o lead selecionado |
 | `c` | Copiar a mensagem |
 | `/` | Ir para a busca (abre o painel de filtros) |
-| `1` `2` `3` | Aquecimento, Pós-venda, Leads |
+| `1` `2` `3` `4` | Aquecimento, Pós-venda, Leads, Base |
 | `r` | Abrir Resultado |
 | `Esc` | Fechar o detalhe e sair da busca |
 | `?` | Mostrar e esconder a lista |
