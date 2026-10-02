@@ -61,6 +61,7 @@ Atualizado em 02/10/2026.
 
 ## Log
 
+- 02/10/2026: central em layout largo (três colunas a partir de 1280px, barra no topo, gaveta e tela cheia), atalhos de teclado, Enviar com Desfazer de 8 segundos, meta diária e painel Filtros abaixo de 1280px; documentação em "A central" no README, 62 testes de página e regras passando.
 - 02/10/2026: perfil do lead dentro do card (o que faz, o que já tem, as três mensagens da cadência, contatos, empresa, alertas) e histórico com anotações; campo `perfil` semeado nos 127 leads, central publicada na versão 5.
 - 02/10/2026: Casa dos Dados nos 104 CNPJs (local), Hunter em 35 domínios e e-mails de decisor aplicados em 13 leads da central, sem mexer em envios nem no contato da cadência.
 - 01/10/2026 23:45: enriquecimento dos 128 leads (cinco pesquisas por segmento, BrasilAPI e sites), seção Leads na central, alertas de risco separados, saudação do R0100 corrigida; banco atualizado sem mexer nos envios do R0002 e do R0003.

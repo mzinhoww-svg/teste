@@ -55,7 +55,7 @@ test("1100px: trilho vira barra no topo, fila e detalhe lado a lado", async () =
 });
 
 test("390px: uma coluna, topo fixo ≤120px, sem rolagem lateral", async () => {
-  const h = await abrir({ largura: 390, altura: 844 });
+  const h = await abrir({ largura: 390, altura: 844, leads: require("./dados.js").leads(25) });
   abertos.push(h);
   await h.page.waitForSelector("#fila [data-id]");
   assert.ok(await semRolagemLateral(h.page));
@@ -1000,4 +1000,82 @@ test("390px: topo fixo ≤120px também com a meta batida", async () => {
   const fixo = await caixa(h.page, ".fixo");
   assert.ok(fixo.h <= 120, "topo ≤120px, veio " + fixo.h);
   assert.ok(await semRolagemLateral(h.page));
+});
+
+// ---------- painel de filtros ----------
+const painelEstado = (page) => page.evaluate(() => ({
+  expandido: document.getElementById("btn-filtros").getAttribute("aria-expanded"),
+  botao: document.getElementById("btn-filtros").offsetParent !== null,
+  busca: document.getElementById("f-busca").offsetParent !== null,
+  selects: document.querySelector(".selects:not([hidden]) select").offsetParent !== null,
+  abas: document.getElementById("abas").offsetParent !== null,
+}));
+
+for (const largura of [1100, 390]) {
+  test(largura + "px: painel de filtros recolhido, o botão abre e fecha", async () => {
+    const h = await abrir({ largura, altura: 844 });
+    abertos.push(h);
+    await h.page.waitForSelector("#fila [data-id]");
+    let e = await painelEstado(h.page);
+    assert.deepEqual(e, { expandido: "false", botao: true, busca: false, selects: false, abas: true });
+    assert.equal(await h.page.getAttribute("#btn-filtros", "aria-controls"), "painel-filtros");
+    await h.page.click("#btn-filtros");
+    e = await painelEstado(h.page);
+    assert.deepEqual(e, { expandido: "true", botao: true, busca: true, selects: true, abas: true });
+    await h.page.click("#btn-filtros");
+    assert.equal((await painelEstado(h.page)).busca, false);
+    assert.ok(await semRolagemLateral(h.page));
+  });
+}
+
+test("390px: botão Filtros com alvo de 44px e topo fixo ≤120px", async () => {
+  const h = await abrir({ largura: 390, altura: 844 });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  assert.ok((await caixa(h.page, "#btn-filtros")).h >= 44);
+  assert.ok((await caixa(h.page, ".fixo")).h <= 120);
+});
+
+test("1100px: / abre o painel e foca a busca; Esc na busca vazia fecha", async () => {
+  const h = await abrir({ largura: 1100 });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  await h.page.keyboard.press("/");
+  assert.equal(await h.page.evaluate(() => document.activeElement.id), "f-busca");
+  assert.equal((await painelEstado(h.page)).expandido, "true");
+  await h.page.keyboard.press("Escape");
+  const e = await painelEstado(h.page);
+  assert.equal(e.expandido, "false");
+  assert.equal(e.busca, false);
+});
+
+test("o botão mostra quantos filtros estão ativos", async () => {
+  const h = await abrir({ largura: 1100 });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  assert.equal(await h.page.locator("#btn-filtros").innerText(), "Filtros");
+  await h.page.click("#btn-filtros");
+  await h.page.fill("#f-busca", "a");
+  assert.equal(await h.page.locator("#btn-filtros").innerText(), "Filtros · 1");
+  await h.page.click("#btn-filtros");
+  assert.equal(await h.page.locator("#btn-filtros").innerText(), "Filtros · 1");
+});
+
+test("1440px: botão Filtros escondido e filtros sempre visíveis", async () => {
+  const h = await abrir({ largura: 1440 });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  const e = await painelEstado(h.page);
+  assert.equal(e.botao, false);
+  assert.ok(e.busca && e.selects && e.abas);
+});
+
+test("O que já tem mostra o texto dos sinais, inclusive em texto simples", async () => {
+  const h = await abrir({ largura: 1440 });
+  abertos.push(h);
+  await h.page.waitForSelector("#fila [data-id]");
+  await h.page.click("#fila [data-id=R0003] .nome");
+  const txt = await h.page.locator("#detalhe").innerText();
+  assert.match(txt, /Instagram ativo/);
+  assert.match(txt, /Sem podcast/);
 });

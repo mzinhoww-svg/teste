@@ -446,7 +446,7 @@
       cont[grupo(l)]++;
       [1, 2, 3].forEach(function (n) { if (mesmoDia(l["enviado" + n], agora)) toquesHoje++; });
     });
-    placar([cont.hoje, "Para hoje"], [toquesHoje, "Toques hoje / " + metaDiaria()], [cont.hoje + cont.aguardando, "Em cadência"],
+    placar([cont.hoje, "Para hoje"], [toquesHoje, "Toques hoje"], [cont.hoje + cont.aguardando, "Em cadência"],
       [cont.respondeu + cont.fechou, "Responderam"]);
     abas(cont);
     var unicos = function (campo) {
@@ -741,7 +741,7 @@
       if (atalhosAbertos()) { e.preventDefault(); mostrarAtalhos(false); return; }
       if (t === $("f-busca")) {
         e.preventDefault();
-        if (t.value) { t.value = ""; aplicarBusca(""); } else t.blur();
+        if (t.value) { t.value = ""; aplicarBusca(""); } else { t.blur(); if (!LARGO.matches) painel(false); }
         return;
       }
       if (estado.detalheAberto) { e.preventDefault(); fecharDetalhe(); }
@@ -763,6 +763,7 @@
     if (k === "/") {
       e.preventDefault();
       if (estado.detalheAberto) fecharDetalhe();  // o trilho fica inert enquanto o detalhe está aberto
+      painel(true);
       $("f-busca").focus();
       return;
     }
@@ -884,7 +885,7 @@
     return secao("Gancho da abordagem", [el("p", { class: "frase", text: l.fraseUnica })], fonte ? "baseado em " + fonte.toLowerCase() : "");
   }
   function secaoJaTem(l) {
-    var sinais = l.sinais || [];
+    var sinais = (l.sinais || []).map(function (s) { return typeof s === "string" ? { texto: s } : s; });
     return secao("O que já tem", sinais.length ? sinais.map(function (s) {
       return el("div", { class: "pessoa" }, [el("span", { text: s.texto }), s.fonte ? el("span", { class: "fonte" }, ["Fonte: ", linkFonte(s.fonte)]) : null]);
     }) : [el("p", { class: "vazio-p", text: "A pesquisa não registrou canal, podcast ou vídeo próprio. Vale perguntar na conversa." })]);
@@ -1461,6 +1462,7 @@
     $("sel-aq").hidden = estado.funil !== "aq";
     $("sel-pv").hidden = !pv;
     $("sel-ld").hidden = !ld;
+    $("novo-cliente").hidden = !pv;
     $("novo-cliente").disabled = !estado.podeMarcar || !estado.pv;
     var leads = Object.keys(estado.leads).filter(function (k) { return k !== "TESTE"; }).map(function (k) { return estado.leads[k]; });
     var clientes = Object.keys(estado.clientes).map(function (k) { return estado.clientes[k]; });
@@ -1477,7 +1479,20 @@
     document.body.dataset.funil = estado.funil;
     if (pv) renderPV(); else if (ld) renderLD(); else renderAQ();
     desenharMeta();
+    contarFiltros();
     aplicarDetalhe();
+  }
+  // Painel de filtros: recolhido abaixo de 1280px (botão Filtros), sempre aberto no trilho largo.
+  var LARGO = window.matchMedia ? window.matchMedia("(min-width: 1280px)") : { matches: true };
+  function painelAberto() { return $("painel-filtros").classList.contains("aberto"); }
+  function painel(abrir) {
+    $("painel-filtros").classList.toggle("aberto", abrir);
+    $("btn-filtros").setAttribute("aria-expanded", String(abrir));
+  }
+  function contarFiltros() {
+    var n = $("f-busca").value.trim() ? 1 : 0;
+    Array.prototype.forEach.call(document.querySelectorAll(".selects:not([hidden]) select"), function (sel) { if (sel.value) n++; });
+    $("btn-filtros-rot").textContent = n ? "Filtros · " + n : "Filtros";
   }
   function trocarFunil(f) {
     estado.funil = f;
@@ -1495,7 +1510,10 @@
   $("f-ld-segmento").addEventListener("change", function (e) { estado.filtro.ld.segmento = e.target.value; render(); });
   var buscaTimer;
   function aplicarBusca(v) { clearTimeout(buscaTimer); estado.busca = v; render(); }
+  $("btn-filtros").addEventListener("click", function () { painel(!painelAberto()); });
+  $("painel-filtros").addEventListener("change", contarFiltros);
   $("f-busca").addEventListener("input", function (e) {
+    contarFiltros();
     clearTimeout(buscaTimer);
     var v = e.target.value;
     buscaTimer = setTimeout(function () { estado.busca = v; render(); }, 200);

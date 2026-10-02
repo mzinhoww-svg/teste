@@ -35,6 +35,9 @@
 
   <nav class="filtros" aria-label="Filtros">
     <div class="abas" id="abas"></div>
+    <button type="button" class="btn" id="btn-filtros" aria-expanded="false" aria-controls="painel-filtros"><span id="btn-filtros-rot">Filtros</span></button>
+    <button type="button" class="btn principal" id="novo-cliente" hidden>Novo cliente</button>
+    <div class="painel-filtros" id="painel-filtros">
     <label class="campo busca" for="f-busca">Buscar<input id="f-busca" type="search" placeholder="Empresa, pessoa, CNPJ ou contato" aria-keyshortcuts="/" autocomplete="off"></label>
     <div class="selects" id="sel-aq">
       <label class="campo" for="f-segmento">Segmento<select id="f-segmento"><option value="">Todos</option></select></label>
@@ -47,7 +50,7 @@
     <div class="selects dois" id="sel-pv" hidden>
       <label class="campo" for="f-etapa">Etapa<select id="f-etapa"><option value="">Todas</option></select></label>
       <label class="campo" for="f-produto">Produto<select id="f-produto"><option value="">Todos</option></select></label>
-      <button type="button" class="btn principal" id="novo-cliente">Novo cliente</button>
+    </div>
     </div>
   </nav>
   </div>

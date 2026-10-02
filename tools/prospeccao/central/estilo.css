@@ -112,8 +112,11 @@
                  border-radius: 999px; padding: 6px 12px; font-size: var(--t14); cursor: pointer; }
   .abas button[aria-pressed="true"] { background: var(--navy); color: var(--creme); border-color: var(--navy); }
   .abas .n { font-family: var(--mono); font-variant-numeric: tabular-nums; margin-left: 4px; }
+  .painel-filtros { display: none; gap: 8px; }
+  .painel-filtros.aberto { display: grid; }
+  #btn-filtros[aria-expanded="true"] { background: var(--navy); color: var(--creme); border-color: var(--navy); }
   .selects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; align-items: end; }
-  .selects.dois { grid-template-columns: repeat(2, minmax(0, 1fr)) auto; }
+  .selects.dois { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   label.campo { display: grid; gap: 3px; font: 500 var(--t12)/1.2 var(--sans); color: var(--suave); }
   label.campo select, label.campo input { width: 100%; padding: 7px 8px; min-height: 44px; border: 1px solid var(--borda-campo); border-radius: 8px;
                     background: var(--papel); color: var(--navy); font: var(--t14) var(--sans); min-width: 0; }
@@ -329,7 +332,6 @@
     .tempo li { grid-template-columns: 1fr; gap: 0; }
     .selects, .selects.dois { grid-template-columns: 1fr 1fr; }
     .funis button { padding-inline: 4px; }
-    .selects.dois .btn { grid-column: 1 / -1; }
     .grade { grid-template-columns: 1fr; }
     .btn.sair { margin-left: 0; }
   }
@@ -359,8 +361,11 @@
     .resumo-topo { flex: 1 1 280px; min-width: 260px; }
     .placar b { font-size: var(--t20); }
     .aviso { margin: 0; flex-basis: 100%; }
-    .filtros { margin: 0; flex: 2 1 100%; grid-template-columns: auto minmax(0, 1fr); align-items: end; gap: 12px; }
-    .filtros .abas { flex-wrap: wrap; }
+    .filtros { margin: 0; flex: 2 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+    .filtros .abas { flex-wrap: wrap; flex: 1 1 auto; }
+    .painel-filtros.aberto { display: flex; flex: 1 1 100%; flex-wrap: wrap; align-items: end; gap: 8px 12px; }
+    .painel-filtros .busca { flex: 1 1 260px; }
+    .painel-filtros .selects { flex: 2 1 420px; }
   }
   /* ===== >=1280px: trilho, fila e detalhe em três colunas, cada uma com a própria rolagem ===== */
   @media (min-width: 1280px) {
@@ -377,5 +382,7 @@
     .abas { flex-direction: column; flex-wrap: nowrap; }
     .abas button { border-radius: 8px; display: flex; justify-content: space-between; min-height: 40px; }
     .selects, .selects.dois { grid-template-columns: 1fr; }
+    .painel-filtros { display: grid; gap: 12px; }
+    #btn-filtros { display: none; }
   }
   .resumo a, .pessoa .dado { color: var(--ouro-texto); }

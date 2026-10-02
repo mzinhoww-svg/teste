@@ -103,7 +103,7 @@ O cliente entra no pós-venda pelo botão **Fechou negócio** de um lead do aque
 | `msg/checks.py` | Checagem automática e rubrica de tom (termos proibidos do manual comercial, preço, números, saudação) |
 | `msg/personal_v1.py` | Saudação, nome curto e frase única de cada lead (gera `msg/personal.json`) |
 | `msg/gerar.py` | Gera e checa as mensagens e exporta a planilha |
-| `central/index.html` | Central de disparo (Artifact com banco `db`), publicada em `central/url.txt` |
+| `central/index.html`, `estilo.css`, `regras.js`, `app.js` | Central de disparo (Artifact com banco `db`), publicada em `central/url.txt` |
 | `central/seed.py` | Lotes de escrita para semear o banco da central |
 | `status.md` | Totais, pontos de atenção e log da última execução |
 
@@ -130,3 +130,46 @@ Um seletor no topo troca entre **Aquecimento**, **Pós-venda** e **Leads**, cada
 - Pós-venda: cada cliente é um documento em `clientes` (o id é o do lead, ou `C…` no cadastro manual). A página escreve `etapa`, `pvEnviado1..7`, `pvConcluido1..7`, `dataKickoff`, `dataGravacao` e `situacao` (`ativo`, `pausado` ou `concluido`). As abas são Para hoje, Em andamento, Pausados, Concluídos e Todos.
 
 Nos dois funis, abrir o link do WhatsApp marca a mensagem como enviada. No e-mail, o envio é marcado no botão, porque o `mailto:` pode não abrir dentro do Artifact.
+
+### Publicação
+
+A central são quatro arquivos que sobem juntos no mesmo Artifact: `index.html` é a página e `estilo.css`, `regras.js` e `app.js` vão em `files`, mantendo `fotos/`. Publicar só o HTML deixa a página sem estilo e sem lógica.
+
+### Layouts por largura
+
+- 1280px ou mais: três colunas (trilho de 240px com funis, meta e filtros, fila de 340 a 420px e detalhe), cada uma com a própria rolagem, até 1600px.
+- 1024 a 1279px: o trilho vira uma barra no topo (funis, meta, abas e botão **Filtros**); fila e detalhe ficam lado a lado.
+- 760 a 1023px: só a fila; o detalhe abre em gaveta pela direita, com até 560px.
+- Abaixo de 760px: uma coluna, detalhe em tela cheia com Voltar e alvos de toque de 44px. Só o seletor de funis e a linha da meta ficam fixos no topo.
+
+Abaixo de 1280px a busca e os seletores ficam num painel que o botão **Filtros** abre; com filtro ativo o botão mostra a contagem ("Filtros · 2"). As abas de status ficam sempre à vista.
+
+### Atalhos
+
+| Tecla | Ação |
+| --- | --- |
+| `j` / `k` | Próximo e anterior na fila |
+| `Enter` | Enviar o lead selecionado |
+| `c` | Copiar a mensagem |
+| `/` | Ir para a busca (abre o painel de filtros) |
+| `1` `2` `3` | Aquecimento, Pós-venda, Leads |
+| `r` | Abrir Resultado |
+| `Esc` | Fechar o detalhe e sair da busca |
+| `?` | Mostrar e esconder a lista |
+
+Dentro de campos de texto os atalhos ficam desligados.
+
+### Enviar com Desfazer
+
+Enviar (botão ou Enter) abre o WhatsApp ou o e-mail, marca o toque, avança para o próximo da fila e mostra "Toque N marcado · Desfazer" por 8 segundos. Desfazer volta o toque e a seleção, e só age se aquele ainda for o último toque. Se a gravação falhar, o toque não fica marcado e a seleção não avança.
+
+### Meta do dia
+
+A meta são 20 toques por dia (campo `metaDiaria` em `config/meta`). O placar conta os toques marcados hoje, sem o card de teste, e a linha da meta mostra "N de 20 toques".
+
+### Testes da central
+
+```bash
+NODE_PATH=$(npm root -g) node --test 'tools/prospeccao/tests/central/*.test.js'   # na raiz do repositório; usa o Playwright global
+cd tools/prospeccao && python3 -m pytest -q
+```

@@ -30,7 +30,7 @@ function base(num, sobre) {
     socios: [{ nome: "Sócia Modelo " + num, qualificacao: "Sócio-Administrador" }],
     decisores: [{ nome: "Ana Souza", cargo: "Diretora", fonte: "https://modelo" + num + ".example/equipe", confianca: "alta" }],
     contatos: [{ id: "k1", papel: "decisor", nome: "ANA SOUZA", cargo: "Diretora", telefone: "5565911110" + x, whatsapp: "5565911110" + x, email: "ana" + num + "@modelo.example", fonte: "site", confianca: "alta" }],
-    sinais: ["Instagram ativo", "Sem podcast"], alertas: [], pendencias: [],
+    sinais: [{ texto: "Instagram ativo", fonte: "https://instagram.com/exemplo" }, { texto: "Sem podcast", fonte: "" }], alertas: [], pendencias: [],
     enriquecimento: { status: "completo", atualizadoEm: dia(3), contatoSugerido: "k1" },
     historico: [],
   };
