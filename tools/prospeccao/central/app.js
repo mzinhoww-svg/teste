@@ -446,9 +446,8 @@
       cont[grupo(l)]++;
       [1, 2, 3].forEach(function (n) { if (mesmoDia(l["enviado" + n], agora)) toquesHoje++; });
     });
-    var meta = Number(estado.meta.metaDiaria) || 20;
-    placar([cont.hoje, "Para hoje"], [toquesHoje, "Toques hoje / " + meta], [cont.hoje + cont.aguardando, "Em cadência"],
-      [cont.respondeu + cont.fechou, "Responderam"], toquesHoje / meta, toquesHoje + "/" + meta + " toques · " + cont.hoje + " para hoje");
+    placar([cont.hoje, "Para hoje"], [toquesHoje, "Toques hoje / " + (Number(estado.meta.metaDiaria) || 20)], [cont.hoje + cont.aguardando, "Em cadência"],
+      [cont.respondeu + cont.fechou, "Responderam"]);
     abas(cont);
     var unicos = function (campo) {
       var vs = {};
@@ -1071,8 +1070,7 @@
       if (l.enriquecimento && l.enriquecimento.contatoSugerido) direto++;
       if (!(l.empresa && l.empresa.cnpj)) semCnpj++;
     });
-    placar([cont.completo, "Completos"], [decisor, "Com quem lidera"], [direto, "Contato direto"], [semCnpj, "Sem CNPJ"],
-      todos.length ? cont.completo / todos.length : 0);
+    placar([cont.completo, "Completos"], [decisor, "Com quem lidera"], [direto, "Contato direto"], [semCnpj, "Sem CNPJ"]);
     abas(cont);
     var segs = {};
     todos.forEach(function (l) { if (l.segmento) segs[l.segmento] = 1; });
@@ -1371,7 +1369,7 @@
       }
     });
     placar([cont.hoje, "Para hoje"], [cont.hoje + cont.andamento, "Clientes ativos"], [gravacoes, "Gravações em 7 dias"],
-      [cont.concluido, "Concluídos"], null);
+      [cont.concluido, "Concluídos"]);
     abas(cont);
     var etapas = etapasPV().map(function (e) { return e.n + " · " + e.nome; });
     preencherSelect("f-etapa", etapas);
@@ -1411,11 +1409,27 @@
   }
 
   // ================= comum =================
-  function placar(a, b, c, d, progresso, linha) {
+  function placar(a, b, c, d) {
     [a, b, c, d].forEach(function (x, i) { $("p" + (i + 1)).textContent = x[0]; $("p" + (i + 1) + "l").textContent = x[1]; });
-    $("linha-meta").textContent = linha || (a[0] + " " + a[1].toLowerCase() + " · " + b[0] + " " + b[1].toLowerCase());
-    $("barra").style.transform = "scaleX(" + (progresso == null ? 0 : Math.min(1, progresso)) + ")";
-    $("barra").parentNode.hidden = progresso == null;
+  }
+  // Meta do dia: toques de aquecimento enviados hoje (sem o card TESTE), em qualquer funil. Sem animação nem confete.
+  function desenharMeta() {
+    var agora = new Date(), n = 0, hoje = 0;
+    Object.keys(estado.leads).forEach(function (k) {
+      if (k === "TESTE") return;
+      var l = estado.leads[k];
+      if (grupo(l) === "hoje") hoje++;
+      [1, 2, 3].forEach(function (i) { if (mesmoDia(l["enviado" + i], agora)) n++; });
+    });
+    var meta = Number(estado.meta.metaDiaria) || 20, batida = n >= meta;
+    var texto = batida ? "Meta do dia batida · " + hoje + " ainda vencem hoje" : n + " de " + meta + " toques · " + hoje + " para hoje";
+    var barra = $("barra");
+    barra.max = meta;
+    barra.value = Math.min(n, meta);
+    barra.classList.toggle("batida", batida);
+    $("meta-texto").textContent = texto;
+    $("meta-texto").classList.toggle("batida", batida);
+    $("linha-meta").textContent = texto;
   }
   function abas(cont) {
     var f = estado.filtro[estado.funil], nav = $("abas");
@@ -1461,6 +1475,7 @@
     }
     document.body.dataset.funil = estado.funil;
     if (pv) renderPV(); else if (ld) renderLD(); else renderAQ();
+    desenharMeta();
     aplicarDetalhe();
   }
   function trocarFunil(f) {

@@ -64,7 +64,7 @@ test("390px: uma coluna, topo fixo ≤120px, sem rolagem lateral", async () => {
   await h.page.evaluate(() => window.scrollTo(0, 600));
   const fixo = await caixa(h.page, ".fixo");
   assert.ok(fixo.y <= 1 && fixo.h <= 120, "topo fixo colado e ≤120px, veio y=" + fixo.y + " h=" + fixo.h);
-  assert.match(await h.page.locator(".linha-meta").innerText(), /^\d+\/20 toques · \d+ para hoje$/);
+  assert.match(await h.page.locator(".linha-meta").innerText(), /^\d+ de 20 toques · \d+ para hoje$/);
   const f = await caixa(h.page, "#fila");
   assert.ok(f.w <= 390);
 });
@@ -182,6 +182,7 @@ test("TESTE fica no topo e fora da meta", async () => {
   }
   await h.empurrar("leads/TESTE", { etapa: 1, enviado1: agoraIso() });
   assert.equal(await h.page.locator("#p2").innerText(), "0", "toque do TESTE não conta");
+  assert.equal(await h.page.getAttribute("#barra", "value"), "0", "barra da meta também ignora o TESTE");
   assert.equal(await h.page.locator("#p1").innerText(), "4");
   assert.equal(await h.page.locator('#abas [data-grupo="todos"] .n').innerText(), "7");
 });
@@ -954,4 +955,28 @@ test("/ com a gaveta aberta fecha o detalhe e foca a busca", async () => {
   await h.page.keyboard.press("/");
   assert.equal(await h.page.locator("#detalhe.aberto").count(), 0);
   assert.equal(await h.page.evaluate(() => document.activeElement.id), "f-busca");
+});
+
+// ---------- Task 10: meta do dia ----------
+test("meta mostra N de 20 e muda ao bater", async () => {
+  const dados = require("./dados.js");
+  const hoje = new Date().toISOString();
+  const leads = [dados.leads(0)[0]];
+  for (let i = 1; i <= 19; i++) leads.push(dados.leads(i)[i]);
+  for (let i = 1; i <= 19; i++) Object.assign(leads[i].data, { etapa: 1, enviado1: hoje });
+  const novo = dados.leads(20)[20]; // ainda sem toque: vence hoje
+  leads.push(novo);
+  const h = await abrirEnvio({ leads });
+  assert.match(await h.page.locator("#meta-texto").textContent(), /^19 de 20 toques · 1 para hoje$/);
+  const barra = await h.page.evaluate(() => { const b = document.querySelector("progress#barra"); return { max: b.max, v: b.value, h: b.getBoundingClientRect().height, nome: b.getAttribute("aria-label"), batida: b.classList.contains("batida") }; });
+  assert.deepEqual(barra, { max: 20, v: 19, h: 8, nome: "Meta do dia", batida: false });
+  await h.page.click("#fila [data-id=" + novo.id + "] a.enviar");
+  await h.page.waitForFunction(() => /Meta do dia batida/.test(document.getElementById("meta-texto").textContent));
+  assert.match(await h.page.locator("#meta-texto").textContent(), /^Meta do dia batida · \d+ ainda vencem hoje$/);
+  assert.equal(await h.page.evaluate(() => document.querySelector("progress#barra").classList.contains("batida")), true);
+  assert.equal(await h.page.evaluate(() => document.getElementById("linha-meta").textContent), await h.page.locator("#meta-texto").textContent());
+  // vale em qualquer funil
+  await h.page.click("#f-ld");
+  assert.match(await h.page.locator("#meta-texto").textContent(), /^Meta do dia batida/);
+  assert.deepEqual(h.erros.map(String), []);
 });
