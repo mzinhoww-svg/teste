@@ -1,0 +1,112 @@
+<title>Reiners · Central de disparo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="estilo.css">
+
+<div class="central">
+  <div id="trilho" class="trilho">
+  <header class="topo">
+    <div class="marca">
+      <h1>Reiners Media<small>Central de disparo</small></h1>
+      <div class="marca-pe">
+        <span id="conexao" class="conexao">Conectando</span>
+        <button type="button" class="btn atalhos-dica" id="btn-atalhos" aria-controls="atalhos" aria-expanded="false" aria-keyshortcuts="?">Atalhos: <kbd>?</kbd></button>
+      </div>
+    </div>
+  </header>
+  <div class="fixo">
+    <div class="funis" role="group" aria-label="Funil">
+      <button type="button" id="f-aq" data-funil="aq" aria-pressed="true"><span class="rot-longo">Aquecimento</span><span class="rot-curto" aria-hidden="true">Aquec.</span> <span class="n" id="n-aq"></span></button>
+      <button type="button" id="f-pv" data-funil="pv" aria-pressed="false"><span class="rot-longo">Pós-venda</span><span class="rot-curto" aria-hidden="true">Pós</span> <span class="n" id="n-pv"></span></button>
+      <button type="button" id="f-ld" data-funil="ld" aria-pressed="false">Leads <span class="n" id="n-ld"></span></button>
+      <button type="button" id="f-bs" data-funil="bs" aria-pressed="false">Base <span class="n" id="n-bs"></span></button>
+    </div>
+    <p class="linha-meta" id="linha-meta"></p>
+  </div>
+  <div class="resumo-topo">
+    <div class="placar">
+      <div><b id="p1">0</b><span id="p1l">Para hoje</span></div>
+      <div><b id="p2">0</b><span id="p2l">Toques hoje</span></div>
+      <div><b id="p3">0</b><span id="p3l">Em cadência</span></div>
+      <div><b id="p4">0</b><span id="p4l">Responderam</span></div>
+    </div>
+    <progress id="barra" class="barra" max="20" value="0" aria-label="Meta do dia"></progress>
+    <p class="meta-texto" id="meta-texto"></p>
+  </div>
+
+  <section id="enriq" class="enriq" aria-label="Enriquecer base" hidden>
+    <p class="enriq-texto">Busca o celular de quem decide em cada lead ainda não buscado (via treg). Teto de US$ 10 por execução.</p>
+    <button type="button" class="btn principal" id="btn-enriq">Enriquecer base</button>
+    <p class="enriq-motivo" id="enriq-motivo" hidden></p>
+    <div class="enriq-status" id="enriq-status" hidden></div>
+    <div class="enriq-hist" id="enriq-hist" hidden></div>
+  </section>
+
+  <div id="aviso" class="aviso" hidden></div>
+
+  <nav class="filtros" aria-label="Filtros">
+    <div class="abas" id="abas"></div>
+    <button type="button" class="btn" id="btn-filtros" aria-expanded="false" aria-controls="painel-filtros"><span id="btn-filtros-rot">Filtros</span></button>
+    <button type="button" class="btn principal" id="novo-cliente" hidden>Novo cliente</button>
+    <div class="bs-lote" id="bs-lote" role="group" aria-label="Pedir os filtrados" hidden></div>
+    <div class="painel-filtros" id="painel-filtros">
+    <label class="campo busca" for="f-busca">Buscar<input id="f-busca" type="search" placeholder="Empresa, pessoa ou CNPJ" aria-keyshortcuts="/" autocomplete="off"></label>
+    <div class="selects" id="sel-aq">
+      <label class="campo" for="f-segmento">Segmento<select id="f-segmento"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-faixa">Faixa<select id="f-faixa"><option value="">Todas</option></select></label>
+      <label class="campo" for="f-canal">Canal<select id="f-canal"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-pais">País<select id="f-pais"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-uf">Estado<select id="f-uf"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-cidade">Cidade<select id="f-cidade"><option value="">Todas</option></select></label>
+    </div>
+    <div class="selects dois" id="sel-ld" hidden>
+      <label class="campo" for="f-ld-segmento">Segmento<select id="f-ld-segmento"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-ld-pais">País<select id="f-ld-pais"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-ld-uf">Estado<select id="f-ld-uf"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-ld-cidade">Cidade<select id="f-ld-cidade"><option value="">Todas</option></select></label>
+    </div>
+    <div class="selects" id="sel-bs" hidden>
+      <label class="campo" for="f-bs-segmento">Segmento<select id="f-bs-segmento"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-bs-faixa">Faixa<select id="f-bs-faixa"><option value="">Todas</option></select></label>
+      <label class="campo" for="f-bs-persona">Quem decide<select id="f-bs-persona"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-bs-contato">Contato da empresa<select id="f-bs-contato"><option value="">Todos</option><option value="sim">Com contato da empresa</option></select></label>
+      <label class="campo" for="f-bs-pais">País<select id="f-bs-pais"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-bs-uf">Estado<select id="f-bs-uf"><option value="">Todos</option></select></label>
+      <label class="campo" for="f-bs-cidade">Cidade<select id="f-bs-cidade"><option value="">Todas</option></select></label>
+    </div>
+    <div class="selects dois" id="sel-pv" hidden>
+      <label class="campo" for="f-etapa">Etapa<select id="f-etapa"><option value="">Todas</option></select></label>
+      <label class="campo" for="f-produto">Produto<select id="f-produto"><option value="">Todos</option></select></label>
+    </div>
+    </div>
+  </nav>
+  </div>
+
+  <main id="fila" class="fila">
+    <div class="vazio"><b>Carregando</b>Conectando ao banco da central.</div>
+  </main>
+
+  <button type="button" id="veu" class="veu" tabindex="-1" aria-label="Fechar detalhe" hidden></button>
+  <aside id="detalhe" class="detalhe" aria-label="Detalhe do lead">
+    <div class="vazio"><b>Nenhum lead selecionado</b>Selecione um lead na fila para ver a mensagem, o perfil e o histórico.</div>
+  </aside>
+</div>
+<div id="atalhos" role="dialog" aria-label="Atalhos" hidden>
+  <div class="atalhos-topo"><b>Atalhos</b><button type="button" class="btn" id="atalhos-fechar">Fechar</button></div>
+  <dl>
+    <div><dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>Próximo e anterior na fila</dd></div>
+    <div><dt><kbd>Enter</kbd></dt><dd>Enviar o lead selecionado</dd></div>
+    <div><dt><kbd>c</kbd></dt><dd>Copiar a mensagem</dd></div>
+    <div><dt><kbd>/</kbd></dt><dd>Ir para a busca</dd></div>
+    <div><dt><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></dt><dd>Aquecimento, Pós-venda, Leads, Base</dd></div>
+    <div><dt><kbd>r</kbd></dt><dd>Abrir Resultado</dd></div>
+    <div><dt><kbd>Esc</kbd></dt><dd>Fechar o detalhe e sair da busca</dd></div>
+    <div><dt><kbd>?</kbd></dt><dd>Mostrar e esconder esta lista</dd></div>
+  </dl>
+  <p>Os atalhos ficam desligados dentro de campos de texto.</p>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="regras.js"></script>
+<script src="app.js"></script>

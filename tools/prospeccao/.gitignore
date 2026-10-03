@@ -1,0 +1,6 @@
+__pycache__/
+.pytest_cache/
+*.xlsx
+dados/
+central/lotes/
+icp*/

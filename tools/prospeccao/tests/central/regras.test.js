@@ -1,0 +1,210 @@
+const { test } = require("node:test"); const assert = require("node:assert");
+const R = require("../../central/regras.js");
+const ESPERA = { "1": 0, "2": 4, "3": 6 };
+test("grupo: toque 1 vence hoje; toque 2 só 4 dias depois", () => {
+  const agora = new Date("2026-10-02T12:00:00");
+  const tel = { telefone: "5565999991111" };
+  assert.equal(R.grupo({ etapa: 0, situacao: "ativo", ...tel }, ESPERA, agora), "hoje");
+  assert.equal(R.grupo({ etapa: 1, situacao: "ativo", enviado1: "2026-10-01T10:00:00", ...tel }, ESPERA, agora), "aguardando");
+  assert.equal(R.grupo({ etapa: 1, situacao: "ativo", enviado1: "2026-09-28T10:00:00", ...tel }, ESPERA, agora), "hoje");
+  assert.equal(R.grupo({ etapa: 3, situacao: "ativo" }, ESPERA, agora), "encerrado");
+});
+test("telefoneFormatado", () => {
+  assert.equal(R.telefoneFormatado("5565999991111"), "+55 (65) 99999-1111");
+  assert.equal(R.telefoneFormatado("556530000000"), "+55 (65) 3000-0000");
+  assert.equal(R.telefoneFormatado(""), "");
+});
+test("proximoDoDia pula para o próximo que vence hoje e volta ao início", () => {
+  const fila = [{ id: "A", g: "hoje" }, { id: "B", g: "aguardando" }, { id: "C", g: "hoje" }];
+  const g = x => x.g;
+  assert.equal(R.proximoDoDia(fila, "A", g), "C");
+  assert.equal(R.proximoDoDia(fila, "C", g), "A");
+  assert.equal(R.proximoDoDia([{ id: "A", g: "hoje" }], "A", g), null);
+});
+test("proximoDoDia nunca volta para o card TESTE", () => {
+  const g = x => x.g;
+  const fila = [{ id: "TESTE", g: "hoje" }, { id: "A", g: "hoje" }, { id: "B", g: "aguardando" }, { id: "C", g: "hoje" }];
+  assert.equal(R.proximoDoDia(fila, "C", g), "A", "o último de hoje volta ao primeiro lead real, não ao TESTE");
+  assert.equal(R.proximoDoDia([{ id: "TESTE", g: "hoje" }, { id: "A", g: "hoje" }], "A", g), null);
+  assert.equal(R.proximoDoDia(fila, "TESTE", g), "A");
+});
+test("comSaudacao troca a saudação pelo primeiro nome do contato ativo", () => {
+  const l = { saudacao: "pessoal da Clínica", contatoAtivo: "k1", contatos: [{ id: "k1", nome: "ANA SOUZA" }] };
+  assert.equal(R.comSaudacao(l, "Oi, pessoal da Clínica,\n\nTexto"), "Oi, Ana,\n\nTexto");
+});
+test("ordenarClientes manda pausados para o fim", () => {
+  const etapas = [{ quando: "imediato" }];
+  const ativo = { id: "A", etapa: 1, situacao: "ativo", criadoEm: "2026-10-01" };
+  const pausado = { id: "P", etapa: 1, situacao: "pausado", criadoEm: "2026-09-01" };
+  assert.deepEqual([pausado, ativo].sort((a, b) => R.ordenarClientes(a, b, etapas)).map(c => c.id), ["A", "P"]);
+});
+test("registrar guarda as últimas 100 linhas", () => {
+  const h = Array.from({ length: 100 }, (_, i) => ({ em: "x", texto: String(i) }));
+  const novo = R.registrar(h, "fim", null, new Date("2026-10-02T12:00:00Z"));
+  assert.equal(novo.length, 100); assert.equal(novo[99].texto, "fim"); assert.equal(novo[0].texto, "1");
+});
+test("casaBusca não junta dígitos de campos diferentes", () => {
+  const l = { id: "R0012", telefone: "5565900001", empresa: { cnpj: "11.222.333/0001-44" }, contatos: [{ telefone: "5565988880" }] };
+  assert.equal(R.casaBusca(l, "00129"), false, "fim do id + início do telefone");
+  assert.equal(R.casaBusca(l, "0012"), true);
+  assert.equal(R.casaBusca(l, "11.222.333"), true);
+  assert.equal(R.casaBusca(l, "988880"), true);
+});
+test("enriquecimento: dinheiro em micro-dólar, taxa e motivo de parada", () => {
+  assert.equal(R.dinheiroMicro(130000), "US$ 0,13");
+  assert.equal(R.dinheiroMicro(10000000), "US$ 10,00");
+  assert.equal(R.dinheiroMicro(1234560000), "US$ 1.234,56");
+  assert.equal(R.dinheiroMicro(null), "US$ 0,00");
+  assert.equal(R.porcento(0.333), "33%");
+  assert.equal(R.porcento(35), "35%");
+  assert.equal(R.porcento(null), "—");
+  assert.equal(R.motivoParada("saldo insuficiente"), "Parou: saldo insuficiente. Precisa recarregar o treg.");
+  assert.match(R.motivoParada("acerto abaixo de 30%"), /abaixo de 30%/);
+  assert.equal(R.motivoParada("outra coisa"), "Parou: outra coisa.");
+  assert.ok(R.enriqOcupado("pedido") && R.enriqOcupado("estimando") && R.enriqOcupado("executando"));
+  assert.ok(!R.enriqOcupado("ocioso") && !R.enriqOcupado("concluido") && !R.enriqOcupado("parado") && !R.enriqOcupado(undefined));
+});
+test("grupo: lead na cadência sem destino vai para semcontato até ganhar telefone ou e-mail", () => {
+  const agora = new Date("2026-10-02T12:00:00");
+  const migrado = { etapa: 0, canal: "WhatsApp", telefone: "", email: "", contatoAtivo: null,
+    contatos: [], flags: ["base Explee", "migrado sem enriquecer"] };
+  assert.equal(R.grupo(migrado, ESPERA, agora), "semcontato");
+  assert.equal(R.grupo(Object.assign({}, migrado, { situacao: "ativo" }), ESPERA, agora), "semcontato");
+  assert.equal(R.grupo(Object.assign({}, migrado, { email: "a@b.example" }), ESPERA, agora), "semcontato", "e-mail não serve ao WhatsApp");
+  // o enriquecimento acha o celular, mas só vale quando vira destino (contato ativo ou telefone do lead)
+  const achado = Object.assign({}, migrado, { contatos: [{ id: "k1", papel: "decisor", telefone: "5511988887777" }] });
+  assert.equal(R.grupo(achado, ESPERA, agora), "semcontato");
+  assert.equal(R.grupo(Object.assign({}, achado, { contatoAtivo: "k1" }), ESPERA, agora), "hoje");
+  assert.equal(R.grupo(Object.assign({}, migrado, { telefone: "5565999991111" }), ESPERA, agora), "hoje");
+  assert.equal(R.grupo(Object.assign({}, migrado, { telefone: "5565999991111", etapa: 1, enviado1: "2026-10-01T10:00:00" }), ESPERA, agora), "aguardando");
+  // canal E-mail: vale o e-mail do lead ou do contato ativo
+  const email = Object.assign({}, migrado, { canal: "E-mail" });
+  assert.equal(R.grupo(email, ESPERA, agora), "semcontato");
+  assert.equal(R.grupo(Object.assign({}, email, { email: "a@b.example" }), ESPERA, agora), "hoje");
+  assert.equal(R.grupo(Object.assign({}, email, { contatoAtivo: "k1", contatos: [{ id: "k1", email: "k@b.example" }] }), ESPERA, agora), "hoje");
+  // fora da cadência o destino não importa
+  for (const s of ["respondeu", "fechou", "sair"]) assert.equal(R.grupo(Object.assign({}, migrado, { situacao: s }), ESPERA, agora), s);
+  assert.equal(R.grupo(Object.assign({}, migrado, { etapa: 3 }), ESPERA, agora), "encerrado");
+});
+test("grupo: as fixtures dos testes continuam nos mesmos grupos", () => {
+  const dados = require("./dados.js");
+  const agora = new Date();
+  const g = Object.fromEntries(dados.leads(7).map((d) => [d.id, R.grupo(d.data, ESPERA, agora)]));
+  assert.deepEqual(g, { TESTE: "hoje", R0001: "hoje", R0002: "aguardando", R0003: "hoje", R0004: "hoje",
+    R0005: "respondeu", R0006: "sair", R0007: "hoje" });
+  assert.equal(R.grupo(dados.explee(1).data, ESPERA, agora), "respondeu");
+});
+test("linkToque monta o link quando o toque foi semeado sem link e o telefone chegou depois", () => {
+  const l = { telefone: "5565999991111", toques: [{ n: 1, mensagem: "Oi, Paulo.", waLink: "" }] };
+  assert.equal(R.linkToque(l, l.toques[0]), "https://wa.me/5565999991111?text=Oi%2C%20Paulo.");
+  assert.equal(R.linkToque({ telefone: "", toques: [] }, { n: 1, mensagem: "x", waLink: "" }), "");
+});
+test("Base: status, busca sem acento, filtros, ordem e lote com teto de 50", () => {
+  const d = (id, sobre) => Object.assign({ id, nome: "Empresa " + id, dominio: id.toLowerCase() + ".example", segmento: "Entidades do agro", tier: "B", score: 50,
+    decisor: { nome: "Paulo Pereira", cargo: "Presidente", persona: "decisor", linkedin: "" }, status: "base" }, sobre || {});
+  assert.equal(R.statusBase({}), "base");
+  assert.equal(R.statusBase({ status: "pedido" }), "pedido");
+  assert.ok(R.casaBase(d("D1", { nome: "Associação Agrícola" }), "agricola"));
+  assert.ok(R.casaBase(d("D1"), "PEREIRA"));
+  assert.ok(R.casaBase(d("D1"), "d1.example"));
+  assert.ok(!R.casaBase(d("D1"), "zzz"));
+  const lista = [d("D1", { tier: "C", score: 90 }), d("D2", { score: 40 }), d("D3", { score: 60, status: "pedido" }),
+    d("D4", { segmento: "Gestão pública", decisor: { persona: "comunicacao" } })].sort(R.ordenarBase);
+  assert.deepEqual(lista.map((x) => x.id), ["D3", "D4", "D2", "D1"]);
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "base" }, "").map((x) => x.id), ["D4", "D2", "D1"]);
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", faixa: "C" }, "").map((x) => x.id), ["D1"]);
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", segmento: "Gestão pública" }, "").map((x) => x.id), ["D4"]);
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", persona: "comunicacao" }, "").map((x) => x.id), ["D4"]);
+  const muitos = Array.from({ length: 80 }, (_, i) => d("D" + (100 + i), i % 10 === 0 ? { status: "pedido" } : {}));
+  const lote = R.loteBase(muitos);
+  assert.equal(lote.total, 72);
+  assert.equal(lote.ids.length, 50);
+  assert.ok(!lote.ids.includes("D100"));
+});
+test("contatoEncontrado: decisor com telefone ainda não escolhido; nada se já é o ativo", () => {
+  const l = { canal: "WhatsApp", contatos: [{ id: "k1", papel: "geral", telefone: "5565911112222" }, { id: "k2", papel: "decisor", nome: "Paulo", telefone: "5565988887777" }] };
+  assert.equal(R.contatoEncontrado(l).id, "k2");
+  assert.equal(R.contatoEncontrado(Object.assign({}, l, { contatoAtivo: "k2" })).id, "k1");
+  assert.equal(R.contatoEncontrado({ canal: "WhatsApp", contatos: [{ id: "k1", papel: "decisor", telefone: "1", invalido: true }] }), null);
+  assert.equal(R.contatoEncontrado({ canal: "E-mail", contatos: [{ id: "k1", papel: "decisor", telefone: "5565988887777" }] }), null);
+});
+test("Base: sem_cadencia é status próprio, fora do lote e do filtro Na base", () => {
+  const lista = [{ id: "D1", status: "sem_cadencia", motivo: "x" }, { id: "D2", status: "base" }, { id: "D3", status: "qualquer" }];
+  assert.equal(R.statusBase(lista[0]), "sem_cadencia");
+  assert.equal(R.statusBase(lista[2]), "base");
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "sem_cadencia" }, "").map((d) => d.id), ["D1"]);
+  assert.deepEqual(R.loteBase(lista).ids, ["D2", "D3"]);
+});
+
+test("contato da empresa (site): lead só com ele segue em semcontato até Usar na cadência; filtro da Base", () => {
+  const geral = { id: "k1", papel: "geral", nome: "", cargo: "Contato da empresa (site)", telefone: "5565999991111", whatsapp: "sim", email: "", fonte: "https://a.example/contato", confianca: "média" };
+  const l = { id: "B0001", canal: "WhatsApp", telefone: "", email: "", contatoAtivo: null, etapa: 0, contatos: [geral] };
+  const agora = new Date("2026-10-02T12:00:00");
+  assert.equal(R.grupo(l, {}, agora), "semcontato", "o contato achado não tira o lead da aba");
+  assert.equal(R.contatoEncontrado(l).id, "k1");
+  assert.equal(R.grupo(Object.assign({}, l, { contatoAtivo: "k1" }), {}, agora), "hoje");
+  const lista = [{ id: "D1", contatoEmpresa: { whatsapp: "", telefone: "556530000000", email: "", fonte: "https://a.example" } },
+    { id: "D2" }, { id: "D3", contatoEmpresa: { whatsapp: "", telefone: "", email: "", fonte: "" } }];
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", contato: "sim" }, "").map((d) => d.id), ["D1"]);
+  assert.deepEqual(R.filtrarBase(lista, { grupo: "todos", contato: "" }, "").length, 3);
+});
+
+// ---------- geografia: país, estado e cidade ----------
+const GEO_LISTA = [
+  { id: "D1", pais: "Brasil", uf: "MT", cidade: "Cuiabá" },
+  { id: "D2", pais: "Brasil", uf: "MT", cidade: "Sinop" },
+  { id: "D3", pais: "Brasil", uf: "SP", cidade: "Campinas" },
+  { id: "D4", pais: "Brasil", uf: "SP", cidade: "" },
+  { id: "D5", pais: "Portugal", uf: "", cidade: "" },
+  { id: "D6", pais: "", uf: "", cidade: "" },
+  { id: "D7", pais: "Brasil", uf: "MT", cidade: "CUIABA" },
+];
+const idsDe = (l) => l.map((d) => d.id);
+test("geo: casaGeo filtra por país, estado e cidade (cidade sem acento nem caixa) e por Sem informação", () => {
+  const f = (o) => idsDe(GEO_LISTA.filter((d) => R.casaGeo(d, Object.assign({ pais: "", uf: "", cidade: "" }, o))));
+  assert.deepEqual(f({}), ["D1", "D2", "D3", "D4", "D5", "D6", "D7"]);
+  assert.deepEqual(f({ uf: "MT" }), ["D1", "D2", "D7"]);
+  assert.deepEqual(f({ uf: "MT", cidade: "Cuiabá" }), ["D1", "D7"]);
+  assert.deepEqual(f({ pais: "Portugal" }), ["D5"]);
+  assert.deepEqual(f({ uf: R.SEM_GEO }), ["D5", "D6"]);
+  assert.deepEqual(f({ uf: "SP", cidade: R.SEM_GEO }), ["D4"]);
+  assert.deepEqual(f({ pais: R.SEM_GEO }), ["D6"]);
+  assert.ok(R.casaGeo({}, null), "sem filtro, passa");
+});
+test("geo: opcoesGeo estreita estado e cidade pelo recorte e termina com Sem informação", () => {
+  const o = R.opcoesGeo(GEO_LISTA, {});
+  assert.deepEqual(o.paises, [["Brasil", "Brasil"], ["Portugal", "Portugal"], [R.SEM_GEO, "Sem informação"]], "Brasil primeiro");
+  assert.deepEqual(o.ufs, [["MT", "MT"], ["SP", "SP"], [R.SEM_GEO, "Sem informação"]]);
+  assert.deepEqual(o.cidades.map((c) => c[0]), ["Campinas", "Cuiabá", "Sinop", R.SEM_GEO], "Cuiabá e CUIABA são uma cidade só");
+  assert.deepEqual(R.opcoesGeo(GEO_LISTA, { uf: "MT" }).cidades, [["Cuiabá", "Cuiabá"], ["Sinop", "Sinop"]], "todo MT tem cidade: sem opção Sem informação");
+  assert.deepEqual(R.opcoesGeo(GEO_LISTA, { uf: "SP" }).cidades, [["Campinas", "Campinas"], [R.SEM_GEO, "Sem informação"]]);
+  assert.deepEqual(R.opcoesGeo(GEO_LISTA, { pais: "Portugal" }).ufs, [[R.SEM_GEO, "Sem informação"]]);
+  assert.deepEqual(R.opcoesGeo([{ id: "x" }], {}).paises, [[R.SEM_GEO, "Sem informação"]]);
+});
+test("geo: rótulo Cidade/UF e busca por cidade e por sigla de estado", () => {
+  assert.equal(R.rotuloGeo({ uf: "MT", cidade: "Cuiabá" }), "Cuiabá/MT");
+  assert.equal(R.rotuloGeo({ uf: "MT" }), "MT");
+  assert.equal(R.rotuloGeo({ cidade: "Sinop" }), "Sinop");
+  assert.equal(R.rotuloGeo({ pais: "Portugal" }), "Portugal");
+  assert.equal(R.rotuloGeo({ pais: "Brasil" }), "");
+  assert.equal(R.rotuloGeo({ perfil: { cidade: "Cuiabá" } }), "Cuiabá", "lead R sem cidade própria usa a do perfil");
+  assert.equal(R.rotuloGeo({ cidade: "Sinop", perfil: { cidade: "Cuiabá" } }), "Sinop");
+  const l = { id: "R1", nome: "Clínica Alfa", uf: "MT", cidade: "Várzea Grande" };
+  assert.ok(R.casaBusca(l, "varzea"));
+  assert.ok(R.casaBusca(l, "MT"));
+  assert.ok(!R.casaBusca(l, "SP"));
+  assert.ok(!R.casaBusca({ id: "R2", nome: "Alfa", uf: "MT" }, "m"), "a sigla só casa inteira");
+  assert.ok(R.casaBusca({ id: "R2", nome: "Alfa", uf: "MT" }, "mt"));
+});
+test("geo: filtrarBase e casaBase com uf, cidade, país, Sem informação e busca", () => {
+  const lista = GEO_LISTA.map((d) => Object.assign({ nome: "Empresa " + d.id, dominio: d.id.toLowerCase() + ".example", status: "base" }, d));
+  const f = (o, busca) => idsDe(R.filtrarBase(lista, Object.assign({ grupo: "todos" }, o), busca || ""));
+  assert.deepEqual(f({ uf: "SP" }), ["D3", "D4"]);
+  assert.deepEqual(f({ uf: "MT", cidade: "Sinop" }), ["D2"]);
+  assert.deepEqual(f({ uf: R.SEM_GEO }), ["D5", "D6"]);
+  assert.deepEqual(f({ pais: "Portugal", uf: R.SEM_GEO }), ["D5"]);
+  assert.deepEqual(f({ uf: "MT" }, "cuiaba"), ["D1", "D7"]);
+  assert.deepEqual(f({}, "campinas"), ["D3"]);
+  assert.deepEqual(f({}, "sp"), ["D3", "D4"]);
+  assert.deepEqual(f({ grupo: "todos", segmento: "" , uf: "MT", cidade: "" }), ["D1", "D2", "D7"]);
+});
