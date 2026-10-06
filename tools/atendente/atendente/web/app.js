@@ -368,6 +368,24 @@
       .then(function () { botoes.forEach(function (x) { x.disabled = false; }); });
   });
 
+  $('form-enviar').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var campo = $('enviar-texto'), botao = $('btn-enviar');
+    var texto = campo.value.trim();
+    if (!texto || !estado.abertoId) { aviso('Escreva a mensagem antes de enviar.', true); campo.focus(); return; }
+    if (!window.confirm('Enviar esta mensagem agora para o lead?')) return;
+    var id = estado.abertoId;
+    botao.disabled = true;
+    api('api/leads/' + encodeURIComponent(id) + '/enviar', { method: 'POST', corpo: { texto: texto } })
+      .then(function () {
+        if (estado.abertoId === id && campo.value.trim() === texto) campo.value = '';
+        aviso('Mensagem enviada.');
+        return atualizar().then(function () { return carregarPainel(false); });
+      })
+      .catch(function (e) { aviso(eRede(e) ? ERRO_REDE : e.message, true); })   // mantém o texto digitado
+      .then(function () { botao.disabled = false; });
+  });
+
   $('form-nota').addEventListener('submit', function (ev) {
     ev.preventDefault();
     var campo = $('nota-texto');
