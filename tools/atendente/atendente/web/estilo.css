@@ -77,6 +77,9 @@ textarea { resize: vertical; min-height: 72px; }
 .interruptor-nome { font-weight: 700; }
 .interruptor-estado { font-size: 13px; color: var(--suave); font-weight: 600; }
 .interruptor[aria-checked="true"] .interruptor-estado { color: var(--ok); }
+.faixa-aguardando { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 10px; border-radius: 6px; background: var(--ouro-fundo); color: var(--ouro-texto); }
+.faixa-aguardando[hidden] { display: none; }
+.faixa-aguardando p { margin: 0; flex: 1 1 240px; font-weight: 600; font-size: 14px; }
 .faixa-parado { margin: 0; padding: 4px 10px; border-radius: 6px; background: var(--alerta-fundo); color: var(--alerta); font-weight: 700; font-size: 13px; }
 .resumo { display: flex; flex-wrap: wrap; gap: 2px 14px; margin: 0; font-size: 13px; }
 .resumo div { display: inline-flex; gap: 5px; align-items: baseline; }

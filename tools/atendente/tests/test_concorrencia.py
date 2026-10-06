@@ -56,12 +56,12 @@ def msg(i, wa_id, texto="Tenho interesse", em="2026-10-06T14:00:00Z"):
                     texto=texto, em=em, grupo=False)
 
 
-def montar(n_leads):
+def montar(n_leads, espera=0.05):
     repo = Repo(":memory:")
     wa = WaFalso()
     for i in range(1, n_leads + 1):
         repo.lead_put(lead(i))
-    return Atendente(repo, wa, IaLenta(), Avisador(wa, EQUIPE, repo, atraso_s=0)), repo, wa
+    return Atendente(repo, wa, IaLenta(espera), Avisador(wa, EQUIPE, repo, atraso_s=0)), repo, wa
 
 
 def paralelo(fns):
@@ -82,7 +82,7 @@ def paralelo(fns):
 
 
 def test_rajada_do_mesmo_lead_gera_uma_resposta_automatica_so():
-    at, repo, wa = montar(1)
+    at, repo, wa = montar(1, espera=0.3)
     res = paralelo([lambda: at.tratar_mensagem(msg(1, "A1"), AGORA),
                     lambda: at.tratar_mensagem(msg(1, "A2", "Pode ser hoje?", "2026-10-06T14:00:01Z"), AGORA)])
     assert sorted(res) == ["avisada", "respondida"]

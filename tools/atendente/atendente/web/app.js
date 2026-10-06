@@ -154,6 +154,9 @@
     botao.className = 'btn ' + (parado ? 'retomar' : 'perigo');
     botao.disabled = estado.mudandoConfig;
     $('faixa-parado').hidden = !parado;
+    var aguardando = c.status === 'aguardando';
+    $('faixa-aguardando').hidden = !aguardando;
+    $('btn-ligar').disabled = estado.mudandoConfig;
 
     var wa = $('wa-estado');
     var conectado = estado.wa && estado.wa.conectado === true;
@@ -195,6 +198,11 @@
     estado.config.auto_resposta = !antes;           // otimista; volta se o servidor recusar
     gravarConfig({ auto_resposta: !antes }, function () { estado.config.auto_resposta = antes; })
       .then(function (r) { if (r) aviso(r.config.auto_resposta ? 'Respostas automáticas ligadas.' : 'Respostas automáticas desligadas.'); });
+  });
+
+  $('btn-ligar').addEventListener('click', function () {
+    if (estado.mudandoConfig || !estado.config) return;
+    gravarConfig({ status: 'ativo' }).then(function (r) { if (r) { aviso('Atendente ligado.'); atualizar(); } });
   });
 
   var dlg = $('dlg-parar');

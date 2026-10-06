@@ -17,6 +17,8 @@ WORKDIR /app
 
 COPY tools/atendente/atendente /app/atendente
 COPY tools/prospeccao/scripts /app/scripts
+# scripts/wa_akg.py faz 'from msg.fotos import linha_foto': sem esta pasta o contêiner não sobe.
+COPY tools/prospeccao/msg /app/msg
 COPY .claude/skills/disparar-wa/conhecimento-reiners.md /app/conhecimento.md
 
 USER atendente

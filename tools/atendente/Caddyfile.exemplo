@@ -1,15 +1,25 @@
 # Exemplo do que o instalar-atendente.sh acrescenta ao /etc/caddy/Caddyfile.
 # O instalador faz isso sozinho, com cópia de segurança. Este arquivo é só para consulta.
+#
+# /webhook NÃO é publicado na internet: o WA-AKG chama http://atendente:8088/webhook
+# por dentro da rede do Docker. Por isso os dois endereços respondem 404 para ele.
 
 # Endereço próprio da tela (precisa do registro DNS "central" apontando para a VPS).
 central.reiners.agency {
+	@webhook path /webhook
+	respond @webhook 404
 	reverse_proxy 127.0.0.1:8088
 }
 
 # Bloco que já existia: o handle_path entra ANTES do proxy geral.
+# O cabeçalho X-Forwarded-Prefix faz o servidor restringir o cookie a /central/.
 wa.reiners.agency {
 	handle_path /central/* {
-		reverse_proxy 127.0.0.1:8088
+		@webhook path /webhook
+		respond @webhook 404
+		reverse_proxy 127.0.0.1:8088 {
+			header_up X-Forwarded-Prefix /central
+		}
 	}
 	reverse_proxy 127.0.0.1:3000
 }

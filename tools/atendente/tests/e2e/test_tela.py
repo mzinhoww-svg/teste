@@ -350,3 +350,20 @@ def test_funciona_sob_prefixo_central(ctx, pagina):
     finally:
         proxy.shutdown()
         proxy.server_close()
+
+
+def test_aguardando_mostra_ligar_atendente_e_liga(ctx, pagina):
+    ctx.repo.config_set("status", "aguardando")
+    ctx.repo.config_set("auto_resposta", False)
+    entrar(pagina, ctx.url)
+    aviso = pagina.locator("#faixa-aguardando")
+    expect(aviso).to_be_visible()
+    expect(aviso).to_contain_text("Instalado. O atendente ainda não está respondendo nem enviando")
+    expect(aviso).to_contain_text("clique em Ligar atendente quando o Claude confirmar")
+    expect(pagina.get_by_role("button", name="Parar tudo")).to_be_visible()
+    pagina.get_by_role("button", name="Ligar atendente").click()
+    expect(aviso).to_be_hidden()
+    expect(pagina.get_by_role("button", name="Ligar atendente")).to_be_hidden()
+    expect(pagina.get_by_role("switch", name="Respostas automáticas")).to_have_attribute("aria-checked", "true")
+    assert ctx.repo.config_get("status") == "ativo"
+    assert ctx.repo.config_get("auto_resposta") is True

@@ -6,7 +6,7 @@
 #  1. Confere se o Docker e o WA-AKG estão no ar.
 #  2. Baixa o código em /opt/atendente-src.
 #  3. Pede as senhas e chaves (não aparecem na tela) e guarda em /opt/atendente/.env.
-#  4. Liga o atendente.
+#  4. Liga o atendente (ele sobe em ESPERA: não responde nem envia nada sozinho).
 #  5. Acrescenta os endereços no Caddy (com cópia de segurança).
 #  6. Avisa o WA-AKG de onde mandar as respostas (webhook).
 #  7. Importa os leads, se você tiver o arquivo.
@@ -37,6 +37,7 @@ docker network inspect "$REDE" >/dev/null 2>&1 || parar "não achei a rede '$RED
 command -v git >/dev/null 2>&1 || { apt-get install -y git >/dev/null 2>&1 || parar "não consegui instalar o git."; }
 command -v curl >/dev/null 2>&1 || { apt-get install -y curl >/dev/null 2>&1 || parar "não consegui instalar o curl."; }
 command -v openssl >/dev/null 2>&1 || parar "o openssl não está instalado (apt-get install -y openssl)."
+command -v python3 >/dev/null 2>&1 || { apt-get install -y python3 >/dev/null 2>&1 || parar "não consegui instalar o python3."; }
 command -v caddy >/dev/null 2>&1 || parar "o Caddy não está instalado."
 [ -f "$CADDYFILE" ] || parar "não achei $CADDYFILE."
 ok "Docker, rede do WA-AKG e Caddy encontrados"
@@ -159,13 +160,18 @@ fi
 
 if grep -Eq 'handle_path[[:space:]]+/central/\*' "$CADDYFILE"; then
   ok "wa.reiners.agency/central já configurado"
+  grep -q 'X-Forwarded-Prefix' "$CADDYFILE" || echo "    AVISO: o bloco /central/ existente é de uma versão antiga (sem 'respond @webhook 404' e sem X-Forwarded-Prefix). Ajuste-o pelo modelo $SRC/tools/atendente/Caddyfile.exemplo."
 else
   fazer_copia
   awk '
     { print }
     !feito && /^[[:space:]]*wa\.reiners\.agency[[:space:]]*\{/ {
       print "\thandle_path /central/* {"
-      print "\t\treverse_proxy 127.0.0.1:8088"
+      print "\t\t@webhook path /webhook"
+      print "\t\trespond @webhook 404"
+      print "\t\treverse_proxy 127.0.0.1:8088 {"
+      print "\t\t\theader_up X-Forwarded-Prefix /central"
+      print "\t\t}"
       print "\t}"
       feito=1
     }' "$CADDYFILE" > "$CADDYFILE.novo" && cat "$CADDYFILE.novo" > "$CADDYFILE" && rm -f "$CADDYFILE.novo"
@@ -180,6 +186,8 @@ else
   {
     echo
     echo "central.reiners.agency {"
+    echo "	@webhook path /webhook"
+    echo "	respond @webhook 404"
     echo "	reverse_proxy 127.0.0.1:8088"
     echo "}"
   } >> "$CADDYFILE"
@@ -208,46 +216,115 @@ WA_KEY_ENV="$(valor_env WA_AKG_KEY)"
 WA_SESSAO_ENV="$(valor_env WA_AKG_SESSION)"
 SEGREDO_ENV="$(valor_env WEBHOOK_SEGREDO)"
 URL_HOOKS="$WA_LOCAL/api/webhooks/$WA_SESSAO_ENV"
-# A chave vai por arquivo temporário para não aparecer na lista de processos.
-CABECALHO="$(mktemp)"; chmod 600 "$CABECALHO"
+URL_ATENDENTE="http://atendente:8088/webhook"
+# Chave e segredo vão por arquivos temporários (modo 600) para não aparecerem na lista de processos (ps).
+umask 077
+CABECALHO="$(mktemp)"; CORPO="$(mktemp)"; SAIDA="$(mktemp)"
+trap 'rm -f "$CABECALHO" "$CORPO" "$SAIDA"' EXIT
+chmod 600 "$CABECALHO" "$CORPO" "$SAIDA"
 printf 'X-API-Key: %s\n' "$WA_KEY_ENV" > "$CABECALHO"
 unset WA_KEY_ENV
-codigo="$(curl -sS -m 20 -o /tmp/atendente-lista.out -w '%{http_code}' -H @"$CABECALHO" "$URL_HOOKS" 2>&1)"
-lista="$(cat /tmp/atendente-lista.out 2>/dev/null)"; rm -f /tmp/atendente-lista.out
+printf '{"name":"atendente","url":"%s","secret":"%s","events":["message.received","message.sent"]}' \
+  "$URL_ATENDENTE" "$SEGREDO_ENV" > "$CORPO"
+unset SEGREDO_ENV
+
+chamar() {  # chamar METODO URL [corpo]  -> código HTTP em $codigo, resposta em $SAIDA
+  local metodo="$1" url="$2" extra=()
+  [ "$metodo" = "GET" ] || [ "$metodo" = "DELETE" ] || extra=(-H 'Content-Type: application/json' --data @"$CORPO")
+  : > "$SAIDA"
+  codigo="$(curl -sS -m 20 -o "$SAIDA" -w '%{http_code}' -X "$metodo" -H @"$CABECALHO" "${extra[@]}" "$url" 2>&1)"
+}
+
+chamar GET "$URL_HOOKS"
 case "$codigo" in
   2??) ;;
-  *)   rm -f "$CABECALHO"; parar "o WA-AKG em $WA_LOCAL não aceitou a consulta (código $codigo). A chave e o nome da sessão estão certos? Resposta: $lista";;
+  *)   parar "o WA-AKG em $WA_LOCAL não aceitou a consulta (código $codigo). A chave e o nome da sessão estão certos? Resposta: $(cat "$SAIDA" 2>/dev/null)";;
 esac
-if printf '%s' "$lista" | grep -q 'atendente:8088/webhook'; then
-  ok "webhook já estava registrado"
-else
-  corpo="{\"name\":\"atendente\",\"url\":\"http://atendente:8088/webhook\",\"secret\":\"$SEGREDO_ENV\",\"events\":[\"message.received\",\"message.sent\"]}"
-  codigo="$(curl -sS -m 20 -o /tmp/atendente-webhook.out -w '%{http_code}' -X POST \
-    -H @"$CABECALHO" -H 'Content-Type: application/json' -d "$corpo" "$URL_HOOKS" 2>&1)"
+# IDs dos webhooks que já apontam para o atendente (um por linha).
+IDS="$(python3 -I -c '
+import json, sys
+alvo = sys.argv[1]
+achados = []
+def varrer(o):
+    if isinstance(o, dict):
+        if o.get("url") == alvo and o.get("id") is not None:
+            achados.append(str(o["id"]))
+        for v in o.values():
+            varrer(v)
+    elif isinstance(o, list):
+        for v in o:
+            varrer(v)
+try:
+    varrer(json.load(open(sys.argv[2])))
+except Exception:
+    sys.exit(3)
+print("\n".join(dict.fromkeys(achados)))
+' "$URL_ATENDENTE" "$SAIDA")" || parar "não consegui entender a lista de webhooks do WA-AKG. Resposta: $(head -c 300 "$SAIDA")"
+
+if [ -z "$IDS" ]; then
+  chamar POST "$URL_HOOKS"
   case "$codigo" in
     2??) ok "webhook registrado";;
-    *)   rm -f "$CABECALHO"; parar "o WA-AKG recusou o registro do webhook (código $codigo): $(cat /tmp/atendente-webhook.out 2>/dev/null)";;
+    *)   parar "o WA-AKG recusou o registro do webhook (código $codigo): $(cat "$SAIDA" 2>/dev/null)";;
   esac
-  rm -f /tmp/atendente-webhook.out
+else
+  PRIMEIRO="$(printf '%s\n' "$IDS" | head -n1)"
+  # Atualiza com o segredo atual do .env: se o segredo mudou numa reinstalação, sem isto todo webhook daria 401.
+  chamar PUT "$URL_HOOKS/$PRIMEIRO"
+  case "$codigo" in
+    2??) ok "webhook já existia: atualizado com o segredo atual";;
+    *)   parar "o WA-AKG recusou a atualização do webhook (código $codigo): $(cat "$SAIDA" 2>/dev/null)";;
+  esac
+  printf '%s\n' "$IDS" | tail -n +2 | while IFS= read -r extra_id; do
+    [ -n "$extra_id" ] || continue
+    chamar DELETE "$URL_HOOKS/$extra_id"
+    case "$codigo" in
+      2??) echo "    ok: webhook duplicado apagado";;
+      *)   echo "    AVISO: não consegui apagar um webhook duplicado (código $codigo). Pode apagar depois pelo painel do WA-AKG.";;
+    esac
+  done
 fi
-rm -f "$CABECALHO"
-unset SEGREDO_ENV corpo
+rm -f "$CABECALHO" "$CORPO" "$SAIDA"
 
 # ---------------------------------------------------------------- 8. leads
 passo "8/8 Importando os leads"
+SEM_LEADS=nao
 if [ -f "$LEADS_JSON" ]; then
   docker cp "$LEADS_JSON" atendente:/data/leads.json 2>/dev/null || parar "não consegui copiar $LEADS_JSON para o atendente."
   docker exec -u 0 atendente chmod 644 /data/leads.json >/dev/null 2>&1
-  docker compose -f "$COMPOSE" run --rm atendente python -m atendente.importar /data/leads.json \
-    || parar "a importação dos leads falhou. Veja a mensagem acima; o atendente continua ligado."
+  saida_imp="$(docker compose -f "$COMPOSE" run --rm -T atendente python -m atendente.importar /data/leads.json 2>&1)"
+  rc_imp=$?
   docker exec -u 0 atendente rm -f /data/leads.json >/dev/null 2>&1
-  ok "leads importados (cópia temporária apagada do atendente)"
+  linha_imp="$(printf '%s\n' "$saida_imp" | grep -E 'importados=' | tail -n1)"
+  [ -n "$linha_imp" ] || linha_imp="$(printf '%s\n' "$saida_imp" | tail -n1)"
+  if [ "$rc_imp" -ne 0 ]; then
+    echo
+    echo "ERRO: nenhum lead foi importado (código $rc_imp)."
+    echo "    Resultado: $linha_imp"
+    echo "    O atendente está instalado e em ESPERA, mas SEM leads. NÃO ligue o atendente ainda."
+    echo "    Confira se o arquivo $LEADS_JSON é o certo (o Claude entrega o leads.json atualizado) e rode este script de novo."
+    echo "    Detalhes: docker compose -f $COMPOSE run --rm -T atendente python -m atendente.importar /data/leads.json"
+    exit 1
+  fi
+  ok "importação concluída: $linha_imp (cópia temporária apagada do atendente)"
 else
-  echo "    Arquivo $LEADS_JSON não encontrado: pulei esta etapa."
-  echo "    (Se precisar, copie o arquivo para a VPS e rode este script de novo.)"
+  SEM_LEADS=sim
+  echo "    AVISO: o arquivo $LEADS_JSON não foi encontrado. O atendente ficou SEM leads."
+  echo "    Para importar depois: copie o leads.json (o Claude entrega o atualizado) para $LEADS_JSON na VPS e rode este script de novo"
+  echo "    (na pergunta sobre o .env, aperte ENTER para manter o que já existe)."
 fi
 
 echo
-echo "PRONTO. Teste de saúde (deve mostrar {\"ok\": true}):"
+if [ "$SEM_LEADS" = "sim" ]; then
+  echo "INSTALADO, mas SEM LEADS (veja o aviso acima)."
+else
+  echo "INSTALADO."
+fi
+echo
+echo "O atendente está instalado e em ESPERA. Ele só começa a responder e enviar quando você clicar em"
+echo "\"Ligar atendente\" no painel (central.reiners.agency ou wa.reiners.agency/central/), depois que o"
+echo "Claude confirmar que parou o lado dele. NÃO clique antes."
+echo
+echo "Teste de saúde (deve mostrar {\"ok\": true}):"
 echo "    curl http://127.0.0.1:8088/saude"
 echo "Tela: https://wa.reiners.agency/central/   (e https://central.reiners.agency depois de criar o registro DNS)"
