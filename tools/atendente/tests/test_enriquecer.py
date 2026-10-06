@@ -96,6 +96,7 @@ def test_importa_so_com_o_que_o_dockerfile_copia(tmp_path):
         shutil.copy(os.path.join(tools, "prospeccao", "central", nome), tmp_path / "central" / nome)
     codigo = ("import sys; sys.path.insert(0, sys.argv[1]); import atendente.servidor, atendente.rotas as r; "
               "assert any('enriquecer' in p.pattern for _, p, _ in r.ROTAS); "
+              "assert any('prospeccao' in p.pattern for _, p, _ in r.ROTAS); "
               "import scripts.site_contatos, scripts.enriquecer_leads")
     r = subprocess.run([sys.executable, "-I", "-c", codigo, str(tmp_path)], cwd=str(tmp_path),
                        capture_output=True, text=True, timeout=60)
