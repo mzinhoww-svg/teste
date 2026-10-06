@@ -114,18 +114,26 @@ def maps(cli, consulta: str, cidade: str, max_micro: int, chave: str, registro=N
     return saida
 
 
-def decisores(cli, dominio: str, cargos: list[str], max_micro: int, chave: str, registro=None) -> list[dict]:
-    """Pessoas da empresa (pelo domínio) com os cargos pedidos: [{nome, cargo, linkedin}]."""
-    corpo = {"domain": dominio, "titles": list(cargos or []), "country": "br"}
-    resp = _chamar(cli, EP_PESSOAS, corpo, max_micro, chave)
-    saida = []
-    for p in _lista(_output(resp), "people", "persons", "results", "contacts"):
-        nome = _primeiro(p, "name", "full_name", "nome")
-        if not nome:
-            continue
-        saida.append({"nome": nome, "cargo": _primeiro(p, "title", "job_title", "position", "cargo"),
-                      "linkedin": _primeiro(p, "linkedin_url", "linkedin", "linkedin_profile")})
-    _registrar(registro, "decisores", resp, bool(saida))
+def decisores(cli, dominio: str, cargos: list[str], max_micro: int, chave: str, registro=None, limite: int = 3) -> list[dict]:
+    """Pessoas da empresa (pelo domínio) com os cargos pedidos: [{nome, cargo, linkedin}].
+    O `treg.people.search` aceita UM cargo por chamada (`title`); uma chamada por cargo, sem repetir pessoa.
+    `limite` = linhas por chamada (a maioria dos provedores cobra por linha)."""
+    saida, vistos = [], set()
+    for i, cargo in enumerate(list(cargos or []) or [""]):
+        corpo = {"company_domain": dominio, "country": "br", "limit": limite}
+        if cargo:
+            corpo["title"] = cargo
+        resp = _chamar(cli, EP_PESSOAS, corpo, max_micro, f"{chave}-{i}")
+        achou = False
+        for p in _lista(_output(resp), "people", "persons", "results", "contacts"):
+            nome = _primeiro(p, "name", "full_name", "nome")
+            if not nome or nome.casefold() in vistos:
+                continue
+            vistos.add(nome.casefold())
+            achou = True
+            saida.append({"nome": nome, "cargo": _primeiro(p, "title", "job_title", "position", "cargo"),
+                          "linkedin": _primeiro(p, "linkedin_url", "linkedin", "linkedin_profile")})
+        _registrar(registro, "decisores", resp, achou)
     return saida
 
 

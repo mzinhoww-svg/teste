@@ -192,9 +192,17 @@ def test_decisores_normaliza_pessoas():
                   "linkedin": "https://www.linkedin.com/in/pessoa-um"},
                  {"nome": "Pessoa Dois", "cargo": "Gerente de Marketing", "linkedin": ""}]
     corpo = t.chamadas[0]["corpo"]
-    assert corpo["domain"] == "empresa-exemplo.com.br" and corpo["titles"] == ["dono", "marketing"]
+    assert corpo["company_domain"] == "empresa-exemplo.com.br" and corpo["title"] == "dono"
 
 
 def test_decisores_vazio():
     cli, _ = _cli({"treg.people.search": _ok({"people": []})})
     assert treg_ops.decisores(cli, "empresa-exemplo.com.br", ["dono"], 5_000, "k") == []
+
+
+def test_decisores_uma_chamada_por_cargo_sem_repetir_pessoa():
+    pessoas = [{"name": "Pessoa Um", "title": "Sócio"}]
+    cli, t = _cli({"treg.people.search": _ok({"people": pessoas}, "aiark", 0)})
+    r = treg_ops.decisores(cli, "empresa-exemplo.com.br", ["dono", "sócio"], 5_000, "k")
+    assert len(t.chamadas) == 2 and [c["corpo"]["title"] for c in t.chamadas] == ["dono", "sócio"]
+    assert [p["nome"] for p in r] == ["Pessoa Um"]            # a mesma pessoa nas duas buscas entra uma vez
