@@ -157,6 +157,7 @@ def main(argv=None) -> int:
     ap.add_argument("--etapas", default=",".join(ETAPAS))
     ap.add_argument("--max-celular-usd", type=float, default=MAX_CELULAR_MICRO / 1_000_000)
     ap.add_argument("--max-email-usd", type=float, default=MAX_EMAIL_MICRO / 1_000_000)
+    ap.add_argument("--execucao", default="f0", help="rótulo das chaves de idempotência; troque a cada rodada nova")
     a = ap.parse_args(argv)
     if a.teto_usd <= 0:
         ap.error("--teto-usd tem de ser maior que zero")
@@ -174,7 +175,7 @@ def main(argv=None) -> int:
     rel = rodar(amostra, cli, provedores=[p.strip() for p in a.provedores.split(",") if p.strip()],
                 teto_micro=int(round(a.teto_usd * 1_000_000)),
                 max_celular_micro=int(round(a.max_celular_usd * 1_000_000)),
-                max_email_micro=int(round(a.max_email_usd * 1_000_000)), etapas=etapas)
+                max_email_micro=int(round(a.max_email_usd * 1_000_000)), etapas=etapas, execucao=a.execucao)
     rel["simulado"] = a.simular
     with open(a.saida, "w", encoding="utf-8") as fh:
         json.dump(rel, fh, ensure_ascii=False, indent=1)
