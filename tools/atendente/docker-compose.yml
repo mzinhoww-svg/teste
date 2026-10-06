@@ -1,0 +1,32 @@
+# Uso (na VPS):  docker compose -f /opt/atendente-src/tools/atendente/docker-compose.yml up -d --build
+# Build com o repositório inteiro como contexto (../.. = raiz do repositório).
+services:
+  atendente:
+    build:
+      context: ../..
+      dockerfile: tools/atendente/Dockerfile
+    image: atendente:local
+    container_name: atendente
+    restart: unless-stopped
+    mem_limit: 256m
+    env_file: /opt/atendente/.env
+    environment:
+      # Dentro do contêiner o servidor precisa escutar em todas as interfaces;
+      # quem limita o acesso é a publicação da porta, só em 127.0.0.1.
+      ATENDENTE_ESCUTA: "0.0.0.0"
+      ATENDENTE_PORTA: "8088"
+      DB_CAMINHO: /data/atendente.db
+      CONHECIMENTO_CAMINHO: /app/conhecimento.md
+    ports:
+      - "127.0.0.1:8088:8088"
+    volumes:
+      - atendente_data:/data
+    networks:
+      - wa-akg_default
+
+volumes:
+  atendente_data:
+
+networks:
+  wa-akg_default:
+    external: true

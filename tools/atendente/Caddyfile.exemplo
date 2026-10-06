@@ -1,0 +1,15 @@
+# Exemplo do que o instalar-atendente.sh acrescenta ao /etc/caddy/Caddyfile.
+# O instalador faz isso sozinho, com cópia de segurança. Este arquivo é só para consulta.
+
+# Endereço próprio da tela (precisa do registro DNS "central" apontando para a VPS).
+central.reiners.agency {
+	reverse_proxy 127.0.0.1:8088
+}
+
+# Bloco que já existia: o handle_path entra ANTES do proxy geral.
+wa.reiners.agency {
+	handle_path /central/* {
+		reverse_proxy 127.0.0.1:8088
+	}
+	reverse_proxy 127.0.0.1:3000
+}
