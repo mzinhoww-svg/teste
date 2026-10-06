@@ -103,3 +103,14 @@ def achar(repo, cli, campanha: dict, orcamento, registro=None, limite: int | Non
                 continue
         saida.append(_empresa(d))
     return saida
+
+
+def completar(repo, cli, empresa: dict, orcamento, registro=None) -> dict | None:
+    """Uma empresa só (no formato que `achar` devolve): consulta o Maps se ela ainda não tem site, nunca foi
+    consultada e a busca cabe no orçamento. None se a empresa não vale mais (o Maps disse que fechou)."""
+    d = repo.cnpj_get(empresa.get("cnpj") or empresa.get("id") or "")
+    if d is None:
+        return empresa
+    if not d.get("site") and not d.get("mapsEm") and orcamento.cabe(MAPS_MAX):
+        d = _completar(repo, cli, d, orcamento, registro)
+    return _empresa(d) if _ativa(d) else None
