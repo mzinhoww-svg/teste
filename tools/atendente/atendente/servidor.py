@@ -512,6 +512,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._situacao(lead, usuario, agora)
             if metodo == "POST" and len(resto) == 2 and resto[1] == "nota":
                 return self._nota(lead, usuario, agora)
+            if metodo == "POST" and len(resto) == 2 and resto[1] == "enviar":
+                return self._enviar_ao_lead(lead, usuario, agora)
         if metodo == "POST":
             self._corpo()
         return self._erro(404, "Não encontrado.")
@@ -574,6 +576,51 @@ class Handler(BaseHTTPRequestHandler):
             return self._erro(400, "A nota pode ter no máximo 1000 caracteres.")
         srv.repo.aplicar(lead["id"], {"historico": wa_akg.registrar(
             lead.get("historico"), f"Nota de {usuario}: {texto}", agora, tipo="nota")})
+        return self._json(200, {"ok": True})
+
+    def _enviar_ao_lead(self, lead, usuario, agora):
+        """A equipe escreve para o lead pela tela. Sai na hora pelo WhatsApp, vira `respondeu`, cancela o toque agendado
+        e entra no registro como intervenção humana (é material do aprendizado dos 30 dias)."""
+        srv = self.server
+        dados, falhou = self._json_do_corpo()
+        if falhou:
+            return
+        texto = dados.get("texto") if isinstance(dados, dict) else None
+        if not isinstance(texto, str) or not texto.strip():
+            return self._erro(400, "Escreva a mensagem antes de enviar.")
+        texto = texto.strip()
+        if len(texto) > 1000:
+            return self._erro(400, "A mensagem pode ter no máximo 1000 caracteres.")
+        if lead.get("situacao") in ("sair", "fechou"):
+            return self._erro(409, f"Este lead está como '{lead['situacao']}'. Para escrever, volte-o para a cadência ou marque Respondeu.")
+        try:
+            jid = lead.get("jidWa")
+            if not jid:
+                numero = wa_akg.numero_whatsapp(wa_akg.telefone_destino(lead))
+                jid = srv.wa.verificar([numero]).get(numero) if numero else None
+            if not jid:
+                return self._erro(400, "Não achei o WhatsApp deste número.")
+            envio = wa_akg.responder_lead(srv.wa, lead, jid, texto, agora)
+        except wa_akg.WaAkgErro:
+            return self._erro(502, "Não consegui falar com o WhatsApp agora. A mensagem NÃO foi enviada; tente de novo.")
+        except ValueError as e:
+            return self._erro(409, str(e))
+        data = dict(envio["data"])
+        data["historico"] = wa_akg.registrar(lead.get("historico"), f"Mensagem de {usuario} pelo WhatsApp: {texto[:200]}",
+                                             agora, tipo="resposta")
+        data["situacao"] = "respondeu"
+        ag = lead.get("agendamento")
+        if ag:  # quem já está conversando com a equipe não recebe o toque agendado
+            try:
+                srv.wa.cancelar(ag["id"])
+                data["agendamento"] = {"__delete__": True}
+            except Exception as e:
+                log.warning("não consegui cancelar o agendamento do lead: %s", type(e).__name__)
+        srv.repo.aplicar(lead["id"], data)
+        em = agora.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        srv.repo.msg_add(lead["id"], jid, True, texto, "TEXT", None, em)
+        srv.repo.atendimento_add(leadId=lead["id"], empresa=nome_da_empresa(lead), em=em, mensagemLead="",
+                                 acao="humano", respostaEnviada=texto, humanoRespondeu=True)
         return self._json(200, {"ok": True})
 
     def _backup(self, agora):

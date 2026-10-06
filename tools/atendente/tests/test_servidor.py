@@ -53,6 +53,22 @@ class WaFalso:
         self.cancelados.append(id_)
         self.pendentes = [p for p in self.pendentes if p["id"] != id_]
 
+    # envio imediato (a equipe escrevendo pela tela)
+    enviados = None
+    existem = None
+
+    def verificar(self, numeros):
+        if self.fora:
+            raise wa_akg.WaAkgErro(0, "fora do ar")
+        return {n: (f"{n}@s.whatsapp.net" if (self.existem is None or n in self.existem) else None) for n in numeros}
+
+    def enviar_texto(self, jid, texto):
+        if self.fora:
+            raise wa_akg.WaAkgErro(503, "fora do ar")
+        if self.enviados is None:
+            self.enviados = []
+        self.enviados.append((jid, texto))
+
 
 class Ctx:
     pass
@@ -483,3 +499,49 @@ def test_empresa_no_formato_real_da_central_e_um_objeto_e_o_nome_vem_de_nome(ctx
     d = json_de(pedir(ctx, "GET", "/api/leads/L1", cookie=cookie))
     assert d["empresa"] == "Espósito Advocacia"                       # texto, para a tela
     assert d["empresaDados"]["municipio"] == "Cuiabá"                 # o objeto original continua disponível
+
+
+# --------------------------------------------------------------------------- equipe responde pela tela
+
+def test_equipe_envia_mensagem_pela_tela_e_fica_registrado(ctx):
+    ctx.repo.lead_put(_lead(1, telefone="(65) 99990-0011", situacao="ativo",
+                            agendamento={"n": 2, "id": "s1", "sendAt": "2026-10-08T13:00:00Z", "jid": "x"}))
+    ctx.wa.pendentes = [{"id": "s1", "jid": "5565999900011@s.whatsapp.net"}]
+    cookie = entrar(ctx)
+    r = pedir(ctx, "POST", "/api/leads/L1/enviar", {"texto": "  Oi! Posso te ligar hoje às 15h?  "}, cookie=cookie)
+    assert r[0] == 200, r
+    assert ctx.wa.enviados == [("5565999900011@s.whatsapp.net", "Oi! Posso te ligar hoje às 15h?")]
+    lead = ctx.repo.lead_get("L1")
+    assert lead["situacao"] == "respondeu" and "agendamento" not in lead         # conversa começou: sai da cadência
+    assert ctx.wa.cancelados == ["s1"]                                           # e o toque pendente é cancelado
+    assert any("ana" in h["texto"] and "Posso te ligar" in h["texto"] for h in lead["historico"])
+    msgs = ctx.repo.msgs_do_lead("L1")
+    assert msgs[-1]["de_mim"] is True and msgs[-1]["texto"] == "Oi! Posso te ligar hoje às 15h?"
+    linha = ctx.repo.atendimento_lista(10, "L1")[0]
+    assert linha["acao"] == "humano" and linha["humanoRespondeu"] is True
+
+
+def test_envio_pela_tela_recusa_texto_vazio_longo_lead_que_saiu_e_numero_sem_whatsapp(ctx):
+    ctx.repo.lead_put(_lead(1, telefone="(65) 99990-0011"))
+    ctx.repo.lead_put(_lead(2, telefone="(65) 99990-0022", situacao="sair"))
+    ctx.repo.lead_put(_lead(3, telefone="(65) 99990-0033"))
+    ctx.wa.existem = ["5565999900011"]
+    cookie = entrar(ctx)
+    assert pedir(ctx, "POST", "/api/leads/L1/enviar", {"texto": "   "}, cookie=cookie)[0] == 400
+    assert pedir(ctx, "POST", "/api/leads/L1/enviar", {"texto": "a" * 1001}, cookie=cookie)[0] == 400
+    assert pedir(ctx, "POST", "/api/leads/L1/enviar", {"texto": 123}, cookie=cookie)[0] == 400
+    r = pedir(ctx, "POST", "/api/leads/L2/enviar", {"texto": "oi"}, cookie=cookie)
+    assert r[0] == 409 and "sair" in json_de(r)["erro"].lower()
+    r = pedir(ctx, "POST", "/api/leads/L3/enviar", {"texto": "oi"}, cookie=cookie)
+    assert r[0] == 400 and "whatsapp" in json_de(r)["erro"].lower()
+    assert not ctx.wa.enviados                                                   # nada saiu em nenhum caso
+
+
+def test_envio_pela_tela_exige_login_e_mostra_erro_se_o_whatsapp_cair(ctx):
+    ctx.repo.lead_put(_lead(1, telefone="(65) 99990-0011"))
+    assert pedir(ctx, "POST", "/api/leads/L1/enviar", {"texto": "oi"})[0] == 401
+    ctx.wa.fora = True
+    r = pedir(ctx, "POST", "/api/leads/L1/enviar", {"texto": "oi"}, cookie=entrar(ctx))
+    assert r[0] == 502 and "whatsapp" in json_de(r)["erro"].lower()
+    assert ctx.repo.lead_get("L1")["situacao"] == "ativo"                        # não mudou nada se não enviou
+    assert pedir(ctx, "POST", "/api/leads/L404/enviar", {"texto": "oi"}, cookie=entrar(ctx))[0] == 404

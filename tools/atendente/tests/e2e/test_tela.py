@@ -28,6 +28,14 @@ class WaFalso:
     def __init__(self):
         self.pendentes = [{"id": "ag1", "status": "PENDING"}, {"id": "ag2", "status": "PENDING"}]
         self.cancelados = []
+        self.enviados = []
+        self.existem = None
+
+    def verificar(self, numeros):
+        return {n: f"{n}@s.whatsapp.net" for n in numeros}
+
+    def enviar_texto(self, jid, texto):
+        self.enviados.append((jid, texto))
 
     def conectado(self):
         return True
@@ -367,3 +375,24 @@ def test_aguardando_mostra_ligar_atendente_e_liga(ctx, pagina):
     expect(pagina.get_by_role("switch", name="Respostas automáticas")).to_have_attribute("aria-checked", "true")
     assert ctx.repo.config_get("status") == "ativo"
     assert ctx.repo.config_get("auto_resposta") is True
+
+
+def test_equipe_responde_pela_tela_com_confirmacao(ctx, pagina):
+    ctx.wa.existem = None
+    entrar(pagina, ctx.url)
+    pagina.on("dialog", lambda d: d.accept())                        # "Enviar esta mensagem agora?"
+    coluna(pagina, "Responderam").locator(".card").click()
+    painel = pagina.get_by_role("dialog", name="Empresa Teste 4")
+    painel.get_by_label("Responder pelo WhatsApp").fill("Combinado, te ligo às 15h.")
+    painel.get_by_role("button", name="Enviar mensagem").click()
+    expect(pagina.locator("#avisos, [aria-live]").first).to_contain_text("Mensagem enviada")
+    assert ctx.wa.enviados and ctx.wa.enviados[-1][1] == "Combinado, te ligo às 15h."
+    expect(painel.get_by_label("Responder pelo WhatsApp")).to_have_value("")
+
+
+def test_enviar_vazio_nao_chama_o_servidor(ctx, pagina):
+    entrar(pagina, ctx.url)
+    coluna(pagina, "Responderam").locator(".card").click()
+    painel = pagina.get_by_role("dialog", name="Empresa Teste 4")
+    painel.get_by_role("button", name="Enviar mensagem").click()
+    assert not ctx.wa.enviados
