@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from scripts import wa_akg
-from scripts.wa_akg import (WaAkgCliente, caixa, responder_lead, distribuir_ritmo, ritmo_atual, WaAkgErro, agendar_plano, atualizacoes_agendados, cancelar_agendados, conferir, distribuir, ler_config,
+from scripts.wa_akg import (WaAkgCliente, avisar_equipe, caixa, responder_lead, distribuir_ritmo, ritmo_atual, WaAkgErro, agendar_plano, atualizacoes_agendados, cancelar_agendados, conferir, distribuir, ler_config,
                             main, mensagem_do_toque, numero_whatsapp, planejar, primeiro_nome, vence_hoje)
 
 # terça-feira, 10h em Cuiabá (14h UTC)
@@ -546,3 +546,62 @@ def test_caixa_e_responder_usam_o_jid_guardado_sem_consultar_o_whatsapp(tmp_path
     txt.write_text("Combinado!", encoding="utf-8")
     assert main(["responder", "--leads", leads, "--lead", "R1", "--texto-arquivo", str(txt), "--saida", saida, "--confirmo"], cliente=cliente(f)) == 0
     assert consultados(f) == []
+
+
+# --------------------------------------------------------------------------- resposta automática e aviso à equipe
+
+def test_responder_automatico_anota_e_so_deixa_uma_vez_por_dia_para_o_mesmo_lead():
+    f = Fake()
+    l = lead(etapa=1, situacao="respondeu")
+    u = responder_lead(cliente(f), l, jid(), "Obrigada! Quando quiser: https://cal.com/leticiareiners/30min", AGORA, auto=True)
+    assert u["data"]["respostaAutoEm"] == "2026-10-06T14:00:00Z"
+    assert u["data"]["historico"][-1]["texto"].startswith("Resposta automática enviada")
+    l2 = {**l, "respostaAutoEm": u["data"]["respostaAutoEm"]}
+    with pytest.raises(ValueError, match="já recebeu uma resposta automática"):
+        responder_lead(cliente(f), l2, jid(), "mais uma", AGORA + timedelta(hours=3), auto=True)
+    assert sum(1 for c in f.chamadas if c[1].endswith("/send")) == 1
+    responder_lead(cliente(f), l2, jid(), "no dia seguinte pode", AGORA + timedelta(hours=25), auto=True)   # passou das 24h
+    assert sum(1 for c in f.chamadas if c[1].endswith("/send")) == 2
+
+
+def test_responder_com_aprovacao_humana_nao_tem_o_limite_do_automatico():
+    f = Fake()
+    l = lead(etapa=1, situacao="respondeu", respostaAutoEm="2026-10-06T13:50:00Z")
+    responder_lead(cliente(f), l, jid(), "Aprovado pela Letícia", AGORA)
+    assert sum(1 for c in f.chamadas if c[1].endswith("/send")) == 1
+
+
+def test_avisar_equipe_manda_para_cada_numero_e_continua_se_um_falha():
+    f = Fake(existem=["5565999207108"])                       # o outro número "não tem WhatsApp"
+    r = avisar_equipe(cliente(f), ["65999207108", "(65) 99622-7110"], "ATENÇÃO: lead perguntou preço")
+    envios = [c for c in f.chamadas if c[1].endswith("/send")]
+    assert len(envios) == 1 and "5565999207108%40s.whatsapp.net/send" in envios[0][1]
+    assert envios[0][3] == {"message": {"text": "ATENÇÃO: lead perguntou preço"}}
+    assert r["enviados"] == ["5565999207108"] and r["erros"][0]["numero"] == "5565996227110"
+
+
+@pytest.mark.parametrize("texto,quebra", [("  ", "vazio"), ("a" * 601, "600 caracteres")])
+def test_avisar_equipe_recusa_texto_vazio_ou_longo(texto, quebra):
+    f = Fake()
+    with pytest.raises(ValueError, match=quebra):
+        avisar_equipe(cliente(f), ["5565999207108"], texto)
+    assert f.chamadas == []
+
+
+def test_cli_responder_auto_dispensa_confirmo_e_avisar_usa_os_numeros_da_equipe(tmp_path, monkeypatch):
+    leads, saida = arquivos(tmp_path, [lead("R1", etapa=1, jidWa=jid())])
+    txt = tmp_path / "t.txt"
+    txt.write_text("Obrigada!", encoding="utf-8")
+    f = Fake()
+    assert main(["responder", "--leads", leads, "--lead", "R1", "--texto-arquivo", str(txt), "--saida", saida, "--auto"], cliente=cliente(f)) == 0
+    assert json.load(open(saida))["updates"][0]["data"]["respostaAutoEm"]
+    monkeypatch.delenv("WA_AKG_AVISAR", raising=False)
+    g = Fake()
+    txt.write_text("ATENÇÃO: R1 pediu contrato", encoding="utf-8")
+    assert main(["avisar", "--texto-arquivo", str(txt), "--saida", saida], cliente=cliente(g)) == 0
+    assert sorted(consultados(g)) == ["5565996227110", "5565999207108"]
+    assert sum(1 for c in g.chamadas if c[1].endswith("/send")) == 2
+    monkeypatch.setenv("WA_AKG_AVISAR", "65988887777")
+    h = Fake()
+    assert main(["avisar", "--texto-arquivo", str(txt), "--saida", saida], cliente=cliente(h)) == 0
+    assert consultados(h) == ["5565988887777"]
