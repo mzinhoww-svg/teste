@@ -45,6 +45,60 @@ def _aplicar(repo, updates) -> int:
     return n
 
 
+def _adotar_pendentes(repo, wa, status_leads=(None, "", "ativo")) -> int:
+    """Um POST de agendamento que deu timeout pode ter agendado no WA-AKG sem o lead saber. Antes de planejar, adota
+    o pendente de quem está sem `agendamento`, para o planejador pular o lead e não duplicar o toque."""
+    try:
+        pend = wa.agendadas("pending")
+    except Exception:
+        return 0
+    por_numero = {}
+    for p in pend or []:
+        num = _numero(p.get("jid"))
+        if num and p.get("id") is not None:
+            por_numero.setdefault(num, p)
+    adotados = 0
+    for l in repo.leads_todos():
+        if l.get("agendamento") or l.get("situacao") not in status_leads:
+            continue
+        p = por_numero.get(wa_akg.numero_whatsapp(wa_akg.telefone_destino(l))) or por_numero.get(_numero(l.get("jidWa")))
+        if p is None:
+            continue
+        try:
+            repo.aplicar(l["id"], {"agendamento": {"n": wa_akg._etapa(l) + 1, "id": p["id"],
+                                                   "sendAt": p.get("sendAt"), "jid": p.get("jid")}})
+            adotados += 1
+        except KeyError:
+            continue
+    return adotados
+
+
+def _reconferir(repo, wa, updates, agora: datetime) -> int:
+    """O mundo muda durante a rodada (lead responde, alguém põe `parado`). Cancela o que esta rodada agendou e já
+    não deve sair."""
+    revertidos = 0
+    for u in updates or []:
+        ag = (u.get("data") or {}).get("agendamento")
+        if not isinstance(ag, dict) or not ag.get("id"):
+            continue
+        lead = repo.lead_get(u["id"])
+        ativo = repo.config_get("status", "parado") == "ativo"
+        if ativo and lead is not None and lead.get("situacao") in (None, "", "ativo"):
+            continue
+        try:
+            wa.cancelar(ag["id"])
+        except Exception:
+            continue                       # segue marcado: a conferência acompanha e a equipe vê no histórico
+        revertidos += 1
+        if lead is not None:
+            try:
+                repo.aplicar(u["id"], {"agendamento": {"__delete__": True}, "historico": wa_akg.registrar(
+                    lead.get("historico"), "Envio agendado cancelado: o lead respondeu ou a fila foi parada", agora)})
+            except KeyError:
+                pass
+    return revertidos
+
+
 def _rodar(args: list, wa) -> int:
     return wa_akg.main(args, cliente=wa)
 
@@ -67,9 +121,11 @@ def conferir_envios(repo, wa, agora: datetime, saida_dir: str) -> dict:
 
 
 def rodada_envios(repo, wa, agora: datetime, fotos_url: str, saida_dir: str) -> dict:
-    """conferir -> (ativo) planejar -> agendar --confirmo -> aplica os updates. Pausado/parado: cancela os pendentes.
+    """aguardando: não faz nada. conferir -> (ativo) planejar -> agendar --confirmo -> aplica os updates. Pausado/parado: cancela os pendentes.
     Quem liga a fila é a Letícia (config.status == "ativo"); por isso o agendamento roda com --confirmo."""
     status = repo.config_get("status", "parado")
+    if status == "aguardando":          # instalado, esperando a liberação da equipe: não agenda nem cancela
+        return {"aguardando": True}
     por_lote = _inteiro(repo.config_get("por_lote"), POR_LOTE_PADRAO, 1, wa_akg.POR_LOTE_MAX)
     limite_dia = _inteiro(repo.config_get("limite_dia"), LIMITE_DIA_PADRAO, 1, wa_akg.LIMITE_DIA_MAX)
     os.makedirs(saida_dir, exist_ok=True)
@@ -78,6 +134,8 @@ def rodada_envios(repo, wa, agora: datetime, fotos_url: str, saida_dir: str) -> 
         if "erro" in conferencia:
             return {"erro": "conferir"}
         if status != "ativo":
+            # Pausado/parado cancela TUDO o que a sessão tem pendente (corte de emergência). Já o núcleo, quando um
+            # lead responde, cancela só os pendentes daquele lead.
             saida = os.path.join(pasta, "cancelar.json")
             _rodar(["cancelar", "--leads", _leads_em(repo, pasta, "leads2.json"), "--saida", saida,
                     "--agora", wa_akg._iso(agora)], wa)
@@ -89,6 +147,7 @@ def rodada_envios(repo, wa, agora: datetime, fotos_url: str, saida_dir: str) -> 
             if r.get("erros"):
                 out["erros"] = len(r["erros"])
             return out
+        _adotar_pendentes(repo, wa)
         plano = os.path.join(pasta, "plano.json")
         rc = _rodar(["planejar", "--leads", _leads_em(repo, pasta, "leads2.json"), "--saida", plano,
                      "--fotos-url", fotos_url or "", "--por-lote", str(por_lote), "--limite-dia", str(limite_dia),
@@ -108,7 +167,9 @@ def rodada_envios(repo, wa, agora: datetime, fotos_url: str, saida_dir: str) -> 
             return {**out, "erro": "agendar"}
         r = _ler(ag)
         _aplicar(repo, r.get("updates"))
-        out.update({"agendados": len(r.get("agendados") or []), "erros": len(r.get("erros") or [])})
+        revertidos = _reconferir(repo, wa, r.get("updates"), agora)
+        out.update({"agendados": len(r.get("agendados") or []), "erros": len(r.get("erros") or []),
+                    "revertidos": revertidos})
         return out
 
 

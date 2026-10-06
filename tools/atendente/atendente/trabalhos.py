@@ -64,7 +64,11 @@ class Trabalhos:
     def _passo_planejador(self) -> None:
         agora = self.relogio()
         with self._trabalho:
-            ativo = self.repo.config_get("status", "parado") == "ativo"
+            status = self.repo.config_get("status", "parado")
+            if status == "aguardando":      # corte seguro: só marca o que já saiu, não agenda nem cancela
+                conferir_envios(self.repo, self.wa, agora, self._dir_saida())
+                return
+            ativo = status == "ativo"
             if ativo and not na_janela_de_envio(agora):
                 conferir_envios(self.repo, self.wa, agora, self._dir_saida())     # fora do horário: só marca o que saiu
                 return

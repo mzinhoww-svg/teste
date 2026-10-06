@@ -610,3 +610,22 @@ def test_cli_responder_auto_dispensa_confirmo_e_avisar_usa_os_numeros_da_equipe(
     h = Fake()
     assert main(["avisar", "--texto-arquivo", str(txt), "--saida", saida], cliente=cliente(h)) == 0
     assert consultados(h) == ["5565988887777"]
+
+
+def test_erro_do_wa_akg_nao_vaza_telefone_nem_jid(capsys):
+    e = WaAkgErro(500, "WA-AKG respondeu 500 em /chat/s1/5565999900011@s.whatsapp.net e /chat/s1/123456789012@lid, tel 5565999900012")
+    assert "5565999900011" not in str(e) and "123456789012" not in str(e) and "5565999900012" not in str(e)
+    assert str(e).count("[número]") == 3 and "/chat/s1/" in str(e)
+    assert "[número]" in str(WaAkgErro(0, "ok 12345678")) and str(WaAkgErro(0, "porta 3000 id 1234567")) == "porta 3000 id 1234567"
+
+
+
+def test_main_nao_imprime_telefone_do_erro(tmp_path, capsys):
+    class Quebra:
+        def conectado(self):
+            raise WaAkgErro(502, "WA-AKG não respondeu em /chat/s1/5565999900011@s.whatsapp.net (502)")
+
+    leads, saida = arquivos(tmp_path, [lead()])
+    assert main(["planejar", "--leads", leads, "--saida", saida], cliente=Quebra()) == 1
+    err = capsys.readouterr().err
+    assert "5565999900011" not in err and "[número]" in err

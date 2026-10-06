@@ -62,9 +62,17 @@ LOTE_CHECK = 50
 SENT, FAILED, PENDING = "SENT", "FAILED", "PENDING"
 
 
+_NUMERO = re.compile(r"\d+@(?:s\.whatsapp\.net|lid)|\d{8,}")
+
+
+def sem_numeros(texto: str) -> str:
+    """Telefone não vai para log nem terminal: jids (…@s.whatsapp.net, …@lid) e sequências de 8+ dígitos viram [número]."""
+    return _NUMERO.sub("[número]", texto)
+
+
 class WaAkgErro(Exception):
     def __init__(self, status, msg=""):
-        super().__init__(msg or f"WA-AKG respondeu {status}")
+        super().__init__(sem_numeros(msg or f"WA-AKG respondeu {status}"))
         self.status = status
 
 

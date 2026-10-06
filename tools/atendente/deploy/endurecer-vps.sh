@@ -5,7 +5,8 @@
 # O que faz, em português simples:
 #  1. Instala o fail2ban (bloqueia quem erra a senha várias vezes).
 #  2. Instala as atualizações automáticas de segurança.
-#  3. Confere o firewall: só as portas 22 (acesso), 80 e 443 (site) ficam abertas.
+#  3. Confere o firewall: só a porta do SSH (acesso, normalmente 22), 80 e 443 (site) ficam abertas.
+#     Antes de ligar, ele descobre as portas do SSH e libera todas; se não descobrir, não liga.
 #  4. OPCIONAL: troca a senha por chave SSH. Só acontece se você pedir e confirmar tudo.
 set -u
 
@@ -27,25 +28,48 @@ APT::Periodic::Unattended-Upgrade "1";' > /etc/apt/apt.conf.d/20auto-upgrades
 systemctl enable --now unattended-upgrades >/dev/null 2>&1 || true
 ok "atualizações automáticas de segurança ligadas"
 
-passo "2/4 Firewall (só 22, 80 e 443)"
-# Libera o 22 ANTES de ligar, para você não ficar de fora.
-ufw allow 22/tcp >/dev/null 2>&1
-ufw allow 80/tcp >/dev/null 2>&1
-ufw allow 443/tcp >/dev/null 2>&1
-if ! ufw status | grep -q "Status: active"; then
-  ufw --force enable >/dev/null 2>&1 || parar "não consegui ligar o firewall."
-fi
-ufw status | sed 's/^/    /'
-extras="$(ufw status | grep -E '^[0-9]+' | grep -Ev '^(22|80|443)(/tcp)?[[:space:]]' || true)"
-if [ -n "$extras" ]; then
-  echo
-  echo "    ATENÇÃO: o firewall tem outras portas abertas além de 22, 80 e 443:"
-  echo "$extras" | sed 's/^/      /'
-  echo "    Se não souber por que estão ali, me mostre esta tela antes de mexer."
+passo "2/4 Firewall (porta do SSH, 80 e 443)"
+# Descobre TODAS as portas em que o SSH atende, para você não ficar trancado do lado de fora.
+achar_portas_ssh() {
+  {
+    sshd -T 2>/dev/null | awk '/^port /{print $2}'
+    ss -tlnp 2>/dev/null | awk '/"sshd"/{n=split($4,a,":"); print a[n]}'
+    systemctl show ssh.socket -p Listen 2>/dev/null | grep -oE ':[0-9]+ ' | tr -d ': '
+    [ -n "${SSH_CONNECTION:-}" ] && echo "$SSH_CONNECTION" | awk '{print $4}'
+  } | grep -E '^[0-9]+$' | sort -un
+}
+PORTAS_SSH="$(achar_portas_ssh)"
+if [ -z "$PORTAS_SSH" ]; then
+  echo "    ATENÇÃO: não consegui descobrir em qual porta o SSH está atendendo."
+  echo "    Por segurança NÃO liguei o firewall (ligar sem liberar a porta certa trancaria você fora da VPS)."
+  echo "    Peça ajuda a quem cuida do sistema e me mostre esta tela. O resto (fail2ban e atualizações) já está feito."
+  FIREWALL=nao
 else
-  ok "firewall com só 22, 80 e 443"
+  FIREWALL=sim
+  LIBERADAS=""
+  for porta in $PORTAS_SSH; do
+    ufw allow "$porta/tcp" >/dev/null 2>&1 || parar "não consegui liberar a porta $porta/tcp no firewall. O firewall NÃO foi ligado."
+    LIBERADAS="$LIBERADAS $porta"
+  done
+  ufw allow 80/tcp >/dev/null 2>&1
+  ufw allow 443/tcp >/dev/null 2>&1
+  echo "    Portas do SSH liberadas antes de ligar o firewall:$LIBERADAS"
+  if ! ufw status | grep -q "Status: active"; then
+    ufw --force enable >/dev/null 2>&1 || parar "não consegui ligar o firewall."
+  fi
+  ufw status | sed 's/^/    /'
+  padrao="^($(echo "$PORTAS_SSH 80 443" | tr ' ' '|'))(/tcp)?[[:space:]]"
+  extras="$(ufw status | grep -E '^[0-9]+' | grep -Ev "$padrao" || true)"
+  if [ -n "$extras" ]; then
+    echo
+    echo "    ATENÇÃO: o firewall tem outras portas abertas além do SSH ($PORTAS_SSH), 80 e 443:"
+    echo "$extras" | sed 's/^/      /'
+    echo "    Se não souber por que estão ali, me mostre esta tela antes de mexer."
+  else
+    ok "firewall com só SSH ($PORTAS_SSH), 80 e 443"
+  fi
+  echo "    Obs.: portas que o Docker publica podem furar o ufw; por isso o atendente é publicado só em 127.0.0.1."
 fi
-echo "    Obs.: portas que o Docker publica podem furar o ufw; por isso o atendente é publicado só em 127.0.0.1."
 
 passo "3/4 Chave SSH (opcional)"
 echo "    Entrar por chave é mais seguro que por senha. É OPCIONAL e você pode pular."
