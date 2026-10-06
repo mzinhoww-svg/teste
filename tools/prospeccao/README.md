@@ -259,3 +259,17 @@ O envio automático usa o [WA-AKG](https://github.com/mrifqidaffaaditya/WA-AKG),
 - O lead guarda `agendamento` (toque, id no WA-AKG, horário). Só quando o WA-AKG confirma o envio é que o lead ganha `etapa` e `enviadoN`, e o toque aparece como enviado no card.
 
 **Cuidado com o fuso**: o WA-AKG lê um horário sem fuso como o fuso do sistema dele (padrão `Asia/Jakarta`). O script manda sempre em UTC com `Z`, então não depende dessa configuração.
+
+### A fila de envios (botão na Central)
+
+No funil **Aquecimento** há o painel **Fila de envios no WhatsApp**. Escolha quantas mensagens por vez a cada 30 minutos (de 1 a 10, padrão 5) e o máximo por dia (de 1 a 60, padrão 30), clique em **Iniciar fila de envios** e depois em **Confirmar**. A página só grava `config/disparo` (`status: "ativo"`, `porLote`, `intervaloMin: 30`, `limiteDia`); quem agenda é o Claude, a cada rodada:
+
+- **A cada hora**, pela rotina "Fila de envios WhatsApp", e no início de qualquer conversa com o Claude (se a última rodada tiver mais de 10 minutos). O painel avisa quando a fila fica mais de 1h30 sem rodada.
+- **O ritmo é uma regra, não uma média**: em qualquer intervalo de 30 minutos nunca saem mais de X mensagens, contando tudo o que o número já tem agendado ou enviado. Só dias úteis, das 9h às 17h de Cuiabá, e só a próxima hora fica agendada por vez, então **Pausar** pesa pouco: o que já estava agendado é cancelado na rodada seguinte, ou na hora se você pedir "cancele os agendamentos".
+- O painel mostra na fila, enviadas hoje, respostas novas e pulados, e avisos como "a sessão do WhatsApp caiu" ou "fora do horário de envio".
+
+### Respostas, funil e anotações
+
+A cada rodada o Claude lê as mensagens novas dos leads (`scripts/wa_akg.py caixa`, só leitura), classifica a intenção (sair, interesse, dúvida, redirecionou, neutra, mídia, resposta automática), **move o lead no funil** (`respondeu` o leva para "Responderam" e o tira da cadência; `sair` o tira de vez; nunca marca `fechou`) e **anota no histórico do card** o que a pessoa disse e os detalhes (datas, telefones, nomes). Preços, contrato, reclamação e irritação recebem `ATENÇÃO:` e o aviso na hora.
+
+**Resposta a lead nunca sai sozinha.** O Claude escreve uma sugestão (aparece no histórico do card como "Sugestão de resposta (não enviada)") e a lista no chat; só envia (`scripts/wa_akg.py responder --confirmo`) o texto que a Letícia aprovar. Se um dia ela quiser respostas automáticas para algum tipo simples, a regra muda na skill `disparar-wa`, por tipo.

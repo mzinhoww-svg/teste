@@ -48,6 +48,9 @@ USER_AGENT = "reiners-central/1.0"
 LIMITE_DIA = 30            # número novo: poucos por dia, para não ser banido
 JANELA = (9, 17)           # horas locais de envio, de segunda a sexta
 INTERVALO = (60, 180)      # segundos entre uma mensagem e a próxima
+JANELA_MIN = 30            # a fila segue "X mensagens a cada 30 minutos"
+POR_LOTE_MAX = 10          # teto de X: acima disso o WhatsApp costuma bloquear
+LIMITE_DIA_MAX = 60
 LEGENDA_MAX = 1024         # limite do WhatsApp para legenda de foto
 LOTE_CHECK = 50
 SENT, FAILED, PENDING = "SENT", "FAILED", "PENDING"
@@ -156,6 +159,10 @@ class WaAkgCliente:
     def agendadas(self, aba: str) -> list[dict]:
         r = self._pedir("GET", f"/scheduler/{self.sessao}?tab={aba}", repetir=True)
         return r.get("data", []) if isinstance(r, dict) else r
+
+    def enviar_texto(self, jid: str, texto: str) -> dict:
+        """Envio imediato de uma resposta. Sem repetição automática: repetir um POST de envio pode mandar duas vezes."""
+        return self._pedir("POST", f"/messages/{self.sessao}/{urllib.parse.quote(jid, safe='')}/send", {"message": {"text": texto}})
 
     def cancelar(self, id_: str) -> None:
         self._pedir("DELETE", f"/scheduler/{self.sessao}/{urllib.parse.quote(str(id_), safe='')}", repetir=True)
@@ -284,15 +291,63 @@ def distribuir(qtd: int, agora: datetime, *, limite_dia=LIMITE_DIA, ocupados: di
     return saida
 
 
+def distribuir_ritmo(qtd: int, agora: datetime, *, por_lote: int, janela_min: int = JANELA_MIN, limite_dia: int = LIMITE_DIA,
+                     ocupados: dict | None = None, recentes: list | None = None, janela=JANELA, rng=None,
+                     dias_uteis: bool = True, horizonte_min: int | None = None) -> list[datetime]:
+    """No máximo `por_lote` mensagens em QUALQUER intervalo de `janela_min` minutos (e não só em blocos fixos), com
+    espaçamento aleatório em torno de janela_min/por_lote, em dias úteis, dentro da janela e até `limite_dia` por dia.
+    `recentes`: horários já agendados ou enviados (entram na conta), `ocupados`: quantas já há em cada dia local.
+    `horizonte_min`: só planeja os próximos N minutos; o resto fica para a próxima rodada."""
+    if not 1 <= por_lote <= POR_LOTE_MAX:
+        raise ValueError(f"por_lote precisa estar entre 1 e {POR_LOTE_MAX}")
+    if not 1 <= limite_dia <= LIMITE_DIA_MAX:
+        raise ValueError(f"limite_dia precisa estar entre 1 e {LIMITE_DIA_MAX}")
+    rng = rng or random.Random()
+    cont = dict(ocupados or {})
+    passo = janela_min * 60 / por_lote
+    hist = sorted(recentes or [])[-por_lote:]
+    fim = agora + timedelta(minutes=horizonte_min) if horizonte_min else None
+    t, saida = agora + timedelta(minutes=2), []
+    while len(saida) < qtd:
+        if len(hist) >= por_lote:  # a mensagem de `por_lote` posições atrás precisa ter saído há pelo menos janela_min
+            t = max(t, hist[-por_lote] + timedelta(minutes=janela_min))
+        t = _na_janela(t, janela, dias_uteis)
+        dia = t.astimezone(FUSO).date()
+        if cont.get(dia, 0) >= limite_dia:
+            t = t.astimezone(FUSO).replace(hour=janela[0], minute=0, second=0, microsecond=0) + DIA
+            continue
+        if fim and t > fim:
+            break
+        saida.append(t)
+        hist.append(t)
+        cont[dia] = cont.get(dia, 0) + 1
+        t = t + timedelta(seconds=rng.uniform(0.5, 1.5) * passo)
+    return saida
+
+
 def _iso(d: datetime) -> str:
     return d.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 # --------------------------------------------------------------------------- plano
 
+def elegivel(l: dict, agora: datetime, so_ids: set | None = None, espera: dict | None = None) -> bool:
+    """Lead de WhatsApp, em cadência, com o toque vencendo hoje. `so_ids` restringe (e é o único jeito de o TESTE entrar)."""
+    if so_ids is not None and l.get("id") not in so_ids:
+        return False
+    if (l.get("id") == "TESTE" and so_ids is None) or l.get("canal") != "WhatsApp" or l.get("situacao") not in (None, "", "ativo"):
+        return False
+    return vence_hoje(l, agora, espera)
+
+
+def prioridade(l: dict) -> tuple:
+    return (-(_etapa(l) + 1), l.get("ordem") or 0, l.get("id", ""))  # a continuação sai antes do primeiro contato
+
+
 def planejar(leads: list[dict], agora: datetime, *, existem: dict, respondidas: set | None = None, fotos_url: str = "",
              limite_dia=LIMITE_DIA, ocupados: dict | None = None, janela=JANELA, intervalo=INTERVALO, rng=None,
-             espera: dict | None = None, max_leads: int | None = None, so_ids: set | None = None, dias_uteis: bool = True) -> dict:
+             espera: dict | None = None, max_leads: int | None = None, so_ids: set | None = None, dias_uteis: bool = True,
+             por_lote: int | None = None, recentes: list | None = None, horizonte_min: int | None = None) -> dict:
     """`existem`: número -> jid (None se o número não tem WhatsApp). Só entram leads de WhatsApp que vencem hoje.
     `so_ids` restringe a esses leads; é o único jeito de o card TESTE (o WhatsApp da própria Reiners) entrar."""
     respondidas = respondidas or set()
@@ -302,11 +357,7 @@ def planejar(leads: list[dict], agora: datetime, *, existem: dict, respondidas: 
         pulados.append({"leadId": l["id"], "nome": l.get("nome", ""), "n": n, "motivo": motivo})
 
     for l in leads:
-        if so_ids is not None and l.get("id") not in so_ids:
-            continue
-        if (l.get("id") == "TESTE" and so_ids is None) or l.get("canal") != "WhatsApp" or l.get("situacao") not in (None, "", "ativo"):
-            continue
-        if not vence_hoje(l, agora, espera):
+        if not elegivel(l, agora, so_ids, espera):
             continue
         n = _etapa(l) + 1
         ag = l.get("agendamento") or {}
@@ -342,11 +393,18 @@ def planejar(leads: list[dict], agora: datetime, *, existem: dict, respondidas: 
             midia = f"{fotos_url.rstrip('/')}/{foto}.jpg"
         itens.append({"leadId": l["id"], "nome": l.get("nome", ""), "n": n, "jid": existem[num], "texto": texto,
                       "midiaUrl": midia, "ordem": l.get("ordem") or 0})
-    itens.sort(key=lambda i: (-i["n"], i["ordem"], i["leadId"]))  # a continuação sai antes do primeiro contato
+    itens.sort(key=lambda i: (-i["n"], i["ordem"], i["leadId"]))
     if max_leads:
         itens = itens[:max_leads]
-    horarios = distribuir(len(itens), agora, limite_dia=limite_dia, ocupados=ocupados, janela=janela, intervalo=intervalo, rng=rng,
-                           dias_uteis=dias_uteis)
+    if por_lote:  # modo fila: X a cada 30 minutos, contando o que já está agendado
+        horarios = distribuir_ritmo(len(itens), agora, por_lote=por_lote, limite_dia=limite_dia, ocupados=ocupados, recentes=recentes,
+                                    janela=janela, rng=rng, dias_uteis=dias_uteis, horizonte_min=horizonte_min)
+        adiados = len(itens) - len(horarios)  # o que passou do horizonte fica para a próxima rodada
+        itens = itens[:len(horarios)]
+    else:
+        adiados = 0
+        horarios = distribuir(len(itens), agora, limite_dia=limite_dia, ocupados=ocupados, janela=janela, intervalo=intervalo, rng=rng,
+                               dias_uteis=dias_uteis)
     for i, h in zip(itens, horarios):
         i["sendAt"] = _iso(h)
         del i["ordem"]
@@ -355,8 +413,25 @@ def planejar(leads: list[dict], agora: datetime, *, existem: dict, respondidas: 
         d = h.astimezone(FUSO).strftime("%d/%m")
         por_dia[d] = por_dia.get(d, 0) + 1
     return {"geradoEm": _iso(agora), "planos": itens, "pulados": pulados,
-            "resumo": {"agendar": len(itens), "pulados": len(pulados), "porDia": por_dia,
+            "resumo": {"agendar": len(itens), "adiados": adiados, "pulados": len(pulados), "porDia": por_dia,
                        "primeiro": _iso(horarios[0]) if horarios else None, "ultimo": _iso(horarios[-1]) if horarios else None}}
+
+
+def ritmo_atual(pendentes: list[dict], historico: list[dict], agora: datetime) -> tuple[list, dict]:
+    """O que este número já tem no agendador: horários recentes ou futuros (entram na conta dos 30 minutos) e quantas
+    mensagens há em cada dia local, de hoje em diante (entram no limite do dia). Conta tudo do número, não só da central."""
+    recentes, ocupados = [], {}
+    hoje = agora.astimezone(FUSO).date()
+    for m in list(pendentes) + [x for x in historico if x.get("status") == SENT]:
+        d = _data(m.get("sendAt"))
+        if not d:
+            continue
+        if d >= agora - timedelta(hours=2):
+            recentes.append(d)
+        dia = d.astimezone(FUSO).date()
+        if dia >= hoje:
+            ocupados[dia] = ocupados.get(dia, 0) + 1
+    return recentes, ocupados
 
 
 def detectar_respostas(cliente: WaAkgCliente, leads: list[dict], existem: dict) -> set:
@@ -377,6 +452,65 @@ def detectar_respostas(cliente: WaAkgCliente, leads: list[dict], existem: dict) 
                 achados.add(l["id"])
                 break
     return achados
+
+
+def _texto_msg(m: dict) -> str:
+    t = str(m.get("content") or "").strip()
+    return (t or f"[{str(m.get('type') or 'mensagem').lower()}]")[:1000]
+
+
+def acompanhavel(l: dict) -> bool:
+    """Lead de WhatsApp que já recebeu o toque 1 e ainda está em conversa (em cadência ou que respondeu)."""
+    return bool(l.get("enviado1")) and l.get("canal") == "WhatsApp" and l.get("situacao") in (None, "", "ativo", "respondeu")
+
+
+def caixa(cliente: WaAkgCliente, leads: list[dict], existem: dict, agora: datetime, max_conversas: int = 200) -> dict:
+    """Só leitura. Para cada lead acompanhável, as mensagens que ELE mandou depois da última vez que a central viu
+    (`respostasVistasAte`; na primeira vez, depois do toque 1), com o fim da conversa para dar contexto. Quem classifica,
+    anota e decide a resposta é o Claude. Melhor esforço: se o WA-AKG guardar a conversa sob outro endereço (LID), não aparece."""
+    conversas, erros, sem_jid, vistos = [], [], 0, 0
+    for l in leads:
+        if not acompanhavel(l) or vistos >= max_conversas:
+            continue
+        jid = l.get("jidWa") or existem.get(numero_whatsapp(telefone_destino(l)))
+        if not jid:
+            sem_jid += 1
+            continue
+        vistos += 1
+        try:
+            msgs = cliente.mensagens(jid)
+        except WaAkgErro as e:
+            erros.append({"leadId": l["id"], "erro": str(e)})
+            continue
+        desde = _data(l.get("respostasVistasAte")) or _data(l.get("enviado1"))
+        novas = [m for m in msgs if not m.get("fromMe") and (_data(m.get("timestamp")) is None or desde is None or _data(m["timestamp"]) > desde)]
+        if not novas:
+            continue
+        ordem = sorted(msgs, key=lambda m: _data(m.get("timestamp")) or datetime.min.replace(tzinfo=timezone.utc))
+        ultimo = max((_data(m.get("timestamp")) for m in novas if _data(m.get("timestamp"))), default=None)
+        conversas.append({
+            "leadId": l["id"], "nome": l.get("nome", ""), "situacao": l.get("situacao") or "ativo", "etapa": _etapa(l), "jid": jid,
+            "novas": [{"em": m.get("timestamp"), "tipo": str(m.get("type") or "TEXT"), "texto": _texto_msg(m)} for m in novas],
+            "conversa": [{"de": "nós" if m.get("fromMe") else "lead", "em": m.get("timestamp"), "texto": _texto_msg(m)} for m in ordem[-8:]],
+            "vistasAte": _iso(ultimo) if ultimo else None})
+    return {"geradoEm": _iso(agora), "conversas": conversas, "erros": erros,
+            "resumo": {"monitorados": vistos, "comRespostaNova": len(conversas), "semJid": sem_jid, "erros": len(erros)}}
+
+
+def responder_lead(cliente: WaAkgCliente, lead: dict, jid: str, texto: str, agora: datetime) -> dict:
+    """Envia uma resposta já aprovada pela Letícia, na hora. Recusa lead que saiu ou fechou e texto vazio ou longo demais."""
+    texto = (texto or "").strip()
+    if lead.get("situacao") in ("sair", "fechou"):
+        raise ValueError(f"o lead {lead['id']} está como '{lead['situacao']}': não se escreve mais para ele por aqui")
+    if not texto:
+        raise ValueError("o texto da resposta está vazio")
+    if len(texto) > 1000:
+        raise ValueError("a resposta passa de 1000 caracteres; encurte antes de enviar")
+    cliente.enviar_texto(jid, texto)
+    resumo = texto if len(texto) <= 200 else texto[:197] + "..."
+    return {"id": lead["id"], "data": {
+        "respostaSugerida": {"__delete__": True},
+        "historico": registrar(lead.get("historico"), f"Resposta enviada pelo WhatsApp: {resumo}", agora, "resposta")}}
 
 
 def agendar_plano(cliente: WaAkgCliente, planos: list[dict]) -> dict:
@@ -433,6 +567,8 @@ def conferir(leads: list[dict], pendentes: list[dict], historico: list[dict], ag
             resumo["enviados"] += 1
             quando = _iso(_data(hist[id_].get("sendAt")) or _data(ag.get("sendAt")))
             dados = {"agendamento": apagar, "historico": registrar(l.get("historico"), f"Toque {n} enviado", agora)}
+            if ag.get("jid"):
+                dados["jidWa"] = ag["jid"]  # as próximas rodadas não precisam consultar o WhatsApp de novo
             if _etapa(l) == n - 1:  # nunca pula um toque
                 dados.update({"etapa": n, f"enviado{n}": quando})
             updates.append({"id": l["id"], "data": dados})
@@ -446,7 +582,10 @@ def conferir(leads: list[dict], pendentes: list[dict], historico: list[dict], ag
             resumo["sumiram"] += 1
             updates.append({"id": l["id"], "data": {"agendamento": apagar, "historico": registrar(
                 l.get("historico"), f"Toque {n} não está mais agendado no WhatsApp", agora)}})
-    return {"geradoEm": _iso(agora), "updates": updates, "resumo": resumo}
+    hoje = agora.astimezone(FUSO).date()
+    enviadas_hoje = sum(1 for x in historico if x.get("status") == SENT and _data(x.get("sendAt")) and _data(x["sendAt"]).astimezone(FUSO).date() == hoje)
+    # os dois números do painel da central: tudo o que este número tem no agendador, da central ou não
+    return {"geradoEm": _iso(agora), "updates": updates, "resumo": resumo, "painel": {"naFila": len(pendentes), "enviadasHoje": enviadas_hoje}}
 
 
 def cancelar_agendados(cliente: WaAkgCliente, leads: list[dict], pendentes: list[dict], agora: datetime) -> dict:
@@ -504,6 +643,8 @@ def main(argv=None, cliente=None):
     p.add_argument("--fotos-url", default="")
     p.add_argument("--limite-dia", type=int, default=LIMITE_DIA)
     p.add_argument("--max", type=int, default=None, help="no máximo N mensagens neste plano")
+    p.add_argument("--por-lote", type=int, default=None, help=f"modo fila: X mensagens a cada {JANELA_MIN} minutos (1 a {POR_LOTE_MAX})")
+    p.add_argument("--horizonte-min", type=int, default=None, help="modo fila: só planeja os próximos N minutos (o resto fica para a próxima rodada)")
     p.add_argument("--so", default="", help="ids separados por vírgula; só estes entram (use TESTE para o primeiro envio)")
     p.add_argument("--janela", default="", help="só para teste (exige --so): horas de envio, ex. 0-24. Padrão 9-17")
     p.add_argument("--todos-os-dias", action="store_true", help="só para teste (exige --so): inclui sábado e domingo")
@@ -518,6 +659,18 @@ def main(argv=None, cliente=None):
     c.add_argument("--leads", required=True)
     c.add_argument("--saida", required=True)
     c.add_argument("--agora", default="")
+    k = sub.add_parser("caixa", help="lê as mensagens novas dos leads (só leitura) para o Claude classificar")
+    k.add_argument("--leads", required=True)
+    k.add_argument("--saida", required=True)
+    k.add_argument("--max-conversas", type=int, default=200)
+    k.add_argument("--agora", default="")
+    rp = sub.add_parser("responder", help="envia na hora uma resposta já aprovada (exige --confirmo)")
+    rp.add_argument("--leads", required=True)
+    rp.add_argument("--lead", required=True, help="id do lead")
+    rp.add_argument("--texto-arquivo", required=True, help="arquivo com o texto aprovado (evita problema de aspas)")
+    rp.add_argument("--saida", required=True)
+    rp.add_argument("--confirmo", action="store_true", help="a Letícia aprovou este texto")
+    rp.add_argument("--agora", default="")
     x = sub.add_parser("cancelar", help="cancela no WA-AKG o que ainda está pendente (nada que já saiu)")
     x.add_argument("--leads", required=True)
     x.add_argument("--saida", required=True)
@@ -525,6 +678,9 @@ def main(argv=None, cliente=None):
     args = ap.parse_args(argv)
 
     try:
+        if args.cmd == "responder" and not args.confirmo:
+            print("Nada enviado: falta --confirmo (a Letícia precisa ter aprovado o texto).", file=sys.stderr)
+            return 2
         if args.cmd == "agendar" and not args.confirmo:
             print("Nada agendado: falta --confirmo (a Letícia precisa ter visto o plano).", file=sys.stderr)
             return 2
@@ -544,17 +700,29 @@ def main(argv=None, cliente=None):
             if not cli.conectado():
                 print("A sessão do WhatsApp não está conectada no WA-AKG (escanear o QR de novo).", file=sys.stderr)
                 return 3
-            numeros = sorted({n for n in (numero_whatsapp(telefone_destino(l)) for l in leads
-                                          if l.get("canal") == "WhatsApp") if n})
+            # Consulta o WhatsApp só dos que podem sair agora (em modo fila, só os primeiros): consultar todos a cada
+            # rodada parece robô. O resto espera a vez.
+            so = {i.strip() for i in args.so.split(",") if i.strip()} or None
+            alvo = sorted((l for l in leads if elegivel(l, agora, so) and (l.get("agendamento") or {}).get("n") != _etapa(l) + 1), key=prioridade)
+            candidatos_total = len(alvo)
+            if args.por_lote:
+                alvo = alvo[:max(20, args.por_lote * 6)]
+            leads = alvo
+            numeros = sorted({n for n in (numero_whatsapp(telefone_destino(l)) for l in leads) if n})
             existem = cli.verificar(numeros)
             respondidas = detectar_respostas(cli, leads, existem)
             ocupados = {}
             for dm, q in (json.loads(args.ocupados) if args.ocupados else {}).items():
                 ocupados[datetime.strptime(f"{dm}/{agora.astimezone(FUSO).year}", "%d/%m/%Y").date()] = int(q)
+            recentes = None
+            if args.por_lote:  # modo fila: conta o que o número já tem no agendador, da central ou não
+                recentes, ocupados = ritmo_atual(cli.agendadas("pending"), cli.agendadas("history"), agora)
             plano = planejar(leads, agora, existem=existem, respondidas=respondidas, fotos_url=args.fotos_url,
+                             por_lote=args.por_lote, recentes=recentes, horizonte_min=args.horizonte_min,
                              limite_dia=args.limite_dia, ocupados=ocupados, max_leads=args.max, janela=janela,
                              dias_uteis=not args.todos_os_dias,
                              so_ids={i.strip() for i in args.so.split(",") if i.strip()} or None)
+            plano["resumo"]["aguardandoVez"] = candidatos_total - len(leads)  # vencem hoje mas ainda não foram consultados
             _gravar(args.saida, plano)
             print(json.dumps(plano["resumo"], ensure_ascii=False))
         elif args.cmd == "agendar":
@@ -564,6 +732,28 @@ def main(argv=None, cliente=None):
             _gravar(args.saida, r)
             print(json.dumps({"agendados": len(r["agendados"]), "erros": len(r["erros"])}, ensure_ascii=False))
             return 0 if not r["erros"] else 1
+        elif args.cmd == "caixa":
+            agora, leads = _agora(args.agora), _ler(args.leads)
+            numeros = sorted({n for n in (numero_whatsapp(telefone_destino(l)) for l in leads if acompanhavel(l) and not l.get("jidWa")) if n})
+            r = caixa(cli, leads, cli.verificar(numeros) if numeros else {}, agora, args.max_conversas)
+            _gravar(args.saida, r)
+            print(json.dumps(r["resumo"], ensure_ascii=False))
+        elif args.cmd == "responder":
+            agora = _agora(args.agora)
+            lead = next((l for l in _ler(args.leads) if l.get("id") == args.lead), None)
+            if not lead:
+                print(f"Lead {args.lead} não está no arquivo.", file=sys.stderr)
+                return 2
+            with open(args.texto_arquivo, encoding="utf-8") as fh:
+                texto = fh.read()
+            num = numero_whatsapp(telefone_destino(lead))
+            jid = lead.get("jidWa") or (cli.verificar([num]).get(num) if num else None)
+            if not jid:
+                print("O número do lead não tem WhatsApp ou não tem telefone.", file=sys.stderr)
+                return 2
+            u = responder_lead(cli, lead, jid, texto, agora)
+            _gravar(args.saida, {"updates": [u]})
+            print(json.dumps({"enviado": True, "lead": args.lead}, ensure_ascii=False))
         elif args.cmd == "cancelar":
             r = cancelar_agendados(cli, _ler(args.leads), cli.agendadas("pending"), _agora(args.agora))
             _gravar(args.saida, r)
@@ -573,6 +763,9 @@ def main(argv=None, cliente=None):
             r = conferir(_ler(args.leads), cli.agendadas("pending"), cli.agendadas("history"), _agora(args.agora))
             _gravar(args.saida, r)
             print(json.dumps(r["resumo"], ensure_ascii=False))
+    except ValueError as e:  # ritmo fora dos limites seguros
+        print(str(e), file=sys.stderr)
+        return 2
     except WaAkgErro as e:
         print(str(e), file=sys.stderr)
         return 1

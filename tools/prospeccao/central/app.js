@@ -22,13 +22,19 @@
     podeMarcar: false,
     gravando: {},
     enriq: null,                                    // config/enriquecimento (o Claude grava; a página só pede)
+    disparo: null,                                  // config/disparo: a página autoriza e pausa a fila; o Claude agenda e grava o andamento
+    disparoErro: false,
+    filaConfirmar: false,                           // confirmação de "Iniciar fila", no próprio lugar
+    filaX: null,                                    // o que está digitado (texto); null = valor do banco ou o padrão
+    filaDia: null,
+    filaAberta: false,                              // o painel da fila abre e fecha ao toque; o estado sobrevive ao redesenho
     base: {},                                       // coleção base (faixas B e C da Explee), assinada só quando o funil Base abre
     baseLista: [],                                  // a mesma coleção já ordenada (faixa, score)
     baseAssinada: false,
     bsLimite: 100,                                  // linhas mostradas; "Mostrar mais" soma 100
     bsConfirmar: false,                             // confirmação do pedido dos filtrados, no próprio lugar
     bsLote: null,                                   // { feitos, total } enquanto o pedido em lote grava
-    carregado: { leads: false, clientes: false, enriq: false, base: false },
+    carregado: { leads: false, clientes: false, enriq: false, disparo: false, base: false },
     fechando: null,
     novoCliente: false,
     filtro: {
@@ -1189,7 +1195,7 @@
     return secao("Histórico", [
       lista.length ? el("ol", { class: "tempo" }, lista.map(function (x) {
         var d = new Date(x.em);
-        return el("li", { class: x.tipo === "nota" || x.tipo === "explee" ? x.tipo : null }, [
+        return el("li", { class: x.tipo === "nota" || x.tipo === "explee" || x.tipo === "resposta" ? x.tipo : null }, [
           el("time", { datetime: x.em, text: dataCurta(d) + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0") }),
           el("span", null, [x.texto, x.desfazer ? el("button", { type: "button", class: "btn desfazer-h", disabled: !estado.podeMarcar || !!estado.gravando["leads/" + l.id],
             onclick: function () { desfazerToque(l, x.desfazer); } }, ["Desfazer"]) : null])
@@ -1423,6 +1429,127 @@
     }
   }
   $("btn-enriq").addEventListener("click", pedirEnriq);
+
+  // ================= Fila de envios no WhatsApp: autorização e andamento (config/disparo) =================
+  // A página só autoriza e pausa: grava status "ativo" ou "pausado" com o ritmo (X a cada 30 minutos e o máximo do dia).
+  // Quem agenda no WhatsApp (WA-AKG), acompanha as respostas e grava o andamento é o Claude, a cada rodada.
+  var CAMINHO_DISPARO = "config/disparo";
+  var FILA_WA = { xPadrao: 5, xMax: 10, diaPadrao: 30, diaMax: 60, intervaloMin: 30, atrasoMin: 90 };
+  function inteiroEm(v, min, max) {
+    var n = Number(v);
+    return v !== "" && v != null && isFinite(n) && n === Math.floor(n) && n >= min && n <= max ? n : null;
+  }
+  function ritmoFilaWa() {
+    var d = estado.disparo || {};
+    var x = estado.filaX != null ? estado.filaX : (d.porLote != null ? String(d.porLote) : String(FILA_WA.xPadrao));
+    var dia = estado.filaDia != null ? estado.filaDia : (d.limiteDia != null ? String(d.limiteDia) : String(FILA_WA.diaPadrao));
+    return { x: x, dia: dia, nx: inteiroEm(x, 1, FILA_WA.xMax), ndia: inteiroEm(dia, 1, FILA_WA.diaMax) };
+  }
+  function motivoFilaWa() {
+    var r = ritmoFilaWa();
+    if (!estado.podeMarcar) return "Sem acesso para gravar no banco: a fila fica desligada.";
+    if (estado.disparoErro) return "Não deu para ler o andamento no banco. Recarregue a página.";
+    if (!estado.carregado.disparo) return "Carregando o andamento.";
+    if (estado.gravando[CAMINHO_DISPARO]) return "Registrando.";
+    if ((estado.disparo || {}).status === "ativo") return "A fila já está ativa.";
+    if (r.nx == null) return "Mensagens a cada 30 minutos: de 1 a " + FILA_WA.xMax + ".";
+    if (r.ndia == null) return "Máximo por dia: de 1 a " + FILA_WA.diaMax + ".";
+    return "";
+  }
+  function iniciarFilaWa() {
+    if (motivoFilaWa()) return;
+    var r = ritmoFilaWa();
+    // update exige o documento; se ainda não existe, set grava os mesmos campos
+    gravar(CAMINHO_DISPARO, { status: "ativo", porLote: r.nx, intervaloMin: FILA_WA.intervaloMin, limiteDia: r.ndia,
+      iniciadoEm: new Date().toISOString(), pausadoEm: null }, null, !estado.disparo).then(function (ok) {
+      estado.filaConfirmar = false;
+      estado.filaX = null; estado.filaDia = null;
+      render();
+      if (ok) toast("Fila ativa: " + r.nx + " a cada 30 minutos. O Claude agenda na próxima rodada; para começar agora, abra a conversa com ele e mande qualquer mensagem.", null, 10000);
+    });
+  }
+  function pausarFilaWa() {
+    if (!estado.podeMarcar || estado.gravando[CAMINHO_DISPARO] || (estado.disparo || {}).status !== "ativo") return;
+    gravar(CAMINHO_DISPARO, { status: "pausado", pausadoEm: new Date().toISOString() }, null, false).then(function (ok) {
+      if (ok) toast("Fila pausada. O que já estava agendado é cancelado na próxima rodada do Claude; para parar na hora, peça a ele para cancelar os agendamentos.", null, 12000);
+    });
+  }
+  function filaWaParada(d) {  // ativa, mas o Claude não roda há mais de 90 minutos
+    if (d.status !== "ativo") return false;
+    var ref = new Date(d.ultimaRodada || d.iniciadoEm || ""), idade = (Date.now() - ref.getTime()) / 60000;
+    return !isNaN(ref) && idade > FILA_WA.atrasoMin;
+  }
+  function atualizarMotivoFilaWa() {  // vale a cada tecla, sem refazer os campos (o foco fica onde está)
+    var motivo = motivoFilaWa(), btn = $("btn-fila"), m = $("fila-motivo");
+    if (btn) {
+      if (motivo) { btn.setAttribute("aria-disabled", "true"); btn.setAttribute("aria-describedby", "fila-motivo"); }
+      else { btn.removeAttribute("aria-disabled"); btn.removeAttribute("aria-describedby"); }
+    }
+    var ok = $("fila-ok");
+    if (ok) { if (motivo) ok.setAttribute("aria-disabled", "true"); else ok.removeAttribute("aria-disabled"); }
+    if (m) { m.textContent = motivo; m.hidden = !motivo; }
+  }
+  function desenharFilaWa() {
+    var sec = $("fila-wa");
+    sec.hidden = estado.funil !== "aq";
+    if (sec.hidden) return;
+    var d = estado.disparo || {}, st = d.status || "parado";
+    var sig = JSON.stringify([d, estado.filaConfirmar, estado.podeMarcar, estado.carregado.disparo, estado.disparoErro,
+      !!estado.gravando[CAMINHO_DISPARO], Math.floor(Date.now() / 300000)]);
+    if (sec._sig === sig) { atualizarMotivoFilaWa(); return; }
+    sec._sig = sig;
+    var foco = document.activeElement && sec.contains(document.activeElement) ? document.activeElement.id : null;
+    var antes = sec.querySelector("details");
+    if (antes) estado.filaAberta = antes.open;  // lido do elemento na hora: o evento "toggle" chega depois e perderia a corrida com o snapshot
+    sec.textContent = "";
+    // Recolhido por padrão: uma linha só com o essencial, para a fila de leads continuar no alto da tela (no celular também).
+    var res0 = d.resumo || {};
+    var resumoTxt = "Fila de envios no WhatsApp · " + (st === "ativo"
+      ? "ativa · " + (d.porLote || "?") + " a cada " + (d.intervaloMin || FILA_WA.intervaloMin) + " min" + (res0.naFila != null ? " · " + res0.naFila + " na fila" : "") + (d.aviso || filaWaParada(d) ? " · atenção" : "")
+      : st === "pausado" ? "pausada" : "parada");
+    var det = el("details", { class: "fila-det", open: estado.filaAberta || estado.filaConfirmar ? "" : null },
+      [el("summary", { id: "fila-resumo", text: resumoTxt })]);
+    var corpo = el("div", { class: "fila-corpo" });
+    det.appendChild(corpo);
+    sec.appendChild(det);
+    var r = ritmoFilaWa(), card = el("div", { class: "fila-card" });
+    if (st === "ativo") {
+      var res = d.resumo || {};
+      var num = function (rot, v) { return [rot, v != null ? v : "—"]; };
+      card.appendChild(el("p", { class: "fila-estado", text: "Fila ativa" + (d.iniciadoEm ? " desde " + horaDe(d.iniciadoEm) : "") + " · " + (d.porLote || "?") + " a cada " + (d.intervaloMin || FILA_WA.intervaloMin) + " min · máx. " + (d.limiteDia || "?") + " por dia" }));
+      card.appendChild(numerosEnriq([num("Na fila", res.naFila), num("Enviadas hoje", res.enviadasHoje), num("Respostas novas", res.respostasNovas), num("Pulados", res.pulados)]));
+      if (d.aviso) card.appendChild(el("p", { class: "fila-aviso", text: d.aviso }));
+      if (filaWaParada(d)) card.appendChild(el("p", { class: "fila-aviso", text: "O Claude não roda a fila há mais de 1h30. Abra a conversa com ele e mande qualquer mensagem." }));
+      card.appendChild(el("p", { class: "fila-hora", text: d.ultimaRodada ? "Última rodada às " + horaDe(d.ultimaRodada) : "Esperando a primeira rodada do Claude." }));
+      card.appendChild(el("div", { class: "fila-acoes" }, [el("button", { type: "button", class: "btn", id: "btn-fila-pausar",
+        "aria-disabled": !estado.podeMarcar || estado.gravando[CAMINHO_DISPARO] ? "true" : null, onclick: pausarFilaWa }, ["Pausar fila"])]));
+      corpo.appendChild(card);
+      if ((foco === "btn-fila-pausar" || foco === "fila-resumo") && $(foco)) $(foco).focus({ preventScroll: true });
+      return;
+    }
+    corpo.appendChild(el("p", { class: "fila-texto", text: "Manda os toques que vencem hoje pelo WhatsApp, poucos por vez, de segunda a sexta, das 9h às 17h (Cuiabá). O Claude agenda, acompanha as respostas e anota no lead." }));
+    if (st === "pausado") corpo.appendChild(el("p", { class: "fila-estado parado", text: "Fila pausada" + (d.pausadoEm ? " às " + horaDe(d.pausadoEm) : "") + ". O que já estava agendado é cancelado na próxima rodada do Claude." }));
+    var campo = function (id, rot, valor, max, onde) {
+      return el("label", { class: "campo", for: id }, [rot, el("input", { id: id, type: "number", min: "1", max: String(max), step: "1", inputmode: "numeric", value: valor,
+        oninput: function (ev) { estado[onde] = ev.target.value; atualizarMotivoFilaWa(); } })]);
+    };
+    corpo.appendChild(el("div", { class: "fila-campos" }, [campo("fila-x", "Mensagens a cada 30 min", r.x, FILA_WA.xMax, "filaX"), campo("fila-dia", "Máximo por dia", r.dia, FILA_WA.diaMax, "filaDia")]));
+    if (estado.filaConfirmar && !motivoFilaWa()) {
+      corpo.appendChild(el("p", { class: "fila-pergunta", id: "fila-pergunta", text: "Começar a mandar " + r.nx + " mensagens a cada 30 minutos, no máximo " + r.ndia + " por dia, para leads reais?" }));
+      corpo.appendChild(el("div", { class: "fila-acoes" }, [
+        el("button", { type: "button", class: "btn principal", id: "fila-ok", "aria-describedby": "fila-pergunta", onclick: iniciarFilaWa }, ["Confirmar"]),
+        el("button", { type: "button", class: "btn", id: "fila-nao", onclick: function () { estado.filaConfirmar = false; render(); if ($("btn-fila")) $("btn-fila").focus(); } }, ["Cancelar"])]));
+      if (foco && foco !== "fila-nao" && foco !== "fila-x" && foco !== "fila-dia") foco = "fila-ok";
+      if (foco === "btn-fila") foco = "fila-ok";
+    } else {
+      corpo.appendChild(el("div", { class: "fila-acoes" }, [el("button", { type: "button", class: "btn principal", id: "btn-fila",
+        onclick: function () { if (motivoFilaWa()) return; estado.filaConfirmar = true; render(); if ($("fila-ok")) $("fila-ok").focus(); } },
+        [st === "pausado" ? "Retomar fila" : "Iniciar fila de envios"])]));
+    }
+    corpo.appendChild(el("p", { class: "fila-motivo", id: "fila-motivo", hidden: "" }));
+    atualizarMotivoFilaWa();
+    if (foco && $(foco)) $(foco).focus({ preventScroll: true });
+  }
 
   // ================= BASE: faixas B e C da Explee =================
   // Lista leve (coleção base, um documento enxuto por empresa). A página só pede: grava status "pedido" e pedidoEm
@@ -2101,6 +2228,7 @@
     if (pv) renderPV(); else if (ld) renderLD(); else if (bs) renderBS(); else renderAQ();
     desenharMeta();
     desenharEnriq();
+    desenharFilaWa();
     contarFiltros();
     aplicarDetalhe();
   }
@@ -2228,6 +2356,11 @@
       estado.carregado.enriq = true;
       render();
     }, function () { estado.enriqErro = true; render(); });  // sem leitura, nada de pedido: um set às cegas apagaria o histórico
+    db.doc(CAMINHO_DISPARO).onSnapshot(function (d) {
+      estado.disparo = d.exists ? d.data() : null;
+      estado.carregado.disparo = true;
+      render();
+    }, function () { estado.disparoErro = true; render(); });  // sem leitura, nada de iniciar: um set às cegas apagaria o andamento
     db.doc("config/posvenda").onSnapshot(function (d) {
       estado.pv = d.exists ? d.data() : null;
       render();

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from scripts import wa_akg
-from scripts.wa_akg import (WaAkgCliente, WaAkgErro, agendar_plano, atualizacoes_agendados, cancelar_agendados, conferir, distribuir, ler_config,
+from scripts.wa_akg import (WaAkgCliente, caixa, responder_lead, distribuir_ritmo, ritmo_atual, WaAkgErro, agendar_plano, atualizacoes_agendados, cancelar_agendados, conferir, distribuir, ler_config,
                             main, mensagem_do_toque, numero_whatsapp, planejar, primeiro_nome, vence_hoje)
 
 # terça-feira, 10h em Cuiabá (14h UTC)
@@ -43,6 +43,10 @@ class Fake:
         if url.endswith("/check"):
             res = [{"number": n, "exists": (self.existem is None or n in self.existem), "jid": jid(n)} for n in corpo["numbers"]]
             return 200, {}, json.dumps({"status": True, "message": "Operation successful", "data": {"results": res}}).encode()
+        if metodo == "POST" and url.endswith("/send"):
+            if self.falhar_post:
+                return self.falhar_post, {}, b""
+            return 200, {}, json.dumps({"status": True, "data": {"key": {"id": "m1"}}}).encode()
         if metodo == "DELETE":
             return 200, {}, b"{}"
         if metodo == "POST" and "/scheduler/" in url:
@@ -262,6 +266,7 @@ def test_conferir_marca_enviado_falha_sumiu_e_deixa_pendente():
     assert "etapa" not in por_id["E"]                    # lead que já estava na etapa 1: nunca pula nem volta um toque
     assert "etapa" not in por_id["B"] and "falhou" in por_id["B"]["historico"][-1]["texto"]
     assert "C" not in por_id and "F" not in por_id and "não está mais agendado" in por_id["D"]["historico"][-1]["texto"]
+    assert r["painel"] == {"naFila": 1, "enviadasHoje": 2}                      # s1 e s5 saíram hoje; s3 ainda está na fila
 
 
 # --------------------------------------------------------------------------- linha de comando
@@ -336,3 +341,208 @@ def test_verificar_aceita_a_resposta_da_doc_e_a_real_e_usa_o_jid_devolvido():
     for resposta in ({"status": True, "data": {"results": [item]}}, {"success": True, "results": [item]}):
         c = WaAkgCliente("http://wa/api", "k", "reiners", transporte=transporte(resposta), dormir=lambda s: None)
         assert c.verificar(["5565996227110"]) == {"5565996227110": "556596227110@s.whatsapp.net"}
+
+
+# --------------------------------------------------------------------------- ritmo: X a cada 30 minutos
+
+@pytest.mark.parametrize("por_lote", [1, 3, 5, 10])
+@pytest.mark.parametrize("semente", [1, 2, 3])
+def test_ritmo_nunca_passa_de_x_em_qualquer_intervalo_de_30_minutos(por_lote, semente):
+    hs = distribuir_ritmo(120, AGORA, por_lote=por_lote, limite_dia=60, rng=random.Random(semente))
+    assert hs == sorted(hs) and len(hs) == 120
+    for i, h in enumerate(hs):  # janela deslizante: a partir de qualquer mensagem, no máximo X nos 30 minutos seguintes
+        assert sum(1 for x in hs if h <= x < h + timedelta(minutes=30)) <= por_lote
+    assert all(b - a >= timedelta(seconds=60) for a, b in zip(hs, hs[1:]))
+    locais = [h.astimezone(wa_akg.FUSO) for h in hs]
+    assert all(l.weekday() < 5 and 9 <= l.hour < 17 for l in locais)
+
+
+def test_ritmo_respeita_o_limite_do_dia_e_passa_para_o_dia_seguinte():
+    hs = distribuir_ritmo(50, AGORA, por_lote=10, limite_dia=20, rng=random.Random(1))
+    por_dia = {}
+    for h in hs:
+        d = h.astimezone(wa_akg.FUSO).date()
+        por_dia[d] = por_dia.get(d, 0) + 1
+    assert max(por_dia.values()) <= 20 and len(por_dia) == 3
+    hoje = AGORA.astimezone(wa_akg.FUSO).date()
+    hs = distribuir_ritmo(3, AGORA, por_lote=5, limite_dia=20, ocupados={hoje: 20}, rng=random.Random(1))
+    assert all(h.astimezone(wa_akg.FUSO).date() > hoje for h in hs)
+
+
+def test_ritmo_conta_o_que_ja_esta_agendado():
+    ja = [AGORA + timedelta(minutes=m) for m in (1, 2, 3, 4, 5)]            # 5 já na fila
+    primeiro = distribuir_ritmo(1, AGORA, por_lote=5, recentes=ja, rng=random.Random(1))[0]
+    assert primeiro >= ja[0] + timedelta(minutes=30)                         # a 5ª mensagem de trás saiu há pelo menos 30 min
+    livre = distribuir_ritmo(1, AGORA, por_lote=5, recentes=ja[:3], rng=random.Random(1))[0]
+    assert livre < primeiro                                                  # com vaga na janela, não espera
+
+
+def test_ritmo_horizonte_deixa_o_resto_para_a_proxima_rodada():
+    hs = distribuir_ritmo(100, AGORA, por_lote=5, horizonte_min=60, rng=random.Random(1))
+    assert 5 <= len(hs) <= 11 and all(h <= AGORA + timedelta(minutes=60) for h in hs)
+
+
+def test_ritmo_recusa_x_e_limite_fora_do_seguro():
+    for ruim in (0, 11, -1):
+        with pytest.raises(ValueError, match="por_lote"):
+            distribuir_ritmo(1, AGORA, por_lote=ruim)
+    with pytest.raises(ValueError, match="limite_dia"):
+        distribuir_ritmo(1, AGORA, por_lote=5, limite_dia=61)
+
+
+def test_ritmo_atual_conta_pendentes_e_enviados_de_hoje_em_diante_e_ignora_falhas():
+    pend = [{"id": "p1", "sendAt": "2026-10-06T15:00:00.000Z"}]
+    hist = [{"id": "h1", "status": "SENT", "sendAt": "2026-10-06T13:30:00.000Z"},
+            {"id": "h2", "status": "FAILED", "sendAt": "2026-10-06T13:40:00.000Z"},
+            {"id": "h3", "status": "SENT", "sendAt": "2026-10-05T13:30:00.000Z"}]      # ontem: não conta no dia
+    recentes, ocupados = ritmo_atual(pend, hist, AGORA)
+    assert len(recentes) == 2                                                           # h1 (há 30 min) e p1; ontem e falha ficam fora
+    assert ocupados == {AGORA.astimezone(wa_akg.FUSO).date(): 2}
+
+
+def test_planejar_em_fila_adia_o_que_nao_cabe_no_horizonte():
+    leads = [lead(f"R{i}", telefone=f"6599234{i:04d}") for i in range(1, 21)]
+    existem = {numero_whatsapp(l["telefone"]): jid(numero_whatsapp(l["telefone"])) for l in leads}
+    r = plano_de(leads, existem=existem, por_lote=5, horizonte_min=60)
+    assert r["resumo"]["agendar"] == len(r["planos"]) <= 11
+    assert r["resumo"]["adiados"] == 20 - len(r["planos"])
+    assert all(p["sendAt"] > "2026-10-06T14:00:00Z" for p in r["planos"])
+
+
+def test_cli_fila_conta_o_agendador_e_recusa_x_fora_do_limite(tmp_path):
+    leads, saida = arquivos(tmp_path, [lead("R1")])
+    base = ["planejar", "--leads", leads, "--saida", saida, "--fotos-url", "https://f", "--agora", "2026-10-06T14:00:00Z"]
+    cheio = [{"id": f"p{i}", "sendAt": f"2026-10-06T14:0{i}:00.000Z", "status": "PENDING"} for i in range(1, 6)]
+    assert main(base + ["--por-lote", "5"], cliente=cliente(Fake(agendadas=cheio))) == 0
+    com_fila = json.load(open(saida))["planos"][0]["sendAt"]
+    assert main(base + ["--por-lote", "5"], cliente=cliente(Fake())) == 0
+    sem_fila = json.load(open(saida))["planos"][0]["sendAt"]
+    assert com_fila > sem_fila and com_fila >= "2026-10-06T14:31:00Z"                    # espera os 30 minutos da fila existente
+    assert main(base + ["--por-lote", "11"], cliente=cliente(Fake())) == 2
+
+
+# --------------------------------------------------------------------------- caixa: respostas dos leads
+
+def msg(de_mim, texto, quando, tipo="TEXT"):
+    return {"fromMe": de_mim, "content": texto, "timestamp": quando, "type": tipo}
+
+
+def test_caixa_traz_so_o_que_o_lead_mandou_depois_do_toque_1_e_o_fim_da_conversa():
+    l = lead(etapa=1, enviado1="2026-10-01T14:00:00Z")
+    conversa = [msg(False, "oi, tudo bem", "2026-09-20T10:00:00Z"),          # antes do toque 1: não conta
+                msg(True, "Oi, Letícia da Reiners...", "2026-10-01T14:00:00Z"),
+                msg(False, "Oi! Pode ser terça?", "2026-10-02T09:00:00Z"),
+                msg(False, "", "2026-10-02T09:01:00Z", tipo="AUDIO")]
+    r = caixa(cliente(Fake(mensagens={jid(): conversa})), [l], {"5565992345678": jid()}, AGORA)
+    c = r["conversas"][0]
+    assert [n["texto"] for n in c["novas"]] == ["Oi! Pode ser terça?", "[audio]"]
+    assert c["conversa"][-1]["de"] == "lead" and c["conversa"][1]["de"] == "nós" and len(c["conversa"]) == 4
+    assert c["vistasAte"] == "2026-10-02T09:01:00Z" and r["resumo"] == {"monitorados": 1, "comRespostaNova": 1, "semJid": 0, "erros": 0}
+
+
+def test_caixa_nao_repete_o_que_a_central_ja_viu_e_ignora_quem_nao_e_acompanhavel():
+    visto = lead("A", etapa=1, enviado1="2026-10-01T14:00:00Z", respostasVistasAte="2026-10-02T09:01:00Z")
+    sai = lead("B", etapa=1, enviado1="2026-10-01T14:00:00Z", situacao="sair", telefone="65988887777")
+    novo = lead("C", enviado1=None, telefone="65977776666")
+    conv = [msg(False, "ok", "2026-10-02T09:01:00Z")]
+    existem = {"5565992345678": jid(), "5565988887777": jid("5565988887777"), "5565977776666": jid("5565977776666")}
+    r = caixa(cliente(Fake(mensagens={jid(): conv})), [visto, sai, novo], existem, AGORA)
+    assert r["conversas"] == [] and r["resumo"]["monitorados"] == 1
+
+
+def test_caixa_registra_erro_de_um_lead_sem_parar_os_outros():
+    a = lead("A", etapa=1, enviado1="2026-10-01T14:00:00Z")
+    b = lead("B", etapa=1, enviado1="2026-10-01T14:00:00Z", telefone="65988887777")
+    class Quebra(Fake):
+        def __call__(self, metodo, url, headers, corpo=None):
+            if "5565992345678" in url:
+                return 500, {}, b""
+            return super().__call__(metodo, url, headers, corpo)
+    f = Quebra(mensagens={jid("5565988887777"): [msg(False, "oi", "2026-10-02T09:00:00Z")]})
+    c = WaAkgCliente("http://wa/api", "k", "reiners", transporte=f, dormir=lambda s: None, tentativas=1)
+    r = caixa(c, [a, b], {"5565992345678": jid(), "5565988887777": jid("5565988887777")}, AGORA)
+    assert [x["leadId"] for x in r["conversas"]] == ["B"] and r["resumo"]["erros"] == 1
+
+
+# --------------------------------------------------------------------------- responder
+
+def test_responder_envia_na_hora_e_anota_no_historico_sem_vazar_nada():
+    f = Fake()
+    l = lead(etapa=1, situacao="respondeu", respostaSugerida={"texto": "x"})
+    u = responder_lead(cliente(f), l, jid(), "Combinado! Terça às 15h no estúdio.", AGORA)
+    envio = [c for c in f.chamadas if c[1].endswith("/send")]
+    assert len(envio) == 1 and envio[0][3] == {"message": {"text": "Combinado! Terça às 15h no estúdio."}}
+    assert "5565992345678%40s.whatsapp.net/send" in envio[0][1]
+    assert u["data"]["respostaSugerida"] == {"__delete__": True}
+    assert u["data"]["historico"][-1]["tipo"] == "resposta" and "Combinado" in u["data"]["historico"][-1]["texto"]
+
+
+@pytest.mark.parametrize("lead_kw,texto,quebra", [({"situacao": "sair"}, "oi", "não se escreve mais"), ({"situacao": "fechou"}, "oi", "não se escreve mais"),
+                                                  ({}, "  ", "vazio"), ({}, "a" * 1001, "1000 caracteres")])
+def test_responder_recusa_lead_que_saiu_texto_vazio_ou_longo(lead_kw, texto, quebra):
+    f = Fake()
+    with pytest.raises(ValueError, match=quebra):
+        responder_lead(cliente(f), lead(**lead_kw), jid(), texto, AGORA)
+    assert not [c for c in f.chamadas if c[1].endswith("/send")]
+
+
+def test_cli_responder_exige_confirmo_e_o_envio_nao_repete(tmp_path):
+    leads, saida = arquivos(tmp_path, [lead("R1", etapa=1)])
+    txt = tmp_path / "t.txt"
+    txt.write_text("Combinado!", encoding="utf-8")
+    args = ["responder", "--leads", leads, "--lead", "R1", "--texto-arquivo", str(txt), "--saida", saida]
+    f = Fake()
+    assert main(args, cliente=cliente(f)) == 2 and f.chamadas == []
+    assert main(args + ["--confirmo"], cliente=cliente(f)) == 0
+    assert sum(1 for c in f.chamadas if c[1].endswith("/send")) == 1 and json.load(open(saida))["updates"][0]["id"] == "R1"
+    ruim = Fake(falhar_post=503)
+    assert main(args + ["--confirmo"], cliente=cliente(ruim)) == 1
+    assert sum(1 for c in ruim.chamadas if c[1].endswith("/send")) == 1                 # falhou e não tentou de novo
+
+
+# --------------------------------------------------------------------------- poucas consultas ao WhatsApp
+
+def consultados(f):
+    """Todos os números que o Fake recebeu em /check."""
+    return [n for c in f.chamadas if c[1].endswith("/check") for n in c[3]["numbers"]]
+
+
+def test_conferir_guarda_o_jid_do_whatsapp_no_lead_depois_do_envio():
+    ag = {"n": 1, "id": "s1", "sendAt": "2026-10-06T14:05:00Z", "jid": "556596227110@s.whatsapp.net"}
+    r = conferir([lead("A", agendamento=ag)], [], [{"id": "s1", "status": "SENT", "sendAt": "2026-10-06T14:06:00.000Z"}], AGORA)
+    assert r["updates"][0]["data"]["jidWa"] == "556596227110@s.whatsapp.net"
+
+
+def test_cli_planejar_so_consulta_o_whatsapp_de_quem_pode_sair_agora(tmp_path):
+    pode = lead("A", telefone="65992345678")
+    email = lead("B", canal="E-mail", telefone="65988887777")
+    saiu = lead("C", situacao="sair", telefone="65977776666")
+    cedo = lead("D", etapa=1, enviado1="2026-10-06T13:00:00Z", telefone="65966665555")        # toque 2 só daqui a 4 dias
+    ja = lead("E", telefone="65955554444", agendamento={"n": 1, "id": "s9", "sendAt": "2026-10-06T15:00:00Z"})
+    leads, saida = arquivos(tmp_path, [pode, email, saiu, cedo, ja])
+    f = Fake()
+    assert main(["planejar", "--leads", leads, "--saida", saida, "--fotos-url", "https://f", "--agora", "2026-10-06T14:00:00Z"], cliente=cliente(f)) == 0
+    assert consultados(f) == ["5565992345678"]
+
+
+def test_cli_fila_limita_quantos_numeros_consulta_por_rodada(tmp_path):
+    todos = [lead(f"R{i:03d}", telefone=f"6599{i:07d}", ordem=i) for i in range(1, 51)]
+    leads, saida = arquivos(tmp_path, todos)
+    f = Fake()
+    assert main(["planejar", "--leads", leads, "--saida", saida, "--fotos-url", "https://f", "--agora", "2026-10-06T14:00:00Z",
+                 "--por-lote", "1", "--horizonte-min", "60"], cliente=cliente(f)) == 0
+    # no mínimo 20 (ou 6 por mensagem de X): exatamente os 20 de maior prioridade, na ordem do lead
+    assert sorted(consultados(f)) == ["55" + f"6599{i:07d}" for i in range(1, 21)]
+    assert json.load(open(saida))["resumo"]["aguardandoVez"] == 30                              # o resto espera a próxima rodada
+
+
+def test_caixa_e_responder_usam_o_jid_guardado_sem_consultar_o_whatsapp(tmp_path):
+    l = lead("R1", etapa=1, enviado1="2026-10-01T14:00:00Z", jidWa=jid())
+    leads, saida = arquivos(tmp_path, [l])
+    f = Fake(mensagens={jid(): [msg(False, "oi!", "2026-10-02T09:00:00Z")]})
+    assert main(["caixa", "--leads", leads, "--saida", saida], cliente=cliente(f)) == 0
+    assert json.load(open(saida))["resumo"]["comRespostaNova"] == 1 and consultados(f) == []
+    txt = tmp_path / "t.txt"
+    txt.write_text("Combinado!", encoding="utf-8")
+    assert main(["responder", "--leads", leads, "--lead", "R1", "--texto-arquivo", str(txt), "--saida", saida, "--confirmo"], cliente=cliente(f)) == 0
+    assert consultados(f) == []
