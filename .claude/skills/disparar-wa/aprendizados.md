@@ -19,7 +19,7 @@ Regras deste arquivo (o repositório é público): sem nome de lead, empresa, te
 ## 2026-10-06 · Robôs de triagem pedem dados e não avançam (ideia a validar)
 - **O que aconteceu:** alguns robôs respondem com menu ou pergunta ("qual empresa?", "qual o CNPJ?") e a conversa não chega a quem decide.
 - **Ideia (Mazinho):** mandar uma palavra curta antes ("Oi"), esperar 8 a 10 segundos e só então enviar a mensagem do toque, para o robô responder à palavra e a mensagem de verdade cair já na conversa aberta.
-- **Estado:** **não implementado.** Só vale depois da regra da saudação (acima). Testar com 10 leads antes de ligar para todos, atrás de um interruptor.
+- **Estado:** **decidido em 06/10 (Mazinho): sempre testar com um "Olá" antes do toque 1** para saber se é robô e qual o melhor caminho. Ainda **não implementado**: precisa de janela de espera (resposta ao "Olá" antes de enviar o toque) e de regra para o que fazer quando for robô de menu. Entra na próxima rodada de trabalho.
 - **Cuidado:** o "Oi" solto pode soar mais como robô para quem é humano.
 
 ## 2026-10-06 · Lead humano que "não entendeu" quem somos
@@ -47,3 +47,11 @@ Exemplo real, enviado pela equipe (sem nomes). O lead respondeu ao toque 1, fez 
 ## 2026-10-06 · IA indisponível vira aviso à equipe
 - **O que aconteceu:** quando a chamada ao OpenRouter falha, todo caso vira aviso, inclusive as saudações de robô. Isso encheu o WhatsApp da equipe.
 - **Decisões:** a regra da saudação (acima) tira esse ruído. Falta (**a fazer**) um aviso "IA fora do ar" na faixa do painel e uma checagem de que a chave funciona depois de cada atualização.
+
+## 2026-10-06 · Decisões da Letícia/Mazinho (sem dados pessoais)
+- **Endereço** confirmado e gravado em `conhecimento-reiners.md` (perguntas práticas podem ser respondidas sozinhas, em mensagens curtas).
+- **Link da agenda:** mantém o original do `conhecimento-reiners.md`.
+- **Contabilidade vira segmento próprio** na prospecção (cliente em potencial e fonte de indicação). Gancho técnico, cadência própria.
+- **Retomada de lead que foi consultar o sócio:** lembrar em 1 e 2 dias; não insistir antes.
+- **Prospecção por decisores:** testar todas as personas (dono, marketing, RH) ao mesmo tempo, medir a taxa de resposta por persona e por segmento, e concentrar o envio no que converte mais. Site da empresa não é o indicador principal, mas é central para qualificar. LGPD revisada pela equipe (06/10): pode seguir.
+- **Enriquecimento:** a Lusha via treg cobra por consulta (sem volume grátis pelo treg); entra só como último recurso na cascata.
