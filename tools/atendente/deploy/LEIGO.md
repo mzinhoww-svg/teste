@@ -6,6 +6,10 @@ Regras de ouro:
 - Se aparecer **PAROU:** em algum passo, nada foi estragado. Leia a frase, resolva e rode o mesmo comando de novo. Os scripts podem ser rodados quantas vezes quiser.
 - Nunca mande senhas ou chaves por e-mail, grupo ou chat público.
 
+## Antes de começar: avise o Claude
+
+**Antes de colar qualquer comando, me diga "vou instalar".** Eu paro o lado que hoje envia as mensagens e entrego o `leads.json` atualizado. Sem isso, dois sistemas escreveriam ao mesmo tempo nos mesmos leads (e o mesmo lead poderia receber duas mensagens). Só comece depois que eu responder que parei.
+
 ## Em caso de emergência: desligar tudo
 
 Cole na VPS:
@@ -44,7 +48,7 @@ docker compose -f /opt/atendente-src/tools/atendente/docker-compose.yml start
    ```
    bash /opt/atendente-src/tools/atendente/deploy/endurecer-vps.sh
    ```
-3. **O que esperar:** ele instala proteções, mostra a lista de portas abertas do firewall (só 22, 80 e 443) e termina com "VPS endurecida".
+3. **O que esperar:** ele instala proteções, mostra a lista de portas abertas do firewall (só a porta do SSH, normalmente 22, mais 80 e 443) e termina com "VPS endurecida".
 4. Quando perguntar sobre a **chave SSH**, aperte **ENTER** para pular. É opcional, e pular não muda nada no seu acesso.
 5. **Se der erro:** leia a linha "PAROU" e me mande a tela.
 
@@ -52,7 +56,7 @@ Também nesta etapa (com a ajuda de quem cuida do sistema): trocar a senha de ro
 
 ## Passo 3. Preparar o arquivo de leads (opcional)
 
-Se você recebeu um arquivo de leads, ele precisa estar na VPS com o nome `/root/leads.json`. Peça ajuda para copiá-lo. Se não tiver o arquivo agora, pule: o instalador avisa e segue.
+O arquivo de leads (`leads.json`) é o que eu entrego depois que você disser "vou instalar". Ele precisa estar na VPS com o nome `/root/leads.json`. Peça ajuda para copiá-lo. Se não tiver o arquivo agora, pode seguir: o instalador avisa que o atendente ficou **sem leads** e, para importar depois, basta copiar o arquivo e rodar o instalador de novo (na pergunta sobre manter o que já existe, aperte ENTER).
 
 ## Passo 4. Instalar o atendente
 
@@ -66,7 +70,7 @@ Se você recebeu um arquivo de leads, ele precisa estar na VPS com o nome `/root
    - a **chave do OpenRouter**;
    - **nome e senha** de cada pessoa que vai entrar na tela (mínimo 8 caracteres, sem espaço nem os sinais `, : # $ ' " \`);
    - os **números da equipe** que recebem os avisos (com 55 e DDD, só números, separados por vírgula).
-3. **O que esperar:** 8 etapas numeradas, cada uma terminando com "ok". Na primeira vez a etapa 4 demora alguns minutos. No fim aparece **PRONTO**.
+3. **O que esperar:** 8 etapas numeradas, cada uma terminando com "ok". Na primeira vez a etapa 4 demora alguns minutos. No fim aparece **INSTALADO** e o aviso de que o atendente está em **ESPERA** (veja o Passo 6). Se aparecer **ERRO: nenhum lead foi importado**, não ligue nada: me mande a tela.
 4. **Se der erro:** "PAROU" diz o motivo. Casos comuns:
    - "não achei a rede wa-akg_default": ligue o WA-AKG com `cd /root/WA-AKG && docker compose up -d` e rode de novo.
    - "o Caddy NÃO aprovou": o script já devolveu a configuração antiga; o site segue como estava. Me mande a mensagem.
@@ -88,7 +92,11 @@ curl http://127.0.0.1:8088/saude
 
 1. No navegador, abra `https://wa.reiners.agency/central/`.
 2. Entre com o nome e a senha que você cadastrou no Passo 4.
-3. **O que esperar:** o painel com as colunas e, no alto, os botões **Respostas automáticas** e **Parar tudo**.
+3. **O que esperar:** o painel com as colunas e, no alto, os botões **Ligar atendente** e **Parar tudo**.
+
+### Importante: o atendente nasce em ESPERA
+
+O atendente está instalado e em **ESPERA**. Ele só começa a responder e enviar quando você clicar em **Ligar atendente** no painel (`central.reiners.agency` ou `wa.reiners.agency/central/`), **depois que o Claude confirmar que parou o lado dele**. **Não clique antes.** Em espera ele não envia nem responde nada sozinho; só avisa a equipe.
 
 ## Passo 7. Criar o endereço `central` na Vercel (DNS)
 
@@ -109,4 +117,4 @@ curl http://127.0.0.1:8088/saude
 bash /opt/atendente-src/tools/atendente/deploy/atualizar.sh
 ```
 
-**O que esperar:** termina com "PRONTO: atendente atualizado e respondendo".
+**O que esperar:** termina com "PRONTO: atendente atualizado e respondendo". Se a versão nova falhar, o script volta sozinho para a anterior e avisa. Atualizar não liga o atendente: quem liga é você, no botão **Ligar atendente**.

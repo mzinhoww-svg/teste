@@ -162,6 +162,7 @@ def test_dockerfile_segue_as_regras():
     assert "FROM python:3.12-slim" in t
     assert "COPY tools/atendente/atendente /app/atendente" in t
     assert "COPY tools/prospeccao/scripts /app/scripts" in t
+    assert "COPY tools/prospeccao/msg /app/msg" in t
     assert "COPY .claude/skills/disparar-wa/conhecimento-reiners.md /app/conhecimento.md" in t
     assert re.search(r"^USER\s+(?!root)\S+", t, re.M)
     assert 'CMD ["python", "-m", "atendente"]' in t
@@ -177,8 +178,13 @@ def test_instalador_tem_as_travas_combinadas():
     assert "caddy validate" in t and t.index("caddy validate") < t.index("systemctl reload caddy")
     assert 'cp -p "$COPIA" "$CADDYFILE"' in t
     assert "/api/webhooks/" in t and "X-API-Key" in t
-    assert '\\"events\\":[\\"message.received\\",\\"message.sent\\"]' in t
+    assert '"events":["message.received","message.sent"]' in t
     assert "python -m atendente.importar /data/leads.json" in t
+    assert "--data @" in t and '-d "$corpo"' not in t          # segredo fora do ps
+    assert "-X PUT" not in t and "chamar PUT" in t and "chamar DELETE" in t
+    assert "@webhook path /webhook" in t and "respond @webhook 404" in t
+    assert "header_up X-Forwarded-Prefix /central" in t
+    assert "ESPERA" in t and "Ligar atendente" in t
 
 
 def test_endurecer_nunca_desliga_senha_por_padrao():
@@ -187,3 +193,68 @@ def test_endurecer_nunca_desliga_senha_por_padrao():
     assert "sshd -t" in t
     assert t.index("authorized_keys") < t.index("PasswordAuthentication no")
     assert t.count('= "SIM"') >= 3
+
+
+def test_caddyfile_exemplo_bloqueia_webhook_e_marca_prefixo():
+    t = open(os.path.join(ATENDENTE, "Caddyfile.exemplo"), encoding="utf-8").read()
+    assert t.count("@webhook path /webhook") == 2 and t.count("respond @webhook 404") == 2
+    assert t.count("header_up X-Forwarded-Prefix /central") == 1
+    for bloco in t.split("respond @webhook 404")[1:]:
+        assert bloco.lstrip().startswith("reverse_proxy"), "respond precisa vir antes do reverse_proxy"
+
+
+def test_endurecer_libera_portas_do_ssh_antes_do_ufw():
+    t = open(os.path.join(DEPLOY, "endurecer-vps.sh"), encoding="utf-8").read()
+    assert "sshd -T" in t and "ss -tlnp" in t
+    assert t.index("ufw allow") < t.index("ufw --force enable")
+    assert "ufw allow 22/tcp" not in t
+
+
+def test_atualizar_constroi_antes_e_volta_se_falhar():
+    t = open(os.path.join(DEPLOY, "atualizar.sh"), encoding="utf-8").read()
+    assert "up -d --build" not in t
+    assert t.index(" build ||") < t.index("docker tag \"$ATUAL\" atendente:anterior") < t.index("up -d --no-build")
+    assert "/saude" in t and "docker tag atendente:anterior atendente:local" in t
+
+
+def test_leigo_explica_espera_e_aviso_previo():
+    t = open(os.path.join(DEPLOY, "LEIGO.md"), encoding="utf-8").read()
+    assert "Ligar atendente" in t and "ESPERA" in t
+    assert "vou instalar" in t
+    assert "Não clique antes" in t or "Não clique antes".lower() in t.lower()
+
+
+def _copias_do_dockerfile():
+    """(origem relativa à raiz do repositório, destino absoluto no contêiner) de cada COPY."""
+    copias = []
+    for linha in open(os.path.join(ATENDENTE, "Dockerfile"), encoding="utf-8"):
+        partes = linha.split()
+        if partes and partes[0] == "COPY":
+            assert len(partes) == 3, linha
+            copias.append((partes[1], partes[2]))
+    return copias
+
+
+def test_layout_do_conteiner_importa_o_servico(tmp_path):
+    """Monta exatamente o layout do Dockerfile (/app) e importa o serviço como o CMD faria."""
+    copias = _copias_do_dockerfile()
+    assert ("tools/prospeccao/msg", "/app/msg") in copias      # wa_akg.py importa msg.fotos
+    app = tmp_path / "app"
+    app.mkdir()
+    for origem, destino in copias:
+        assert destino.startswith("/app/"), destino
+        alvo = tmp_path / destino.lstrip("/")
+        alvo.parent.mkdir(parents=True, exist_ok=True)
+        fonte = os.path.join(RAIZ, origem)
+        assert os.path.exists(fonte), fonte
+        if os.path.isdir(fonte):
+            shutil.copytree(fonte, alvo, ignore=shutil.ignore_patterns("__pycache__"))
+        else:
+            shutil.copy(fonte, alvo)
+    env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH", "PYTHONHOME")}
+    env["PYTHONPATH"] = str(app)
+    r = subprocess.run(
+        ["python3", "-c",
+         "import atendente.__main__, atendente.servidor, atendente.planejador, atendente.nucleo"],
+        capture_output=True, text=True, env=env, cwd=str(app))   # WORKDIR /app, como no contêiner
+    assert r.returncode == 0, r.stderr
