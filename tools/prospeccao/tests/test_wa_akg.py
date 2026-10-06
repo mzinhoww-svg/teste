@@ -42,7 +42,7 @@ class Fake:
             return 200, {}, json.dumps([{"sessionId": "reiners", "status": self.conectado}]).encode()
         if url.endswith("/check"):
             res = [{"number": n, "exists": (self.existem is None or n in self.existem), "jid": jid(n)} for n in corpo["numbers"]]
-            return 200, {}, json.dumps({"success": True, "results": res}).encode()
+            return 200, {}, json.dumps({"status": True, "message": "Operation successful", "data": {"results": res}}).encode()
         if metodo == "DELETE":
             return 200, {}, b"{}"
         if metodo == "POST" and "/scheduler/" in url:
@@ -315,3 +315,24 @@ def test_cancelar_so_o_que_ainda_esta_pendente():
     assert r["resumo"] == {"cancelados": 1, "naoPendentes": 1, "erros": 0} and r["naoPendentes"] == ["B"]
     assert r["updates"][0]["data"]["agendamento"] == {"__delete__": True}
     assert [c[0] for c in f.chamadas] == ["DELETE"] and f.chamadas[0][1].endswith("/scheduler/reiners/s1")
+
+
+def test_janela_livre_so_com_so_e_so_para_o_lead_escolhido(tmp_path):
+    leads, saida = arquivos(tmp_path, [lead("TESTE")])
+    base = ["planejar", "--leads", leads, "--saida", saida, "--fotos-url", "https://f", "--agora", "2026-10-06T02:00:00Z"]
+    assert main(base + ["--janela", "0-24"], cliente=cliente(Fake())) == 2                      # sem --so: recusa
+    assert main(base + ["--so", "TESTE", "--janela", "25-30"], cliente=cliente(Fake())) == 2     # janela inválida
+    assert main(base + ["--so", "TESTE", "--janela", "0-24", "--todos-os-dias"], cliente=cliente(Fake())) == 0
+    h = json.load(open(saida))["planos"][0]["sendAt"]
+    assert h == "2026-10-06T02:02:00Z"                                                         # em 2 minutos, mesmo de madrugada
+    assert main(base, cliente=cliente(Fake())) == 0                                              # sem --so, o TESTE nunca entra
+    assert json.load(open(saida))["planos"] == []
+
+
+def test_verificar_aceita_a_resposta_da_doc_e_a_real_e_usa_o_jid_devolvido():
+    def transporte(corpo):
+        return lambda m, url, h, c=None: (200, {}, json.dumps(corpo).encode())
+    item = {"number": "5565996227110", "exists": True, "jid": "556596227110@s.whatsapp.net"}   # conta sem o nono dígito
+    for resposta in ({"status": True, "data": {"results": [item]}}, {"success": True, "results": [item]}):
+        c = WaAkgCliente("http://wa/api", "k", "reiners", transporte=transporte(resposta), dormir=lambda s: None)
+        assert c.verificar(["5565996227110"]) == {"5565996227110": "556596227110@s.whatsapp.net"}
