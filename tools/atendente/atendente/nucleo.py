@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 from scripts import wa_akg
 
-from .politica import decidir
+from .politica import decidir, e_saudacao_automatica
 
 log = logging.getLogger("atendente.nucleo")
 
@@ -100,6 +100,12 @@ class Atendente:
         # 1) toda mensagem do lead é gravada antes de qualquer outra coisa
         if not self.repo.msg_add(lead_id, m.jid, False, m.texto, m.tipo, m.wa_id, em):
             return "duplicada"
+
+        # 1b) saudação de robô do WhatsApp Business: não é resposta de gente; não marca, não cancela, não avisa
+        if m.tipo == "TEXT" and e_saudacao_automatica(m.texto):
+            self.repo.atendimento_add(leadId=lead_id, empresa=lead.get("nome"), em=_iso(agora), mensagemLead=m.texto,
+                                      intencao="automatica", acao="ignorou", motivoAviso="saudação automática")
+            return "automatica"
 
         # 2) o lead respondeu: marca, atualiza o visto e cancela o que estava agendado
         dados = {"respostasVistasAte": em}
