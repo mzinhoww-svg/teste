@@ -46,7 +46,7 @@ class AtendenteFalso:
 
 
 def _lead(i, **extra):
-    d = {"id": f"L{i}", "nome": f"Contato {i}", "empresa": f"Empresa Teste {i}", "canal": "whatsapp",
+    d = {"id": f"L{i}", "nome": f"Empresa Teste {i}", "empresa": {"cnpj": "", "municipio": "Cuiabá"}, "canal": "whatsapp",
          "telefone": f"55659999000{i:02d}", "situacao": "ativo", "etapa": 0, "historico": []}
     d.update(extra)
     return d
@@ -228,7 +228,7 @@ def test_atualiza_sozinha_sem_perder_painel_nem_nota(ctx, pagina):
     coluna(pagina, "Responderam").locator(".card").click()
     nota = pagina.get_by_label("Nota para a equipe")
     nota.fill("rascunho que não pode sumir")
-    ctx.repo.lead_put(_lead(7, empresa="Empresa Teste 7"))  # chega um lead novo enquanto a tela está aberta
+    ctx.repo.lead_put(_lead(7, nome="Empresa Teste 7"))  # chega um lead novo enquanto a tela está aberta
     expect(pagina.get_by_text("Empresa Teste 7")).to_be_visible()
     expect(pagina.get_by_role("dialog", name="Empresa Teste 4")).to_be_visible()
     expect(nota).to_have_value("rascunho que não pode sumir")
