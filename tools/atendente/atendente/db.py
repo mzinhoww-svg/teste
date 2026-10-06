@@ -1,5 +1,9 @@
 """SQLite e a classe Repo. Horários em UTC ISO no banco; "dia" e "mês" em Cuiabá."""
+import hashlib
 import json
+import os
+import re
+import secrets
 import sqlite3
 import threading
 from datetime import datetime, timedelta, timezone
@@ -23,7 +27,19 @@ CREATE TABLE IF NOT EXISTS gastos (
     id INTEGER PRIMARY KEY AUTOINCREMENT, modelo TEXT, tokens_in INTEGER, tokens_out INTEGER, usd REAL, em TEXT);
 CREATE TABLE IF NOT EXISTS base (id TEXT PRIMARY KEY, doc TEXT NOT NULL, status TEXT);
 CREATE TABLE IF NOT EXISTS clientes (id TEXT PRIMARY KEY, doc TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS campanhas (id TEXT PRIMARY KEY, doc TEXT NOT NULL, status TEXT);
+CREATE TABLE IF NOT EXISTS prospectos (
+    id TEXT PRIMARY KEY, doc TEXT NOT NULL, campanha_id TEXT, estado TEXT, chave_pessoa TEXT);
+CREATE INDEX IF NOT EXISTS ix_prosp_campanha ON prospectos(campanha_id, estado);
+CREATE INDEX IF NOT EXISTS ix_prosp_chave ON prospectos(chave_pessoa);
+CREATE TABLE IF NOT EXISTS cnpj (cnpj TEXT PRIMARY KEY, doc TEXT NOT NULL, cnae TEXT, municipio TEXT, porte TEXT);
+CREATE INDEX IF NOT EXISTS ix_cnpj_filtro ON cnpj(cnae, municipio);
+CREATE TABLE IF NOT EXISTS contatos_compartilhados (
+    chave_hash TEXT PRIMARY KEY, empresas INTEGER NOT NULL, cnaes TEXT, primeira TEXT, ultima TEXT);
+CREATE TABLE IF NOT EXISTS lista_sair (hash TEXT PRIMARY KEY, em TEXT);
 """
+
+CHAVE_SAL = "prospeccao_sal"   # sal guardado no banco quando PROSPECCAO_SAL não vem do ambiente
 
 CAMPOS_ATENDIMENTO = ("leadId", "empresa", "em", "mensagemLead", "intencao", "acao",
                       "respostaEnviada", "motivoAviso", "humanoRespondeu", "resultado")
@@ -45,14 +61,46 @@ def _numero_do_jid(jid) -> str:
     return "".join(c for c in str(jid or "").split("@")[0].split(":")[0] if c.isdigit())
 
 
+def _contato_normalizado(valor) -> str:
+    """E-mail: minúsculo e sem espaço. Telefone: 55 + DDD + os 8 últimos dígitos, para o número com e sem o nono
+    dígito (conta antiga do WhatsApp) dar o mesmo hash. "" quando não dá para usar."""
+    t = str(valor or "").strip().lower()
+    if not t:
+        return ""
+    if "@" in t:
+        return t
+    d = re.sub(r"\D", "", t).lstrip("0")
+    if len(d) in (10, 11):
+        d = "55" + d
+    if d.startswith("55") and len(d) in (12, 13):
+        return d[:4] + d[-8:]
+    return d
+
+
 class Repo:
-    def __init__(self, caminho: str):
+    def __init__(self, caminho: str, sal: str | None = None):
         self._lock = threading.RLock()
         self._con = sqlite3.connect(caminho, check_same_thread=False)
         self._con.row_factory = sqlite3.Row
         with self._lock:
             self._con.executescript(ESQUEMA)
             self._con.commit()
+        self._sal_fixo = sal
+
+    def _sal(self) -> str:
+        """Sal do hash da lista de saída: o do construtor, o de PROSPECCAO_SAL ou um aleatório guardado no banco
+        na primeira vez (fica no backup). Trocar o sal depois invalida a lista: definir uma vez só."""
+        if self._sal_fixo is not None:
+            return self._sal_fixo
+        amb = os.environ.get("PROSPECCAO_SAL")
+        if amb:
+            return amb
+        with self._lock:
+            s = self.config_get(CHAVE_SAL)
+            if not s:
+                s = secrets.token_hex(16)
+                self.config_set(CHAVE_SAL, s)
+            return s
 
     # ---- config
     def config_get(self, chave: str, padrao=None):
@@ -190,6 +238,142 @@ class Repo:
                 raise KeyError(id)
             self.cliente_put(self._mesclar(doc, data))
             return doc
+
+    # ---- prospecção: campanhas e prospectos
+    def campanha_get(self, id: str) -> dict | None:
+        return self._doc_get("campanhas", id)
+
+    def campanha_put(self, doc: dict) -> None:
+        if not doc.get("id"):
+            raise ValueError('campanha sem "id"')
+        with self._lock:
+            self._con.execute(
+                "INSERT INTO campanhas(id, doc, status) VALUES(?, ?, ?) "
+                "ON CONFLICT(id) DO UPDATE SET doc=excluded.doc, status=excluded.status",
+                (str(doc["id"]), _dumps(doc), doc.get("status")))
+            self._con.commit()
+
+    def campanhas(self) -> list[dict]:
+        return self._doc_todos("campanhas")
+
+    def prospecto_get(self, id: str) -> dict | None:
+        return self._doc_get("prospectos", id)
+
+    def prospecto_put(self, doc: dict) -> None:
+        if not doc.get("id"):
+            raise ValueError('prospecto sem "id"')
+        with self._lock:
+            self._con.execute(
+                "INSERT INTO prospectos(id, doc, campanha_id, estado, chave_pessoa) VALUES(?, ?, ?, ?, ?) "
+                "ON CONFLICT(id) DO UPDATE SET doc=excluded.doc, campanha_id=excluded.campanha_id, "
+                "estado=excluded.estado, chave_pessoa=excluded.chave_pessoa",
+                (str(doc["id"]), _dumps(doc), doc.get("campanhaId"), doc.get("estado"), doc.get("chavePessoa")))
+            self._con.commit()
+
+    def prospectos(self, campanha_id: str | None = None, estado: str | None = None) -> list[dict]:
+        """Prospectos de uma campanha (ou de todas, com None), opcionalmente só de um estado."""
+        sql, args, onde = "SELECT doc FROM prospectos", [], []
+        if campanha_id is not None:
+            onde.append("campanha_id=?")
+            args.append(str(campanha_id))
+        if estado is not None:
+            onde.append("estado=?")
+            args.append(estado)
+        if onde:
+            sql += " WHERE " + " AND ".join(onde)
+        with self._lock:
+            rs = self._con.execute(sql + " ORDER BY id", args).fetchall()
+        return [json.loads(r["doc"]) for r in rs]
+
+    def prospectos_por_chave(self, chave_pessoa: str) -> list[dict]:
+        with self._lock:
+            rs = self._con.execute("SELECT doc FROM prospectos WHERE chave_pessoa=? ORDER BY id",
+                                   (str(chave_pessoa),)).fetchall()
+        return [json.loads(r["doc"]) for r in rs]
+
+    # ---- prospecção: CNPJ aberto de MT (um documento por estabelecimento)
+    def cnpj_put(self, doc: dict) -> None:
+        if not doc.get("cnpj"):
+            raise ValueError('estabelecimento sem "cnpj"')
+        with self._lock:
+            self._con.execute(
+                "INSERT INTO cnpj(cnpj, doc, cnae, municipio, porte) VALUES(?, ?, ?, ?, ?) "
+                "ON CONFLICT(cnpj) DO UPDATE SET doc=excluded.doc, cnae=excluded.cnae, "
+                "municipio=excluded.municipio, porte=excluded.porte",
+                (str(doc["cnpj"]), _dumps(doc), doc.get("cnae"), doc.get("municipio"), doc.get("porte")))
+            self._con.commit()
+
+    def cnpj_get(self, cnpj: str) -> dict | None:
+        with self._lock:
+            r = self._con.execute("SELECT doc FROM cnpj WHERE cnpj=?", (str(cnpj),)).fetchone()
+        return json.loads(r["doc"]) if r else None
+
+    def cnpjs(self, filtro: dict | None = None, limite: int | None = None, **kw) -> list[dict]:
+        """Filtro (dict ou palavras-chave): cnae/cnaes, municipio/municipios, porte; valor único ou lista."""
+        f = dict(filtro or {}, **kw)
+        sql, args, onde = "SELECT doc FROM cnpj", [], []
+        for coluna, nomes in (("cnae", ("cnae", "cnaes")), ("municipio", ("municipio", "municipios")),
+                              ("porte", ("porte", "portes"))):
+            valores = []
+            for n in nomes:
+                v = f.get(n)
+                if v is None:
+                    continue
+                valores += [str(x) for x in v] if isinstance(v, (list, tuple, set)) else [str(v)]
+            if valores:
+                onde.append(f"{coluna} IN ({','.join('?' * len(valores))})")
+                args += valores
+        if onde:
+            sql += " WHERE " + " AND ".join(onde)
+        sql += " ORDER BY cnpj"
+        if limite is not None:
+            sql += " LIMIT ?"
+            args.append(int(limite))
+        with self._lock:
+            rs = self._con.execute(sql, args).fetchall()
+        return [json.loads(r["doc"]) for r in rs]
+
+    # ---- prospecção: contagem de contatos repetidos no cadastro (filtro de contabilidade; só hash)
+    def compartilhado_set(self, chave_hash: str, empresas: int, cnaes: list, primeira: str, ultima: str) -> None:
+        with self._lock:
+            self._con.execute(
+                "INSERT INTO contatos_compartilhados(chave_hash, empresas, cnaes, primeira, ultima) VALUES(?,?,?,?,?) "
+                "ON CONFLICT(chave_hash) DO UPDATE SET empresas=excluded.empresas, cnaes=excluded.cnaes, "
+                "primeira=excluded.primeira, ultima=excluded.ultima",
+                (str(chave_hash), int(empresas), _dumps(list(cnaes or [])), primeira, ultima))
+            self._con.commit()
+
+    def compartilhado_get(self, chave_hash: str) -> dict | None:
+        with self._lock:
+            r = self._con.execute("SELECT * FROM contatos_compartilhados WHERE chave_hash=?",
+                                  (str(chave_hash),)).fetchone()
+        if r is None:
+            return None
+        d = dict(r)
+        d["cnaes"] = json.loads(d["cnaes"]) if d.get("cnaes") else []
+        return d
+
+    # ---- prospecção: quem pediu para sair (lista permanente, só hash com sal)
+    def hash_contato(self, valor) -> str:
+        """SHA-256 com o sal do ambiente do telefone ou e-mail normalizado. "" quando o valor é vazio."""
+        n = _contato_normalizado(valor)
+        return hashlib.sha256((self._sal() + "|" + n).encode("utf-8")).hexdigest() if n else ""
+
+    def sair_add(self, telefone_ou_email, agora: datetime | None = None) -> None:
+        h = self.hash_contato(telefone_ou_email)
+        if not h:
+            return
+        em = _iso(agora or datetime.now(timezone.utc))
+        with self._lock:
+            self._con.execute("INSERT OR IGNORE INTO lista_sair(hash, em) VALUES(?, ?)", (h, em))
+            self._con.commit()
+
+    def sair_tem(self, telefone_ou_email) -> bool:
+        h = self.hash_contato(telefone_ou_email)
+        if not h:
+            return False
+        with self._lock:
+            return self._con.execute("SELECT 1 FROM lista_sair WHERE hash=?", (h,)).fetchone() is not None
 
     # ---- mensagens
     def msg_add(self, lead_id: str, jid: str, de_mim: bool, texto: str, tipo: str, wa_id: str | None, em: str) -> bool:
