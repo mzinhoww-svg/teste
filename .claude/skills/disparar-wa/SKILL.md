@@ -1,6 +1,6 @@
 ---
 name: disparar-wa
-description: Dispara pelo WhatsApp (WA-AKG) os toques da cadência dos leads da Central de disparo da Reiners, no ritmo seguro (X a cada 30 minutos), acompanha as respostas dos leads, move o lead no funil e anota os detalhes. Use quando a Letícia pedir para disparar, agendar, enviar pelo WhatsApp, conferir envios, ver respostas ou cancelar agendamentos, e a cada rodada da fila quando `config/disparo.status` for "ativo" ou "pausado". O envio em lote só acontece depois de ela ver o plano e confirmar no chat, ou depois de ela clicar em "Iniciar fila de envios" na Central. Resposta a lead só sai depois de ela aprovar o texto.
+description: Dispara pelo WhatsApp (WA-AKG) os toques da cadência dos leads da Central de disparo da Reiners, no ritmo seguro (X a cada 30 minutos), acompanha as respostas dos leads, move o lead no funil e anota os detalhes. Use quando a Letícia pedir para disparar, agendar, enviar pelo WhatsApp, conferir envios, ver respostas ou cancelar agendamentos, e a cada rodada da fila quando `config/disparo.status` for "ativo" ou "pausado". O envio em lote só acontece depois de ela ver o plano e confirmar no chat, ou depois de ela clicar em "Iniciar fila de envios" na Central. Respostas simples saem sozinhas; as complexas avisam a Letícia e o Mazinho por WhatsApp.
 ---
 
 # Disparo pelo WA-AKG
@@ -32,11 +32,11 @@ Uma rodada acontece (a) a cada hora, pela rotina "Fila de envios WhatsApp", (b) 
 1. **Trava.** Ler `config/disparo`. Se `rodandoDesde` for de menos de 15 minutos, parar sem fazer nada. Senão, gravar `rodandoDesde: agora` com o `if_version` lido (conflito = outra rodada começou: parar).
 2. **Pausada?** Se `status == "pausado"`: rodar `cancelar` (passo 6 acima), gravar as `updates`, gravar em `config/disparo` `ultimaRodada`, `resumo.naFila: 0` e apagar `rodandoDesde` (`{"__delete__": true}`). Fim. Não mudar o `status`.
 3. **Conferir** (passo 5): grava o que saiu, falhou ou sumiu. Guardar `painel`.
-4. **Respostas** (seção abaixo): `caixa`, classificar, anotar, mover no funil, gerar sugestões. Gravar as atualizações.
+4. **Respostas** (seção abaixo): `caixa`, classificar, anotar, mover no funil, responder o que é simples, avisar a equipe do que é complexo e registrar em `atendimento`. Gravar as atualizações.
 5. **Reler os leads** (para o plano ver `situacao` e `etapa` já atualizados) e **planejar em modo fila**: `python3 -m scripts.wa_akg planejar --leads $WS/leads.json --saida $WS/plano.json --fotos-url https://reiners.agency/fotos-cenarios --por-lote <porLote> --limite-dia <limiteDia> --horizonte-min 60`. O script conta o que o número já tem agendado ou enviado (nunca mais de X em qualquer intervalo de 30 minutos, nem do limite do dia) e só planeja a próxima hora. Saída `3` = sessão do WhatsApp caiu: gravar `aviso: "A sessão do WhatsApp caiu: escaneie o QR de novo no WA-AKG."` e ir ao passo 7.
 6. **Agendar** com `--confirmo` e gravar as `updates` (passo 4 do disparo manual).
 7. **Registrar a rodada** em `config/disparo` (`update` com `if_version`): `ultimaRodada` (agora), `resumo: {naFila, enviadasHoje, respostasNovas, pulados, dia}`, `aviso` e apagar `rodandoDesde`. `naFila` e `enviadasHoje` vêm do `painel` do `conferir`, somando o que acabou de agendar. `respostasNovas` conta as respostas tratadas hoje (somar às anteriores quando `resumo.dia` for de hoje; zerar na virada do dia). `pulados` vem do plano. `aviso`: texto curto em português quando algo precisa da atenção dela (sessão caiu, fora do horário de envio, nada vence hoje) e `null` quando está tudo certo. Se o plano veio vazio com `resumo.adiados > 0`, é fora do horário (segunda a sexta, 9h às 17h de Cuiabá): `aviso: "Fora do horário de envio. Volta às 9h."`.
-8. **Responder só se a Letícia estiver na conversa**: uma linha com agendados, enviados, respostas novas e o que precisa dela (ver Respostas). Na rotina (sem conversa), terminar em silêncio se nada precisa dela.
+8. **Responder só se a Letícia estiver na conversa**: uma linha com agendados, enviados, respostas novas e o que precisa dela (ver Respostas). Na rotina (sem conversa), terminar em silêncio: quem precisa de gente já foi avisado por WhatsApp no passo 4.
 
 Nunca mudar `status` da fila, a não ser por pedido dela. Falhas repetidas (3 rodadas seguidas com erro) = gravar `aviso` e parar de agendar até ela olhar.
 
@@ -56,14 +56,38 @@ Para cada lead com resposta nova, ler `novas` junto com `conversa` e decidir **u
 | `automatica` | resposta automática, "fora do escritório", menu de atendimento | não muda | não |
 
 - **Mover no funil** é só isso: `respondeu` leva o lead para "Responderam" e tira da cadência; `sair` tira de vez. **Nunca** marcar `fechou`, nunca mexer em `etapa` nem `enviadoN` e nunca apagar nada.
-- Começar a anotação com `ATENÇÃO:` quando a pessoa falar de preço, contrato, reclamação, irritação, advogado ou cobrança, e avisar a Letícia no chat na mesma hora. Não sugerir resposta com valor, prazo ou promessa.
-- **Sugestão de resposta**: gravar no lead `respostaSugerida: {texto, geradoEm}` e uma linha no `historico` (`tipo: "resposta"`): `Sugestão de resposta (não enviada): <texto>`. Na voz da Letícia, primeira pessoa, curta (até 400 caracteres), no mesmo tom da cadência ("Oi, <nome>, ..."), sem emoji a menos que a pessoa use. Só usa o que a Reiners oferece (conhecer o estúdio, o diagnóstico, o episódio piloto). Não inventa preço, data nem disponibilidade: se a pessoa propôs um dia, a sugestão pergunta ou diz que confirma.
-- **Enviar resposta** só depois de a Letícia aprovar o texto no chat ("pode enviar", "manda"), com o texto final que ela aprovou: gravar o texto num arquivo e rodar `python3 -m scripts.wa_akg responder --leads $WS/leads.json --lead <ID> --texto-arquivo $WS/r.txt --saida $WS/resposta.json --confirmo`, depois gravar a `update`. Nunca enviar resposta por conta própria, nem na rotina. O script recusa lead que saiu ou fechou.
-- Mostrar à Letícia, no chat, as respostas novas em lista curta: nome do lead, intenção, o que ele disse em uma frase, e a sugestão. Pedir aprovação, edição ou "ignorar".
+- Começar a anotação com `ATENÇÃO:` quando a pessoa falar de preço, contrato, reclamação, irritação, advogado ou cobrança.
+
+### Quem responde: a IA sozinha ou a equipe
+Autorizado pela Letícia e pelo Mazinho em 06/10/2026. O que a IA pode dizer está em `conhecimento-reiners.md` (do site reiners.agency). Fora dele, não responde.
+
+| Intenção | Ação |
+|---|---|
+| `sair` | `situacao: sair`, **nenhuma mensagem**. |
+| `automatica` | Não muda nada, não responde. |
+| `neutra` ("ok", "obrigado") | Responde sozinha, curta, sem empurrar nada. |
+| `interesse` (quer conversar, visitar, saber mais) | Responde sozinha com o link da agenda `https://cal.com/leticiareiners/30min` e a oferta da visita ao estúdio. |
+| `duvida` **simples** (o que é o Diagnóstico, onde fica, como funciona, quanto tempo) | Responde sozinha, só com fatos de `conhecimento-reiners.md`. |
+| **Complexo**: preço, proposta, orçamento, contrato, reclamação, irritação, advogado, cobrança, data ou horário que o lead propôs, `redirecionou`, `midia` (áudio, imagem), dúvida fora do `conhecimento-reiners.md`, ou qualquer incerteza | **Não responde.** Avisa a equipe e anota `ATENÇÃO:`. O lead fica em `respondeu`. |
+
+Regras da resposta sozinha:
+- Envio: gravar o texto num arquivo e rodar `python3 -m scripts.wa_akg responder --leads $WS/leads.json --lead <ID> --texto-arquivo $WS/r.txt --saida $WS/resposta.json --auto`; depois gravar a `update` (traz `respostaAutoEm`). O script recusa lead que saiu e um segundo envio automático ao mesmo lead em 24 h.
+- No máximo **20 respostas automáticas por dia** no total. Passou disso, trata o resto como complexo.
+- Na dúvida entre simples e complexo, é complexo.
+- Texto na voz da Letícia, primeira pessoa, até 400 caracteres, como a cadência. Não inventa preço, prazo, data nem disponibilidade. Com texto aprovado por ela no chat, vale `--confirmo` em vez de `--auto` (sem o limite de 24 h).
+
+### Avisar a equipe (casos complexos)
+Uma mensagem por rodada, juntando todos os casos novos (até 5 leads; se houver mais, "e mais N"). Texto em arquivo, até 600 caracteres, e `python3 -m scripts.wa_akg avisar --texto-arquivo $WS/aviso.txt --saida $WS/aviso.json`. Vai para Letícia (65 99920-7108) e Mazinho (65 99622-7110), ou os números de `WA_AKG_AVISAR`. Formato: `Reiners: <N> conversa(s) precisam de vocês no WhatsApp. 1) <Empresa> (<contato>): <motivo em poucas palavras>. 2) ...` Nunca repetir o aviso do mesmo lead para a mesma resposta (`respostasVistasAte` já marca). Se o aviso falhar (código 1), gravar `aviso` em `config/disparo` e tentar na próxima rodada.
+
+### Registro para aprender (30 dias)
+Para **cada** resposta tratada, gravar um documento novo em `atendimento` (id `<leadId>-<AAAAMMDDHHMMSS>`), sem telefone: `{leadId, empresa, em, mensagemLead, intencao, acao, respostaEnviada, motivoAviso, humanoRespondeu, resultado}`. `acao` é `sozinha`, `avisou`, `sair` ou `ignorou`. Quando a `conversa` mostrar mensagem nossa (`fromMe`) que **não** é da cadência nem resposta automática, é a equipe intervindo: gravar um documento com `acao: "humano"` e o texto em `humanoRespondeu`. `resultado` fica `null` e é preenchido depois (marcou conversa, pediu proposta, sumiu). A cada rodada, atualizar `config/aprendizado` (`respostasSozinhas`, `avisos`, `humanos`). Em **05/11/2026** (30 dias) o conteúdo vira a documentação para a IA assumir mais do atendimento: quais perguntas ela respondeu bem, em quais a equipe teve de entrar e o que a equipe escreveu.
+
+- Mostrar à Letícia, quando ela estiver no chat, as respostas novas em lista curta: nome do lead, intenção, o que disse em uma frase e o que foi feito (respondido sozinho ou avisado).
 
 ## Regras
 - Só entra na fila lead de canal WhatsApp, em cadência (`situacao` vazia ou `ativo`), com o toque vencendo hoje pela mesma regra da central. E-mail, quem respondeu, saiu ou fechou nunca entram.
 - Não mudar texto, foto, ordem nem espera da cadência; o script usa a mensagem do toque como a central a abre.
-- Ritmo: X a cada 30 minutos (X de 1 a 10, padrão 5), no máximo `limiteDia` por dia (padrão 30), de segunda a sexta, das 9h às 17h de Cuiabá. Não aumentar sem ela pedir: o WhatsApp bane quem manda muito e rápido. `--janela` e `--todos-os-dias` existem só para teste com `--so`.
+- Ritmo: X a cada 30 minutos (X de 1 a 10, padrão 5), no máximo `limiteDia` por dia (padrão 30; a Letícia e o Mazinho pediram 50, que é o que está em `config/disparo`), de segunda a sexta, das 9h às 17h de Cuiabá. Não aumentar sem ela pedir: o WhatsApp bane quem manda muito e rápido. `--janela` e `--todos-os-dias` existem só para teste com `--so`.
 - Nunca editar `enviadoN` nem `etapa` à mão aqui.
+- Resposta a lead: só as simples saem sozinhas (seção acima). Todo o resto, a equipe vê no WhatsApp.
 - Para parar na hora: `cancelar` (passo 6). Pausar na Central só cancela na próxima rodada.

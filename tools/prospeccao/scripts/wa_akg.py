@@ -51,6 +51,12 @@ INTERVALO = (60, 180)      # segundos entre uma mensagem e a próxima
 JANELA_MIN = 30            # a fila segue "X mensagens a cada 30 minutos"
 POR_LOTE_MAX = 10          # teto de X: acima disso o WhatsApp costuma bloquear
 LIMITE_DIA_MAX = 60
+# Quem é avisado por WhatsApp quando chega uma resposta que precisa de gente (Letícia e Mazinho).
+# Pode ser trocado por WA_AKG_AVISAR="65999999999,65988888888".
+AVISAR_PADRAO = ("5565999207108", "5565996227110")
+RESPOSTA_AUTO_ESPERA_H = 24   # no máximo uma resposta automática por lead a cada 24 h
+AVISO_MAX = 600
+
 LEGENDA_MAX = 1024         # limite do WhatsApp para legenda de foto
 LOTE_CHECK = 50
 SENT, FAILED, PENDING = "SENT", "FAILED", "PENDING"
@@ -497,8 +503,9 @@ def caixa(cliente: WaAkgCliente, leads: list[dict], existem: dict, agora: dateti
             "resumo": {"monitorados": vistos, "comRespostaNova": len(conversas), "semJid": sem_jid, "erros": len(erros)}}
 
 
-def responder_lead(cliente: WaAkgCliente, lead: dict, jid: str, texto: str, agora: datetime) -> dict:
-    """Envia uma resposta já aprovada pela Letícia, na hora. Recusa lead que saiu ou fechou e texto vazio ou longo demais."""
+def responder_lead(cliente: WaAkgCliente, lead: dict, jid: str, texto: str, agora: datetime, auto: bool = False) -> dict:
+    """Envia uma resposta na hora. Sem `auto`, é um texto que a Letícia aprovou. Com `auto`, a IA respondeu sozinha um caso
+    simples: no máximo uma vez a cada 24 h por lead. Recusa lead que saiu ou fechou e texto vazio ou longo demais."""
     texto = (texto or "").strip()
     if lead.get("situacao") in ("sair", "fechou"):
         raise ValueError(f"o lead {lead['id']} está como '{lead['situacao']}': não se escreve mais para ele por aqui")
@@ -506,11 +513,46 @@ def responder_lead(cliente: WaAkgCliente, lead: dict, jid: str, texto: str, agor
         raise ValueError("o texto da resposta está vazio")
     if len(texto) > 1000:
         raise ValueError("a resposta passa de 1000 caracteres; encurte antes de enviar")
+    if auto:
+        ultima = _data(lead.get("respostaAutoEm"))
+        if ultima and agora - ultima < timedelta(hours=RESPOSTA_AUTO_ESPERA_H):
+            raise ValueError(f"o lead {lead['id']} já recebeu uma resposta automática nas últimas {RESPOSTA_AUTO_ESPERA_H} horas")
     cliente.enviar_texto(jid, texto)
     resumo = texto if len(texto) <= 200 else texto[:197] + "..."
-    return {"id": lead["id"], "data": {
-        "respostaSugerida": {"__delete__": True},
-        "historico": registrar(lead.get("historico"), f"Resposta enviada pelo WhatsApp: {resumo}", agora, "resposta")}}
+    prefixo = "Resposta automática enviada" if auto else "Resposta enviada pelo WhatsApp"
+    data = {"respostaSugerida": {"__delete__": True},
+            "historico": registrar(lead.get("historico"), f"{prefixo}: {resumo}", agora, "resposta")}
+    if auto:
+        data["respostaAutoEm"] = _iso(agora)
+    return {"id": lead["id"], "data": data}
+
+
+def numeros_de_aviso(env=None) -> list[str]:
+    bruto = (env if env is not None else os.environ).get("WA_AKG_AVISAR", "")
+    lista = [numero_whatsapp(x) for x in bruto.split(",")] if bruto.strip() else list(AVISAR_PADRAO)
+    return [n for n in lista if n]
+
+
+def avisar_equipe(cliente: WaAkgCliente, numeros: list[str], texto: str) -> dict:
+    """Manda um aviso curto por WhatsApp para a equipe (Letícia e Mazinho) olhar uma conversa. Um erro num número não para os outros."""
+    texto = (texto or "").strip()
+    if not texto:
+        raise ValueError("o texto do aviso está vazio")
+    if len(texto) > AVISO_MAX:
+        raise ValueError(f"o aviso passa de {AVISO_MAX} caracteres; encurte antes de enviar")
+    alvos = [n for n in (numero_whatsapp(x) for x in numeros) if n]
+    existem = cliente.verificar(alvos) if alvos else {}
+    enviados, erros = [], []
+    for n in alvos:
+        if not existem.get(n):
+            erros.append({"numero": n, "erro": "o número não tem WhatsApp"})
+            continue
+        try:
+            cliente.enviar_texto(existem[n], texto)
+            enviados.append(n)
+        except WaAkgErro as e:
+            erros.append({"numero": n, "erro": str(e)})
+    return {"enviados": enviados, "erros": erros}
 
 
 def agendar_plano(cliente: WaAkgCliente, planos: list[dict]) -> dict:
@@ -670,7 +712,11 @@ def main(argv=None, cliente=None):
     rp.add_argument("--texto-arquivo", required=True, help="arquivo com o texto aprovado (evita problema de aspas)")
     rp.add_argument("--saida", required=True)
     rp.add_argument("--confirmo", action="store_true", help="a Letícia aprovou este texto")
+    rp.add_argument("--auto", action="store_true", help="resposta automática a um caso simples (no máximo 1 por lead a cada 24 h)")
     rp.add_argument("--agora", default="")
+    av = sub.add_parser("avisar", help="avisa a equipe (Letícia e Mazinho) por WhatsApp que há uma conversa para olhar")
+    av.add_argument("--texto-arquivo", required=True)
+    av.add_argument("--saida", required=True)
     x = sub.add_parser("cancelar", help="cancela no WA-AKG o que ainda está pendente (nada que já saiu)")
     x.add_argument("--leads", required=True)
     x.add_argument("--saida", required=True)
@@ -678,8 +724,8 @@ def main(argv=None, cliente=None):
     args = ap.parse_args(argv)
 
     try:
-        if args.cmd == "responder" and not args.confirmo:
-            print("Nada enviado: falta --confirmo (a Letícia precisa ter aprovado o texto).", file=sys.stderr)
+        if args.cmd == "responder" and not (args.confirmo or args.auto):
+            print("Nada enviado: falta --confirmo (a Letícia precisa ter aprovado o texto) ou --auto (caso simples).", file=sys.stderr)
             return 2
         if args.cmd == "agendar" and not args.confirmo:
             print("Nada agendado: falta --confirmo (a Letícia precisa ter visto o plano).", file=sys.stderr)
@@ -751,9 +797,15 @@ def main(argv=None, cliente=None):
             if not jid:
                 print("O número do lead não tem WhatsApp ou não tem telefone.", file=sys.stderr)
                 return 2
-            u = responder_lead(cli, lead, jid, texto, agora)
+            u = responder_lead(cli, lead, jid, texto, agora, auto=args.auto and not args.confirmo)
             _gravar(args.saida, {"updates": [u]})
             print(json.dumps({"enviado": True, "lead": args.lead}, ensure_ascii=False))
+        elif args.cmd == "avisar":
+            with open(args.texto_arquivo, encoding="utf-8") as fh:
+                r = avisar_equipe(cli, numeros_de_aviso(), fh.read())
+            _gravar(args.saida, r)
+            print(json.dumps({"enviados": len(r["enviados"]), "erros": len(r["erros"])}, ensure_ascii=False))
+            return 0 if r["enviados"] else 1
         elif args.cmd == "cancelar":
             r = cancelar_agendados(cli, _ler(args.leads), cli.agendadas("pending"), _agora(args.agora))
             _gravar(args.saida, r)
