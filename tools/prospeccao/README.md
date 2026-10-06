@@ -239,3 +239,23 @@ A meta são 20 toques por dia (campo `metaDiaria` em `config/meta`). O placar co
 NODE_PATH=$(npm root -g) node --test 'tools/prospeccao/tests/central/*.test.js'   # na raiz do repositório; usa o Playwright global
 cd tools/prospeccao && python3 -m pytest -q
 ```
+
+## Disparo pelo WhatsApp (WA-AKG)
+
+O envio automático usa o [WA-AKG](https://github.com/mrifqidaffaaditya/WA-AKG), um gateway de WhatsApp que se instala à parte (Docker ou Node). A central continua só mostrando e marcando; quem agenda é o Claude, com `scripts/wa_akg.py` e a skill `.claude/skills/disparar-wa/`.
+
+**Montar uma vez**
+1. Instalar o WA-AKG num servidor com endereço público em HTTPS, criar uma sessão (ex.: `reiners`) e escanear o QR com o WhatsApp da Letícia. Gerar uma chave de API em Configurações → API Keys (`wag_...`).
+2. No ambiente do Claude: `~/.wa-akg/url`, `~/.wa-akg/key` e `~/.wa-akg/session` (chmod 600), ou as variáveis `WA_AKG_URL`, `WA_AKG_KEY` e `WA_AKG_SESSION`. A chave nunca vai para o repositório, a página nem o banco.
+3. Hospedar as fotos de `central/fotos/` numa URL pública: o WA-AKG baixa a imagem do toque 1 dessa URL.
+4. Liberar o endereço do WA-AKG na rede do ambiente do Claude.
+
+**Usar**: pedir "dispare" (ou "confira os envios", "cancele o que está agendado"). O Claude mostra o plano e só agenda depois do "confirmo". O primeiro envio é sempre o do card TESTE.
+
+**O que o plano faz**
+- Pega os leads de WhatsApp em cadência cujo toque vence hoje, pela mesma regra da central (toque 2 quatro dias depois do 1, toque 3 seis dias depois do 2).
+- Confere no WhatsApp se o número existe (descarta telefone fixo sem WhatsApp) e pula quem já mandou mensagem depois do toque 1. A conferência é de melhor esforço; o botão **Respondeu** do card continua valendo.
+- Distribui os horários de segunda a sexta, das 9h às 17h de Cuiabá, no máximo 30 por dia, com 1 a 3 minutos entre uma mensagem e outra. O agendador do WA-AKG não espaça nada, então o espaçamento é feito aqui. Número novo manda pouco por dia para não ser banido.
+- O lead guarda `agendamento` (toque, id no WA-AKG, horário). Só quando o WA-AKG confirma o envio é que o lead ganha `etapa` e `enviadoN`, e o toque aparece como enviado no card.
+
+**Cuidado com o fuso**: o WA-AKG lê um horário sem fuso como o fuso do sistema dele (padrão `Asia/Jakarta`). O script manda sempre em UTC com `Z`, então não depende dessa configuração.
