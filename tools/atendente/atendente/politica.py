@@ -13,6 +13,30 @@ MAX_AUTO_DIA = 20
 ESPERA_AUTO_H = 24
 
 
+_SEM_ACENTO = lambda t: "".join(c for c in unicodedata.normalize("NFD", t.lower()) if not unicodedata.combining(c))
+# Frases típicas de robô de WhatsApp Business (saudação, menu, fora do horário).
+_ROBO = re.compile(
+    r"agradece(?:mos)? (?:o |a )?(?:seu |sua )?(?:contato|mensagem)"
+    r"|(?:contente|feliz|prazer) em receber a sua mensagem"
+    r"|para agilizar o seu atendimento"
+    r"|fora do horario de atendimento|no momento nao (?:estamos|estou)"
+    r"|retornaremos|responderemos (?:assim|o mais)"
+    r"|(?:digite|escolha) (?:uma|a)? ?(?:das )?(?:opcao|opcoes|numero)"
+    r"|sua mensagem e muito importante|em que (?:posso|podemos) (?:te |lhe |o |a )?ajudar|como (?:posso|podemos) (?:te |lhe )?ajudar")
+# Se a mensagem traz qualquer pedido de verdade, não é só robô: segue o fluxo normal.
+_PEDIDO = re.compile(
+    r"\b(?:sair|sai|parar|pare|para de|remov|descadastr|nao quero|nao tenho interesse|bloque|spam)"
+    r"|quanto|preco|valor|orcamento|proposta|contrato|reuniao|marcar|agendar|interess|me liga|ligar|pode ser|vamos")
+
+
+def e_saudacao_automatica(texto: str | None) -> bool:
+    """Saudação de robô: curta, com frase típica e sem pedido nenhum. Na dúvida, devolve False (segue o fluxo normal)."""
+    if not isinstance(texto, str) or not texto.strip() or len(texto) > 300:
+        return False
+    t = _SEM_ACENTO(texto)
+    return bool(_ROBO.search(t)) and not _PEDIDO.search(t)
+
+
 @dataclass(frozen=True)
 class Decisao:
     acao: str            # "sair" | "ignorar" | "responder" | "avisar"

@@ -257,3 +257,36 @@ def test_em_vazio_usa_agora_e_contexto_leva_ultima_mensagem_nossa():
     at.tratar_mensagem(msg(wa_id="A1", em=""), AGORA)
     assert repo.lead_get("R0001")["respostasVistasAte"] == "2026-10-06T14:00:00Z"
     assert ia.chamadas[0][1]["ultima_mensagem_nossa"] == MSG1
+
+
+# ---- saudação automática de robô de WhatsApp Business: não é resposta do lead
+SAUDACOES = [
+    "Olá! O Colégio Modelo está muito contente em receber a sua mensagem. Para agilizar o seu atendimento e a sua solicitação, informe seu nome.",
+    "Clínica Modelo agradece seu contato. Como podemos ajudar?",
+    "Olá, me chamo Giovanna da clínica Modelo. Agradecemos o seu contato, em que posso te ajudar?",
+    "Estamos fora do horário de atendimento. Retornaremos assim que possível.",
+]
+
+
+@pytest.mark.parametrize("texto", SAUDACOES)
+def test_saudacao_automatica_nao_marca_respondeu_nao_cancela_nem_avisa(texto):
+    at, repo, wa, ia, av = montar(None, erro=True)       # a IA fora do ar não pode gerar aviso
+    repo.aplicar("R0001", {"agendamento": {"id": "ag1"}})
+    wa.pendentes = [{"id": "ag1", "jid": JID}]
+    assert at.tratar_mensagem(msg(texto), AGORA) == "automatica"
+    lead = repo.lead_get("R0001")
+    assert lead["situacao"] == "ativo" and lead.get("agendamento")
+    assert wa.cancelados == [] and wa.enviados == [] and av.pendentes() == 0 and ia.chamadas == []
+    assert acoes(repo) == ["ignorou"] and repo.msgs_do_lead("R0001")[0]["texto"] == texto
+
+
+@pytest.mark.parametrize("texto", [
+    "Olá! Agradecemos o contato. Quanto custa o serviço de vocês?",
+    "Agradecemos o seu contato, mas pode parar de mandar mensagem.",
+    "Oi, tenho interesse, podemos marcar uma reunião?",
+    "x" * 400 + " agradece seu contato",
+])
+def test_resposta_com_pedido_de_verdade_segue_o_fluxo_normal(texto):
+    at, repo, wa, ia, av = montar({"intencao": "complexo", "simples": False, "resposta": "", "motivo": "m"})
+    assert at.tratar_mensagem(msg(texto), AGORA) != "automatica"
+    assert repo.lead_get("R0001")["situacao"] in ("respondeu", "sair")
