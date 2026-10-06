@@ -258,3 +258,28 @@ def test_layout_do_conteiner_importa_o_servico(tmp_path):
          "import atendente.__main__, atendente.servidor, atendente.planejador, atendente.nucleo"],
         capture_output=True, text=True, env=env, cwd=str(app))   # WORKDIR /app, como no contêiner
     assert r.returncode == 0, r.stderr
+
+
+def test_instalador_limpa_caracteres_invisiveis_do_que_foi_colado(tmp_path):
+    """No Terminal do Mac, colar uma chave pode trazer marcadores invisíveis (ESC[200~ ... ESC[201~); o servidor
+    recusa o cabeçalho com 400 e resposta vazia. O instalador precisa limpar isso antes de gravar."""
+    import subprocess
+    script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "deploy", "instalar-atendente.sh")
+    trecho = subprocess.run(["sed", "-n", "/^limpar_entrada()/,/^}/p", script], capture_output=True, text=True).stdout
+    assert "limpar_entrada" in trecho, "função limpar_entrada não existe no instalador"
+    casos = {
+        "wag_FICTICIO123": "wag_FICTICIO123",
+        "\x1b[200~wag_FICTICIO123\x1b[201~": "wag_FICTICIO123",
+        "[200~wag_FICTICIO123[201~": "wag_FICTICIO123",
+        "  wag_FICTICIO123\r\n": "wag_FICTICIO123",
+        "wag_FICTICIO\t123": "wag_FICTICIO123",
+    }
+    for entrada, esperado in casos.items():
+        r = subprocess.run(["bash", "-c", trecho + '\nprintf "%s" "$1" | limpar_entrada', "x", entrada],
+                           capture_output=True, text=True)
+        assert r.stdout == esperado, (entrada, r.stdout, r.stderr)
+
+
+def test_instalador_valida_o_formato_da_chave_e_da_sessao():
+    texto = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "deploy", "instalar-atendente.sh"), encoding="utf-8").read()
+    assert "limpar_entrada" in texto and "chave_ok" in texto and "sessao_ok" in texto
