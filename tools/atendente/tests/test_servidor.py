@@ -312,7 +312,7 @@ def test_leads_agrupados_por_coluna(ctx):
     assert por_id["L3"]["ultimaMensagem"]["texto"] == "Já te chamo"
     assert por_id["L3"]["atencao"] == "ATENÇÃO: pediu orçamento"
     assert por_id["L1"]["ultimaMensagem"] is None and por_id["L1"]["atencao"] is None
-    assert por_id["L1"]["empresa"] == "Empresa 1" and por_id["L7"]["empresa"] == "So Nome"
+    assert por_id["L1"]["empresa"] == "Lead 1" and por_id["L7"]["empresa"] == "So Nome"   # nome é o nome da empresa
     assert set(por_id["L1"]) == {"id", "nome", "empresa", "coluna", "etapa", "situacao", "ultimaMensagem", "atencao"}
 
 
@@ -460,3 +460,26 @@ def test_cookie_path_padrao_e_com_prefixo(ctx):
 def test_cookie_ignora_prefixo_malicioso(ctx, ruim):
     sc = _cookie_login(ctx, {"X-Forwarded-Prefix": ruim})
     assert "Path=/;" in sc and "Domain" not in sc
+
+
+def test_empresa_no_formato_real_da_central_e_um_objeto_e_o_nome_vem_de_nome(ctx):
+    """Nos dados reais da Central, `empresa` é um objeto (dados do CNPJ, às vezes vazio) e o nome fica em `nome`.
+    A tela mostrava "[object Object]" nos cards."""
+    r = ctx.repo
+    r.lead_put(_lead(1, nome="Espósito Advocacia", empresa={"cnpj": "", "cnae": "", "municipio": "Cuiabá"}))
+    r.lead_put(_lead(2, nome="Abrace Energia", empresa={}))
+    r.lead_put(_lead(3, nome="", empresa={"razaoSocial": "Razão Social Ltda"}))
+    r.lead_put(_lead(4, nome="Só texto", empresa="Empresa em texto"))
+    r.lead_put(_lead(5, nome=None, empresa=None))
+    cookie = entrar(ctx)
+    por_id = {l["id"]: l for l in json_de(pedir(ctx, "GET", "/api/leads", cookie=cookie))}
+    assert por_id["L1"]["empresa"] == "Espósito Advocacia"
+    assert por_id["L2"]["empresa"] == "Abrace Energia"
+    assert por_id["L3"]["empresa"] == "Razão Social Ltda"
+    assert por_id["L4"]["empresa"] == "Só texto"
+    assert por_id["L5"]["empresa"] == "Sem nome"
+    for l in por_id.values():
+        assert isinstance(l["empresa"], str) and "object" not in l["empresa"].lower()
+    d = json_de(pedir(ctx, "GET", "/api/leads/L1", cookie=cookie))
+    assert d["empresa"] == "Espósito Advocacia"                       # texto, para a tela
+    assert d["empresaDados"]["municipio"] == "Cuiabá"                 # o objeto original continua disponível

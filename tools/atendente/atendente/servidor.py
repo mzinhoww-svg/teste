@@ -263,9 +263,26 @@ class Servidor(ThreadingHTTPServer):
     def resumo_do_lead(self, l: dict, agora: datetime) -> dict:
         msgs = self.repo.msgs_do_lead(str(l["id"]), 1)
         ult = ({"texto": msgs[-1]["texto"], "de_mim": msgs[-1]["de_mim"], "em": msgs[-1]["em"]} if msgs else None)
-        return {"id": l["id"], "nome": l.get("nome"), "empresa": l.get("empresa") or l.get("nome"),
+        return {"id": l["id"], "nome": l.get("nome"), "empresa": nome_da_empresa(l),
                 "coluna": coluna_do_lead(l, agora), "etapa": l.get("etapa"), "situacao": l.get("situacao"),
                 "ultimaMensagem": ult, "atencao": _atencao(l)}
+
+
+def nome_da_empresa(lead: dict) -> str:
+    """Texto para a tela. Nos dados da Central, `nome` é o nome da empresa e `empresa` é um objeto com dados do CNPJ
+    (às vezes vazio); em dados antigos `empresa` pode ser texto. Nunca devolve um objeto."""
+    nome = lead.get("nome")
+    if isinstance(nome, str) and nome.strip():
+        return nome.strip()
+    emp = lead.get("empresa")
+    if isinstance(emp, str) and emp.strip():
+        return emp.strip()
+    if isinstance(emp, dict):
+        for chave in ("nome", "razaoSocial", "fantasia", "nomeFantasia"):
+            v = emp.get(chave)
+            if isinstance(v, str) and v.strip():
+                return v.strip()
+    return "Sem nome"
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -489,7 +506,8 @@ class Handler(BaseHTTPRequestHandler):
                     self._corpo()
                 return self._erro(404, "Lead não encontrado.")
             if metodo == "GET" and len(resto) == 1:
-                return self._json(200, dict(lead, mensagens=srv.repo.msgs_do_lead(lead_id, 100)))
+                return self._json(200, dict(lead, empresa=nome_da_empresa(lead), empresaDados=lead.get("empresa"),
+                                            mensagens=srv.repo.msgs_do_lead(lead_id, 100)))
             if metodo == "POST" and len(resto) == 2 and resto[1] == "situacao":
                 return self._situacao(lead, usuario, agora)
             if metodo == "POST" and len(resto) == 2 and resto[1] == "nota":
