@@ -26,6 +26,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote, urlsplit, parse_qs
 
 from . import ia as _ia
+from . import rotas
 from . import webhook
 from scripts import wa_akg
 
@@ -476,6 +477,8 @@ class Handler(BaseHTTPRequestHandler):
         if metodo == "POST" and not self._mesma_origem():
             return self._erro(403, "Origem não permitida.")
         agora = srv.agora()
+        if rotas.despachar(self, metodo, caminho, usuario, agora):
+            return
         if metodo == "POST" and caminho == "/logout":
             self._corpo()
             return self._json(200, {"ok": True}, extra={"Set-Cookie": f"sessao=; Path={self._path_cookie()}; HttpOnly; SameSite=Strict; Max-Age=0"})
