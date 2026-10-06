@@ -5,7 +5,8 @@ Só stdlib. O servidor recebe objetos prontos (duck typing):
   atendente   -> .tratar_mensagem(m, agora) -> str
   wa          -> .conectado(), .agendadas(aba), .cancelar(id)
   cfg (dict)  -> webhook_segredo, segredo_sessao, usuarios {nome: senha}; opcionais: pasta_web, relogio (callable
-                 que devolve datetime com fuso), ao_mudar_config (callable(config dict)).
+                 que devolve datetime com fuso), ao_mudar_config (callable(config dict)), fotos_url (onde as fotos
+                 do toque 1 estão publicadas; o painel mostra a foto).
 Todas as URLs da tela são relativas, para funcionar atrás de /central/ (o Caddy corta o prefixo).
 """
 import base64
@@ -26,6 +27,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote, urlsplit, parse_qs
 
 from . import ia as _ia
+from . import rotas
 from . import webhook
 from scripts import wa_akg
 
@@ -263,9 +265,11 @@ class Servidor(ThreadingHTTPServer):
     def resumo_do_lead(self, l: dict, agora: datetime) -> dict:
         msgs = self.repo.msgs_do_lead(str(l["id"]), 1)
         ult = ({"texto": msgs[-1]["texto"], "de_mim": msgs[-1]["de_mim"], "em": msgs[-1]["em"]} if msgs else None)
-        return {"id": l["id"], "nome": l.get("nome"), "empresa": nome_da_empresa(l),
-                "coluna": coluna_do_lead(l, agora), "etapa": l.get("etapa"), "situacao": l.get("situacao"),
-                "ultimaMensagem": ult, "atencao": _atencao(l)}
+        from .api_leads import resumo_extra   # leva 1: dados do card (segmento, faixa, toque, visões...)
+        coluna = coluna_do_lead(l, agora)
+        return dict({"id": l["id"], "nome": l.get("nome"), "empresa": nome_da_empresa(l),
+                     "coluna": coluna, "etapa": l.get("etapa"), "situacao": l.get("situacao"),
+                     "ultimaMensagem": ult, "atencao": _atencao(l)}, **resumo_extra(l, coluna, agora))
 
 
 def nome_da_empresa(lead: dict) -> str:
@@ -476,6 +480,8 @@ class Handler(BaseHTTPRequestHandler):
         if metodo == "POST" and not self._mesma_origem():
             return self._erro(403, "Origem não permitida.")
         agora = srv.agora()
+        if rotas.despachar(self, metodo, caminho, usuario, agora):
+            return
         if metodo == "POST" and caminho == "/logout":
             self._corpo()
             return self._json(200, {"ok": True}, extra={"Set-Cookie": f"sessao=; Path={self._path_cookie()}; HttpOnly; SameSite=Strict; Max-Age=0"})

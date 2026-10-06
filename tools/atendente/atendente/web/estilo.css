@@ -90,7 +90,8 @@ textarea { resize: vertical; min-height: 72px; }
 
 /* Abas */
 .abas-barra { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 16px 0; flex-wrap: wrap; }
-.abas { display: flex; gap: 4px; }
+.abas { display: flex; gap: 4px; max-width: 100%; overflow-x: auto; scrollbar-width: thin; }
+.abas .aba { white-space: nowrap; flex: 0 0 auto; }
 .aba { min-height: 40px; padding: 6px 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; cursor: pointer; font-weight: 600; color: var(--suave); }
 .aba[aria-selected="true"] { color: var(--navy); border-bottom-color: var(--ouro); }
 

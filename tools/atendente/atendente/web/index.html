@@ -6,6 +6,10 @@
 <title>Atendente Reiners</title>
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="estilo.css">
+<link rel="stylesheet" href="leva1.css">
+<link rel="stylesheet" href="leva2.css">
+<link rel="stylesheet" href="leva3.css">
+<link rel="stylesheet" href="leva4.css">
 </head>
 <body>
 
@@ -68,6 +72,7 @@
 
   <main>
     <section id="vista-quadro" role="tabpanel" aria-labelledby="aba-quadro">
+      <div id="filtros-quadro" class="filtros-quadro"></div>
       <div id="quadro" class="quadro" tabindex="-1"></div>
     </section>
     <section id="vista-atend" role="tabpanel" aria-labelledby="aba-atend" hidden>
@@ -79,6 +84,7 @@
       </div>
       <ol id="lista-atend" class="lista-atend"></ol>
     </section>
+    <!-- seções extras entram aqui (Atendente.abas.registrar) -->
   </main>
 
   <aside id="painel" class="painel" role="dialog" aria-modal="false" aria-labelledby="painel-titulo" hidden>
@@ -104,6 +110,7 @@
         <textarea id="nota-texto" rows="3" maxlength="1000" placeholder="O que aconteceu com este lead?"></textarea>
         <button class="btn primario" type="submit">Salvar nota</button>
       </form>
+      <div id="painel-extra" class="painel-extra"></div>
       <h3>Conversa</h3>
       <ol id="painel-conversa" class="conversa"></ol>
       <h3>Histórico</h3>
@@ -124,5 +131,9 @@
 </dialog>
 
 <script src="app.js"></script>
+<script src="leva1.js"></script>
+<script src="leva2.js"></script>
+<script src="leva3.js"></script>
+<script src="leva4.js"></script>
 </body>
 </html>

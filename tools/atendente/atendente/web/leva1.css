@@ -1,0 +1,62 @@
+/* Leva 1: filtros e visões do quadro, dados no card e seções do painel. Usa as cores de estilo.css. */
+
+/* Barra de filtros acima do quadro */
+.l1-barra { display: grid; gap: 8px; padding: 0 16px 12px; min-width: 0; }
+.l1-visoes { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 4px; scrollbar-width: thin; }
+.l1-visao { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 12px; border-radius: 999px;
+            border: 1px solid var(--borda-campo); background: var(--papel); cursor: pointer; font-weight: 600; white-space: nowrap; }
+.l1-visao:hover { background: var(--pergaminho); }
+.l1-visao[aria-pressed="true"] { background: var(--btn); color: var(--btn-texto); border-color: var(--btn); }
+.l1-visao .l1-num { font-size: 12px; font-weight: 700; padding: 0 6px; border-radius: 999px; background: var(--pergaminho); color: var(--suave); }
+.l1-visao[aria-pressed="true"] .l1-num { background: transparent; color: inherit; }
+.l1-linha { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 12px; min-width: 0; }
+.l1-busca { display: grid; gap: 2px; flex: 1 1 260px; max-width: 420px; min-width: 0; font-weight: 600; font-size: 13px; }
+.l1-busca input { min-height: 40px; padding: 6px 10px; }
+.l1-contagem { margin: 0; flex: 1 1 200px; align-self: center; color: var(--suave); font-size: 13px; font-weight: 600; }
+.l1-limpar:disabled { visibility: hidden; }
+.l1-selects { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; min-width: 0; }
+.l1-campo { display: grid; gap: 2px; font-size: 13px; font-weight: 600; min-width: 0; }
+.l1-campo select { width: 100%; min-width: 0; min-height: 38px; padding: 4px 8px; border: 1px solid var(--borda-campo); border-radius: 8px;
+                   background: var(--papel); color: var(--navy); font: inherit; font-weight: 400; }
+.l1-campo select.l1-ativo { border-color: var(--ouro); box-shadow: inset 0 0 0 1px var(--ouro); }
+
+/* Card */
+.l1-meta { font-size: 12px; color: var(--suave); overflow-wrap: anywhere; }
+.l1-linha-card { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.l1-etiqueta { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 4px; background: var(--pergaminho); color: var(--navy); }
+.l1-etiqueta.g-hoje { background: var(--ouro-fundo); color: var(--ouro-texto); }
+.l1-etiqueta.g-respondeu, .l1-etiqueta.g-fechou { background: var(--ok-fundo); color: var(--ok); }
+.l1-etiqueta.g-semcontato, .l1-etiqueta.g-sair { background: var(--alerta-fundo); color: var(--alerta); }
+.l1-nums { font-size: 12px; color: var(--suave); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.l1-decide { font-size: 13px; overflow-wrap: anywhere; }
+.l1-tel { font-size: 12px; color: var(--suave); }
+
+/* Painel */
+.l1-painel { display: grid; gap: 4px; margin-top: 16px; }
+.l1-secao { border-top: 1px solid var(--linha); padding-top: 4px; overflow-wrap: anywhere; }
+.l1-secao h3 { margin-top: 10px; }
+.l1-secao p { margin: 4px 0; }
+.l1-toque-rot { color: var(--suave); }
+.l1-toque-rot b { color: var(--navy); }
+.l1-msg { white-space: pre-wrap; padding: 10px 12px; border-radius: 8px; background: var(--papel); border: 1px solid var(--linha); }
+.l1-foto { margin: 10px 0 0; }
+.l1-foto img { display: block; width: 100%; max-width: 320px; height: auto; border-radius: 8px; border: 1px solid var(--linha); background: var(--pergaminho); }
+.l1-foto figcaption, .l1-foto-txt { font-size: 13px; color: var(--suave); margin-top: 4px; }
+.l1-gancho { padding: 6px 10px; background: var(--ouro-fundo); color: var(--navy); border-radius: 6px; }
+.l1-pessoa { display: grid; gap: 1px; padding: 8px 10px; margin: 6px 0; border: 1px solid var(--linha); border-radius: 8px; background: var(--papel); }
+.l1-pessoa.l1-ativo { border-color: var(--ouro); box-shadow: inset 3px 0 0 var(--ouro); }
+.l1-papel { justify-self: start; font-size: 12px; font-weight: 700; padding: 0 6px; border-radius: 4px; background: var(--pergaminho); color: var(--suave); }
+.l1-fonte { font-size: 12px; color: var(--suave); }
+.l1-painel a { color: var(--navy); text-underline-offset: 2px; }
+.l1-links { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.l1-links a { font-weight: 600; min-height: 32px; display: inline-flex; align-items: center; }
+.l1-alerta { color: var(--alerta); font-weight: 600; }
+.l1-socios { margin: 4px 0; padding-left: 18px; }
+.l1-secao details summary { cursor: pointer; min-height: 32px; display: flex; align-items: center; }
+
+@media (max-width: 599px) {
+  .l1-barra { padding-inline: 12px; }
+  .l1-busca { max-width: none; flex-basis: 100%; }
+  .l1-selects { grid-template-columns: 1fr 1fr; }
+  .l1-visao { min-height: 40px; }
+}

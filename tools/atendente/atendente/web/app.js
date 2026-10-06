@@ -24,6 +24,9 @@
 
   function $(id) { return document.getElementById(id); }
 
+  /* Ganchos para os módulos leva1..4.js (carregados depois deste arquivo). */
+  var ganchos = { filtro: null, cartao: [], painel: [], quadro: [], atualizou: [] };
+
   /* Cria elemento; filhos string viram nós de texto (seguro contra HTML). */
   function h(tag, props) {
     var e = document.createElement(tag);
@@ -231,7 +234,7 @@
   /* ---------- quadro ---------- */
   function cartao(l) {
     var ult = l.ultimaMensagem;
-    return h('li', null,
+    var el = h('li', null,
       h('button', {
         class: 'card', type: 'button', dataset: { id: l.id }, 'aria-expanded': estado.abertoId === l.id ? 'true' : 'false',
         onclick: function (ev) { abrirPainel(l.id, ev.currentTarget); }
@@ -242,20 +245,28 @@
                          : h('span', { class: 'card-msg suave', text: 'Sem mensagens ainda' }),
         l.atencao ? h('span', { class: 'marca-atencao', text: 'ATENÇÃO' }) : null,
         l.atencao ? h('span', { class: 'so-leitor', text: l.atencao }) : null));
+    ganchos.cartao.forEach(function (f) { f(l, el); });
+    return el;
   }
 
+  function visiveis() {
+    return ganchos.filtro ? estado.leads.filter(ganchos.filtro) : estado.leads;
+  }
   function pintarQuadro() {
     var quadro = $('quadro');
     var rolagemX = quadro.scrollLeft;
     var rolagemY = {};
     var focoId = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('card')
       ? document.activeElement.dataset.id : null;
-    quadro.querySelectorAll('.coluna').forEach(function (c) { rolagemY[c.dataset.coluna] = c.querySelector('.cards').scrollTop; });
+    quadro.querySelectorAll('.coluna').forEach(function (c) {
+      var ul = c.querySelector('.cards');   // coluna vazia não tem a lista
+      if (ul) rolagemY[c.dataset.coluna] = ul.scrollTop;
+    });
 
     limpar(quadro);
     var porColuna = {};
     COLUNAS.forEach(function (c) { porColuna[c] = []; });
-    estado.leads.forEach(function (l) { (porColuna[l.coluna] || porColuna['Aguardando']).push(l); });
+    visiveis().forEach(function (l) { (porColuna[l.coluna] || porColuna['Aguardando']).push(l); });
     COLUNAS.forEach(function (nome) {
       var lista = porColuna[nome];
       var titulo = 'col-' + COLUNAS.indexOf(nome);
@@ -264,6 +275,7 @@
         h('div', { class: 'coluna-topo' }, h('h2', { id: titulo, text: nome }), h('span', { class: 'num', text: String(lista.length) })),
         lista.length ? ul : h('p', { class: 'vazio', text: VAZIO_COLUNA })));
     });
+    ganchos.quadro.forEach(function (f) { f(quadro); });
     quadro.scrollLeft = rolagemX;
     quadro.querySelectorAll('.coluna').forEach(function (c) {
       var ul = c.querySelector('.cards');
@@ -316,6 +328,7 @@
       if (!primeiraVez && assinatura === estado.assinaturaPainel) return;
       estado.assinaturaPainel = assinatura;
       pintarPainel(lead, primeiraVez);
+      ganchos.painel.forEach(function (f) { f(lead, primeiraVez); });
     }).catch(function (e) {
       if (e instanceof ErroApi && e.status === 404) { fecharPainel(true); aviso('Esse lead não existe mais.', true); }
       else if (primeiraVez && !(e instanceof ErroApi && e.status === 401)) aviso(eRede(e) ? ERRO_REDE : e.message, true);
@@ -423,24 +436,38 @@
     });
   }
 
-  function trocarAba(atend) {
-    estado.abaAtend = atend;
-    $('aba-quadro').setAttribute('aria-selected', atend ? 'false' : 'true');
-    $('aba-quadro').tabIndex = atend ? -1 : 0;
-    $('aba-atend').setAttribute('aria-selected', atend ? 'true' : 'false');
-    $('aba-atend').tabIndex = atend ? 0 : -1;
-    $('vista-quadro').hidden = atend;
-    $('vista-atend').hidden = !atend;
-    if (atend) fecharPainel(true);
+  var extras = {};   // abas registradas por outros módulos: nome -> {botao, secao, montado, aoAbrir}
+  function nomesAbas() { return ['quadro', 'atend'].concat(Object.keys(extras)); }
+  function trocarAba(nome) {
+    if (nome === true) nome = 'atend';
+    if (nome === false) nome = 'quadro';
+    estado.aba = nome;
+    estado.abaAtend = nome === 'atend';
+    nomesAbas().forEach(function (n) {
+      var ativa = n === nome;
+      var btn = n === 'quadro' ? $('aba-quadro') : n === 'atend' ? $('aba-atend') : extras[n].botao;
+      var sec = n === 'quadro' ? $('vista-quadro') : n === 'atend' ? $('vista-atend') : extras[n].secao;
+      btn.setAttribute('aria-selected', ativa ? 'true' : 'false');
+      btn.tabIndex = ativa ? 0 : -1;
+      sec.hidden = !ativa;
+    });
+    if (nome !== 'quadro') fecharPainel(true);
+    if (extras[nome]) {
+      var x = extras[nome];
+      if (!x.montado) { x.montado = true; x.montar(x.secao); }
+      if (x.aoAbrir) x.aoAbrir(x.secao);
+    }
     atualizar();
   }
-  $('aba-quadro').addEventListener('click', function () { trocarAba(false); });
-  $('aba-atend').addEventListener('click', function () { trocarAba(true); });
+  $('aba-quadro').addEventListener('click', function () { trocarAba('quadro'); });
+  $('aba-atend').addEventListener('click', function () { trocarAba('atend'); });
   document.querySelector('.abas').addEventListener('keydown', function (ev) {
     if (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft') {
-      var vaiAtend = ev.key === 'ArrowRight';
-      trocarAba(vaiAtend);
-      (vaiAtend ? $('aba-atend') : $('aba-quadro')).focus();
+      var nomes = nomesAbas();
+      var i = nomes.indexOf(estado.aba || 'quadro');
+      var n = nomes[(i + (ev.key === 'ArrowRight' ? 1 : nomes.length - 1)) % nomes.length];
+      trocarAba(n);
+      (n === 'quadro' ? $('aba-quadro') : n === 'atend' ? $('aba-atend') : extras[n].botao).focus();
     }
   });
   document.querySelector('.filtros').addEventListener('click', function (ev) {
@@ -463,6 +490,7 @@
       pintarFaixa();
       var ass = JSON.stringify(r[1]);
       if (ass !== estado.assinaturaLeads) { estado.assinaturaLeads = ass; estado.leads = r[1]; pintarQuadro(); }
+      ganchos.atualizou.forEach(function (f) { f(estado); });
       if (r[2]) {
         var a2 = JSON.stringify(r[2]);
         if (a2 !== estado.assinaturaAtend) { estado.assinaturaAtend = a2; estado.atendimento = r[2]; pintarAtendimento(); }
@@ -475,9 +503,34 @@
     }).then(function () { estado.carregando = false; });
   }
 
+  /* ---------- API para os módulos extras ---------- */
+  window.Atendente = {
+    h: h, $: $, limpar: limpar, api: api, aviso: aviso, quando: quando, dolar: dolar, numero: numero,
+    estado: estado, ganchos: ganchos, atualizar: atualizar, abrirPainel: abrirPainel, fecharPainel: fecharPainel,
+    pintarQuadro: pintarQuadro, carregarPainel: carregarPainel, COLUNAS: COLUNAS, eRede: eRede, ERRO_REDE: ERRO_REDE,
+    abas: {
+      ir: trocarAba,
+      registrar: function (nome, titulo, montar, aoAbrir) {
+        var botao = h('button', { class: 'aba', role: 'tab', type: 'button', id: 'aba-' + nome, 'aria-selected': 'false',
+                                  'aria-controls': 'vista-' + nome, tabindex: '-1', text: titulo,
+                                  onclick: function () { trocarAba(nome); } });
+        var secao = h('section', { id: 'vista-' + nome, role: 'tabpanel', 'aria-labelledby': 'aba-' + nome, hidden: true });
+        document.querySelector('.abas').append(botao);
+        document.querySelector('#tela-app main').append(secao);
+        extras[nome] = { botao: botao, secao: secao, montar: montar, aoAbrir: aoAbrir, montado: false };
+      }
+    }
+  };
   /* ---------- início ---------- */
-  api('api/estado').then(function () { mostrarApp(); }, function (e) {
-    if (e instanceof ErroApi && e.status === 401) return;   // api() já mostrou o login
-    mostrarApp();                                            // sem rede: mostra o erro e tenta de novo sozinha
-  });
+  function iniciar() {
+    ['leva1', 'leva2', 'leva3', 'leva4'].forEach(function (n) {
+      var f = window['Atendente_' + n]; if (typeof f === 'function') f(window.Atendente);
+    });
+
+    api('api/estado').then(function () { mostrarApp(); }, function (e) {
+      if (e instanceof ErroApi && e.status === 401) return;   // api() já mostrou o login
+      mostrarApp();                                            // sem rede: mostra o erro e tenta de novo sozinha
+    });
+  }
+  if (document.readyState === 'complete') iniciar(); else window.addEventListener('load', iniciar);
 })();
