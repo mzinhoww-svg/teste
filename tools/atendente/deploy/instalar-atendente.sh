@@ -56,10 +56,18 @@ ok "código em dia"
 # ---------------------------------------------------------------- 3. segredos
 valor_env() { grep -E "^$1=" "$ENV" 2>/dev/null | head -n1 | cut -d= -f2-; }
 
+# O Terminal do Mac pode trazer marcadores invisíveis ao colar (ESC[200~ ... ESC[201~). Um cabeçalho com esses caracteres
+# faz o servidor responder 400 sem texto. Tira os marcadores, os caracteres de controle e os espaços.
+limpar_entrada() {
+  sed -e 's/\x1b\[[0-9;]*[~A-Za-z]//g' -e 's/\[20[01]~//g' | tr -d '[:cntrl:][:space:]'
+}
+chave_ok() { case "$1" in *[!A-Za-z0-9_-]*|"") return 1;; esac; [ "${#1}" -ge 16 ]; }
+sessao_ok() { case "$1" in *[!A-Za-z0-9_-]*|"") return 1;; esac; }
 pedir_segredo() {  # pedir_segredo "texto" -> imprime o valor
   local v=""
   while [ -z "$v" ]; do
     read -r -s -p "$1: " v </dev/tty; echo >&2
+    v="$(printf '%s' "$v" | limpar_entrada)"
     [ -z "$v" ] && echo "    (não pode ficar vazio)" >&2
   done
   printf '%s' "$v"
@@ -68,6 +76,8 @@ pedir_texto() {
   local v=""
   while [ -z "$v" ]; do
     read -r -p "$1: " v </dev/tty
+    v="$(printf '%s' "$v" | sed -e 's/\x1b\[[0-9;]*[~A-Za-z]//g' -e 's/\[20[01]~//g' | tr -d '[:cntrl:]')"
+    v="${v#"${v%%[![:space:]]*}"}"; v="${v%"${v##*[![:space:]]}"}"
     [ -z "$v" ] && echo "    (não pode ficar vazio)" >&2
   done
   printf '%s' "$v"
@@ -85,8 +95,16 @@ fi
 if [ "$REFAZER" = "sim" ]; then
   mkdir -p "$PASTA_ENV" && chmod 700 "$PASTA_ENV"
   echo "    O que você digitar NÃO aparece na tela. É normal."
-  WA_KEY="$(pedir_segredo "Chave do WA-AKG (a nova, que você gerou depois de trocar)")"
-  WA_SESSAO="$(pedir_texto "Nome da sessão do WhatsApp no WA-AKG")"
+  while :; do
+    WA_KEY="$(pedir_segredo "Chave do WA-AKG (a nova, que você gerou depois de trocar)")"
+    chave_ok "$WA_KEY" && break
+    echo "    essa chave não parece certa (só letras, números, _ e -, e pelo menos 16 caracteres). Cole de novo." >&2
+  done
+  while :; do
+    WA_SESSAO="$(pedir_texto "Código da sessão do WhatsApp no WA-AKG (não é o apelido; ex.: fjenui)")"
+    sessao_ok "$WA_SESSAO" && break
+    echo "    o código da sessão só tem letras, números, _ e -. Veja em Sessions / QR no painel do WA-AKG." >&2
+  done
   OR_KEY="$(pedir_segredo "Chave do OpenRouter")"
   USUARIOS=""
   while :; do
@@ -238,7 +256,7 @@ chamar() {  # chamar METODO URL [corpo]  -> código HTTP em $codigo, resposta em
 chamar GET "$URL_HOOKS"
 case "$codigo" in
   2??) ;;
-  *)   parar "o WA-AKG em $WA_LOCAL não aceitou a consulta (código $codigo). A chave e o nome da sessão estão certos? Resposta: $(cat "$SAIDA" 2>/dev/null)";;
+  *)   parar "o WA-AKG em $WA_LOCAL não aceitou a consulta (código $codigo). Confira a chave e o CÓDIGO da sessão (não o apelido). Código 400 com resposta vazia costuma ser caractere invisível na chave: rode este instalador de novo e responda n na pergunta de manter, para digitar a chave outra vez. Resposta: $(cat "$SAIDA" 2>/dev/null)";;
 esac
 # IDs dos webhooks que já apontam para o atendente (um por linha).
 IDS="$(python3 -I -c '
