@@ -258,7 +258,7 @@
     var rolagemY = {};
     var focoId = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('card')
       ? document.activeElement.dataset.id : null;
-    quadro.querySelectorAll('.coluna').forEach(function (c) { rolagemY[c.dataset.coluna] = c.querySelector('.cards').scrollTop; });
+    quadro.querySelectorAll('.coluna').forEach(function (c) { var ul = c.querySelector('.cards'); rolagemY[c.dataset.coluna] = ul ? ul.scrollTop : 0; });
 
     limpar(quadro);
     var porColuna = {};
@@ -513,7 +513,7 @@
                                   onclick: function () { trocarAba(nome); } });
         var secao = h('section', { id: 'vista-' + nome, role: 'tabpanel', 'aria-labelledby': 'aba-' + nome, hidden: true });
         document.querySelector('.abas').append(botao);
-        document.querySelector('main').append(secao);
+        document.querySelector('#tela-app main').append(secao);
         extras[nome] = { botao: botao, secao: secao, montar: montar, aoAbrir: aoAbrir, montado: false };
       }
     }
