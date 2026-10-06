@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from scripts.enriquecer_leads import (TregCliente, aplicar, decisor_alvo, estimar, executar, extrair_telefone,
+from scripts.enriquecer_leads import (TregCliente, aplicar, decisor_alvo, estimar, executar, extrair_telefone, ler_token,
                                       limpar, limpar_telefone, main, recuperar_call, selecionar,
                                       transporte_simulado)
 
@@ -431,3 +431,45 @@ def test_aplicar_nao_duplica_contato_existente():
     assert len(n["contatos"]) == 1
     assert n["buscaTreg"]["resultado"] == "achou"
     assert n["historico"][-1]["texto"] == "Busca de telefone (treg): achou"
+
+
+# ---------------------------------------------------------------- uso como biblioteca (atendente na VPS)
+
+def test_parar_interrompe_antes_do_proximo_lead():
+    pedidos = {"n": 0}
+    cli, t = cliente(lambda c: ok_phone())
+
+    def parar():
+        pedidos["n"] += 1
+        return "parado pela equipe" if pedidos["n"] > 2 else None
+    r = executar([cand(f"R{i}") for i in range(5)], cli, "E1", 5_000_000, parar=parar)
+    assert r["motivoParada"] == "parado pela equipe" and len(t.chamadas) == 2 and r["consultados"] == 2
+
+
+def test_ao_lead_avisa_cada_lead_com_o_parcial():
+    vistos = []
+    cli, _ = cliente(lambda c: ok_phone())
+    executar([cand("R1"), cand("R2")], cli, "E1", 5_000_000,
+             ao_lead=lambda lead_id, r, parcial: vistos.append((lead_id, r["resultado"], parcial["consultados"])))
+    assert vistos == [("R1", "achou", 1), ("R2", "achou", 2)]
+
+
+def test_402_sem_saldo_para_a_rodada_sem_marcar_o_lead():
+    corpo = {"error": "insufficient_balance", "balance_micro": 1000, "estimated_cost_micro": 150000,
+             "topup_url": "https://treg.to/topup"}
+    cli, t = cliente(lambda c: (402, {}, corpo))
+    r = executar([cand("R1"), cand("R2")], cli, "E1", 5_000_000)
+    assert r["motivoParada"] == "saldo insuficiente" and len(t.chamadas) == 1
+    assert "R1" not in r["porLead"] and r["erros"] == 0
+
+
+def test_402_por_teto_da_chamada_continua_sendo_erro_do_lead():
+    cli, t = cliente(lambda c: (402, {}, {"error": "route_max_cost"}))
+    r = executar([cand("R1"), cand("R2")], cli, "E1", 5_000_000)
+    assert r["motivoParada"] is None and r["erros"] == 2 and len(t.chamadas) == 2
+
+
+def test_ler_token_aceita_treg_api_key(tmp_path):
+    assert ler_token({"TREG_API_KEY": "k"}, str(tmp_path / "nada.json")) == ("k", None)
+    assert ler_token({"TREG_TOKEN": "t", "TREG_API_KEY": "k"}, str(tmp_path / "nada.json"))[0] == "t"
+    assert ler_token({}, str(tmp_path / "nada.json")) == (None, None)
