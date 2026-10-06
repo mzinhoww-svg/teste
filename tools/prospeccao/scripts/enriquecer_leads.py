@@ -222,6 +222,18 @@ class TregErro(Exception):
         super().__init__(msg or f"HTTP {status}")
         self.status, self.corpo = status, corpo
 
+    @property
+    def sem_saldo(self) -> bool:
+        """402 por falta de saldo pré-pago (corpo com balance_micro/topup_url). O 402 `route_max_cost` é o teto
+        da chamada, não falta de saldo."""
+        if self.status != 402:
+            return False
+        c = self.corpo if isinstance(self.corpo, dict) else {}
+        if str(c.get("error") or "") == "route_max_cost":
+            return False
+        texto = json.dumps(c).lower()
+        return "balance" in texto or "topup" in texto or "insufficient" in texto or not c
+
 
 def transporte_urllib(metodo: str, url: str, headers: dict, corpo: bytes | None):
     """(status, headers, bytes). Erros HTTP voltam como resposta, não como exceção."""
@@ -237,8 +249,9 @@ def ler_token(env=None, config_path="~/.treg/config.json"):
     """(token, org). Nunca imprimir nem gravar o token."""
     env = os.environ if env is None else env
     org = env.get("TREG_ORG") or None
-    if env.get("TREG_TOKEN"):
-        return env["TREG_TOKEN"], org
+    for nome in ("TREG_TOKEN", "TREG_API_KEY"):
+        if (env.get(nome) or "").strip():
+            return env[nome].strip(), org
     try:
         with open(os.path.expanduser(config_path), encoding="utf-8") as fh:
             cfg = json.load(fh)
@@ -391,8 +404,12 @@ def _consultado(r: dict) -> bool:
 
 
 def executar(candidatos, cliente, execucao_id, saldo_micro, teto_micro=TETO_PADRAO_MICRO, lote=10,
-             taxa_minima=0.30, ao_fim_do_lote=None) -> dict:
-    """Consulta lead a lead. Erros (HTTP) não entram na taxa: não foram busca de fato nem foram cobrados."""
+             taxa_minima=0.30, ao_fim_do_lote=None, parar=None, ao_lead=None) -> dict:
+    """Consulta lead a lead. Erros (HTTP) não entram na taxa: não foram busca de fato nem foram cobrados.
+
+    `parar()` é olhada antes de cada lead: se devolver um texto, a rodada para com ele como motivo.
+    `ao_lead(lead_id, resultado, parcial)` é chamada depois de cada lead consultado (progresso ao vivo).
+    402 por falta de saldo para a rodada na hora com "saldo insuficiente" (o lead não conta como erro)."""
     por_lead: dict = {}
     estado = {"gasto": 0, "motivo": None}
 
@@ -421,6 +438,10 @@ def executar(candidatos, cliente, execucao_id, saldo_micro, teto_micro=TETO_PADR
 
     seguidos = 0
     for n, c in enumerate(candidatos, 1):
+        motivo = parar() if parar else None
+        if motivo:
+            estado["motivo"] = motivo
+            break
         lead_id = c["leadId"]
         r = {"resultado": "nao_achou", "callIds": [], "custoMicro": 0}
         linkedin = (c.get("linkedin") or "").strip()
@@ -446,12 +467,20 @@ def executar(candidatos, cliente, execucao_id, saldo_micro, teto_micro=TETO_PADR
             if tel:
                 r.update(resultado="achou", telefone=tel, provedor=resp["provedor"])
         except TregErro as e:
+            if e.sem_saldo:
+                estado["motivo"] = "saldo insuficiente"
+                if r["callIds"]:  # a busca de LinkedIn já foi paga: guarda o ganho, sem contar como consulta
+                    r["resultado"] = "interrompido"
+                    por_lead[lead_id] = r
+                break
             r["resultado"] = "erro"
             r["erro"] = f"HTTP {e.status}"
         except OSError as e:  # URLError, timeout, conexão resetada
             r["resultado"] = "erro"
             r["erro"] = f"rede: {type(e).__name__}"
         por_lead[lead_id] = r
+        if ao_lead:
+            ao_lead(lead_id, r, parcial())
         seguidos = seguidos + 1 if r["resultado"] == "erro" else 0
         if seguidos >= ERROS_SEGUIDOS_MAX:
             estado["motivo"] = "erros consecutivos"
