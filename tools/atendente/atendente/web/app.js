@@ -513,7 +513,7 @@
                                   onclick: function () { trocarAba(nome); } });
         var secao = h('section', { id: 'vista-' + nome, role: 'tabpanel', 'aria-labelledby': 'aba-' + nome, hidden: true });
         document.querySelector('.abas').append(botao);
-        document.querySelector('main').append(secao);
+        document.querySelector('#tela-app main').append(secao);
         extras[nome] = { botao: botao, secao: secao, montar: montar, aoAbrir: aoAbrir, montado: false };
       }
     }
