@@ -34,3 +34,6 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# cache local de ferramenta de design
+**/.impeccable/hook.cache.json

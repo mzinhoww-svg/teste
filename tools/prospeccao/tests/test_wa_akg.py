@@ -337,10 +337,10 @@ def test_janela_livre_so_com_so_e_so_para_o_lead_escolhido(tmp_path):
 def test_verificar_aceita_a_resposta_da_doc_e_a_real_e_usa_o_jid_devolvido():
     def transporte(corpo):
         return lambda m, url, h, c=None: (200, {}, json.dumps(corpo).encode())
-    item = {"number": "5565996227110", "exists": True, "jid": "556596227110@s.whatsapp.net"}   # conta sem o nono dígito
+    item = {"number": "5565999900022", "exists": True, "jid": "556599990022@s.whatsapp.net"}   # conta sem o nono dígito
     for resposta in ({"status": True, "data": {"results": [item]}}, {"success": True, "results": [item]}):
         c = WaAkgCliente("http://wa/api", "k", "reiners", transporte=transporte(resposta), dormir=lambda s: None)
-        assert c.verificar(["5565996227110"]) == {"5565996227110": "556596227110@s.whatsapp.net"}
+        assert c.verificar(["5565999900022"]) == {"5565999900022": "556599990022@s.whatsapp.net"}
 
 
 # --------------------------------------------------------------------------- ritmo: X a cada 30 minutos
@@ -508,9 +508,9 @@ def consultados(f):
 
 
 def test_conferir_guarda_o_jid_do_whatsapp_no_lead_depois_do_envio():
-    ag = {"n": 1, "id": "s1", "sendAt": "2026-10-06T14:05:00Z", "jid": "556596227110@s.whatsapp.net"}
+    ag = {"n": 1, "id": "s1", "sendAt": "2026-10-06T14:05:00Z", "jid": "556599990022@s.whatsapp.net"}
     r = conferir([lead("A", agendamento=ag)], [], [{"id": "s1", "status": "SENT", "sendAt": "2026-10-06T14:06:00.000Z"}], AGORA)
-    assert r["updates"][0]["data"]["jidWa"] == "556596227110@s.whatsapp.net"
+    assert r["updates"][0]["data"]["jidWa"] == "556599990022@s.whatsapp.net"
 
 
 def test_cli_planejar_so_consulta_o_whatsapp_de_quem_pode_sair_agora(tmp_path):
@@ -572,19 +572,19 @@ def test_responder_com_aprovacao_humana_nao_tem_o_limite_do_automatico():
 
 
 def test_avisar_equipe_manda_para_cada_numero_e_continua_se_um_falha():
-    f = Fake(existem=["5565999207108"])                       # o outro número "não tem WhatsApp"
-    r = avisar_equipe(cliente(f), ["65999207108", "(65) 99622-7110"], "ATENÇÃO: lead perguntou preço")
+    f = Fake(existem=["5565999900011"])                       # o outro número "não tem WhatsApp"
+    r = avisar_equipe(cliente(f), ["65999900011", "(65) 99990-0022"], "ATENÇÃO: lead perguntou preço")
     envios = [c for c in f.chamadas if c[1].endswith("/send")]
-    assert len(envios) == 1 and "5565999207108%40s.whatsapp.net/send" in envios[0][1]
+    assert len(envios) == 1 and "5565999900011%40s.whatsapp.net/send" in envios[0][1]
     assert envios[0][3] == {"message": {"text": "ATENÇÃO: lead perguntou preço"}}
-    assert r["enviados"] == ["5565999207108"] and r["erros"][0]["numero"] == "5565996227110"
+    assert r["enviados"] == ["5565999900011"] and r["erros"][0]["numero"] == "5565999900022"
 
 
 @pytest.mark.parametrize("texto,quebra", [("  ", "vazio"), ("a" * 601, "600 caracteres")])
 def test_avisar_equipe_recusa_texto_vazio_ou_longo(texto, quebra):
     f = Fake()
     with pytest.raises(ValueError, match=quebra):
-        avisar_equipe(cliente(f), ["5565999207108"], texto)
+        avisar_equipe(cliente(f), ["5565999900011"], texto)
     assert f.chamadas == []
 
 
@@ -596,12 +596,36 @@ def test_cli_responder_auto_dispensa_confirmo_e_avisar_usa_os_numeros_da_equipe(
     assert main(["responder", "--leads", leads, "--lead", "R1", "--texto-arquivo", str(txt), "--saida", saida, "--auto"], cliente=cliente(f)) == 0
     assert json.load(open(saida))["updates"][0]["data"]["respostaAutoEm"]
     monkeypatch.delenv("WA_AKG_AVISAR", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))                 # sem ~/.wa-akg/avisar da máquina de quem roda o teste
     g = Fake()
     txt.write_text("ATENÇÃO: R1 pediu contrato", encoding="utf-8")
-    assert main(["avisar", "--texto-arquivo", str(txt), "--saida", saida], cliente=cliente(g)) == 0
-    assert sorted(consultados(g)) == ["5565996227110", "5565999207108"]
-    assert sum(1 for c in g.chamadas if c[1].endswith("/send")) == 2
+    assert main(["avisar", "--texto-arquivo", str(txt), "--saida", saida], cliente=cliente(g)) == 2     # sem número configurado, não envia
+    assert g.chamadas == []
+    monkeypatch.setenv("WA_AKG_AVISAR", "65999900011,(65) 99990-0022")
+    k = Fake()
+    assert main(["avisar", "--texto-arquivo", str(txt), "--saida", saida], cliente=cliente(k)) == 0
+    assert sorted(consultados(k)) == ["5565999900011", "5565999900022"]
+    assert sum(1 for c in k.chamadas if c[1].endswith("/send")) == 2
     monkeypatch.setenv("WA_AKG_AVISAR", "65988887777")
     h = Fake()
     assert main(["avisar", "--texto-arquivo", str(txt), "--saida", saida], cliente=cliente(h)) == 0
     assert consultados(h) == ["5565988887777"]
+
+
+def test_erro_do_wa_akg_nao_vaza_telefone_nem_jid(capsys):
+    e = WaAkgErro(500, "WA-AKG respondeu 500 em /chat/s1/5565999900011@s.whatsapp.net e /chat/s1/123456789012@lid, tel 5565999900012")
+    assert "5565999900011" not in str(e) and "123456789012" not in str(e) and "5565999900012" not in str(e)
+    assert str(e).count("[número]") == 3 and "/chat/s1/" in str(e)
+    assert "[número]" in str(WaAkgErro(0, "ok 12345678")) and str(WaAkgErro(0, "porta 3000 id 1234567")) == "porta 3000 id 1234567"
+
+
+
+def test_main_nao_imprime_telefone_do_erro(tmp_path, capsys):
+    class Quebra:
+        def conectado(self):
+            raise WaAkgErro(502, "WA-AKG não respondeu em /chat/s1/5565999900011@s.whatsapp.net (502)")
+
+    leads, saida = arquivos(tmp_path, [lead()])
+    assert main(["planejar", "--leads", leads, "--saida", saida], cliente=Quebra()) == 1
+    err = capsys.readouterr().err
+    assert "5565999900011" not in err and "[número]" in err
