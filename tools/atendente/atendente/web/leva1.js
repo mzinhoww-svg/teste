@@ -5,7 +5,7 @@ window.Atendente_leva1 = function (A) {
   var h = A.h, $ = A.$;
   var SEM = '__sem';
   var VISOES = [['todos', 'Todos'], ['nao_enviados', 'Não enviados'], ['hoje', 'Para hoje'], ['enviado1', 'Enviado 1'],
-                ['enviado2', 'Enviado 2'], ['enviado3', 'Enviado 3'], ['responderam', 'Responderam'], ['sem_contato', 'Sem contato']];
+                ['enviado2', 'Enviado 2'], ['enviado3', 'Enviado 3'], ['responderam', 'Responderam'], ['resp_explee', 'Responderam Explee'], ['resp_wa', 'Responderam WA'], ['sem_contato', 'Sem contato']];
   var NOME_GRUPO = { hoje: 'Toque para hoje', aguardando: 'Aguardando o próximo toque', semcontato: 'Sem contato',
                      respondeu: 'Respondeu', fechou: 'Fechou', encerrado: 'Sem resposta (3 toques)', sair: 'Saiu' };
   var NOME_DECISOR = { contato: 'Decisor com contato', nome: 'Só o nome do decisor', sem: 'Sem decisor' };

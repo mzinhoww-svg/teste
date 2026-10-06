@@ -171,6 +171,10 @@ def visoes(l: dict, coluna: str, agora: datetime) -> list[str]:
         out.append(f"enviado{n}")
     if coluna == "Responderam":
         out.append("responderam")
+        if _txt(_dict(l.get("explee")).get("resposta")):
+            out.append("resp_explee")                       # respondeu o e-mail da Explee
+        if l.get("respostasVistasAte") or (l.get("canal") == "WhatsApp" and not _dict(l.get("explee")).get("resposta")):
+            out.append("resp_wa")                           # respondeu pelo WhatsApp
     if coluna == "Sem contato":
         out.append("sem_contato")
     return out
