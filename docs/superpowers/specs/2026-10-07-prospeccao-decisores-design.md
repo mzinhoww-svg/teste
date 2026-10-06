@@ -18,6 +18,8 @@ Sucesso:
 - **Regra de pessoa por porte (editável):** pequena = dono ou sócio; média = marketing ou comunicação, com dono como reserva; grande = RH e marketing. O RH entra quando a oferta é para pessoas (podcast interno, employer branding).
 - **Canal agora: WhatsApp.** O **e-mail principal é só coletado e guardado**. O envio de e-mail fica **fora desta entrega**; quando vier, a ideia é importar os leads nas campanhas da Explee (decisão registrada, não implementada).
 - O saldo do treg será recarregado pelo Mazinho antes do teste.
+- **Telefone do cadastro da Receita só com filtro de contabilidade** (seção 5.1), e a contagem de repetição fica arquivada.
+- **Base paga brasileira fica de fora por enquanto.** Lembrete de reavaliação agendado para 27/10/2026 (e antes, se os resultados patinarem).
 
 ## 3. Fases
 - **F0 · Teste de bancada (antes de codar o ciclo):** 30 a 50 pessoas de MT passam por cada provedor de celular e e-mail do treg, **e medimos também quantos telefones do cadastro da Receita são celulares com WhatsApp** (custa nada além do WA-AKG). Mede acerto e custo por provedor, e a cascata da seção 5 sai desse resultado. Orçamento do teste: até US$ 3. Resultado vira um relatório curto no repositório (sem dados pessoais).
@@ -44,11 +46,19 @@ Cada peça tem uma função só e é testável sozinha (todas em `tools/atendent
 1. **Empresa:** CNPJ aberto de MT (grátis) filtrado por CNAE e município; completa com Google Maps do treg (≈ US$ 0,002 por busca) e, nas maiores, `companies.search` (≈ US$ 0,0004 a 0,004).
 2. **Pessoa:** sócios-administradores do CNPJ (grátis); nas médias e grandes, `people.search` e `decision_makers` por domínio (buscas grátis), com os cargos da regra de porte.
 3. **Celular, do mais barato ao mais caro (a ordem final vem da F0):**
-   - **telefone do cadastro da Receita** (grátis), quando tem formato de celular (DDD + 9 + 8 dígitos);
+   - **telefone do cadastro da Receita** (grátis), **só depois do filtro de contabilidade (seção 5.1)** e quando tem formato de celular (DDD + 9 + 8 dígitos);
    - `people.phone.find` roteado do treg (≈ US$ 0,005), aiark (≈ US$ 0,026), dropleads (≈ US$ 0,054) e wiza (≈ US$ 0,12), que só pagam se acharem.
 4. **E-mail:** o do cadastro da Receita costuma ser do contador; só vale se o domínio for da própria empresa. Depois `people.email.find` (≈ US$ 0,005; trykitt/quickenrich). Todo e-mail passa por verificação (formato, domínio e caixa) e checagem de nome.
 5. **WhatsApp:** o número só vale se o WA-AKG confirmar que tem WhatsApp. Sem WhatsApp, o lead não entra na cadência; fica guardado com e-mail e telefone para outro canal.
 6. **Promoção:** lead com pessoa, celular válido e WhatsApp confirmado entra na cadência; senão volta para a Base com o motivo.
+
+### 5.1 Filtro de contabilidade (telefone e e-mail do cadastro da Receita)
+Muitos contadores registram o **próprio** telefone e e-mail nas empresas dos clientes. Por isso o contato do cadastro nunca vale sozinho:
+1. **Contagem de repetição.** Na importação de MT, o sistema conta quantos CNPJs usam cada telefone e cada domínio de e-mail e **arquiva essa contagem** (tabela `contatos_compartilhados`: valor em hash, quantas empresas, quais CNAEs, primeira e última vez visto).
+2. **Regra:** telefone ou e-mail usado por **3 ou mais CNPJs** (limite ajustável) é marcado `provavel_contabilidade` e **não** é usado como contato do dono. O mesmo vale para e-mail de domínio de escritório contábil (palavras como "contab", "assessoria", "escritorio") e para telefone de empresa cujo CNAE é de contabilidade (6920-6/01).
+3. **Outros sinais:** o nome do e-mail ou do telefone bate com o nome de um sócio da empresa (bom sinal) ou com o de outra empresa (mau sinal); fixo (sem o 9) não vai para WhatsApp.
+4. **Quem aparece muito vira lead à parte:** o escritório de contabilidade (o dono do telefone repetido) entra como **candidato a cliente ou parceiro** numa fila separada, com a lista de quantas empresas ele atende. Fica fora da cadência de dono até a Letícia decidir como abordar.
+5. **Medição:** o relatório da F0 informa quantos telefones do cadastro sobrevivem ao filtro e quantos têm WhatsApp, para decidir se vale manter essa fonte.
 
 Estados por prospecto: `empresa` → `pessoa` → `contato` → `qualificado` → `promovido` ou `descartado(motivo)`. Cada passo grava a fonte (provedor e id da chamada) e o custo.
 
@@ -95,13 +105,13 @@ Lista de campanhas; para cada uma, funil com contagens (empresas, pessoas, com c
 ## 11. Riscos
 - **Cobertura no Brasil** (piloto de setembro: provedores baratos erraram em Cuiabá). Mitigação: F0 antes de fechar a cascata.
 - **Saldo do treg** baixo (US$ 0,87 em 07/10): recarga antes de F0.
-- **Telefone e e-mail do cadastro da Receita:** muitas vezes são do contador, não do dono. A checagem de WhatsApp, a de domínio do e-mail e o nome da pessoa na mensagem reduzem o dano.
+- **Telefone e e-mail do cadastro da Receita:** muitas vezes são do contador, não do dono. O filtro de repetição da seção 5.1 (3 ou mais CNPJs = contabilidade), a checagem de WhatsApp e o nome da pessoa na mensagem reduzem o dano. Se o filtro deixar poucos telefones úteis, a fonte sai do ciclo.
 - **Base da Receita grande:** o ciclo lê o arquivo em fluxo e guarda só MT, ativas e dos CNAEs do segmento; a VPS tem 2 GB, então a carga mensal roda em partes e mede espaço antes.
 - **Número errado ou de recepção** tratado como celular da pessoa: a checagem de WhatsApp e a mensagem com o nome da pessoa reduzem o dano; resposta "não sou eu" cai no aprendizado.
 - **Ritmo:** 50 envios/dia limita o ganho; o ciclo produz só o que a cadência consegue enviar.
 
 ## 12. Fora do escopo
-Envio de e-mail; outros estados; LinkedIn automatizado; qualquer uso da Explee para achar empresas ou pessoas.
+Envio de e-mail; **base paga brasileira** (ex.: Data Stone, decisão de 07/10/2026: fica de fora por enquanto, com lembrete de reavaliação se os resultados patinarem); outros estados; LinkedIn automatizado; qualquer uso da Explee para achar empresas ou pessoas.
 
 ## 13. Fontes da pesquisa (07/10/2026)
 - BrasilAPI e dados abertos do CNPJ (QSA, CNAE, telefone e e-mail do cadastro): https://github.com/jonathands/dados-abertos-receita-cnpj e https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj/
