@@ -134,7 +134,7 @@ def main(env=None) -> None:
         "FOTOS_URL": amb["fotos_url"]})
 
     cfg = {"webhook_segredo": amb["webhook_segredo"], "segredo_sessao": amb["segredo_sessao"],
-           "usuarios": amb["usuarios"], "ao_mudar_config": aplicar_config}
+           "usuarios": amb["usuarios"], "ao_mudar_config": aplicar_config, "fotos_url": amb["fotos_url"]}
     srv = servidor.criar_servidor(repo, atendente, wa, cfg, amb["host"], amb["porta"])
     trabalhos.iniciar()
 

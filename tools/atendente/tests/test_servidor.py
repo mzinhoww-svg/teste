@@ -329,7 +329,8 @@ def test_leads_agrupados_por_coluna(ctx):
     assert por_id["L3"]["atencao"] == "ATENÇÃO: pediu orçamento"
     assert por_id["L1"]["ultimaMensagem"] is None and por_id["L1"]["atencao"] is None
     assert por_id["L1"]["empresa"] == "Lead 1" and por_id["L7"]["empresa"] == "So Nome"   # nome é o nome da empresa
-    assert set(por_id["L1"]) == {"id", "nome", "empresa", "coluna", "etapa", "situacao", "ultimaMensagem", "atencao"}
+    assert {"id", "nome", "empresa", "coluna", "etapa", "situacao", "ultimaMensagem", "atencao"} <= set(por_id["L1"])
+    assert "telefone" not in por_id["L1"]           # o resumo vai para a lista inteira: telefone só mascarado
 
 
 def test_lead_completo_com_mensagens_e_404(ctx):
