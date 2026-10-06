@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atendente Reiners</title>
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<p id="avisos" class="avisos" role="status" aria-live="polite"></p>
+
+<!-- Login -->
+<main id="tela-login" class="login" hidden>
+  <form id="form-login" class="login-caixa" autocomplete="on">
+    <h1>Atendente Reiners</h1>
+    <p class="suave">Entre para ver os leads e controlar as respostas automáticas.</p>
+    <label for="login-usuario">Usuário</label>
+    <input id="login-usuario" name="usuario" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="login-senha">Senha</label>
+    <input id="login-senha" name="senha" type="password" autocomplete="current-password" required>
+    <p id="login-erro" class="erro-campo" role="alert"></p>
+    <button id="login-entrar" class="btn primario" type="submit">Entrar</button>
+  </form>
+</main>
+
+<!-- App -->
+<div id="tela-app" hidden>
+  <header id="faixa" class="faixa" aria-label="Controles do atendente">
+    <div class="faixa-topo">
+      <span class="marca">Atendente</span>
+      <span id="wa-estado" class="chip">WhatsApp: verificando</span>
+      <button id="btn-sessao" class="btn texto" type="button">Encerrar sessão</button>
+    </div>
+    <div class="faixa-controles">
+      <button id="interruptor" class="interruptor" type="button" role="switch" aria-checked="false" aria-describedby="interruptor-ajuda">
+        <span class="trilho" aria-hidden="true"><span class="bolinha"></span></span>
+        <span class="interruptor-texto">
+          <span class="interruptor-nome">Respostas automáticas</span>
+          <span id="interruptor-estado" class="interruptor-estado">Desligadas</span>
+        </span>
+      </button>
+      <span id="interruptor-ajuda" class="so-leitor">Liga ou desliga as respostas que a IA envia sozinha aos leads.</span>
+      <button id="btn-parar" class="btn perigo" type="button">Parar tudo</button>
+    </div>
+    <p id="faixa-parado" class="faixa-parado" hidden>Tudo parado. Nada sai pelo WhatsApp até você retomar.</p>
+    <dl id="resumo" class="resumo">
+      <div><dt>Na fila</dt><dd id="r-fila">&ndash;</dd></div>
+      <div><dt>Enviadas hoje</dt><dd id="r-enviadas">&ndash;</dd></div>
+      <div><dt>IA sozinha hoje</dt><dd id="r-auto">&ndash;</dd></div>
+      <div><dt>Avisos hoje</dt><dd id="r-avisos">&ndash;</dd></div>
+      <div class="gasto"><dt>Gasto da IA no mês</dt><dd id="r-gasto">&ndash;</dd></div>
+    </dl>
+  </header>
+
+  <div class="abas-barra">
+    <div class="abas" role="tablist" aria-label="Seções">
+      <button id="aba-quadro" class="aba" role="tab" type="button" aria-selected="true" aria-controls="vista-quadro">Quadro</button>
+      <button id="aba-atend" class="aba" role="tab" type="button" aria-selected="false" aria-controls="vista-atend" tabindex="-1">Atendimento</button>
+    </div>
+    <a id="btn-backup" class="btn" href="api/backup" download>Baixar cópia</a>
+  </div>
+
+  <main>
+    <section id="vista-quadro" role="tabpanel" aria-labelledby="aba-quadro">
+      <div id="quadro" class="quadro" tabindex="-1"></div>
+    </section>
+    <section id="vista-atend" role="tabpanel" aria-labelledby="aba-atend" hidden>
+      <div class="filtros" role="group" aria-label="Filtrar atendimento">
+        <button class="filtro" type="button" data-filtro="todos" aria-pressed="true">Tudo</button>
+        <button class="filtro" type="button" data-filtro="sozinha" aria-pressed="false">IA respondeu sozinha</button>
+        <button class="filtro" type="button" data-filtro="avisou" aria-pressed="false">Avisou a equipe</button>
+        <button class="filtro" type="button" data-filtro="humano" aria-pressed="false">Equipe escreveu</button>
+      </div>
+      <ol id="lista-atend" class="lista-atend"></ol>
+    </section>
+  </main>
+
+  <aside id="painel" class="painel" role="dialog" aria-modal="false" aria-labelledby="painel-titulo" hidden>
+    <div class="painel-topo">
+      <button id="painel-fechar" class="btn" type="button">Fechar</button>
+    </div>
+    <div class="painel-corpo">
+      <h2 id="painel-titulo" tabindex="-1"></h2>
+      <p id="painel-sub" class="suave"></p>
+      <div id="painel-acoes" class="acoes" role="group" aria-label="Situação do lead">
+        <button class="btn" type="button" data-sit="respondeu">Respondeu</button>
+        <button class="btn" type="button" data-sit="sair">Sair</button>
+        <button class="btn" type="button" data-sit="fechou">Fechou</button>
+        <button class="btn" type="button" data-sit="ativo">Voltar para a cadência</button>
+      </div>
+      <form id="form-nota" class="nota">
+        <label for="nota-texto">Nota para a equipe</label>
+        <textarea id="nota-texto" rows="3" maxlength="1000" placeholder="O que aconteceu com este lead?"></textarea>
+        <button class="btn primario" type="submit">Salvar nota</button>
+      </form>
+      <h3>Conversa</h3>
+      <ol id="painel-conversa" class="conversa"></ol>
+      <h3>Histórico</h3>
+      <ol id="painel-historico" class="historico"></ol>
+    </div>
+  </aside>
+</div>
+
+<dialog id="dlg-parar" class="dialogo" aria-labelledby="dlg-titulo">
+  <form method="dialog">
+    <h2 id="dlg-titulo">Parar tudo agora?</h2>
+    <p>Nenhuma mensagem sai pelo WhatsApp e os envios que estão na fila serão cancelados. Você pode retomar depois.</p>
+    <div class="dlg-botoes">
+      <button id="dlg-cancelar" class="btn" value="cancelar">Cancelar</button>
+      <button id="dlg-confirmar" class="btn perigo" value="confirmar">Sim, parar tudo</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
