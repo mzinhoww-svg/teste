@@ -21,6 +21,8 @@ CREATE INDEX IF NOT EXISTS ix_at_lead ON atendimento(leadId, em);
 CREATE TABLE IF NOT EXISTS config (chave TEXT PRIMARY KEY, valor TEXT);
 CREATE TABLE IF NOT EXISTS gastos (
     id INTEGER PRIMARY KEY AUTOINCREMENT, modelo TEXT, tokens_in INTEGER, tokens_out INTEGER, usd REAL, em TEXT);
+CREATE TABLE IF NOT EXISTS base (id TEXT PRIMARY KEY, doc TEXT NOT NULL, status TEXT);
+CREATE TABLE IF NOT EXISTS clientes (id TEXT PRIMARY KEY, doc TEXT NOT NULL);
 """
 
 CAMPOS_ATENDIMENTO = ("leadId", "empresa", "em", "mensagemLead", "intencao", "acao",
@@ -117,6 +119,77 @@ class Repo:
                     lead[k] = v
             self.lead_put(lead)
             return lead
+
+    # ---- documentos simples (base e clientes): mesma regra de merge do aplicar dos leads
+    @staticmethod
+    def _mesclar(doc: dict, data: dict) -> dict:
+        for k, v in (data or {}).items():
+            if isinstance(v, dict) and v.get("__delete__") is True:
+                doc.pop(k, None)
+            elif k == "historico" and isinstance(v, list):
+                atual = doc.get("historico") or []
+                doc[k] = atual + [x for x in v if x not in atual]
+            else:
+                doc[k] = v
+        return doc
+
+    def _doc_get(self, tabela: str, id: str) -> dict | None:
+        with self._lock:
+            r = self._con.execute(f"SELECT doc FROM {tabela} WHERE id=?", (str(id),)).fetchone()
+        return json.loads(r["doc"]) if r else None
+
+    def _doc_todos(self, tabela: str) -> list[dict]:
+        with self._lock:
+            rs = self._con.execute(f"SELECT doc FROM {tabela} ORDER BY id").fetchall()
+        return [json.loads(r["doc"]) for r in rs]
+
+    # ---- base (faixas B e C da Explee, um documento enxuto por empresa)
+    def base_get(self, id: str) -> dict | None:
+        return self._doc_get("base", id)
+
+    def base_put(self, doc: dict) -> None:
+        if not doc.get("id"):
+            raise ValueError('documento da base sem "id"')
+        with self._lock:
+            self._con.execute(
+                "INSERT INTO base(id, doc, status) VALUES(?, ?, ?) "
+                "ON CONFLICT(id) DO UPDATE SET doc=excluded.doc, status=excluded.status",
+                (str(doc["id"]), _dumps(doc), doc.get("status")))
+            self._con.commit()
+
+    def base_todos(self) -> list[dict]:
+        return self._doc_todos("base")
+
+    def base_aplicar(self, id: str, data: dict) -> dict:
+        with self._lock:
+            doc = self.base_get(id)
+            if doc is None:
+                raise KeyError(id)
+            self.base_put(self._mesclar(doc, data))
+            return doc
+
+    # ---- clientes (pós-venda)
+    def cliente_get(self, id: str) -> dict | None:
+        return self._doc_get("clientes", id)
+
+    def cliente_put(self, doc: dict) -> None:
+        if not doc.get("id"):
+            raise ValueError('cliente sem "id"')
+        with self._lock:
+            self._con.execute("INSERT INTO clientes(id, doc) VALUES(?, ?) ON CONFLICT(id) DO UPDATE SET doc=excluded.doc",
+                              (str(doc["id"]), _dumps(doc)))
+            self._con.commit()
+
+    def clientes_todos(self) -> list[dict]:
+        return self._doc_todos("clientes")
+
+    def cliente_aplicar(self, id: str, data: dict) -> dict:
+        with self._lock:
+            doc = self.cliente_get(id)
+            if doc is None:
+                raise KeyError(id)
+            self.cliente_put(self._mesclar(doc, data))
+            return doc
 
     # ---- mensagens
     def msg_add(self, lead_id: str, jid: str, de_mim: bool, texto: str, tipo: str, wa_id: str | None, em: str) -> bool:

@@ -1,1 +1,65 @@
-/* leva 3 */
+/* leva 3: abas Base e Pós-venda, Novo cliente e Virar cliente. Usa os tokens de estilo.css (claro e escuro). */
+#vista-base, #vista-posvenda { padding: 0 16px; max-width: 1040px; }
+.l3-topo { display: grid; gap: 4px; margin-bottom: 12px; }
+.l3-topo-pv { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.l3-titulo { font-size: 18px; }
+.l3-grupos { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 12px; }
+.l3-grupos .num { margin-left: 2px; font-weight: 700; }
+.l3-filtros { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: flex-end; margin-bottom: 8px; }
+.l3-campo { display: grid; gap: 4px; min-width: 150px; }
+.l3-campo label { font-weight: 600; font-size: 13px; }
+.l3-busca { flex: 1 1 240px; }
+.l3-campo select { min-height: 40px; padding: 6px 10px; border: 1px solid var(--borda-campo); border-radius: 8px; background: var(--papel);
+                   color: inherit; font: inherit; max-width: 100%; }
+.l3-resumo { margin: 4px 0; color: var(--suave); }
+.l3-lote { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0 12px; }
+.l3-confirmar { width: 100%; background: var(--ouro-fundo); border: 1px solid var(--ouro); border-radius: 8px; padding: 10px 12px; }
+.l3-confirmar p { margin: 0; font-weight: 600; color: var(--navy); }
+.l3-confirmar .acoes { margin: 10px 0 0; }
+
+.l3-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.l3-linha { display: grid; grid-template-columns: 32px 1fr auto; gap: 8px 12px; align-items: start; background: var(--papel);
+            border: 1px solid var(--linha); border-radius: 8px; padding: 10px 12px; overflow-wrap: anywhere; }
+.l3-marcar { padding-top: 2px; }
+.l3-marcar input { width: 22px; height: 22px; margin: 0; accent-color: var(--ouro); }
+.l3-info { display: grid; gap: 2px; min-width: 0; }
+.l3-nome { font-weight: 700; font-size: 15px; margin: 0; text-transform: none; letter-spacing: 0; color: var(--navy); }
+.l3-sub { color: var(--suave); font-size: 13px; margin: 0; }
+.l3-acoes { margin: 0; justify-content: flex-end; }
+.l3-estado { justify-self: start; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 4px; margin-top: 4px;
+             background: var(--pergaminho); color: var(--suave); }
+.l3-estado.na_cadencia, .l3-estado.hoje { background: var(--ok-fundo); color: var(--ok); }
+.l3-estado.pedido, .l3-estado.andamento { background: var(--ouro-fundo); color: var(--ouro-texto); }
+.l3-estado.sem_cadencia { background: var(--alerta-fundo); color: var(--alerta); }
+.l3-paginas { display: flex; gap: 12px; align-items: center; justify-content: center; margin: 16px 0; }
+
+/* Pós-venda */
+.l3-placar { margin: 4px 0 8px; }
+.l3-padrao { font-size: 13px; }
+.l3-cliente article { background: var(--papel); border: 1px solid var(--linha); border-radius: 8px; padding: 12px 14px; overflow-wrap: anywhere; }
+.l3-cliente.apagado article { opacity: .75; }
+.l3-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.l3-cab .l3-estado { margin-top: 0; }
+.l3-etapa-atual { margin: 6px 0 4px; font-weight: 600; }
+.l3-etapas { list-style: none; display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 8px; padding: 0; font-size: 12px; }
+.l3-etapas li { padding: 1px 8px; border-radius: 999px; border: 1px solid var(--linha); color: var(--suave); }
+.l3-etapas li.feito { background: var(--ok-fundo); color: var(--ok); border-color: transparent; }
+.l3-etapas li.agora { background: var(--ouro-fundo); color: var(--ouro-texto); border-color: var(--ouro); font-weight: 700; }
+.l3-toque { border-top: 1px solid var(--linha); margin-top: 8px; padding-top: 8px; }
+.l3-toque .acoes { margin: 8px 0 0; }
+.l3-msg { white-space: pre-wrap; margin: 4px 0; padding: 8px 10px; background: var(--pergaminho); border-radius: 8px; }
+.l3-cliente .acoes[role="group"] { margin: 10px 0 0; }
+.l3-form, .l3-form-virar { background: var(--papel); border: 1px solid var(--linha); border-radius: 8px; padding: 12px 14px; margin: 8px 0 16px; }
+.l3-form h3, .l3-virar h3 { margin-top: 0; }
+.l3-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 14px; }
+.l3-form-virar { display: grid; gap: 10px; margin: 0; }
+.l3-form-virar .acoes { margin: 0; }
+.l3-virar { margin: 12px 0; }
+.l3-virar > p { margin: 4px 0 8px; }
+
+@media (max-width: 599px) {
+  .l3-linha { grid-template-columns: 28px 1fr; }
+  .l3-acoes { grid-column: 1 / -1; justify-content: flex-start; }
+  .l3-acoes .btn, .l3-lote .btn { min-height: 44px; }
+  .l3-campo { min-width: 0; flex: 1 1 140px; }
+}
