@@ -1,6 +1,6 @@
 # Atendente do WhatsApp na VPS: envios e respostas em tempo real
 
-Data: 06/10/2026. Estado: **rascunho para aprovação** da Letícia e do Mazinho. Nada disto foi implementado.
+Data: 06/10/2026. Estado: **aprovado em 06/10/2026** pela Letícia e pelo Mazinho (respostas da seção 11). Implementação em `docs/superpowers/plans/2026-10-06-atendente-vps.md`.
 Substitui o que hoje é feito pelo Claude (rotina horária) e prepara a migração da Central de disparo (artefato) para a VPS.
 
 ## 1. Objetivo e o que é sucesso
@@ -104,8 +104,19 @@ passa de "complexo" para "simples" ao fim dos 30 dias. Acesso: login simples de 
 - Conversas guardadas sob outro endereço (LID) podem não aparecer na leitura; a conferência periódica e o botão **Respondeu** cobrem.
 - O WA-AKG é de terceiros: manter a versão fixa e testar antes de atualizar.
 
-## 11. Perguntas em aberto (para a aprovação)
-1. **SQLite na VPS** como banco do atendente, com cópia diária para fora. De acordo?
-2. Endereço do kanban: **`central.reiners.agency`** (precisa de um registro DNS novo na Vercel). De acordo?
-3. **Modo sombra de 48 h** antes de a IA responder sozinha na VPS. De acordo, ou liga direto?
-4. Limite de gasto mensal do OpenRouter para a VPS: qual valor?
+## 11. Decisões finais (06/10/2026)
+1. **SQLite** como banco do atendente. Aprovado.
+2. Kanban em **`central.reiners.agency`**. O MCP da Vercel só consegue editar um registro existente ou **substituir a zona inteira**; como não lista os registros, criar um só é impossível sem risco de apagar e-mail e outros. Portanto: o registro `central` (A, 187.102.244.188) é criado à mão na Vercel (1 minuto) e, enquanto isso, a mesma tela abre em **`https://wa.reiners.agency/central/`** (nenhum DNS novo).
+3. **Sem modo sombra**: a resposta automática liga direto, com o interruptor abaixo como rede de segurança.
+4. **Teto de US$ 5 por mês** no OpenRouter, aplicado em dois lugares: no código (soma dos custos reais; passou do teto, a IA para e a equipe é avisada) e no limite da própria chave no painel do OpenRouter.
+5. **Interruptor no painel admin** da Central: *Respostas automáticas* (liga/desliga) e *Parar tudo* (nada sai, pendentes cancelados). Visíveis o tempo todo, acima de tudo.
+
+## 12. Regras de repositório (o repositório é PÚBLICO)
+Nenhum telefone de pessoa, lead, conversa, chave ou senha vai para o repositório. Números da equipe, segredos e chave do OpenRouter ficam em
+`/opt/atendente/.env` (modo 600) na VPS. Os dados dos leads vão da exportação do artefato direto para a VPS, fora do Git.
+O webhook do WA-AKG é assinado com HMAC-SHA256 (`X-Webhook-Signature: sha256=<hex>`); sem assinatura válida, é rejeitado.
+
+## 13. Fora do escopo desta entrega
+- Cópia de segurança **automática para fora da VPS** (precisa de um destino com credencial: S3, Drive...). Entra: cópia diária local (14 dias)
+  e botão "Baixar cópia" no painel admin.
+- Fase F4 (05/11/2026): é uma data futura; fica agendada (lembrete), não é executável hoje.
