@@ -139,3 +139,22 @@ def test_backup_gera_arquivo_que_abre(repo, tmp_path):
     copia = Repo(destino)
     assert copia.lead_get("a1")["nome"] == "X"
     assert copia.config_get("k") == 1
+
+
+def test_aplicar_historico_nunca_perde_o_que_entrou_no_meio():
+    """Uma rodada longa trabalha com uma cópia antiga do lead; o webhook acrescenta uma linha no meio. As duas ficam."""
+    r = Repo(":memory:")
+    r.lead_put({"id": "R1", "historico": [{"em": "2026-10-06T10:00:00Z", "texto": "Toque 1 enviado"}]})
+    copia_antiga = r.lead_get("R1")["historico"]
+    r.aplicar("R1", {"historico": copia_antiga + [{"em": "2026-10-06T11:00:00Z", "texto": "Respondeu"}]})     # webhook, no meio
+    r.aplicar("R1", {"historico": copia_antiga + [{"em": "2026-10-06T11:05:00Z", "texto": "Toque 2 agendado"}]})  # planejador, com a cópia antiga
+    textos = [h["texto"] for h in r.lead_get("R1")["historico"]]
+    assert textos == ["Toque 1 enviado", "Respondeu", "Toque 2 agendado"]
+
+
+def test_aplicar_historico_nao_duplica_linhas_iguais():
+    r = Repo(":memory:")
+    h = [{"em": "2026-10-06T10:00:00Z", "texto": "Toque 1 enviado"}]
+    r.lead_put({"id": "R1", "historico": h})
+    r.aplicar("R1", {"historico": h})
+    assert r.lead_get("R1")["historico"] == h

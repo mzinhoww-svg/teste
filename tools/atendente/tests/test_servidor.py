@@ -82,7 +82,7 @@ def ctx(tmp_path):
     c.cfg = cfg
     c.srv = servidor.criar_servidor(c.repo, c.atendente, c.wa, cfg, "127.0.0.1", 0)
     c.porta = c.srv.server_address[1]
-    t = threading.Thread(target=c.srv.serve_forever, daemon=True)
+    t = threading.Thread(target=lambda: c.srv.serve_forever(poll_interval=0.05), daemon=True)
     t.start()
     yield c
     c.srv.shutdown()
@@ -301,7 +301,7 @@ def test_leads_agrupados_por_coluna(ctx):
     r.lead_put(_lead(4, telefone="", canal="instagram"))
     r.lead_put(_lead(5, etapa=0, enviado1=None))                       # vence hoje
     r.lead_put(_lead(6, etapa=1, enviado1="2026-10-07T12:00:00Z"))     # enviado hoje: aguarda
-    r.lead_put(_lead(7, empresa=None, nome="So Nome"))
+    r.lead_put(_lead(7, empresa=None, nome="So Nome", enviado1="2026-10-07T12:00:00Z"))
     r.msg_add("L3", "j", False, "Quero saber o preço", "TEXT", "w1", "2026-10-07T13:00:00Z")
     r.msg_add("L3", "j", True, "Já te chamo", "TEXT", "w2", "2026-10-07T13:05:00Z")
     r2 = json_de(pedir(ctx, "GET", "/api/leads", cookie=entrar(ctx)))

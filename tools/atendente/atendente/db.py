@@ -109,6 +109,10 @@ class Repo:
             for k, v in (data or {}).items():
                 if isinstance(v, dict) and v.get("__delete__") is True:
                     lead.pop(k, None)
+                elif k == "historico" and isinstance(v, list):
+                    # só acrescenta: quem trabalhou com uma cópia antiga não apaga o que entrou no meio
+                    atual = lead.get("historico") or []
+                    lead[k] = atual + [x for x in v if x not in atual]
                 else:
                     lead[k] = v
             self.lead_put(lead)
