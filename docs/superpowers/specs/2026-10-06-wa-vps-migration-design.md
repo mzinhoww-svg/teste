@@ -21,7 +21,7 @@ Sucesso é medido assim:
 - Um CRM **enxuto**, com kanban, ligado ao WhatsApp. O `kargulstudio/kanban` é uma referência de kanban, não uma dependência obrigatória.
 - Autonomia B: a IA responde sozinha os casos simples; complexos avisam a equipe. Limites: 1 resposta automática por lead a cada 24 h, 20 por dia.
 - IA via **OpenRouter**, escolhendo o melhor custo-benefício por teste (seção 7). A chave já está nas variáveis do ambiente do Claude; na VPS terá chave própria.
-- Os avisos vão para Letícia (65 99920-7108) e Mazinho (65 99622-7110).
+- Os avisos vão para a Letícia e o Mazinho; os números ficam em `AVISAR_NUMEROS` (`.env` da VPS), nunca no repositório.
 - Conhecimento de resposta: o site reiners.agency (`conhecimento-reiners.md`); agenda: https://cal.com/leticiareiners/30min. Nos primeiros 30 dias a IA não cita valores.
 - Registro de 30 dias para a documentação, e depois "migração para crons e tirar do Claude" (este documento é esse plano).
 

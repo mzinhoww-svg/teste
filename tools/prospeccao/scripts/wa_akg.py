@@ -52,8 +52,8 @@ JANELA_MIN = 30            # a fila segue "X mensagens a cada 30 minutos"
 POR_LOTE_MAX = 10          # teto de X: acima disso o WhatsApp costuma bloquear
 LIMITE_DIA_MAX = 60
 # Quem é avisado por WhatsApp quando chega uma resposta que precisa de gente (Letícia e Mazinho).
-# Pode ser trocado por WA_AKG_AVISAR="65999999999,65988888888".
-AVISAR_PADRAO = ("5565999207108", "5565996227110")
+# Os números NÃO ficam no repositório (ele é público): vêm de WA_AKG_AVISAR="65999999999,65988888888".
+AVISAR_PADRAO = ()
 RESPOSTA_AUTO_ESPERA_H = 24   # no máximo uma resposta automática por lead a cada 24 h
 AVISO_MAX = 600
 
@@ -527,9 +527,10 @@ def responder_lead(cliente: WaAkgCliente, lead: dict, jid: str, texto: str, agor
     return {"id": lead["id"], "data": data}
 
 
-def numeros_de_aviso(env=None) -> list[str]:
-    bruto = (env if env is not None else os.environ).get("WA_AKG_AVISAR", "")
-    lista = [numero_whatsapp(x) for x in bruto.split(",")] if bruto.strip() else list(AVISAR_PADRAO)
+def numeros_de_aviso(env=None, pasta="~/.wa-akg") -> list[str]:
+    """Números da equipe: WA_AKG_AVISAR (ou o arquivo ~/.wa-akg/avisar, um por vírgula ou linha). Nunca no repositório."""
+    bruto = (env if env is not None else os.environ).get("WA_AKG_AVISAR", "") or _arquivo("avisar", pasta) or ""
+    lista = [numero_whatsapp(x) for x in re.split(r"[,\n;]", bruto) if x.strip()]
     return [n for n in lista if n]
 
 
@@ -801,8 +802,12 @@ def main(argv=None, cliente=None):
             _gravar(args.saida, {"updates": [u]})
             print(json.dumps({"enviado": True, "lead": args.lead}, ensure_ascii=False))
         elif args.cmd == "avisar":
+            numeros = numeros_de_aviso()
+            if not numeros:
+                print("Nenhum número para avisar: defina WA_AKG_AVISAR (ex.: 65999990011,65999990022).", file=sys.stderr)
+                return 2
             with open(args.texto_arquivo, encoding="utf-8") as fh:
-                r = avisar_equipe(cli, numeros_de_aviso(), fh.read())
+                r = avisar_equipe(cli, numeros, fh.read())
             _gravar(args.saida, r)
             print(json.dumps({"enviados": len(r["enviados"]), "erros": len(r["erros"])}, ensure_ascii=False))
             return 0 if r["enviados"] else 1
