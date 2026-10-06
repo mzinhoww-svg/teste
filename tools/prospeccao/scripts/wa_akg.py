@@ -18,7 +18,8 @@ Nunca imprimir nem gravar a chave.
 
 Fatos da API conferidos no código do WA-AKG (cabeçalho `X-API-Key`, prefixo `/api`):
 - `GET /sessions` -> [{sessionId, status: "Connected" | ...}].
-- `POST /chat/{sessao}/check` {numbers} (até 50) -> {results: [{number, exists, jid}]}.
+- `POST /chat/{sessao}/check` {numbers} (até 50) -> {data: {results: [{number, exists, jid}]}} (a doc mostra `results` no
+  topo, mas a resposta real vem dentro de `data`). O `jid` devolvido é o certo: conta antiga do Brasil pode estar sem o nono dígito.
 - `POST /scheduler/{sessao}` {jid, content, sendAt, mediaUrl, mediaType} -> {data: {id}}. O `sendAt` sem offset é lido no
   fuso do sistema do WA-AKG (padrão Asia/Jakarta): por isso aqui vai sempre em UTC com "Z". Com `mediaUrl` o texto vai
   como legenda e o Baileys baixa a imagem da URL, então a foto precisa estar numa URL pública.
@@ -134,7 +135,9 @@ class WaAkgCliente:
         for i in range(0, len(numeros), LOTE_CHECK):
             lote = numeros[i:i + LOTE_CHECK]
             r = self._pedir("POST", f"/chat/{self.sessao}/check", {"numbers": lote}, repetir=True)
-            por_numero = {x.get("number"): x for x in r.get("results", [])}
+            # A resposta real vem em {"data": {"results": [...]}}; a documentação mostra "results" no topo. Aceita os dois.
+            dados = r.get("data") if isinstance(r.get("data"), dict) else {}
+            por_numero = {x.get("number"): x for x in (dados.get("results") or r.get("results") or [])}
             for n in lote:
                 x = por_numero.get(n) or {}
                 achados[n] = x.get("jid") if x.get("exists") and x.get("jid") else None
@@ -289,7 +292,7 @@ def _iso(d: datetime) -> str:
 
 def planejar(leads: list[dict], agora: datetime, *, existem: dict, respondidas: set | None = None, fotos_url: str = "",
              limite_dia=LIMITE_DIA, ocupados: dict | None = None, janela=JANELA, intervalo=INTERVALO, rng=None,
-             espera: dict | None = None, max_leads: int | None = None, so_ids: set | None = None) -> dict:
+             espera: dict | None = None, max_leads: int | None = None, so_ids: set | None = None, dias_uteis: bool = True) -> dict:
     """`existem`: número -> jid (None se o número não tem WhatsApp). Só entram leads de WhatsApp que vencem hoje.
     `so_ids` restringe a esses leads; é o único jeito de o card TESTE (o WhatsApp da própria Reiners) entrar."""
     respondidas = respondidas or set()
@@ -342,7 +345,8 @@ def planejar(leads: list[dict], agora: datetime, *, existem: dict, respondidas: 
     itens.sort(key=lambda i: (-i["n"], i["ordem"], i["leadId"]))  # a continuação sai antes do primeiro contato
     if max_leads:
         itens = itens[:max_leads]
-    horarios = distribuir(len(itens), agora, limite_dia=limite_dia, ocupados=ocupados, janela=janela, intervalo=intervalo, rng=rng)
+    horarios = distribuir(len(itens), agora, limite_dia=limite_dia, ocupados=ocupados, janela=janela, intervalo=intervalo, rng=rng,
+                           dias_uteis=dias_uteis)
     for i, h in zip(itens, horarios):
         i["sendAt"] = _iso(h)
         del i["ordem"]
@@ -501,6 +505,8 @@ def main(argv=None, cliente=None):
     p.add_argument("--limite-dia", type=int, default=LIMITE_DIA)
     p.add_argument("--max", type=int, default=None, help="no máximo N mensagens neste plano")
     p.add_argument("--so", default="", help="ids separados por vírgula; só estes entram (use TESTE para o primeiro envio)")
+    p.add_argument("--janela", default="", help="só para teste (exige --so): horas de envio, ex. 0-24. Padrão 9-17")
+    p.add_argument("--todos-os-dias", action="store_true", help="só para teste (exige --so): inclui sábado e domingo")
     p.add_argument("--ocupados", default="", help="JSON {dd/mm: quantas já agendadas}; opcional")
     p.add_argument("--agora", default="")
     a = sub.add_parser("agendar", help="agenda o plano no WA-AKG (exige --confirmo)")
@@ -525,6 +531,16 @@ def main(argv=None, cliente=None):
         cli = _cliente(cliente)
         if args.cmd == "planejar":
             agora, leads = _agora(args.agora), _ler(args.leads)
+            if (args.janela or args.todos_os_dias) and not args.so.strip():
+                print("--janela e --todos-os-dias só valem junto com --so (teste com um lead escolhido).", file=sys.stderr)
+                return 2
+            janela = JANELA
+            if args.janela:
+                m = re.fullmatch(r"(\d{1,2})-(\d{1,2})", args.janela)
+                if not m or not 0 <= int(m[1]) < int(m[2]) <= 24:
+                    print("--janela precisa ser como 9-17 ou 0-24.", file=sys.stderr)
+                    return 2
+                janela = (int(m[1]), int(m[2]))
             if not cli.conectado():
                 print("A sessão do WhatsApp não está conectada no WA-AKG (escanear o QR de novo).", file=sys.stderr)
                 return 3
@@ -536,7 +552,8 @@ def main(argv=None, cliente=None):
             for dm, q in (json.loads(args.ocupados) if args.ocupados else {}).items():
                 ocupados[datetime.strptime(f"{dm}/{agora.astimezone(FUSO).year}", "%d/%m/%Y").date()] = int(q)
             plano = planejar(leads, agora, existem=existem, respondidas=respondidas, fotos_url=args.fotos_url,
-                             limite_dia=args.limite_dia, ocupados=ocupados, max_leads=args.max,
+                             limite_dia=args.limite_dia, ocupados=ocupados, max_leads=args.max, janela=janela,
+                             dias_uteis=not args.todos_os_dias,
                              so_ids={i.strip() for i in args.so.split(",") if i.strip()} or None)
             _gravar(args.saida, plano)
             print(json.dumps(plano["resumo"], ensure_ascii=False))

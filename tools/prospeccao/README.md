@@ -247,7 +247,7 @@ O envio automático usa o [WA-AKG](https://github.com/mrifqidaffaaditya/WA-AKG),
 **Montar uma vez**
 1. Instalar o WA-AKG num servidor com endereço público em HTTPS, criar uma sessão (ex.: `reiners`) e escanear o QR com o WhatsApp da Letícia. Gerar uma chave de API em Configurações → API Keys (`wag_...`).
 2. No ambiente do Claude: `~/.wa-akg/url`, `~/.wa-akg/key` e `~/.wa-akg/session` (chmod 600), ou as variáveis `WA_AKG_URL`, `WA_AKG_KEY` e `WA_AKG_SESSION`. A chave nunca vai para o repositório, a página nem o banco.
-3. Hospedar as fotos de `central/fotos/` numa URL pública: o WA-AKG baixa a imagem do toque 1 dessa URL.
+3. As fotos de `central/fotos/` também ficam em `public/fotos-cenarios/` (cópia, para ter URL pública): o WA-AKG baixa a imagem do toque 1 de `https://reiners.agency/fotos-cenarios/<foto>.jpg`. Ao trocar uma foto em `central/fotos/`, copiar para lá também.
 4. Liberar o endereço do WA-AKG na rede do ambiente do Claude.
 
 **Usar**: pedir "dispare" (ou "confira os envios", "cancele o que está agendado"). O Claude mostra o plano e só agenda depois do "confirmo". O primeiro envio é sempre o do card TESTE.
