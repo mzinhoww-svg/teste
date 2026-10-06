@@ -8,6 +8,7 @@ import os
 import tempfile
 from datetime import datetime
 
+from atendente import sonda
 from scripts import wa_akg
 
 JANELA_HORIZONTE_MIN = 480
@@ -27,10 +28,10 @@ def _ler(caminho):
         return json.load(fh)
 
 
-def _leads_em(repo, pasta: str, nome: str = "leads.json") -> str:
+def _leads_em(repo, pasta: str, nome: str = "leads.json", excluir=()) -> str:
     caminho = os.path.join(pasta, nome)
     with open(caminho, "w", encoding="utf-8") as fh:
-        json.dump(repo.leads_todos(), fh, ensure_ascii=False)
+        json.dump([l for l in repo.leads_todos() if l.get("id") not in excluir], fh, ensure_ascii=False)
     return caminho
 
 
@@ -61,6 +62,8 @@ def _adotar_pendentes(repo, wa, status_leads=(None, "", "ativo")) -> int:
     for l in repo.leads_todos():
         if l.get("agendamento") or l.get("situacao") not in status_leads:
             continue
+        if (l.get("sonda") or {}).get("liberada") is False:
+            continue                      # o pendente é o "Olá" da sonda, não o toque
         p = por_numero.get(wa_akg.numero_whatsapp(wa_akg.telefone_destino(l))) or por_numero.get(_numero(l.get("jidWa")))
         if p is None:
             continue
@@ -148,8 +151,13 @@ def rodada_envios(repo, wa, agora: datetime, fotos_url: str, saida_dir: str) -> 
                 out["erros"] = len(r["erros"])
             return out
         _adotar_pendentes(repo, wa)
+        sondas = {}
+        if sonda.ligada(repo):
+            sondas = sonda.resolver(repo, agora)
+            sondas["enviadas"] = sonda.enviar(repo, wa, agora, por_lote)
+        segurar = sonda.seguram_o_toque(repo)               # primeiro contato só sai depois do "Olá" e da espera
         plano = os.path.join(pasta, "plano.json")
-        rc = _rodar(["planejar", "--leads", _leads_em(repo, pasta, "leads2.json"), "--saida", plano,
+        rc = _rodar(["planejar", "--leads", _leads_em(repo, pasta, "leads2.json", segurar), "--saida", plano,
                      "--fotos-url", fotos_url or "", "--por-lote", str(por_lote), "--limite-dia", str(limite_dia),
                      "--horizonte-min", str(JANELA_HORIZONTE_MIN), "--agora", wa_akg._iso(agora)], wa)
         if rc == 3:
@@ -157,7 +165,8 @@ def rodada_envios(repo, wa, agora: datetime, fotos_url: str, saida_dir: str) -> 
         if rc != 0 or not os.path.exists(plano):
             return {"erro": "planejar"}
         p = _ler(plano)
-        out = {"agendados": 0, "erros": 0, "pulados": len(p.get("pulados") or []), "conferencia": conferencia}
+        out = {"agendados": 0, "erros": 0, "pulados": len(p.get("pulados") or []), "conferencia": conferencia,
+               "sonda": sondas}
         if not p.get("planos"):
             return out
         ag = os.path.join(pasta, "agendados.json")

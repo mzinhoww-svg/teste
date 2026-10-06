@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 
 from scripts import wa_akg
 
+from . import sonda
 from .politica import decidir, e_saudacao_automatica
 
 log = logging.getLogger("atendente.nucleo")
@@ -38,7 +39,7 @@ class Atendente:
         t = (texto or "").strip()
         if not t:
             return False
-        if t.startswith(PREFIXOS_AUTO):
+        if t.startswith(PREFIXOS_AUTO) or t == sonda.TEXTO:
             return True
         for tq in lead.get("toques") or []:
             if (tq.get("mensagem") or "").strip() == t:

@@ -3,6 +3,7 @@ Leads no formato real da Central, dados 100% fictícios.
 
 Rodar:  cd tools/atendente && PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers python3 -m pytest tests/e2e -q
 """
+import re
 import os
 import threading
 from datetime import datetime, timezone
@@ -129,7 +130,7 @@ def cards(pg):
 
 
 def visao(pg, nome):
-    return pg.locator("#filtros-quadro .l1-visoes").get_by_role("button", name=nome)
+    return pg.locator("#filtros-quadro .l1-visoes").get_by_role("button", name=re.compile(rf"^{nome}\s*\d*$"))
 
 
 def test_card_mostra_segmento_faixa_canal_cidade_score_e_etiqueta(ctx, pagina):
@@ -149,7 +150,7 @@ def test_visoes_rapidas_com_contadores_e_combinadas_com_filtro(ctx, pagina):
     entrar(pagina, ctx.url)
     expect(cards(pagina)).to_have_count(7)
     for nome, n in [("Todos", 7), ("Não enviados", 2), ("Para hoje", 2), ("Enviado 1", 2), ("Enviado 2", 1),
-                    ("Enviado 3", 0), ("Responderam", 1), ("Sem contato", 1)]:
+                    ("Enviado 3", 0), ("Responderam", 1), ("Responderam Explee", 0), ("Responderam WA", 1), ("Sem contato", 1)]:
         expect(visao(pagina, nome).locator(".l1-num")).to_have_text(str(n))
     visao(pagina, "Enviado 1").click()
     expect(visao(pagina, "Enviado 1")).to_have_attribute("aria-pressed", "true")

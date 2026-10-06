@@ -24,6 +24,12 @@ do lead não tem resposta neste arquivo, **não responde: avisa a equipe**.
   marcar visita ou saber mais. A resposta automática manda este link; não inventa horário.
 - WhatsApp da Letícia (o mesmo do site): +55 65 99920-7108.
 
+## Onde fica (pergunta prática, pode responder; confirmado pela Letícia em 06/10/2026)
+- Cuiabá, no começo da Av. do CPA, onde funcionava o Instituto da Língua Inglesa, ao lado de um posto. Prédio à direita, subindo.
+- Estacionamento gratuito, na frente e nos fundos.
+- Mapa: https://maps.app.goo.gl/1azjT5wstsnSdDAf8?g_st=ic
+- Mandar em mensagens curtas e separadas (endereço, estacionamento, mapa), com pequena pausa. Marcar horário continua com a equipe.
+
 ## Preços
 Os planos do site são públicos (Hora de Estúdio R$ 1.350 por 2 h; Podcast In Loco R$ 2.190 por episódio; BTS Recorrente
 R$ 4.500 por mês), mas **nos primeiros 30 dias a IA não cita valor**: pergunta de preço, proposta, orçamento ou contrato
