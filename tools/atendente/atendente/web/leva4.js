@@ -29,7 +29,7 @@ window.Atendente_leva4 = function (A) {
           'Cada rodada para sozinha ao chegar em US$ 10. Leads que saíram ou fecharam ficam de fora.' }),
         h('p', { id: 'enriq-sem-token', class: 'enriq-alerta', hidden: true }),
         h('div', { class: 'enriq-botoes' },
-          h('button', { id: 'enriq-btn', class: 'btn primario', type: 'button', onclick: pedirPlano }, 'Enriquecer base'),
+          h('button', { id: 'enriq-btn', class: 'btn primario', type: 'button', disabled: true, onclick: pedirPlano }, 'Enriquecer base'),
           h('button', { id: 'enriq-parar', class: 'btn perigo', type: 'button', hidden: true, onclick: parar }, 'Parar rodada')),
         h('p', { id: 'enriq-motivo', class: 'suave', hidden: true }),
         h('div', { id: 'enriq-plano', class: 'enriq-plano', hidden: true }),

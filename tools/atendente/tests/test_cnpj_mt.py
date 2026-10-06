@@ -290,8 +290,8 @@ def test_contagem_compartilhada_grava_no_repo_quando_ha_metodo(pasta_contador):
             super().__init__()
             self.compartilhados = {}
 
-        def contato_compartilhado_put(self, doc):
-            self.compartilhados[doc["chave"]] = doc
+        def compartilhado_set(self, chave_hash, empresas, cnaes, primeira, ultima):
+            self.compartilhados[chave_hash] = {"empresas": empresas, "cnaes": cnaes}
 
     repo = RepoComTabela()
     cnpj_mt.importar(pasta_contador, repo, ["4711302"], None, AGORA)
@@ -330,3 +330,14 @@ def test_cli(pasta, monkeypatch, capsys):
 def test_cli_sem_cnaes_falha_com_mensagem(capsys):
     assert cnpj_mt.main(["--pasta", "/nao/existe"]) == 2
     assert "--cnaes" in capsys.readouterr().err
+
+
+def test_com_o_repo_de_verdade_a_contagem_sobrevive_ao_reinicio(pasta_contador):
+    from atendente.db import Repo
+    repo = Repo(":memory:")
+    cnpj_mt.importar(pasta_contador, repo, ["4711302"], None, AGORA)
+    cnpj_mt.contagem_compartilhada(repo)                       # grava em contatos_compartilhados
+    chave = cnpj_mt.chave_hash("telefone", "55659999000" + "10")
+    assert repo.compartilhado_get(chave)["empresas"] >= 3
+    cnpj_mt._CONTAGENS.pop(repo, None)                         # "reinício": some a contagem em memória
+    assert cnpj_mt.provavel_contabilidade(repo, telefone="55659999000" + "10") is True

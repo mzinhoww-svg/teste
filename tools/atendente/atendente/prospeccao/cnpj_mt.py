@@ -9,7 +9,7 @@ Filtro de contabilidade: durante a leitura conta quantos CNPJs ativos de MT (qua
 telefone e cada domínio de e-mail (ou o endereço inteiro, nos webmails). A contagem guarda só o hash
 do valor. Enquanto a tabela `contatos_compartilhados` não existir no repo, ela fica num dicionário
 deste módulo, por repo; `contagem_compartilhada(repo)` grava na tabela quando o repo tiver
-`contato_compartilhado_put(doc)`.
+`compartilhado_set(chave_hash, empresas, cnaes, primeira, ultima)`.
 
     python -m atendente.prospeccao.cnpj_mt --pasta /data/receita --cnaes 4711-3/02,5611-2/01 --municipios CUIABA,"VARZEA GRANDE"
 """
@@ -118,7 +118,7 @@ def chave_hash(tipo: str, valor: str) -> str:
     tipo_real, valor = _chave_valor(tipo, valor)
     if not valor:
         return ""
-    sal = os.environ.get("HASH_SAL", "")
+    sal = os.environ.get("PROSPECCAO_SAL") or os.environ.get("HASH_SAL", "")
     return hashlib.sha256(f"{sal}|{tipo_real}|{valor}".encode("utf-8")).hexdigest()
 
 
@@ -208,10 +208,10 @@ def contagem_compartilhada(repo) -> None:
     if c is None:
         c = _contagem_do_repo(repo)
         _guardar_contagem(repo, c)
-    gravar = getattr(repo, "contato_compartilhado_put", None)
+    gravar = getattr(repo, "compartilhado_set", None)
     if gravar:
         for r in c.registros():
-            gravar(r)
+            gravar(r["chave"], r["empresas"], r["cnaes"], r["primeira_vez"], r["ultima_vez"])
 
 
 def registros_compartilhados(repo) -> list[dict]:
@@ -220,7 +220,7 @@ def registros_compartilhados(repo) -> list[dict]:
 
 
 def _empresas_com(repo, chave: str) -> int:
-    ler = getattr(repo, "contato_compartilhado_get", None)
+    ler = getattr(repo, "compartilhado_get", None)
     if ler:
         doc = ler(chave)
         if doc:
