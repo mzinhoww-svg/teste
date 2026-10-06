@@ -38,6 +38,17 @@ _COMANDO_NO_MEIO = re.compile(
     r"\b(?:regras?|instru\w*|anterior\w*|acima|prompt|rules|instructions|previous)\b",
     re.IGNORECASE,
 )
+# Modo restrito do texto automático: vale para o que sobra depois de tirar LINK_AGENDA.
+_CHARS_PROIBIDOS = re.compile(r"[%@/\\$]")
+_SEP_ENTRE_DIGITOS = re.compile(r"(?<=\d)[\s.\-/\\()+,_]+(?=\d)")
+_DOMINIO = re.compile(r"\w+(?:\s+\.\s+|\.)\w+")
+_NUMERO_K = re.compile(r"\d\s*k\b")
+_PALAVRAS_PROIBIDAS = re.compile(
+    r"\b(?:arroba|ponto\s+com|mil|milhao|milhoes|reais|real|r|brl|usd|dolar|dolares|conto|contos|k"
+    r"|cem|duzentos|trezentos|quatrocentos|quinhentos|desconto\w*|promocao|promocoes"
+    r"|garant\w*|gratis|gratuito|gratuita|sem\s+multa|multa|contrato\w*|parcel\w*|pix|boleto\w*"
+    r"|orcamento\w*|proposta\w*)\b"
+)
 _PONTUACAO_FINAL = ".,;:!?)]}\"'"
 
 
@@ -65,6 +76,14 @@ def texto_seguro(texto: str) -> str | None:
         if _LINHA_INSTRUCAO.match(linha):
             return None
     if _COMANDO_NO_MEIO.search(norm):
+        return None
+    resto = norm.replace(LINK_AGENDA, " ")
+    if _CHARS_PROIBIDOS.search(resto) or _DOMINIO.search(resto) or _NUMERO_K.search(resto.lower()):
+        return None
+    if re.search(r"\d{3,}", _SEP_ENTRE_DIGITOS.sub("", resto)):
+        return None
+    sem_acento = "".join(c for c in unicodedata.normalize("NFD", resto) if not unicodedata.combining(c))
+    if _PALAVRAS_PROIBIDAS.search(sem_acento.lower()):
         return None
     return limpo
 
@@ -94,6 +113,8 @@ def decidir(lead: dict, classificacao: dict | None, cfg: dict, auto_hoje: int, u
     if intencao not in ("neutra", "interesse", "duvida") or classificacao.get("simples") is not True:
         motivo = str(classificacao.get("motivo") or "").strip() or "caso complexo ou incerto"
         return Decisao("avisar", motivo, None)
+    if (cfg or {}).get("status") == "aguardando":
+        return Decisao("avisar", "atendente aguardando liberação", None)
     if not (cfg or {}).get("auto_resposta"):
         return Decisao("avisar", "respostas automáticas desligadas", None)
     if auto_hoje >= MAX_AUTO_DIA:

@@ -14,6 +14,27 @@ OBRIGATORIAS = {
 }
 
 
+def url_api(url: str) -> str:
+    """O cliente do WA-AKG chama /sessions, /scheduler/... sem prefixo: o /api tem de vir no endereço base."""
+    url = (url or "").strip().rstrip("/")
+    if url and not url.endswith("/api"):
+        url += "/api"
+    return url
+
+
+def montar_wa(amb: dict, transporte=None):
+    from scripts import wa_akg
+    extra = {"transporte": transporte} if transporte else {}
+    return wa_akg.WaAkgCliente(url_api(amb["wa_url"]), amb["wa_chave"], amb["wa_sessao"], **extra)
+
+
+def semear_config(repo) -> None:
+    """Primeira subida: instalado e esperando a liberação (nada responde nem envia até ligar na tela). Só semeia o que falta."""
+    for chave, valor in (("status", "aguardando"), ("auto_resposta", False), ("por_lote", 5), ("limite_dia", 50)):
+        if repo.config_get(chave) is None:
+            repo.config_set(chave, valor)
+
+
 def ler_usuarios(bruto: str) -> dict:
     usuarios = {}
     for parte in (bruto or "").split(","):
@@ -75,10 +96,7 @@ def main(env=None) -> None:
     if pasta:
         os.makedirs(pasta, exist_ok=True)
     repo = Repo(amb["db_caminho"])
-    # Primeira vez: decisão da Letícia e do Mazinho (06/10/2026) é ligar direto, com o interruptor como rede de segurança.
-    for chave, valor in (("status", "ativo"), ("auto_resposta", True), ("por_lote", 5), ("limite_dia", 50)):
-        if repo.config_get(chave) is None:
-            repo.config_set(chave, valor)
+    semear_config(repo)
 
     conhecimento = ""
     if amb["conhecimento_caminho"]:
@@ -92,7 +110,7 @@ def main(env=None) -> None:
 
     if not (amb["wa_url"] and amb["wa_sessao"] and amb["wa_chave"]):
         LOG.warning("WA_AKG_URL, WA_AKG_SESSION ou WA_AKG_KEY faltando: o envio pelo WhatsApp não vai funcionar.")
-    wa = wa_akg.WaAkgCliente(amb["wa_url"], amb["wa_chave"], amb["wa_sessao"])
+    wa = montar_wa(amb)
 
     transporte = None
     if not amb["openrouter_chave"]:

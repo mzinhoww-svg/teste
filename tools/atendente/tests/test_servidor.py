@@ -390,3 +390,73 @@ def test_estaticos_servem_e_nao_saem_da_pasta_web(ctx):
     r = con.getresponse()
     assert b"NAO PODE SAIR" not in r.read()
     con.close()
+
+
+# ---- status "aguardando", IP atrás do proxy, Path do cookie
+
+def test_config_aceita_aguardando_e_ligar_liga_a_auto_resposta(ctx):
+    ck = entrar(ctx)
+    ctx.repo.config_set("status", "aguardando")
+    ctx.repo.config_set("auto_resposta", False)
+    assert json_de(pedir(ctx, "GET", "/api/estado", cookie=ck))["config"]["status"] == "aguardando"
+    r = pedir(ctx, "POST", "/api/config", {"status": "ativo"}, cookie=ck)
+    assert r[0] == 200
+    assert json_de(r)["config"]["status"] == "ativo" and json_de(r)["config"]["auto_resposta"] is True
+    assert ctx.repo.config_get("auto_resposta") is True
+    # voltar para aguardando é aceito
+    assert pedir(ctx, "POST", "/api/config", {"status": "aguardando"}, cookie=ck)[0] == 200
+
+
+def test_ligar_respeita_auto_resposta_enviada_e_so_vale_saindo_de_aguardando(ctx):
+    ck = entrar(ctx)
+    ctx.repo.config_set("status", "aguardando")
+    pedir(ctx, "POST", "/api/config", {"status": "ativo", "auto_resposta": False}, cookie=ck)
+    assert ctx.repo.config_get("auto_resposta") is False
+    # fora de "aguardando", ativar não mexe na auto_resposta (retomar depois de parar)
+    ctx.repo.config_set("status", "parado")
+    pedir(ctx, "POST", "/api/config", {"status": "ativo"}, cookie=ck)
+    assert ctx.repo.config_get("auto_resposta") is False
+
+
+@pytest.mark.parametrize("peer,xff,esperado", [
+    ("172.18.0.1", "203.0.113.9", "203.0.113.9"),
+    ("10.0.0.5", "198.51.100.7, 203.0.113.9", "203.0.113.9"),
+    ("192.168.1.2", "203.0.113.9", "203.0.113.9"),
+    ("127.0.0.1", "203.0.113.9", "203.0.113.9"),
+    ("::1", "203.0.113.9", "203.0.113.9"),
+    ("198.51.100.20", "203.0.113.9", "198.51.100.20"),   # peer público: XFF forjado não vale
+    ("172.18.0.1", None, "172.18.0.1"),
+    ("172.18.0.1", "lixo", "172.18.0.1"),
+])
+def test_ip_do_cliente_so_confia_em_proxy_local_ou_privado(peer, xff, esperado):
+    assert servidor.ip_do_cliente(peer, xff) == esperado
+
+
+def test_bloqueio_de_login_conta_o_ip_do_xff(ctx):
+    h = {"X-Forwarded-For": "203.0.113.9"}
+    for _ in range(5):
+        assert pedir(ctx, "POST", "/login", {"usuario": "ana", "senha": "errada"}, headers=h)[0] == 401
+    assert pedir(ctx, "POST", "/login", {"usuario": "ana", "senha": USUARIOS["ana"]}, headers=h)[0] == 429
+    # outra pessoa, outro IP, não é afetada
+    h2 = {"X-Forwarded-For": "203.0.113.10"}
+    assert pedir(ctx, "POST", "/login", {"usuario": "ana", "senha": USUARIOS["ana"]}, headers=h2)[0] == 200
+
+
+def _cookie_login(ctx, headers=None):
+    st, h, _ = pedir(ctx, "POST", "/login", {"usuario": "ana", "senha": USUARIOS["ana"]}, headers=headers)
+    assert st == 200
+    return h["set-cookie"]
+
+
+def test_cookie_path_padrao_e_com_prefixo(ctx):
+    assert "Path=/;" in _cookie_login(ctx)
+    sc = _cookie_login(ctx, {"X-Forwarded-Prefix": "/central"})
+    assert "Path=/central/;" in sc
+    st, h, _ = pedir(ctx, "POST", "/logout", cookie=sc.split(";")[0], headers={"X-Forwarded-Prefix": "/central"})
+    assert "Path=/central/;" in h["set-cookie"] and "Max-Age=0" in h["set-cookie"]
+
+
+@pytest.mark.parametrize("ruim", ["/; Domain=evil.com", "central", "/a/b", "/Central", "/", "//x", "/x y"])
+def test_cookie_ignora_prefixo_malicioso(ctx, ruim):
+    sc = _cookie_login(ctx, {"X-Forwarded-Prefix": ruim})
+    assert "Path=/;" in sc and "Domain" not in sc

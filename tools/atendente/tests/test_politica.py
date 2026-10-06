@@ -217,3 +217,47 @@ def test_texto_seguro_aceita_texto_comum_com_numeros_curtos():
 
 def test_texto_seguro_nao_e_str_devolve_none():
     assert texto_seguro(None) is None
+
+
+@pytest.mark.parametrize("t", [
+    "mil e quinhentos por mês", "Fica 1500", "BRL 2000", "2k", "100 conto",
+    "6 5 9 9 9 9 - 9 9 9 9", "65 9999 / 9999",
+    "reiners.agency/precos", "bit.do/abc", "wa . me / 5565",
+    "leticia@reiners.agency", "leticia arroba gmail ponto com",
+    "Garantimos 300% de retorno, sem multa", "Desconto de 50% fechando hoje",
+    "Sai por dois milhões", "Custa DÓLAR", "Fica em USD", "Promoção imperdível",
+    "Promocao imperdivel", "Temos garantia total", "Dá para parcelar", "Aceitamos PIX",
+    "Mando o boleto", "Faço um orçamento", "Faço um orcamento", "Segue a proposta",
+    "Assine o contrato", "É grátis", "Fica uns duzentos", "Quinhentos por mês",
+    "Sem   multa nenhuma", "Veja c:\\pasta", f"{LINK_AGENDA}/outro",
+    f"Agende {LINK_AGENDA} ou 6599990000",
+])
+def test_texto_seguro_modo_restrito_bloqueia(t):
+    assert texto_seguro(t) is None
+
+
+@pytest.mark.parametrize("t", [
+    "Obrigada! Quando quiser conversar, é só escolher um horário: https://cal.com/leticiareiners/30min",
+    "O Diagnóstico leva cerca de 30 minutos de conversa e fica por nossa conta.",
+    "Oi! Posso ajudar com algo?",
+    "Claro! Pode me contar um pouco mais sobre a sua empresa?",
+    "Combinado, a Letícia retorna com você em breve.",
+    "Atendemos de 9h às 17h, de segunda a sexta.",
+    "Que bom! Em 2 ou 3 dias você já vê o primeiro resultado do Diagnóstico.",
+    f"Perfeito, é só marcar aqui: {LINK_AGENDA}",
+])
+def test_texto_seguro_modo_restrito_aceita(t):
+    assert texto_seguro(t) == t.strip()
+
+
+def test_aguardando_avisa_mesmo_simples_e_com_auto_resposta_ligada():
+    x = d(cfg={"status": "aguardando", "auto_resposta": True})
+    assert x.acao == "avisar" and x.motivo == "atendente aguardando liberação" and x.texto is None
+
+
+def test_aguardando_sair_continua_saindo():
+    assert d(c=cls("sair"), cfg={"status": "aguardando"}).acao == "sair"
+
+
+def test_aguardando_automatica_continua_ignorando():
+    assert d(c=cls("automatica"), cfg={"status": "aguardando"}).acao == "ignorar"

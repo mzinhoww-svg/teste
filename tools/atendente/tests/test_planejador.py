@@ -447,3 +447,83 @@ def test_iniciar_e_parar_rodam_os_lacos_em_threads_daemon(repo, tmp_path):
     n = len(av.descarregos)
     threading.Event().wait(0.1)
     assert len(av.descarregos) == n                     # parou mesmo
+
+
+# --------------------------------------------------------------------------- corridas e novo status
+
+class WaComGancho(WaFalso):
+    """Chama `gancho(n_agendamento)` logo depois de guardar cada agendamento (simula o mundo mudando no meio)."""
+
+    def __init__(self, gancho=None, timeout_no=None, **kw):
+        super().__init__(**kw)
+        self.gancho, self.timeout_no, self.n = gancho, timeout_no, 0
+
+    def __call__(self, metodo, url, headers, corpo=None):
+        r = super().__call__(metodo, url, headers, corpo)
+        if metodo == "POST" and "/scheduler/" in url:
+            self.n += 1
+            if self.gancho:
+                self.gancho(self.n)
+            if self.timeout_no == self.n:
+                return 500, {}, b"{}"            # o WA-AKG agendou, mas a resposta não chegou
+        return r
+
+
+def test_lead_que_responde_no_meio_da_rodada_tem_o_toque_cancelado(repo, saida):
+    config(repo)
+    repo.lead_put(lead(1))
+    repo.lead_put(lead(2))
+    wa = WaComGancho(gancho=lambda n: repo.aplicar("R0001", {"situacao": "respondeu"}) if n == 1 else None)
+    r = rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)
+    assert r["revertidos"] == 1
+    assert [p["jid"] for p in wa.pendentes] == [jid(2)]
+    l1 = repo.lead_get("R0001")
+    assert "agendamento" not in l1 and l1["situacao"] == "respondeu"
+    assert repo.lead_get("R0002")["agendamento"]
+
+
+def test_status_que_vira_parado_no_meio_cancela_tudo_o_que_a_rodada_agendou(repo, saida):
+    config(repo)
+    for i in range(1, 4):
+        repo.lead_put(lead(i))
+    wa = WaComGancho(gancho=lambda n: repo.config_set("status", "parado") if n == 1 else None)
+    r = rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)
+    assert r["revertidos"] == 3 and wa.pendentes == []
+    assert all("agendamento" not in l for l in repo.leads_todos())
+
+
+def test_agendamento_que_deu_timeout_e_adotado_e_nao_duplica(repo, saida):
+    config(repo)
+    repo.lead_put(lead(1))
+    wa = WaComGancho(timeout_no=1)
+    r1 = rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)
+    assert r1["erros"] == 1 and len(wa.pendentes) == 1
+    assert "agendamento" not in repo.lead_get("R0001")
+    r2 = rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)
+    assert r2["agendados"] == 0 and len(wa.agendamentos_post()) == 1 and len(wa.pendentes) == 1
+    ag = repo.lead_get("R0001")["agendamento"]
+    assert ag["n"] == 1 and ag["id"] == "s1" and ag["jid"] == jid(1) and ag["sendAt"]
+
+
+def test_aguardando_nao_agenda_e_nao_cancela(repo, saida):
+    config(repo, status="aguardando")
+    repo.lead_put(lead(1, agendamento={"n": 1, "id": "s1", "sendAt": "2026-10-06T15:00:00Z", "jid": jid(1)}))
+    repo.lead_put(lead(2))
+    wa = WaFalso()
+    wa.pendentes = [{"id": "s1", "jid": jid(1), "sendAt": "2026-10-06T15:00:00Z", "content": "x", "status": "PENDING"},
+                    {"id": "s2", "jid": jid(3), "sendAt": "2026-10-06T16:00:00Z", "content": "y", "status": "PENDING"}]
+    r = rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)
+    assert r == {"aguardando": True}
+    assert len(wa.pendentes) == 2 and wa.agendamentos_post() == []
+    assert not [c for c in wa.chamadas if c[0] == "DELETE"]
+    assert repo.lead_get("R0001")["agendamento"]
+
+
+def test_trabalhos_aguardando_so_confere(repo, saida, monkeypatch):
+    config(repo, status="aguardando")
+    chamadas = []
+    monkeypatch.setattr(trabalhos, "conferir_envios", lambda *a, **k: chamadas.append("conferir"))
+    monkeypatch.setattr(trabalhos, "rodada_envios", lambda *a, **k: chamadas.append("rodada"))
+    t = Trabalhos(repo, WaFalso(), None, None, {"SAIDA_DIR": saida}, relogio=lambda: AGORA)
+    t._passo_planejador()
+    assert chamadas == ["conferir"]

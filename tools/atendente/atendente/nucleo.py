@@ -4,6 +4,7 @@ A decisão de responder é de `politica.decidir`; aqui só se executa. Nada se p
 WhatsApp falharem, o caso vira aviso à equipe.
 """
 import logging
+import threading
 from datetime import datetime, timezone
 
 from scripts import wa_akg
@@ -23,6 +24,14 @@ def _iso(d: datetime) -> str:
 class Atendente:
     def __init__(self, repo, wa, ia, avisador):
         self.repo, self.wa, self.ia, self.avisador = repo, wa, ia, avisador
+        self._trava_leads: dict[str, threading.Lock] = {}
+        self._trava_dict = threading.Lock()         # protege o dicionário de travas por lead
+        self._reserva = threading.Lock()            # decide + reserva a cota do dia de forma atômica
+        self._em_voo = 0                            # respostas automáticas decididas e ainda não gravadas
+
+    def _trava_do_lead(self, lead_id: str) -> threading.Lock:
+        with self._trava_dict:
+            return self._trava_leads.setdefault(lead_id, threading.Lock())
 
     # ---- auxiliares
     def _e_nossa_automatica(self, lead: dict, texto: str) -> bool:
@@ -108,41 +117,44 @@ class Atendente:
                     lead.get("historico"), "Envio agendado cancelado porque o lead respondeu", agora)
         lead = self.repo.aplicar(lead_id, dados)
 
-        # 3) classificação (só texto, e só se a política ainda deixaria sair algo)
-        ultima_nossa = next((x["texto"] for x in reversed(self.repo.msgs_do_lead(lead_id, 20)) if x["de_mim"]), None)
-        status = self.repo.config_get("status", "ativo")
-        classificacao = None
-        if m.tipo == "TEXT" and m.texto and status != "parado" and lead.get("situacao") != "sair":
-            try:
-                classificacao = self.ia.classificar(
-                    m.texto, {"empresa": lead.get("nome"), "ultima_mensagem_nossa": ultima_nossa}, agora)
-            except Exception as e:
-                log.warning("a IA falhou: %s", type(e).__name__)
-        cfg = {"status": status, "auto_resposta": self.repo.config_get("auto_resposta", True)}
-        d = decidir(lead, classificacao, cfg, self.repo.auto_respostas_hoje(agora),
-                    self.repo.ultima_auto_resposta(lead_id), agora, m.tipo)
-        intencao = (classificacao or {}).get("intencao")
+        with self._trava_do_lead(lead_id):
+            # dentro da trava: relê o lead (outra mensagem pode ter respondido antes de nós)
+            lead = self.repo.lead_get(lead_id) or lead
+            # 3) classificação (só texto, e só se a política ainda deixaria sair algo)
+            ultima_nossa = next((x["texto"] for x in reversed(self.repo.msgs_do_lead(lead_id, 20)) if x["de_mim"]), None)
+            status = self.repo.config_get("status", "ativo")
+            classificacao = None
+            if m.tipo == "TEXT" and m.texto and status != "parado" and lead.get("situacao") != "sair":
+                try:
+                    classificacao = self.ia.classificar(
+                        m.texto, {"empresa": lead.get("nome"), "ultima_mensagem_nossa": ultima_nossa}, agora)
+                except Exception as e:
+                    log.warning("a IA falhou: %s", type(e).__name__)
+            cfg = {"status": status, "auto_resposta": self.repo.config_get("auto_resposta", True)}
+            d = decidir(lead, classificacao, cfg, self.repo.auto_respostas_hoje(agora),
+                        self.repo.ultima_auto_resposta(lead_id), agora, m.tipo)
+            intencao = (classificacao or {}).get("intencao")
 
-        # 4) execução
-        if d.acao == "responder":
-            try:
-                r = wa_akg.responder_lead(self.wa, lead, m.jid or lead.get("jidWa"), d.texto, agora, auto=True)
-            except Exception as e:
-                log.warning("não consegui responder: %s", type(e).__name__)
-                return self._avisar(lead, m, "falha ao enviar a resposta automática", agora, intencao)
-            lead = self.repo.aplicar(lead_id, r["data"])
-            self.repo.msg_add(lead_id, m.jid, True, d.texto, "TEXT", None, _iso(agora))
+            # 4) execução
+            if d.acao == "responder":
+                try:
+                    r = wa_akg.responder_lead(self.wa, lead, m.jid or lead.get("jidWa"), d.texto, agora, auto=True)
+                except Exception as e:
+                    log.warning("não consegui responder: %s", type(e).__name__)
+                    return self._avisar(lead, m, "falha ao enviar a resposta automática", agora, intencao)
+                lead = self.repo.aplicar(lead_id, r["data"])
+                self.repo.msg_add(lead_id, m.jid, True, d.texto, "TEXT", None, _iso(agora))
+                self.repo.atendimento_add(leadId=lead_id, empresa=lead.get("nome"), em=_iso(agora), mensagemLead=m.texto,
+                                          intencao=intencao, acao="sozinha", respostaEnviada=d.texto)
+                return "respondida"
+            if d.acao == "avisar":
+                return self._avisar(lead, m, d.motivo, agora, intencao)
+            if d.acao == "sair":
+                self.repo.aplicar(lead_id, {"situacao": "sair", "historico": wa_akg.registrar(
+                    lead.get("historico"), "Pediu para sair: não recebe mais mensagens", agora)})
+                self.repo.atendimento_add(leadId=lead_id, empresa=lead.get("nome"), em=_iso(agora), mensagemLead=m.texto,
+                                          intencao=intencao, acao="sair")
+                return "sair"
             self.repo.atendimento_add(leadId=lead_id, empresa=lead.get("nome"), em=_iso(agora), mensagemLead=m.texto,
-                                      intencao=intencao, acao="sozinha", respostaEnviada=d.texto)
-            return "respondida"
-        if d.acao == "avisar":
-            return self._avisar(lead, m, d.motivo, agora, intencao)
-        if d.acao == "sair":
-            self.repo.aplicar(lead_id, {"situacao": "sair", "historico": wa_akg.registrar(
-                lead.get("historico"), "Pediu para sair: não recebe mais mensagens", agora)})
-            self.repo.atendimento_add(leadId=lead_id, empresa=lead.get("nome"), em=_iso(agora), mensagemLead=m.texto,
-                                      intencao=intencao, acao="sair")
-            return "sair"
-        self.repo.atendimento_add(leadId=lead_id, empresa=lead.get("nome"), em=_iso(agora), mensagemLead=m.texto,
-                                  intencao=intencao, acao="ignorou", motivoAviso=d.motivo)
-        return "ignorada"
+                                      intencao=intencao, acao="ignorou", motivoAviso=d.motivo)
+            return "ignorada"
