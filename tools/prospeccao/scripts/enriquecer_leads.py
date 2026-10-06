@@ -309,9 +309,17 @@ class TregCliente:
             return status, hs, dados
         raise AssertionError("inalcançável")
 
-    def chamar(self, endpoint: str, corpo: dict, max_micro: int, chave: str) -> dict:
-        """POST /call/<endpoint>. Devolve {corpo, custoMicro, callId, provedor}; TregErro em 4xx/5xx."""
-        headers = self._cab({"Content-Type": "application/json", "Idempotency-Key": chave,
+    def chamar(self, endpoint: str, corpo: dict, max_micro: int, chave: str, cabecalhos: dict | None = None) -> dict:
+        """POST /call/<endpoint>. Devolve {corpo, custoMicro, callId, provedor}; TregErro em 4xx/5xx.
+
+        `cabecalhos`: extras de rota (`X-Treg-Route-Prefer|Exclude|Waterfall`). Só `X-Treg-Route-*` passa, e o
+        teto (`X-Treg-Route-Max-Cost`) vem sempre de `max_micro`: ValueError antes de chamar se tentar outro."""
+        extras = {}
+        for k, v in (cabecalhos or {}).items():
+            if not str(k).lower().startswith("x-treg-route-") or str(k).lower() == "x-treg-route-max-cost":
+                raise ValueError(f"cabeçalho não permitido: {k}")
+            extras[k] = str(v)
+        headers = self._cab({**extras, "Content-Type": "application/json", "Idempotency-Key": chave,
                              "X-Treg-Route-Max-Cost": _usd(max_micro)})
         status, hs, dados = self._requisitar("POST", f"{self.base}/call/{endpoint}", headers,
                                              json.dumps(corpo).encode("utf-8"))

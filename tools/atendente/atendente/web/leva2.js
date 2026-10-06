@@ -298,11 +298,8 @@ window.Atendente_leva2 = function (A) {
       var estadoToque = p.n ? (p.podeEnviar ? 'O toque ' + p.n + ' vence hoje.' : p.motivo) : p.motivo;
       caixa.append(
         h('h3', { id: 'leva2-mover-titulo', text: 'Mover para' }), grupo,
-        h('h3', { text: 'Próximo toque' }),
+        h('h3', { text: 'Enviar o próximo toque' }),
         h('p', { class: 'toque-estado' + (p.podeEnviar ? '' : ' suave'), text: estadoToque }),
-        p.texto ? h('details', { class: 'toque-previa' }, h('summary', { text: 'Ver a mensagem' }),
-          h('div', { class: 'previa-toque', text: p.texto }),
-          p.midiaUrl ? h('p', { class: 'suave', text: 'Vai junto a foto ' + (p.foto || '') + '.' }) : null) : null,
         h('div', { class: 'acoes' },
           h('button', { class: 'btn primario', type: 'button', text: rotulo, disabled: !p.podeEnviar,
             onclick: function (ev) { pedirEnvio(id, ev.currentTarget); } }),

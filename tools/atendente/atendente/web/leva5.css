@@ -1,0 +1,52 @@
+/* leva 5: aba Prospecção */
+.prosp { padding: 12px 16px 32px; display: grid; gap: 16px; max-width: 880px; }
+.prosp-caixa { background: var(--papel); border: 1px solid var(--linha); border-radius: 10px; padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.prosp-caixa h2 { font-size: 18px; margin: 0; }
+.prosp-caixa p { margin: 0; }
+.prosp-botoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.prosp-alerta { padding: 8px 10px; border-radius: 6px; background: var(--alerta-fundo); color: var(--alerta); font-weight: 600; }
+.prosp-form { display: grid; gap: 12px; padding: 12px; border: 1px solid var(--linha); border-radius: 8px; background: var(--creme); min-width: 0; }
+.prosp-form[hidden] { display: none; }
+.prosp-form h3 { margin: 0; font-size: 16px; }
+.prosp-campo { display: grid; gap: 4px; min-width: 0; }
+.prosp-campo label { font-weight: 600; font-size: 14px; }
+.prosp-campo select { width: 100%; min-width: 0; min-height: 42px; padding: 6px 10px; border: 1px solid var(--borda-campo); border-radius: 8px;
+                      background: var(--papel); color: inherit; font: inherit; }
+.prosp-campo input[aria-invalid="true"] { border-color: var(--alerta); box-shadow: inset 0 0 0 1px var(--alerta); }
+.prosp-dica { font-size: 13px; }
+.prosp-linha { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.prosp-linha input { flex: 1 1 180px; min-width: 0; width: auto; }
+.prosp-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.prosp-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.prosp-chips:empty { display: none; }
+.prosp-chips li { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 4px 2px 10px; border-radius: 999px;
+                  background: var(--ouro-fundo); color: var(--ouro-texto); font-weight: 600; font-size: 14px; }
+.prosp-chips li span { overflow-wrap: anywhere; }
+.prosp-tirar { min-width: 32px; min-height: 32px; border: 0; border-radius: 999px; background: transparent; cursor: pointer; font-size: 18px;
+               line-height: 1; color: inherit; }
+.prosp-tirar:hover { background: var(--pergaminho); }
+.prosp-andamento { display: grid; gap: 6px; }
+.prosp-andamento:empty { display: none; }
+.prosp-andamento progress { width: 100%; height: 12px; accent-color: var(--ouro); }
+.prosp-estado { font-weight: 700; overflow-wrap: anywhere; }
+.prosp-camps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.prosp-camp { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--linha); border-radius: 8px; min-width: 0; }
+.prosp-camp.rodando { border-color: var(--ouro); box-shadow: inset 3px 0 0 var(--ouro); }
+.prosp-camp p { overflow-wrap: anywhere; }
+.prosp-camp-topo { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; justify-content: space-between; }
+.prosp-camp-topo h3 { margin: 0; font-size: 16px; overflow-wrap: anywhere; min-width: 0; }
+.prosp-status { font-size: 13px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--pergaminho); }
+.prosp-camp.rodando .prosp-status { background: var(--ouro-fundo); color: var(--ouro-texto); }
+.prosp-frase { font-weight: 700; font-size: 16px; }
+.prosp-numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 0; }
+.prosp-numeros div { display: grid; gap: 2px; min-width: 0; }
+.prosp-numeros dt { font-size: 13px; color: var(--suave); }
+.prosp-numeros dd { margin: 0; font-weight: 700; font-size: 15px; overflow-wrap: anywhere; }
+.prosp-confirma-caixa { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--ouro); border-radius: 8px; background: var(--ouro-fundo); }
+.prosp-confirma-caixa h4, .prosp-funil-det h4 { margin: 0; font-size: 15px; }
+.prosp-confirma { display: flex; gap: 8px; align-items: flex-start; font-weight: 600; min-height: 40px; cursor: pointer; }
+.prosp-confirma input { width: 20px; height: 20px; flex: none; margin-top: 2px; }
+.prosp-funil-det { display: grid; gap: 8px; padding: 12px; border-radius: 8px; background: var(--creme); }
+.prosp-etapas { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.prosp-etapas li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px solid var(--linha); }
+.prosp-etapas li span { overflow-wrap: anywhere; min-width: 0; }

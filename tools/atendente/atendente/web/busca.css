@@ -1,0 +1,13 @@
+/* Busca geral */
+.busca-caixa { position: relative; flex: 1 1 260px; max-width: 420px; margin-inline: 8px; }
+.busca-caixa input { width: 100%; }
+.busca-lista { position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; right: 0; max-height: 60vh; overflow-y: auto;
+  margin: 0; padding: 4px; list-style: none; background: var(--fundo, Canvas); color: var(--texto, CanvasText);
+  border: 1px solid var(--borda, currentColor); border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+.busca-item { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; padding: 8px 10px;
+  border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.busca-item:hover, .busca-item:focus-visible { background: color-mix(in srgb, currentColor 10%, transparent); }
+.busca-nome { font-weight: 600; }
+.busca-sub, .busca-por { font-size: .85em; }
+.busca-vazio { padding: 10px; }
+@media (max-width: 640px) { .busca-caixa { flex-basis: 100%; max-width: none; order: 3; margin: 8px 0 0; } }
