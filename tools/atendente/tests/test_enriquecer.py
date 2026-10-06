@@ -76,7 +76,7 @@ def repo():
 
 def test_importa_so_com_o_que_o_dockerfile_copia(tmp_path):
     """O Dockerfile copia só atendente/, prospeccao/scripts e prospeccao/msg para /app. As rotas do enriquecimento
-    têm de carregar nesse recorte (sem central/, por exemplo), senão o servidor inteiro não sobe."""
+    têm de carregar nesse recorte (só com o que ele copia), senão o servidor inteiro não sobe."""
     import os
     import shutil
     import subprocess
@@ -90,6 +90,10 @@ def test_importa_so_com_o_que_o_dockerfile_copia(tmp_path):
     shutil.copytree(os.path.join(tools, "atendente", "atendente"), tmp_path / "atendente", ignore=ign)
     shutil.copytree(os.path.join(tools, "prospeccao", "scripts"), tmp_path / "scripts", ignore=ign)
     shutil.copytree(os.path.join(tools, "prospeccao", "msg"), tmp_path / "msg", ignore=ign)
+    (tmp_path / "central").mkdir()          # o Dockerfile também copia estes dois (aba Base, promover_base)
+    for nome in ("__init__.py", "seed.py"):
+        assert f"COPY tools/prospeccao/central/{nome} /app/central/{nome}" in docker
+        shutil.copy(os.path.join(tools, "prospeccao", "central", nome), tmp_path / "central" / nome)
     codigo = ("import sys; sys.path.insert(0, sys.argv[1]); import atendente.servidor, atendente.rotas as r; "
               "assert any('enriquecer' in p.pattern for _, p, _ in r.ROTAS); "
               "import scripts.site_contatos, scripts.enriquecer_leads")
