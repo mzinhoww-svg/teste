@@ -84,8 +84,9 @@ async function abrir(opts) {
     clientes: opts.clientes === undefined ? dados.clientes() : opts.clientes,
     // base: documentos da coleção base (funil Base); dados.empresasBase(n) gera n empresas
     base: opts.base === undefined ? [] : opts.base,
+    // disparo: o documento config/disparo (fila de envios no WhatsApp); ausente quando não vem
     // enriquecimento: o documento config/enriquecimento (ausente quando não vem); h.empurrar("config/enriquecimento", {...}) mescla depois
-    config: { meta: opts.meta || dados.meta(), fotos: dados.fotos(), posvenda: dados.posvenda(), enriquecimento: opts.enriquecimento || null },
+    config: { meta: opts.meta || dados.meta(), fotos: dados.fotos(), posvenda: dados.posvenda(), enriquecimento: opts.enriquecimento || null, disparo: opts.disparo || null },
   };
   const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
   const ctx = await browser.newContext({ viewport: { width: largura, height: opts.altura || 900 } });

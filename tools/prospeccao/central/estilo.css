@@ -127,6 +127,18 @@
   .enriq-numeros dt { font-size: var(--t12); line-height: 1.3; color: var(--suave); }
   .enriq-numeros dd { margin: 0; font-size: var(--t14); overflow-wrap: anywhere; }
   .enriq-hora { margin: 0; font-size: var(--t12); color: var(--suave); }
+  /* Fila de envios no WhatsApp (funil Aquecimento): mesmo desenho do Enriquecer base */
+  .fila-wa { display: grid; gap: 8px; margin-top: 12px; min-width: 0; }
+  .fila-texto, .fila-motivo, .fila-hora { margin: 0; font-size: var(--t13); line-height: 1.4; color: var(--suave); }
+  .fila-det > summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; font: 500 var(--t14)/1.3 var(--sans); }
+  .fila-corpo { display: grid; gap: 8px; padding: 4px 0 8px; min-width: 0; }
+  .fila-estado { margin: 0; font: 500 var(--t14)/1.4 var(--sans); }
+  .fila-estado.parado, .fila-aviso { color: var(--alerta); }
+  .fila-aviso { margin: 0; font-size: var(--t13); line-height: 1.4; }
+  .fila-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 12px; }
+  .fila-acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+  .fila-wa .fila-card { display: grid; gap: 8px; padding: 10px 12px; border-radius: 8px; background: var(--pergaminho); min-width: 0; }
+  .fila-pergunta { margin: 0; font: 500 var(--t14)/1.4 var(--sans); }
   .enriq-hist summary { display: flex; align-items: center; }
   .enriq-hist ol { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 2px; font-size: var(--t13); line-height: 1.4; }
   .enriq-hist li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; }
@@ -356,6 +368,8 @@
   .tempo time { font-size: var(--t13); line-height: 1.5; color: var(--suave); }
   .tempo li.nota span { white-space: pre-wrap; overflow-wrap: anywhere; }
   .tempo li.nota time::after { content: " · nota"; color: var(--ouro-texto); }
+  .tempo li.resposta span { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .tempo li.resposta time::after { content: " · resposta"; color: var(--ouro-texto); }
   .tempo li.explee span { white-space: pre-wrap; overflow-wrap: anywhere; }
   .tempo li.explee time::after { content: " · Explee"; color: var(--ouro-texto); }
   /* Hot lead da Explee: chip na linha e no cabeçalho; a resposta dela logo abaixo do nome, antes de tudo */
@@ -445,7 +459,7 @@
     .linha-meta { display: none; }
     .resumo-topo { display: grid; gap: 8px; }
     header.topo { padding: 0; }
-    .enriq { margin: 0; }
+    .enriq, .fila-wa { margin: 0; }
   }
   /* ===== 1024 a 1279px: o trilho vira barra no topo ===== */
   @media (min-width: 1024px) and (max-width: 1279px) {
@@ -458,6 +472,7 @@
     .aviso { margin: 0; flex-basis: 100%; }
     .enriq { flex: 1 1 100%; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
     .enriq-motivo, .enriq-status, .enriq-hist { grid-column: 1 / -1; }
+    .fila-wa { flex: 1 1 100%; }
     #btn-enriq { grid-column: 2; grid-row: 1; }
     .filtros { margin: 0; flex: 2 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
     .filtros .abas { flex-wrap: wrap; flex: 1 1 auto; }
