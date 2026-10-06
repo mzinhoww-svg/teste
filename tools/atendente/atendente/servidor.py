@@ -12,10 +12,12 @@ import base64
 import dataclasses
 import hashlib
 import hmac
+import ipaddress
 import json
 import logging
 import mimetypes
 import os
+import re
 import tempfile
 import threading
 import time
@@ -34,7 +36,8 @@ SESSAO_SEGUNDOS = 12 * 3600
 LOGIN_TENTATIVAS = 5
 LOGIN_JANELA_S = 5 * 60
 LOGIN_BLOQUEIO_S = 15 * 60
-STATUS_VALIDOS = ("ativo", "pausado", "parado")
+STATUS_VALIDOS = ("ativo", "pausado", "parado", "aguardando")
+PREFIXO_VALIDO = re.compile(r"^/[a-z0-9_-]+$")
 SITUACOES = ("respondeu", "sair", "ativo", "fechou")
 PADRAO_CONFIG = {"status": "pausado", "auto_resposta": False, "por_lote": 5, "limite_dia": 50,
                  "modelo": _ia.MODELO_PADRAO, "teto_usd_mes": 5.0}
@@ -91,7 +94,7 @@ def validar_config(corpo) -> tuple[dict | None, str | None]:
     for k, v in corpo.items():
         if k == "status":
             if v not in STATUS_VALIDOS:
-                return None, 'O estado deve ser "ativo", "pausado" ou "parado".'
+                return None, 'O estado deve ser "ativo", "pausado", "parado" ou "aguardando".'
         elif k == "auto_resposta":
             if not isinstance(v, bool):
                 return None, "Respostas automáticas deve ser ligado ou desligado (verdadeiro ou falso)."
@@ -110,6 +113,28 @@ def validar_config(corpo) -> tuple[dict | None, str | None]:
             v = float(v)
         out[k] = v
     return out, None
+
+
+def ip_do_cliente(peer: str, xff: str | None) -> str:
+    """IP de quem está do outro lado. Só confia no X-Forwarded-For quando quem conectou é o proxy: loopback ou rede
+    privada (o Caddy no Docker chega pelo gateway da bridge, 172.x.0.1). Peer público: o cabeçalho pode ser forjado."""
+    try:
+        origem = ipaddress.ip_address(peer)
+    except ValueError:
+        return peer
+    if xff and (origem.is_loopback or origem.is_private):
+        ultimo = xff.split(",")[-1].strip()
+        try:
+            return str(ipaddress.ip_address(ultimo))
+        except ValueError:
+            return peer
+    return peer
+
+
+def caminho_do_cookie(prefixo: str | None) -> str:
+    """Path do cookie: o prefixo que o proxy tira (X-Forwarded-Prefix), só se for /palavra; senão /."""
+    prefixo = (prefixo or "").strip()
+    return prefixo + "/" if PREFIXO_VALIDO.match(prefixo) else "/"
 
 
 def coluna_do_lead(lead: dict, agora: datetime) -> str:
@@ -277,11 +302,10 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- entrada
     def _ip(self):
-        ip = self.client_address[0]
-        xff = self.headers.get("X-Forwarded-For")
-        if xff and ip in ("127.0.0.1", "::1"):  # só confia no proxy local (Caddy)
-            ip = xff.split(",")[-1].strip() or ip
-        return ip
+        return ip_do_cliente(self.client_address[0], self.headers.get("X-Forwarded-For"))
+
+    def _path_cookie(self):
+        return caminho_do_cookie(self.headers.get("X-Forwarded-Prefix"))
 
     def _corpo(self) -> bytes | None:
         """Lê o corpo (limite de 1 MB). Devolve None depois de já ter respondido 413/400."""
@@ -423,7 +447,7 @@ class Handler(BaseHTTPRequestHandler):
         srv.login_ok(ip)
         valor = assinar_sessao(srv.cfg.get("segredo_sessao") or "", usuario, srv.agora().timestamp() + SESSAO_SEGUNDOS)
         seguro = "; Secure" if self.headers.get("X-Forwarded-Proto") == "https" else ""
-        cookie = f"sessao={valor}; Path=/; HttpOnly; SameSite=Strict; Max-Age={SESSAO_SEGUNDOS}{seguro}"
+        cookie = f"sessao={valor}; Path={self._path_cookie()}; HttpOnly; SameSite=Strict; Max-Age={SESSAO_SEGUNDOS}{seguro}"
         return self._json(200, {"ok": True, "usuario": usuario}, extra={"Set-Cookie": cookie})
 
     # ---- API
@@ -437,7 +461,7 @@ class Handler(BaseHTTPRequestHandler):
         agora = srv.agora()
         if metodo == "POST" and caminho == "/logout":
             self._corpo()
-            return self._json(200, {"ok": True}, extra={"Set-Cookie": "sessao=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0"})
+            return self._json(200, {"ok": True}, extra={"Set-Cookie": f"sessao=; Path={self._path_cookie()}; HttpOnly; SameSite=Strict; Max-Age=0"})
         if metodo == "GET" and caminho == "/api/estado":
             painel, conectado = srv.painel(agora)
             return self._json(200, {"config": srv.config_atual(), "painel": painel, "wa": {"conectado": conectado}})
@@ -482,6 +506,9 @@ class Handler(BaseHTTPRequestHandler):
         valores, erro = validar_config(dados)
         if erro:
             return self._erro(400, erro)
+        if valores.get("status") == "ativo" and "auto_resposta" not in valores \
+                and srv.repo.config_get("status") == "aguardando":
+            valores["auto_resposta"] = True  # "Ligar atendente": sair de aguardando liga também as respostas
         for k, v in valores.items():
             srv.repo.config_set(k, v)
         atual = srv.config_atual()

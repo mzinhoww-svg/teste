@@ -131,22 +131,32 @@ class Atendente:
                 except Exception as e:
                     log.warning("a IA falhou: %s", type(e).__name__)
             cfg = {"status": status, "auto_resposta": self.repo.config_get("auto_resposta", True)}
-            d = decidir(lead, classificacao, cfg, self.repo.auto_respostas_hoje(agora),
-                        self.repo.ultima_auto_resposta(lead_id), agora, m.tipo)
+            with self._reserva:
+                # contagens relidas aqui, dentro das travas: 24 h por lead e 20/dia no total (inclui as em voo)
+                d = decidir(lead, classificacao, cfg, self.repo.auto_respostas_hoje(agora) + self._em_voo,
+                            self.repo.ultima_auto_resposta(lead_id), agora, m.tipo)
+                reservou = d.acao == "responder"
+                if reservou:
+                    self._em_voo += 1
             intencao = (classificacao or {}).get("intencao")
 
             # 4) execução
             if d.acao == "responder":
                 try:
-                    r = wa_akg.responder_lead(self.wa, lead, m.jid or lead.get("jidWa"), d.texto, agora, auto=True)
-                except Exception as e:
-                    log.warning("não consegui responder: %s", type(e).__name__)
-                    return self._avisar(lead, m, "falha ao enviar a resposta automática", agora, intencao)
-                lead = self.repo.aplicar(lead_id, r["data"])
-                self.repo.msg_add(lead_id, m.jid, True, d.texto, "TEXT", None, _iso(agora))
-                self.repo.atendimento_add(leadId=lead_id, empresa=lead.get("nome"), em=_iso(agora), mensagemLead=m.texto,
-                                          intencao=intencao, acao="sozinha", respostaEnviada=d.texto)
-                return "respondida"
+                    try:
+                        r = wa_akg.responder_lead(self.wa, lead, m.jid or lead.get("jidWa"), d.texto, agora, auto=True)
+                    except Exception as e:
+                        log.warning("não consegui responder: %s", type(e).__name__)
+                        return self._avisar(lead, m, "falha ao enviar a resposta automática", agora, intencao)
+                    lead = self.repo.aplicar(lead_id, r["data"])
+                    self.repo.msg_add(lead_id, m.jid, True, d.texto, "TEXT", None, _iso(agora))
+                    self.repo.atendimento_add(leadId=lead_id, empresa=lead.get("nome"), em=_iso(agora),
+                                              mensagemLead=m.texto, intencao=intencao, acao="sozinha",
+                                              respostaEnviada=d.texto)
+                    return "respondida"
+                finally:
+                    with self._reserva:
+                        self._em_voo -= 1
             if d.acao == "avisar":
                 return self._avisar(lead, m, d.motivo, agora, intencao)
             if d.acao == "sair":

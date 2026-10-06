@@ -50,10 +50,10 @@ def lead(i):
             "toques": [{"n": 1, "mensagem": "Oi!"}]}
 
 
-def msg(i, wa_id):
+def msg(i, wa_id, texto="Tenho interesse", em="2026-10-06T14:00:00Z"):
     num = f"55659999{i:04d}"
     return Mensagem(wa_id=wa_id, jid=f"{num}@s.whatsapp.net", numero=num, de_mim=False, tipo="TEXT",
-                    texto="Tenho interesse", em="2026-10-06T14:00:00Z", grupo=False)
+                    texto=texto, em=em, grupo=False)
 
 
 def montar(n_leads):
@@ -84,7 +84,7 @@ def paralelo(fns):
 def test_rajada_do_mesmo_lead_gera_uma_resposta_automatica_so():
     at, repo, wa = montar(1)
     res = paralelo([lambda: at.tratar_mensagem(msg(1, "A1"), AGORA),
-                    lambda: at.tratar_mensagem(msg(1, "A2"), AGORA)])
+                    lambda: at.tratar_mensagem(msg(1, "A2", "Pode ser hoje?", "2026-10-06T14:00:01Z"), AGORA)])
     assert sorted(res) == ["avisada", "respondida"]
     assert len(wa.enviados) == 1
 
