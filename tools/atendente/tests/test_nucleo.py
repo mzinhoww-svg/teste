@@ -265,6 +265,8 @@ SAUDACOES = [
     "Clínica Modelo agradece seu contato. Como podemos ajudar?",
     "Olá, me chamo Giovanna da clínica Modelo. Agradecemos o seu contato, em que posso te ajudar?",
     "Estamos fora do horário de atendimento. Retornaremos assim que possível.",
+    "Bem vindo a Empresa Exemplo! Digite apenas o número da opção desejada.",
+    "Olá! Sou o assistente virtual da Empresa Exemplo. Para darmos continuidade, informe o seu nome.",
 ]
 
 

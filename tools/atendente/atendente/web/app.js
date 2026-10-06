@@ -523,7 +523,7 @@
   };
   /* ---------- início ---------- */
   function iniciar() {
-    ['leva1', 'leva2', 'leva3', 'leva4', 'leva5'].forEach(function (n) {
+    ['leva1', 'leva2', 'leva3', 'leva4', 'leva5', 'busca'].forEach(function (n) {
       var f = window['Atendente_' + n]; if (typeof f === 'function') f(window.Atendente);
     });
 

@@ -22,6 +22,10 @@ _ROBO = re.compile(
     r"|fora do horario de atendimento|no momento nao (?:estamos|estou)"
     r"|retornaremos|responderemos (?:assim|o mais)"
     r"|(?:digite|escolha) (?:uma|a)? ?(?:das )?(?:opcao|opcoes|numero)"
+    r"|bem[- ]vind[oa]|digite (?:apenas )?(?:o |a )?(?:numero|opcao|\d)|para darmos continuidade"
+    r"|para (?:continuar|prosseguir) (?:o |com o )?(?:seu )?atendimento"
+    r"|informe (?:seu|o seu|o) (?:nome|cnpj|cpf|e-?mail)|assistente virtual"
+    r"|atendimento (?:automatico|virtual)|selecione (?:uma|a) opcao"
     r"|sua mensagem e muito importante|em que (?:posso|podemos) (?:te |lhe |o |a )?ajudar|como (?:posso|podemos) (?:te |lhe )?ajudar")
 # Se a mensagem traz qualquer pedido de verdade, não é só robô: segue o fluxo normal.
 _PEDIDO = re.compile(
