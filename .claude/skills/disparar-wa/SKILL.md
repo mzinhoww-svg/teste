@@ -12,7 +12,7 @@ Central: `https://claude.ai/artifact/91a7c2U3k1kV9PZYY7zvum`. Pasta de trabalho:
 ## Antes de tudo
 - Configuração: `WA_AKG_URL`, `WA_AKG_KEY` e `WA_AKG_SESSION`, ou os arquivos `~/.wa-akg/url`, `key` e `session` (chmod 600). Se faltar algo, dizer à Letícia o que falta e parar. Se ela passar a chave no chat, gravar só em `~/.wa-akg/key`. Nunca no repositório, na página, no banco, no histórico de um lead ou na resposta.
 - O WA-AKG precisa estar numa URL que este ambiente alcance (HTTPS público) e liberada na rede do ambiente (`mcp__claude-code-remote__read_documentation` com o tópico `environment.network`). `localhost` da máquina dela não serve.
-- A foto do toque 1 (`central/fotos/<id>.jpg`) precisa estar numa URL pública; o WA-AKG baixa a imagem dessa URL. Pedir a base à Letícia (`--fotos-url`). Sem ela, o toque 1 não sai, porque a mensagem diz "te mandei uma foto".
+- A foto do toque 1 (`central/fotos/<id>.jpg`) precisa estar numa URL pública; o WA-AKG baixa a imagem dessa URL. Elas estão publicadas em `https://reiners.agency/fotos-cenarios` (cópia de `central/fotos/` em `public/fotos-cenarios/`): usar essa base em `--fotos-url`, depois de conferir com `curl -I` que a foto abre. Sem ela, o toque 1 não sai, porque a mensagem diz "te mandei uma foto".
 
 ## Passos
 1. **Leads.** `ArtifactData list` em `leads` com `query.limit: 1000` (seguir `next_cursor`) e `out_dir: $WS/db`. Juntar em `$WS/leads.json` (`[{id, ...}]`) e guardar a `version` de cada um.
