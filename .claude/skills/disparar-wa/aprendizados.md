@@ -33,6 +33,17 @@ Regras deste arquivo (o repositório é público): sem nome de lead, empresa, te
 - **O que aconteceu:** numa conversa, saiu do número da Reiners uma mensagem "A Reiners Media agradece seu contato. Como podemos ajudar?". Pela cara, é a **mensagem de saudação do WhatsApp Business**, não do atendente. Em conversa com robô do lead, vira robô falando com robô.
 - **Decisão (a equipe confirma):** desligar a saudação automática (WhatsApp Business → Ferramentas → Mensagem de saudação) no número que dispara.
 
+## 2026-10-06 · Conversa que andou até marcar horário (escritório de contabilidade)
+Exemplo real, enviado pela equipe (sem nomes). O lead respondeu ao toque 1, fez perguntas práticas, consultou o sócio e **marcou o horário sozinho no mesmo dia**.
+- **O que funcionou no toque 1:** gancho do segmento ("recuperação tributária para agro e saúde"), foto do cenário que a mensagem promete, convite concreto e de baixo custo ("um café, uns 20 minutos, e você vê o set funcionando; se for mais fácil, eu vou até vocês") e saída fácil ("se não fizer sentido agora, é só me avisar").
+- **A primeira pergunta do lead foi prática: "fica onde?".** Responder na hora, com referência, estacionamento (gratuito, na frente e nos fundos), link do mapa e foto da fachada. Quem pergunta onde fica está considerando ir.
+- **Depois da prática, uma pergunta de qualificação curta:** "você sabe como funciona um conteúdo de empresas no modelo podcast?". A resposta ("só ouvi falar") abriu o convite para a conversa de 30 minutos (online, ligação ou presencial) e o link da agenda.
+- **O lead disse "vou ver com meu sócio"** e voltou em ~10 minutos com horário ("marca às 16:30 hoje, só manda o link"). Não insistir enquanto ele consulta; deixar o link à mão.
+- **Estilo:** várias mensagens curtas em sequência (não um bloco), tom de conversa, sem jargão, respostas em segundos.
+- **Decisão para automatizar:** o atendente pode responder sozinho as perguntas **práticas** (endereço, estacionamento, "como funciona a visita", link da agenda) com texto curto em mensagens separadas. Falta pôr os dados do endereço no `conhecimento-reiners.md` (a equipe confirma o texto) e a regra de **enviar em partes curtas com pequena pausa**. Marcar horário, negociar data e qualquer pergunta sobre valor continuam **só humano**.
+- **Sinal para a prospecção:** escritório de contabilidade respondeu bem e é, ao mesmo tempo, cliente em potencial e fonte de indicação (vê o filtro de contabilidade do desenho). Vale testar o segmento "contabilidade" como campanha própria com gancho técnico.
+- **Conferir:** o link de agenda usado na conversa é diferente do registrado no `conhecimento-reiners.md`. Confirmar qual vale e deixar um só.
+
 ## 2026-10-06 · IA indisponível vira aviso à equipe
 - **O que aconteceu:** quando a chamada ao OpenRouter falha, todo caso vira aviso, inclusive as saudações de robô. Isso encheu o WhatsApp da equipe.
 - **Decisões:** a regra da saudação (acima) tira esse ruído. Falta (**a fazer**) um aviso "IA fora do ar" na faixa do painel e uma checagem de que a chave funciona depois de cada atualização.
