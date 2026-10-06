@@ -272,7 +272,7 @@ def test_instalador_limpa_caracteres_invisiveis_do_que_foi_colado(tmp_path):
         "\x1b[200~wag_FICTICIO123\x1b[201~": "wag_FICTICIO123",
         "[200~wag_FICTICIO123[201~": "wag_FICTICIO123",
         "  wag_FICTICIO123\r\n": "wag_FICTICIO123",
-        "wag_FICT\tICIO123": "wag_FICTICIO123",
+        "wag_FICTICIO\t123": "wag_FICTICIO123",
     }
     for entrada, esperado in casos.items():
         r = subprocess.run(["bash", "-c", trecho + '\nprintf "%s" "$1" | limpar_entrada', "x", entrada],
