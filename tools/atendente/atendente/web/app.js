@@ -258,7 +258,10 @@
     var rolagemY = {};
     var focoId = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('card')
       ? document.activeElement.dataset.id : null;
-    quadro.querySelectorAll('.coluna').forEach(function (c) { rolagemY[c.dataset.coluna] = c.querySelector('.cards').scrollTop; });
+    quadro.querySelectorAll('.coluna').forEach(function (c) {
+      var ul = c.querySelector('.cards');   // coluna vazia não tem a lista
+      if (ul) rolagemY[c.dataset.coluna] = ul.scrollTop;
+    });
 
     limpar(quadro);
     var porColuna = {};
