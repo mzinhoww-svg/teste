@@ -596,6 +596,7 @@ def test_cli_responder_auto_dispensa_confirmo_e_avisar_usa_os_numeros_da_equipe(
     assert main(["responder", "--leads", leads, "--lead", "R1", "--texto-arquivo", str(txt), "--saida", saida, "--auto"], cliente=cliente(f)) == 0
     assert json.load(open(saida))["updates"][0]["data"]["respostaAutoEm"]
     monkeypatch.delenv("WA_AKG_AVISAR", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))                 # sem ~/.wa-akg/avisar da máquina de quem roda o teste
     g = Fake()
     txt.write_text("ATENÇÃO: R1 pediu contrato", encoding="utf-8")
     assert main(["avisar", "--texto-arquivo", str(txt), "--saida", saida], cliente=cliente(g)) == 2     # sem número configurado, não envia

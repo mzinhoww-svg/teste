@@ -25,7 +25,7 @@ class WaFalso:
 
 
 def lead(i, nome="Clínica Modelo"):
-    return {"id": f"R{i:04d}", "nome": nome, "telefone": "65992345678"}
+    return {"id": f"R{i:04d}", "nome": nome, "telefone": "65999900033"}
 
 
 def avisador(wa, atraso=40):
@@ -97,10 +97,10 @@ def test_todos_os_numeros_falham_na_entrega_mantem_na_fila():
 def test_texto_do_aviso_nao_leva_telefone_nem_passa_de_120_no_trecho():
     wa = WaFalso()
     av = avisador(wa)
-    av.adicionar(lead(1), "pediu contato", "me liga 65 99234-5678 " + "a" * 300, AGORA)
+    av.adicionar(lead(1), "pediu contato", "me liga 65 99990-0033 " + "a" * 300, AGORA)
     av.descarregar(AGORA, forcar=True)
     texto = wa.enviados[0][1]
-    assert "99234" not in texto and "65992345678" not in texto
+    assert "99990" not in texto and "65999900033" not in texto
     assert len(texto.split('"')[1]) <= 120
 
 
