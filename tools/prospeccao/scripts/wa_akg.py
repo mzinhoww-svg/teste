@@ -45,7 +45,9 @@ FUSO = timezone(timedelta(hours=-4))  # Cuiabá (America/Cuiaba): UTC-4, sem hor
 DIA = timedelta(days=1)
 ESPERA_DIAS = {2: 4, 3: 6}  # igual a esperaDias da central
 USER_AGENT = "reiners-central/1.0"
-LIMITE_DIA = 30            # número novo: poucos por dia, para não ser banido
+LIMITE_DIA = 24            # total de toques por dia (1 a 3); respostas aos leads não contam
+LIMITE_NOVOS = 12          # contatos novos (toque 1) por dia: número em recuperação de bloqueio
+SCORE_MINIMO = 80          # só lead altamente qualificado (faixa A) recebe o toque 1
 JANELA = (9, 17)           # horas locais de envio, de segunda a sexta
 INTERVALO = (60, 180)      # segundos entre uma mensagem e a próxima
 JANELA_MIN = 30            # a fila segue "X mensagens a cada 30 minutos"
@@ -339,15 +341,41 @@ def distribuir_ritmo(qtd: int, agora: datetime, *, por_lote: int, janela_min: in
     return saida
 
 
+def contatos_novos_hoje(leads: list[dict], agora: datetime) -> int:
+    """Toques 1 já enviados ou agendados para hoje (dia de Cuiabá)."""
+    hoje = agora.astimezone(FUSO).date()
+    def hoje_(v):
+        d = _data(v)
+        return bool(d) and d.astimezone(FUSO).date() == hoje
+    return sum(1 for l in leads if hoje_(l.get("enviado1")) or
+               ((l.get("agendamento") or {}).get("n") == 1 and hoje_((l.get("agendamento") or {}).get("sendAt"))))
+
+
 def _iso(d: datetime) -> str:
     return d.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 # --------------------------------------------------------------------------- plano
 
-def elegivel(l: dict, agora: datetime, so_ids: set | None = None, espera: dict | None = None) -> bool:
-    """Lead de WhatsApp, em cadência, com o toque vencendo hoje. `so_ids` restringe (e é o único jeito de o TESTE entrar)."""
+def qualificado(l: dict) -> bool:
+    """Altamente qualificado: faixa A (score >= SCORE_MINIMO) e celular direto (13 dígitos com 9)."""
+    try:
+        score = int(l.get("score") or 0)
+    except (TypeError, ValueError):
+        score = 0
+    if l.get("faixa") != "A" and score < SCORE_MINIMO:
+        return False
+    num = numero_whatsapp(telefone_destino(l))
+    return len(num) == 13 and num[4] == "9"
+
+
+def elegivel(l: dict, agora: datetime, so_ids: set | None = None, espera: dict | None = None,
+             so_qualificados: bool = False) -> bool:
+    """Lead de WhatsApp, em cadência, com o toque vencendo hoje. `so_ids` restringe (e é o único jeito de o TESTE entrar).
+    `so_qualificados`: o primeiro contato só sai para lead altamente qualificado; quem já está na cadência segue."""
     if so_ids is not None and l.get("id") not in so_ids:
+        return False
+    if so_qualificados and _etapa(l) == 0 and so_ids is None and not qualificado(l):
         return False
     if (l.get("id") == "TESTE" and so_ids is None) or l.get("canal") != "WhatsApp" or l.get("situacao") not in (None, "", "ativo"):
         return False
@@ -355,13 +383,15 @@ def elegivel(l: dict, agora: datetime, so_ids: set | None = None, espera: dict |
 
 
 def prioridade(l: dict) -> tuple:
-    return (-(_etapa(l) + 1), l.get("ordem") or 0, l.get("id", ""))  # a continuação sai antes do primeiro contato
+    # a continuação sai antes do primeiro contato; entre os novos, o de maior score primeiro
+    return (-(_etapa(l) + 1), -(l.get("score") or 0), l.get("ordem") or 0, l.get("id", ""))
 
 
 def planejar(leads: list[dict], agora: datetime, *, existem: dict, respondidas: set | None = None, fotos_url: str = "",
              limite_dia=LIMITE_DIA, ocupados: dict | None = None, janela=JANELA, intervalo=INTERVALO, rng=None,
              espera: dict | None = None, max_leads: int | None = None, so_ids: set | None = None, dias_uteis: bool = True,
-             por_lote: int | None = None, recentes: list | None = None, horizonte_min: int | None = None) -> dict:
+             por_lote: int | None = None, recentes: list | None = None, horizonte_min: int | None = None,
+             so_qualificados: bool = False, limite_novos: int | None = None, novos_hoje: int = 0) -> dict:
     """`existem`: número -> jid (None se o número não tem WhatsApp). Só entram leads de WhatsApp que vencem hoje.
     `so_ids` restringe a esses leads; é o único jeito de o card TESTE (o WhatsApp da própria Reiners) entrar."""
     respondidas = respondidas or set()
@@ -371,7 +401,7 @@ def planejar(leads: list[dict], agora: datetime, *, existem: dict, respondidas: 
         pulados.append({"leadId": l["id"], "nome": l.get("nome", ""), "n": n, "motivo": motivo})
 
     for l in leads:
-        if not elegivel(l, agora, so_ids, espera):
+        if not elegivel(l, agora, so_ids, espera, so_qualificados):
             continue
         n = _etapa(l) + 1
         ag = l.get("agendamento") or {}
@@ -408,6 +438,12 @@ def planejar(leads: list[dict], agora: datetime, *, existem: dict, respondidas: 
         itens.append({"leadId": l["id"], "nome": l.get("nome", ""), "n": n, "jid": existem[num], "texto": texto,
                       "midiaUrl": midia, "ordem": l.get("ordem") or 0})
     itens.sort(key=lambda i: (-i["n"], i["ordem"], i["leadId"]))
+    if limite_novos is not None:  # contatos novos têm teto próprio; toques 2 e 3 não gastam dele
+        vagas = max(0, limite_novos - novos_hoje)
+        novos = [i for i in itens if i["n"] == 1]
+        for i in novos[vagas:]:
+            pulados.append({"leadId": i["leadId"], "nome": i["nome"], "n": 1, "motivo": f"teto de {limite_novos} contatos novos por dia"})
+        itens = [i for i in itens if i["n"] != 1] + novos[:vagas]
     if max_leads:
         itens = itens[:max_leads]
     if por_lote:  # modo fila: X a cada 30 minutos, contando o que já está agendado
@@ -694,6 +730,8 @@ def main(argv=None, cliente=None):
     p.add_argument("--fotos-url", default="")
     p.add_argument("--limite-dia", type=int, default=LIMITE_DIA)
     p.add_argument("--max", type=int, default=None, help="no máximo N mensagens neste plano")
+    p.add_argument("--limite-novos", type=int, default=LIMITE_NOVOS, help="teto de contatos novos (toque 1) por dia")
+    p.add_argument("--so-qualificados", action="store_true", help="o toque 1 só sai para lead altamente qualificado (faixa A, celular direto)")
     p.add_argument("--por-lote", type=int, default=None, help=f"modo fila: X mensagens a cada {JANELA_MIN} minutos (1 a {POR_LOTE_MAX})")
     p.add_argument("--horizonte-min", type=int, default=None, help="modo fila: só planeja os próximos N minutos (o resto fica para a próxima rodada)")
     p.add_argument("--so", default="", help="ids separados por vírgula; só estes entram (use TESTE para o primeiro envio)")
@@ -758,7 +796,8 @@ def main(argv=None, cliente=None):
             # Consulta o WhatsApp só dos que podem sair agora (em modo fila, só os primeiros): consultar todos a cada
             # rodada parece robô. O resto espera a vez.
             so = {i.strip() for i in args.so.split(",") if i.strip()} or None
-            alvo = sorted((l for l in leads if elegivel(l, agora, so) and (l.get("agendamento") or {}).get("n") != _etapa(l) + 1), key=prioridade)
+            novos_hoje = contatos_novos_hoje(leads, agora)
+            alvo = sorted((l for l in leads if elegivel(l, agora, so, None, args.so_qualificados) and (l.get("agendamento") or {}).get("n") != _etapa(l) + 1), key=prioridade)
             candidatos_total = len(alvo)
             if args.por_lote:
                 alvo = alvo[:max(20, args.por_lote * 6)]
@@ -775,7 +814,8 @@ def main(argv=None, cliente=None):
             plano = planejar(leads, agora, existem=existem, respondidas=respondidas, fotos_url=args.fotos_url,
                              por_lote=args.por_lote, recentes=recentes, horizonte_min=args.horizonte_min,
                              limite_dia=args.limite_dia, ocupados=ocupados, max_leads=args.max, janela=janela,
-                             dias_uteis=not args.todos_os_dias,
+                             dias_uteis=not args.todos_os_dias, so_qualificados=args.so_qualificados,
+                             limite_novos=args.limite_novos, novos_hoje=novos_hoje,
                              so_ids={i.strip() for i in args.so.split(",") if i.strip()} or None)
             plano["resumo"]["aguardandoVez"] = candidatos_total - len(leads)  # vencem hoje mas ainda não foram consultados
             _gravar(args.saida, plano)

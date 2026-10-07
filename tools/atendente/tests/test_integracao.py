@@ -41,7 +41,7 @@ def jid(i):
 
 def lead(i, **kw):
     base = {"id": f"R{i:04d}", "nome": f"Empresa Teste {i}", "canal": "WhatsApp", "situacao": "ativo", "etapa": 0,
-            "enviado1": None, "telefone": tel(i), "contatos": [], "contatoAtivo": None, "historico": [], "ordem": i,
+            "enviado1": None, "telefone": tel(i), "contatos": [], "contatoAtivo": None, "historico": [], "ordem": i, "score": 90, "faixa": "A",
             "toques": [{"n": 1, "mensagem": "Oi, tudo bem?"}, {"n": 2, "mensagem": "Toque 2."},
                        {"n": 3, "mensagem": "Toque 3."}]}
     base.update(kw)
@@ -361,6 +361,7 @@ def test_ritmo_nunca_mais_de_5_em_30_min_e_50_por_dia(cen):
     cen.repo.config_set("status", "ativo")
     cen.repo.config_set("por_lote", 5)
     cen.repo.config_set("limite_dia", 50)
+    cen.repo.config_set("limite_novos", 50)
     total = 0
     for _ in range(3):
         total += cen.rodada()["agendados"]

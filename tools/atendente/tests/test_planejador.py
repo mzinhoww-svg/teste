@@ -28,7 +28,7 @@ def jid(i):
 
 def lead(i, **kw):
     base = {"id": f"R{i:04d}", "nome": f"Clínica {i}", "canal": "WhatsApp", "situacao": "ativo", "etapa": 0,
-            "enviado1": None, "telefone": tel(i), "contatos": [], "contatoAtivo": None, "historico": [], "ordem": i,
+            "enviado1": None, "telefone": tel(i), "contatos": [], "contatoAtivo": None, "historico": [], "ordem": i, "score": 90, "faixa": "A",
             "toques": [{"n": 1, "mensagem": "Oi, tudo bem?"}, {"n": 2, "mensagem": "Toque 2."},
                        {"n": 3, "mensagem": "Toque 3."}]}
     base.update(kw)
@@ -87,6 +87,7 @@ def saida(tmp_path):
 
 
 def config(repo, status="ativo", por_lote=5, limite_dia=50):
+    repo.config_set("limite_novos", 50)       # os testes de ritmo antigos não esperam o teto de contatos novos
     repo.config_set("status", status)
     repo.config_set("por_lote", por_lote)
     repo.config_set("limite_dia", limite_dia)
@@ -167,13 +168,15 @@ def test_rodada_usa_por_lote_e_limite_do_config(repo, saida):
     assert all(horas[i + 2] - horas[i] >= timedelta(minutes=30) for i in range(len(horas) - 2))
 
 
-def test_rodada_padroes_sao_5_por_lote_e_50_por_dia(repo, saida):
-    repo.config_set("status", "ativo")        # sem por_lote nem limite_dia
+def test_rodada_padroes_sao_3_por_lote_24_por_dia_e_12_contatos_novos(repo, saida):
+    repo.config_set("status", "ativo")        # sem por_lote, limite_dia nem limite_novos
     for i in range(1, 41):
         repo.lead_put(lead(i))
     wa = WaFalso()
-    assert rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)["agendados"] == 30
-    assert rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)["agendados"] == 10
+    total = sum(rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)["agendados"] for _ in range(4))
+    assert total == 12 and len(wa.pendentes) == 12     # só 12 contatos novos no dia, mesmo com 40 leads qualificados
+    horas = sorted(wa_akg._data(p["sendAt"]) for p in wa.pendentes)
+    assert all(horas[i + 3] - horas[i] >= timedelta(minutes=30) for i in range(len(horas) - 3))
 
 
 def test_rodada_so_agenda_com_status_ativo_e_cancela_pendentes_se_pausada(repo, saida):
