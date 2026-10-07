@@ -407,14 +407,22 @@ def extrair_telefone(corpo) -> str:
 
 # --------------------------------------------------------------------------- execução
 
+TAXA_MINIMA = 0.05
+MIN_CONSULTAS = 100
+MOTIVO_ACERTO_BAIXO = "acerto muito baixo"
+
+
 def _consultado(r: dict) -> bool:
     return r.get("resultado") in ("achou", "nao_achou")
 
 
 def executar(candidatos, cliente, execucao_id, saldo_micro, teto_micro=TETO_PADRAO_MICRO, lote=10,
-             taxa_minima=0.30, ao_fim_do_lote=None, parar=None, ao_lead=None) -> dict:
+             taxa_minima=TAXA_MINIMA, min_consultas=MIN_CONSULTAS, ao_fim_do_lote=None, parar=None,
+             ao_lead=None) -> dict:
     """Consulta lead a lead. Erros (HTTP) não entram na taxa: não foram busca de fato nem foram cobrados.
 
+    Só para por acerto baixo depois de `min_consultas` buscas: busca sem resultado não é cobrada, então uma amostra
+    pequena não diz nada (a taxa real do treg fica entre 10% e 20%). O dinheiro é protegido pelo teto da rodada.
     `parar()` é olhada antes de cada lead: se devolver um texto, a rodada para com ele como motivo.
     `ao_lead(lead_id, resultado, parcial)` é chamada depois de cada lead consultado (progresso ao vivo).
     402 por falta de saldo para a rodada na hora com "saldo insuficiente" (o lead não conta como erro)."""
@@ -499,8 +507,9 @@ def executar(candidatos, cliente, execucao_id, saldo_micro, teto_micro=TETO_PADR
             p = parcial()
             if ao_fim_do_lote:
                 ao_fim_do_lote(p)
-            if (n % lote == 0 and p["consultados"] > 0 and p["achados"] / p["consultados"] < taxa_minima):
-                estado["motivo"] = "acerto abaixo de 30%"
+            if (n % lote == 0 and p["consultados"] >= min_consultas
+                    and p["achados"] / p["consultados"] < taxa_minima):
+                estado["motivo"] = MOTIVO_ACERTO_BAIXO
                 break
     return parcial()
 

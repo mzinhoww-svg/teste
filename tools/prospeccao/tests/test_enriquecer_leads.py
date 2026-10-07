@@ -191,13 +191,21 @@ def test_rejeita_numero_nao_brasileiro_e_pega_o_primeiro_valido():
     assert extrair_telefone({"data": {"name": "65999991111"}}) == ""
 
 
-def test_para_abaixo_de_30_por_cento_depois_do_lote():
+def test_nao_para_com_poucas_buscas_sem_acerto():
+    """Busca sem resultado é de graça: 10 ou 60 vazias seguidas não bastam para parar a rodada."""
+    cli, t = cliente(lambda c: ok_phone("", custo=0))
+    cs = [cand(f"R{i}") for i in range(60)]
+    r = executar(cs, cli, "E1", 5_000_000, lote=10)
+    assert r["motivoParada"] is None and r["consultados"] == 60 and len(t.chamadas) == 60
+
+
+def test_para_por_acerto_muito_baixo_so_depois_da_amostra_minima():
     fim = []
     cli, t = cliente(lambda c: ok_phone("", custo=0))
-    cs = [cand(f"R{i}") for i in range(25)]
+    cs = [cand(f"R{i}") for i in range(150)]
     r = executar(cs, cli, "E1", 5_000_000, lote=10, ao_fim_do_lote=fim.append)
-    assert r["motivoParada"] == "acerto abaixo de 30%"
-    assert r["consultados"] == 10 and len(t.chamadas) == 10 and len(fim) == 1 and fim[0]["consultados"] == 10
+    assert r["motivoParada"] == "acerto muito baixo"
+    assert r["consultados"] == 100 and len(t.chamadas) == 100
 
 
 def test_segue_com_30_por_cento():

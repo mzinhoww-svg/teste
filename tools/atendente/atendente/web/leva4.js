@@ -7,7 +7,7 @@ window.Atendente_leva4 = function (A) {
   var POLL_RODANDO = 2000;
   var est = null, plano = null, pedindoPlano = false, timer = null, aberta = false, sec = null;
   var MOTIVO_CURTO = {
-    'teto de US$10': 'Teto de US$ 10', 'saldo insuficiente': 'Saldo insuficiente', 'acerto abaixo de 30%': 'Acerto abaixo de 30%',
+    'teto de US$10': 'Teto de US$ 10', 'saldo insuficiente': 'Saldo insuficiente', 'acerto abaixo de 30%': 'Acerto abaixo de 30%', 'acerto muito baixo': 'Acerto muito baixo',
     'erros consecutivos': 'Erros seguidos', 'parado pela equipe': 'Parada pela equipe', 'atendente parado (Parar tudo)': 'Parar tudo',
     'falha inesperada': 'Falha', 'interrompida': 'Serviço reiniciou'
   };
