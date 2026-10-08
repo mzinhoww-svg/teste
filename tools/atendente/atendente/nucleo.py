@@ -10,11 +10,12 @@ from datetime import datetime, timezone
 from scripts import wa_akg
 
 from . import sonda
-from .politica import decidir, e_saudacao_automatica
+from .politica import decidir, e_saudacao_automatica, tem_pedido
 
 log = logging.getLogger("atendente.nucleo")
 
 PREFIXOS_AUTO = ("Resposta automática",)
+RESPOSTA_OLA_MAX = 200          # resposta ao "Olá" mais longa que isso é conversa de verdade: segue o fluxo normal
 
 
 def _iso(d: datetime) -> str:
@@ -23,8 +24,9 @@ def _iso(d: datetime) -> str:
 
 
 class Atendente:
-    def __init__(self, repo, wa, ia, avisador):
+    def __init__(self, repo, wa, ia, avisador, fotos_url: str = ""):
         self.repo, self.wa, self.ia, self.avisador = repo, wa, ia, avisador
+        self.fotos_url = fotos_url or ""
         self._trava_leads: dict[str, threading.Lock] = {}
         self._trava_dict = threading.Lock()         # protege o dicionário de travas por lead
         self._reserva = threading.Lock()            # decide + reserva a cota do dia de forma atômica
@@ -52,6 +54,43 @@ class Atendente:
                 pass
         return any((a.get("respostaEnviada") or "").strip() == t
                    for a in self.repo.atendimento_lista(limite=50, lead_id=str(lead["id"])))
+
+    def _seguir_apos_ola(self, lead: dict, m, em: str, agora: datetime) -> bool:
+        """Uma pessoa respondeu ao "Olá" da sonda com um cumprimento ou pergunta simples: manda o toque 1 na hora,
+        como continuação da conversa. Pedido de verdade, fila parada ou qualquer falha: devolve False e segue o
+        fluxo normal (marca respondeu, IA, aviso)."""
+        s = lead.get("sonda") or {}
+        if s.get("liberada") is not False or wa_akg._etapa(lead) != 0 or lead.get("situacao") not in (None, "", "ativo"):
+            return False
+        texto = (m.texto or "").strip()
+        if m.tipo != "TEXT" or not texto or len(texto) > RESPOSTA_OLA_MAX or tem_pedido(texto):
+            return False
+        if self.repo.config_get("status", "ativo") == "parado":
+            return False
+        corpo = wa_akg.mensagem_do_toque(lead, 1)
+        if not corpo.strip():
+            return False
+        foto, midia = wa_akg.foto_do_toque(lead), None
+        if "Te mandei uma foto" in corpo:
+            if not (foto and self.fotos_url):
+                return False
+            midia = f"{self.fotos_url.rstrip('/')}/{foto}.jpg"
+        jid = m.jid or lead.get("jidWa")
+        try:
+            id_ = self.wa.agendar(jid, corpo, _iso(agora), midia)
+        except Exception as e:
+            log.warning("não consegui mandar o toque 1 depois do Olá: %s", type(e).__name__)
+            return False
+        envio = _iso(agora)
+        self.repo.aplicar(lead["id"], {
+            "sonda": {**s, "resultado": "humano", "liberada": True, "resolvidaEm": envio},
+            "etapa": 1, "enviado1": envio, "jidWa": jid, "respostasVistasAte": em,
+            "agendamento": {"n": 1, "id": id_, "sendAt": envio, "jid": jid, "agora": True},
+            "historico": wa_akg.registrar(lead.get("historico"),
+                                          "Respondeu ao 'Olá': toque 1 enviado na sequência", agora)})
+        self.repo.atendimento_add(leadId=str(lead["id"]), empresa=lead.get("nome"), em=envio, mensagemLead=m.texto,
+                                  acao="seguiu_toque")
+        return True
 
     def _cancelar_pendentes(self, lead: dict, jid: str, agora: datetime) -> dict:
         """Cancela no WA-AKG o que ainda está pendente para o lead. Falha não impede o resto do fluxo."""
@@ -107,6 +146,12 @@ class Atendente:
             self.repo.atendimento_add(leadId=lead_id, empresa=lead.get("nome"), em=_iso(agora), mensagemLead=m.texto,
                                       intencao="automatica", acao="ignorou", motivoAviso="saudação automática")
             return "automatica"
+
+        # 1c) uma pessoa respondeu ao "Olá" da sonda: a conversa segue com o toque 1, sem marcar respondeu
+        with self._trava_do_lead(lead_id):
+            atual = self.repo.lead_get(lead_id) or lead
+            if self._seguir_apos_ola(atual, m, em, agora):
+                return "seguiu_toque"
 
         # 2) o lead respondeu: marca, atualiza o visto e cancela o que estava agendado
         dados = {"respostasVistasAte": em}
