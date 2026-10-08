@@ -167,13 +167,13 @@ def test_rodada_usa_por_lote_e_limite_do_config(repo, saida):
     assert all(horas[i + 2] - horas[i] >= timedelta(minutes=30) for i in range(len(horas) - 2))
 
 
-def test_rodada_padroes_sao_5_por_lote_e_50_por_dia(repo, saida):
+def test_rodada_padroes_sao_3_por_lote_e_12_por_dia(repo, saida):
     repo.config_set("status", "ativo")        # sem por_lote nem limite_dia
     for i in range(1, 41):
         repo.lead_put(lead(i))
     wa = WaFalso()
-    assert rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)["agendados"] == 30
-    assert rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)["agendados"] == 10
+    assert rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)["agendados"] == 12
+    assert rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)["agendados"] == 0
 
 
 def test_rodada_so_agenda_com_status_ativo_e_cancela_pendentes_se_pausada(repo, saida):

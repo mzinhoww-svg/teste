@@ -41,7 +41,7 @@ LOGIN_BLOQUEIO_S = 15 * 60
 STATUS_VALIDOS = ("ativo", "pausado", "parado", "aguardando")
 PREFIXO_VALIDO = re.compile(r"^/[a-z0-9_-]+$")
 SITUACOES = ("respondeu", "sair", "ativo", "fechou")
-PADRAO_CONFIG = {"status": "pausado", "auto_resposta": False, "por_lote": 5, "limite_dia": 50,
+PADRAO_CONFIG = {"status": "pausado", "auto_resposta": False, "por_lote": 3, "limite_dia": 12,
                  "modelo": _ia.MODELO_PADRAO, "teto_usd_mes": 5.0}
 RESPOSTAS_DO_LEAD = ("sozinha", "avisou", "sair", "ignorou")
 PASTA_WEB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")

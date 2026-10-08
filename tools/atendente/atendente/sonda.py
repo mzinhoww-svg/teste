@@ -17,6 +17,16 @@ def ligada(repo) -> bool:
     return bool(repo.config_get("sonda_ola", True))
 
 
+def vagas_hoje(wa, agora: datetime, limite_dia: int) -> int:
+    """Quantas mensagens ainda cabem hoje no número, contando TUDO o que o WA-AKG tem agendado ou enviado hoje
+    ("Olá", toques e respostas). Se não der para conferir, devolve 0: na dúvida, não manda."""
+    try:
+        _, ocupados = wa_akg.ritmo_atual(wa.agendadas("pending"), wa.agendadas("history"), agora)
+    except Exception:
+        return 0
+    return max(0, int(limite_dia) - ocupados.get(agora.astimezone(wa_akg.FUSO).date(), 0))
+
+
 def _numero(lead) -> str:
     return wa_akg.numero_whatsapp(wa_akg.telefone_destino(lead))
 

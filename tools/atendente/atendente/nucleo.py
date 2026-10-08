@@ -76,6 +76,16 @@ class Atendente:
                 return False
             midia = f"{self.fotos_url.rstrip('/')}/{foto}.jpg"
         jid = m.jid or lead.get("jidWa")
+        limite = self.repo.config_get("limite_dia", 12)
+        if sonda.vagas_hoje(self.wa, agora, limite) <= 0:
+            # limite do dia cheio: libera a sonda e deixa o toque 1 para o planejador, que respeita o limite
+            self.repo.aplicar(lead["id"], {
+                "sonda": {**s, "resultado": "humano", "liberada": True, "resolvidaEm": _iso(agora)},
+                "jidWa": jid, "respostasVistasAte": em,
+                "historico": wa_akg.registrar(lead.get("historico"),
+                                              "Respondeu ao 'Olá'; toque 1 fica para quando houver vaga no limite do dia",
+                                              agora)})
+            return True
         try:
             id_ = self.wa.agendar(jid, corpo, _iso(agora), midia)
         except Exception as e:

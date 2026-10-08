@@ -30,7 +30,7 @@ def montar_wa(amb: dict, transporte=None):
 
 def semear_config(repo) -> None:
     """Primeira subida: instalado e esperando a liberação (nada responde nem envia até ligar na tela). Só semeia o que falta."""
-    for chave, valor in (("status", "aguardando"), ("auto_resposta", False), ("por_lote", 5), ("limite_dia", 50)):
+    for chave, valor in (("status", "aguardando"), ("auto_resposta", False), ("por_lote", 3), ("limite_dia", 12)):
         if repo.config_get(chave) is None:
             repo.config_set(chave, valor)
 
