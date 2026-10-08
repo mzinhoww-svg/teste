@@ -123,7 +123,7 @@ def conferir_envios(repo, wa, agora: datetime, saida_dir: str) -> dict:
         return _conferir(repo, wa, agora, pasta)
 
 
-def rodada_envios(repo, wa, agora: datetime, fotos_url: str, saida_dir: str) -> dict:
+def rodada_envios(repo, wa, agora: datetime, fotos_url: str, saida_dir: str, so_toques: bool = False) -> dict:
     """aguardando: não faz nada. conferir -> (ativo) planejar -> agendar --confirmo -> aplica os updates. Pausado/parado: cancela os pendentes.
     Quem liga a fila é a Letícia (config.status == "ativo"); por isso o agendamento roda com --confirmo."""
     status = repo.config_get("status", "parado")
@@ -154,7 +154,7 @@ def rodada_envios(repo, wa, agora: datetime, fotos_url: str, saida_dir: str) -> 
         sondas = {}
         if sonda.ligada(repo):
             sondas = sonda.resolver(repo, agora)
-            sondas["enviadas"] = sonda.enviar(repo, wa, agora, por_lote)
+            sondas["enviadas"] = 0 if so_toques else sonda.enviar(repo, wa, agora, por_lote)
         segurar = sonda.seguram_o_toque(repo)               # primeiro contato só sai depois do "Olá" e da espera
         plano = os.path.join(pasta, "plano.json")
         rc = _rodar(["planejar", "--leads", _leads_em(repo, pasta, "leads2.json", segurar), "--saida", plano,
@@ -194,6 +194,17 @@ def _mensagem(conversa: dict, item: dict, agora: datetime):
     return Mensagem(wa_id=f"poll:{jid}:{bruto if bruto else item.get('texto', '')}", jid=jid, numero=_numero(jid),
                     de_mim=False, tipo=str(item.get("tipo") or "TEXT"), texto=item.get("texto") or "",
                     em=wa_akg._iso(dt or agora), grupo=False)
+
+
+def completar_sondas(repo, wa, agora: datetime, fotos_url: str, saida_dir: str) -> dict | None:
+    """Roda entre os planejadores (a cada conferência): se alguma sonda "Olá" venceu a espera, libera e já agenda o
+    toque 1 na mesma hora. Sem isso o lead fica até 30 minutos com um "Olá" solto. Não manda sondas novas."""
+    if not sonda.ligada(repo) or repo.config_get("status", "parado") != "ativo":
+        return None
+    r = sonda.resolver(repo, agora)
+    if not r["liberadas"]:
+        return None
+    return rodada_envios(repo, wa, agora, fotos_url, saida_dir, so_toques=True)
 
 
 def conferencia_respostas(repo, wa, atendente, agora: datetime) -> dict:

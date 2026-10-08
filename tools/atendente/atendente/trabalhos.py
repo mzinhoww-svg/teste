@@ -8,7 +8,7 @@ import re
 import threading
 from datetime import datetime, timedelta, timezone
 
-from atendente.planejador import conferencia_respostas, conferir_envios, rodada_envios
+from atendente.planejador import completar_sondas, conferencia_respostas, conferir_envios, rodada_envios
 from scripts import wa_akg
 
 log = logging.getLogger("atendente.trabalhos")
@@ -59,7 +59,10 @@ class Trabalhos:
 
     def _passo_conferencia(self) -> None:
         with self._trabalho:
-            conferencia_respostas(self.repo, self.wa, self.atendente, self.relogio())
+            agora = self.relogio()
+            conferencia_respostas(self.repo, self.wa, self.atendente, agora)
+            if na_janela_de_envio(agora):
+                completar_sondas(self.repo, self.wa, agora, self.cfg.get("FOTOS_URL", ""), self._dir_saida())
 
     def _passo_planejador(self) -> None:
         agora = self.relogio()
