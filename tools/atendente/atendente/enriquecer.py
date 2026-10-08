@@ -36,7 +36,8 @@ TEXTO_MOTIVO = {
     None: "Rodada concluída.",
     "teto de US$10": "Parou no teto de US$ 10 desta rodada.",
     "saldo insuficiente": "Saldo do treg insuficiente. Recarregue o saldo no painel do treg (Team, Billing) e tente de novo.",
-    "acerto abaixo de 30%": "Parou porque menos de 30% das buscas acharam telefone.",
+    "acerto abaixo de 30%": "Parou porque menos de 30% das buscas acharam telefone (regra antiga).",
+    "acerto muito baixo": "Parou porque menos de 5% das buscas acharam telefone, depois de pelo menos 100 buscas.",
     "erros consecutivos": "Parou depois de 10 erros seguidos do treg. Tente de novo mais tarde.",
     PARADO_EQUIPE: "Parada pela equipe.",
     PARADO_TUDO: "Parou porque o atendente foi parado (Parar tudo).",
@@ -316,7 +317,7 @@ class Enriquecedor:
                         self._gravar_resultado(lead_id, r, por_id[lead_id], execucao, usuario)
             self._progresso(consultados=res["consultados"], achados=res["achados"], erros=res["erros"],
                             gastoMicro=res["gastoMicro"], taxa=res["taxa"])
-            if not simular and motivo in (None, "acerto abaixo de 30%", "teto de US$10", "saldo insuficiente",
+            if not simular and motivo in (None, "acerto abaixo de 30%", "acerto muito baixo", "teto de US$10", "saldo insuficiente",
                                           "erros consecutivos"):
                 motivo = self._sites(usuario) or motivo
         except Exception as e:
