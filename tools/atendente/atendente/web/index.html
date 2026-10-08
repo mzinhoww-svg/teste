@@ -54,6 +54,7 @@
       <p>Instalado. O atendente ainda não está respondendo nem enviando: clique em Ligar atendente quando o Claude confirmar.</p>
       <button id="btn-ligar" class="btn primario" type="button">Ligar atendente</button>
     </div>
+    <p id="faixa-wa" class="faixa-wa" role="alert" hidden><strong>WhatsApp desconectado.</strong> Nada sai e nenhuma resposta chega até reconectar: abra o WA-AKG, entre na sessão e leia o QR code com o celular da Reiners.</p>
     <p id="faixa-parado" class="faixa-parado" hidden>Tudo parado. Nada sai pelo WhatsApp até você retomar.</p>
     <dl id="resumo" class="resumo">
       <div><dt>Na fila</dt><dd id="r-fila">&ndash;</dd></div>
@@ -102,6 +103,18 @@
         <button class="btn" type="button" data-sit="fechou">Fechou</button>
         <button class="btn" type="button" data-sit="ativo">Voltar para a cadência</button>
       </div>
+      <section class="resumo-ia" aria-labelledby="resumo-ia-titulo">
+        <div class="linha-titulo">
+          <h3 id="resumo-ia-titulo">Onde a conversa está</h3>
+          <button id="btn-resumir" class="btn" type="button">Resumir com IA</button>
+        </div>
+        <dl id="resumo-ia" class="resumo-ia-campos"></dl>
+      </section>
+      <div class="linha-titulo">
+        <h3>Conversa</h3>
+        <button id="btn-sincronizar" class="btn texto" type="button">Atualizar do WhatsApp</button>
+      </div>
+      <ol id="painel-conversa" class="conversa"></ol>
       <form id="form-enviar" class="nota">
         <label for="enviar-texto">Responder pelo WhatsApp</label>
         <textarea id="enviar-texto" rows="3" maxlength="1000" placeholder="Escreva a mensagem. Ela sai na hora, do WhatsApp da Reiners."></textarea>
@@ -113,8 +126,6 @@
         <button class="btn primario" type="submit">Salvar nota</button>
       </form>
       <div id="painel-extra" class="painel-extra"></div>
-      <h3>Conversa</h3>
-      <ol id="painel-conversa" class="conversa"></ol>
       <h3>Histórico</h3>
       <ol id="painel-historico" class="historico"></ol>
     </div>

@@ -8,6 +8,7 @@ import re
 import threading
 from datetime import datetime, timedelta, timezone
 
+from atendente import conversas
 from atendente.planejador import completar_sondas, conferencia_respostas, conferir_envios, rodada_envios
 from scripts import wa_akg
 
@@ -27,6 +28,9 @@ def na_janela_de_envio(agora: datetime) -> bool:
     """Segunda a sexta, das 9h às 17h de Cuiabá."""
     local = agora.astimezone(wa_akg.FUSO)
     return local.weekday() < 5 and wa_akg.JANELA[0] <= local.hour < wa_akg.JANELA[1]
+
+
+INTERVALO_SYNC = timedelta(minutes=10)
 
 
 class Trabalhos:
@@ -61,6 +65,11 @@ class Trabalhos:
         with self._trabalho:
             agora = self.relogio()
             conferencia_respostas(self.repo, self.wa, self.atendente, agora)
+            # depois da caixa de entrada (que passa pelo atendente): completa no card o que mandamos, a cada 10 min
+            ultima = getattr(self, "_ultima_sync", None)
+            if ultima is None or agora - ultima >= INTERVALO_SYNC:
+                self._ultima_sync = agora
+                conversas.sincronizar(self.repo, self.wa, agora)
             if na_janela_de_envio(agora):
                 completar_sondas(self.repo, self.wa, agora, self.cfg.get("FOTOS_URL", ""), self._dir_saida())
 

@@ -450,6 +450,14 @@ def test_caixa_nao_repete_o_que_a_central_ja_viu_e_ignora_quem_nao_e_acompanhave
     assert r["conversas"] == [] and r["resumo"]["monitorados"] == 1
 
 
+def test_caixa_le_quem_so_recebeu_o_ola_da_sonda():
+    """Quem respondeu ao "Olá" ainda não tem toque 1: a caixa precisa ler mesmo assim (o webhook pode falhar)."""
+    s = lead("S", enviado1=None, sonda={"enviadaEm": "2026-10-02T09:00:00Z", "liberada": False})
+    conv = [msg(True, "Olá", "2026-10-02T09:00:00Z"), msg(False, "Oi, quem é?", "2026-10-02T09:00:30Z")]
+    r = caixa(cliente(Fake(mensagens={jid(): conv})), [s], {"5565992345678": jid()}, AGORA)
+    assert [n["texto"] for n in r["conversas"][0]["novas"]] == ["Oi, quem é?"]
+
+
 def test_caixa_registra_erro_de_um_lead_sem_parar_os_outros():
     a = lead("A", etapa=1, enviado1="2026-10-01T14:00:00Z")
     b = lead("B", etapa=1, enviado1="2026-10-01T14:00:00Z", telefone="65988887777")

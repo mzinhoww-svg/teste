@@ -475,7 +475,8 @@ def _texto_msg(m: dict) -> str:
 
 def acompanhavel(l: dict) -> bool:
     """Lead de WhatsApp que já recebeu o toque 1 e ainda está em conversa (em cadência ou que respondeu)."""
-    return bool(l.get("enviado1")) and l.get("canal") == "WhatsApp" and l.get("situacao") in (None, "", "ativo", "respondeu")
+    comecou = l.get("enviado1") or (l.get("sonda") or {}).get("enviadaEm")     # o "Olá" da sonda também abre a conversa
+    return bool(comecou) and l.get("canal") == "WhatsApp" and l.get("situacao") in (None, "", "ativo", "respondeu")
 
 
 def caixa(cliente: WaAkgCliente, leads: list[dict], existem: dict, agora: datetime, max_conversas: int = 200) -> dict:
@@ -496,7 +497,8 @@ def caixa(cliente: WaAkgCliente, leads: list[dict], existem: dict, agora: dateti
         except WaAkgErro as e:
             erros.append({"leadId": l["id"], "erro": str(e)})
             continue
-        desde = _data(l.get("respostasVistasAte")) or _data(l.get("enviado1"))
+        desde = (_data(l.get("respostasVistasAte")) or _data(l.get("enviado1"))
+                 or _data((l.get("sonda") or {}).get("enviadaEm")))
         novas = [m for m in msgs if not m.get("fromMe") and (_data(m.get("timestamp")) is None or desde is None or _data(m["timestamp"]) > desde)]
         if not novas:
             continue
