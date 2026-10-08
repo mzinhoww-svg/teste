@@ -33,6 +33,11 @@ _PEDIDO = re.compile(
     r"|quanto|preco|valor|orcamento|proposta|contrato|reuniao|marcar|agendar|interess|me liga|ligar|pode ser|vamos")
 
 
+def tem_pedido(texto: str | None) -> bool:
+    """A mensagem traz um pedido de verdade (preço, sair, reunião, interesse...)."""
+    return isinstance(texto, str) and bool(_PEDIDO.search(_SEM_ACENTO(texto)))
+
+
 def e_saudacao_automatica(texto: str | None) -> bool:
     """Saudação de robô: curta, com frase típica e sem pedido nenhum. Na dúvida, devolve False (segue o fluxo normal)."""
     if not isinstance(texto, str) or not texto.strip() or len(texto) > 300:

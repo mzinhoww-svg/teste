@@ -210,10 +210,11 @@ def test_endurecer_libera_portas_do_ssh_antes_do_ufw():
     assert "ufw allow 22/tcp" not in t
 
 
-def test_atualizar_constroi_antes_e_volta_se_falhar():
+def test_atualizar_guarda_a_anterior_pelo_nome_constroi_e_volta_se_falhar():
     t = open(os.path.join(DEPLOY, "atualizar.sh"), encoding="utf-8").read()
     assert "up -d --build" not in t
-    assert t.index(" build ||") < t.index("docker tag \"$ATUAL\" atendente:anterior") < t.index("up -d --no-build")
+    # guarda pelo nome (o id do contêiner não serve com o armazenamento do containerd), antes de construir
+    assert t.index("docker tag atendente:local atendente:anterior") < t.index(" build ||") < t.index("up -d --no-build")
     assert "/saude" in t and "docker tag atendente:anterior atendente:local" in t
 
 

@@ -3,8 +3,8 @@
 # Uso (como root):  bash /opt/atendente-src/tools/atendente/deploy/atualizar.sh
 #
 # Ordem segura:
-#  1. Baixa o código e CONSTRÓI a imagem nova (se falhar, o atendente que está no ar não foi tocado).
-#  2. Guarda a imagem atual com o nome atendente:anterior.
+#  1. Baixa o código e guarda a imagem atual com o nome atendente:anterior.
+#  2. CONSTRÓI a imagem nova (se falhar, o atendente que está no ar não foi tocado).
 #  3. Troca o contêiner e confere /saude por até 30 segundos.
 #  4. Se a versão nova não responder, volta sozinho para a anterior.
 set -u
@@ -22,18 +22,20 @@ command -v docker >/dev/null 2>&1 || parar "o Docker não está instalado."
 echo "==> Baixando a versão mais nova"
 git -C "$SRC" pull --ff-only || parar "não consegui atualizar o código (há alteração local em $SRC?). O atendente que estava ligado não foi tocado."
 
-echo "==> Construindo a versão nova (o atendente atual continua ligado enquanto isso)"
-docker compose -f "$COMPOSE" build || parar "a versão nova não foi construída. NADA foi alterado: o atendente que já estava ligado continua como estava. Veja a mensagem acima."
-
 echo "==> Guardando a versão atual (atendente:anterior)"
+# Guarda ANTES de construir, pelo nome da imagem: com o armazenamento de imagens do containerd, marcar pelo id que o
+# contêiner informa ({{.Image}}) falha, e a versão anterior não ficava guardada.
 TEM_ANTERIOR=nao
-ATUAL="$(docker inspect -f '{{.Image}}' atendente 2>/dev/null)"
-if [ -n "$ATUAL" ] && docker tag "$ATUAL" atendente:anterior 2>/dev/null; then
+if docker inspect atendente >/dev/null 2>&1 && docker image inspect atendente:local >/dev/null 2>&1 \
+   && docker tag atendente:local atendente:anterior 2>/dev/null; then
   TEM_ANTERIOR=sim
   echo "    ok: versão atual guardada"
 else
   echo "    aviso: não achei um atendente ligado para guardar (se a versão nova falhar, não haverá versão anterior para voltar)."
 fi
+
+echo "==> Construindo a versão nova (o atendente atual continua ligado enquanto isso)"
+docker compose -f "$COMPOSE" build || parar "a versão nova não foi construída. NADA foi alterado: o atendente que já estava ligado continua como estava. Veja a mensagem acima."
 
 echo "==> Religando o atendente com a versão nova"
 docker compose -f "$COMPOSE" up -d --no-build || echo "    aviso: o Docker reclamou ao religar; vou conferir se respondeu."

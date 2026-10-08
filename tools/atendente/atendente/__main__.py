@@ -127,7 +127,7 @@ def main(env=None) -> None:
         ia.teto_usd = float(config["teto_usd_mes"])
 
     avisador = Avisador(wa, amb["avisar_numeros"], repo)
-    atendente = Atendente(repo, wa, ia, avisador)
+    atendente = Atendente(repo, wa, ia, avisador, fotos_url=amb["fotos_url"])
     base = pasta or "."
     trabalhos = Trabalhos(repo, wa, atendente, avisador, {
         "BACKUP_DIR": os.path.join(base, "backups"), "SAIDA_DIR": os.path.join(base, "saida"),

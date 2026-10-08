@@ -292,3 +292,55 @@ def test_resposta_com_pedido_de_verdade_segue_o_fluxo_normal(texto):
     at, repo, wa, ia, av = montar({"intencao": "complexo", "simples": False, "resposta": "", "motivo": "m"})
     assert at.tratar_mensagem(msg(texto), AGORA) != "automatica"
     assert repo.lead_get("R0001")["situacao"] in ("respondeu", "sair")
+
+
+# ---- resposta de pessoa ao "Olá" da sonda: a conversa segue com o toque 1 na hora
+class WaComAgendar(WaFalso):
+    def __init__(self):
+        super().__init__()
+        self.agendados = []
+
+    def agendar(self, jid, texto, send_at, midia_url=None):
+        self.agendados.append((jid, texto, midia_url))
+        return f"ag{len(self.agendados)}"
+
+
+def montar_sonda(resp=None, status="ativo"):
+    at, repo, _, ia, av = montar(resp)
+    wa = WaComAgendar()
+    at.wa = wa
+    repo.config_set("status", status)
+    repo.lead_put({"id": "R0001", "nome": "Clínica Modelo", "canal": "WhatsApp", "situacao": "ativo", "etapa": 0,
+                   "telefone": "65999900011", "historico": [], "jidWa": JID,
+                   "sonda": {"enviadaEm": "2026-10-06T13:59:00Z", "id": "s1", "liberada": False},
+                   "toques": [{"n": 1, "mensagem": MSG1}, {"n": 2, "mensagem": "Toque 2."}]})
+    return at, repo, wa, ia, av
+
+
+@pytest.mark.parametrize("texto", ["Olá", "Oi, quem é?", "Bom dia! Tudo bem?"])
+def test_pessoa_responde_ao_ola_e_o_toque_1_sai_na_hora(texto):
+    at, repo, wa, ia, av = montar_sonda()
+    assert at.tratar_mensagem(msg(texto), AGORA) == "seguiu_toque"
+    lead = repo.lead_get("R0001")
+    assert wa.agendados == [(JID, MSG1, None)]
+    assert lead["situacao"] == "ativo" and lead["etapa"] == 1 and lead["enviado1"]
+    assert lead["sonda"]["resultado"] == "humano" and lead["sonda"]["liberada"] is True
+    assert lead["agendamento"]["n"] == 1 and ia.chamadas == [] and av.pendentes() == 0
+    assert acoes(repo) == ["seguiu_toque"] and repo.msgs_do_lead("R0001")[0]["texto"] == texto
+
+
+def test_resposta_ao_ola_com_pedido_segue_o_fluxo_normal():
+    at, repo, wa, ia, av = montar_sonda({"intencao": "complexo", "simples": False, "resposta": "", "motivo": "m"})
+    assert at.tratar_mensagem(msg("Olá, quanto custa?"), AGORA) != "seguiu_toque"
+    assert wa.agendados == [] and repo.lead_get("R0001")["situacao"] == "respondeu"
+
+
+def test_resposta_ao_ola_com_tudo_parado_nao_manda_o_toque():
+    at, repo, wa, ia, av = montar_sonda(status="parado")
+    assert at.tratar_mensagem(msg("Olá"), AGORA) != "seguiu_toque" and wa.agendados == []
+
+
+def test_toque_1_que_promete_foto_sem_foto_hospedada_nao_sai_solto():
+    at, repo, wa, ia, av = montar_sonda({"intencao": "outro", "simples": False, "resposta": "", "motivo": "m"})
+    repo.aplicar("R0001", {"toques": [{"n": 1, "mensagem": "Te mandei uma foto do cenário."}]})
+    assert at.tratar_mensagem(msg("Olá"), AGORA) != "seguiu_toque" and wa.agendados == []
