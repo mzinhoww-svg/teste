@@ -241,7 +241,7 @@ def test_estado_traz_painel_e_gasto(ctx):
                         {"id": "h2", "sendAt": "2026-10-06T13:00:00Z", "status": "SENT"},
                         {"id": "h3", "sendAt": "2026-10-07T13:30:00Z", "status": "FAILED"}]
     e = json_de(pedir(ctx, "GET", "/api/estado", cookie=entrar(ctx)))
-    assert e["config"] == {"status": "pausado", "auto_resposta": False, "por_lote": 5, "limite_dia": 50,
+    assert e["config"] == {"status": "pausado", "auto_resposta": False, "por_lote": 3, "limite_dia": 12,
                            "modelo": e["config"]["modelo"], "teto_usd_mes": 5.0}
     assert e["config"]["modelo"]
     assert e["painel"] == {"naFila": 2, "enviadasHoje": 1, "respostasHoje": 3, "autoHoje": 1,

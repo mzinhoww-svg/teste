@@ -42,7 +42,7 @@ def test_semente_primeira_subida_fica_aguardando_e_nao_sobrescreve():
 
     novo = Repo({})
     principal.semear_config(novo)
-    assert novo.dados == {"status": "aguardando", "auto_resposta": False, "por_lote": 5, "limite_dia": 50}
+    assert novo.dados == {"status": "aguardando", "auto_resposta": False, "por_lote": 3, "limite_dia": 12}
     existente = Repo({"status": "ativo", "auto_resposta": True, "por_lote": 8})
     principal.semear_config(existente)
-    assert existente.dados == {"status": "ativo", "auto_resposta": True, "por_lote": 8, "limite_dia": 50}
+    assert existente.dados == {"status": "ativo", "auto_resposta": True, "por_lote": 8, "limite_dia": 12}

@@ -344,3 +344,13 @@ def test_toque_1_que_promete_foto_sem_foto_hospedada_nao_sai_solto():
     at, repo, wa, ia, av = montar_sonda({"intencao": "outro", "simples": False, "resposta": "", "motivo": "m"})
     repo.aplicar("R0001", {"toques": [{"n": 1, "mensagem": "Te mandei uma foto do cenário."}]})
     assert at.tratar_mensagem(msg("Olá"), AGORA) != "seguiu_toque" and wa.agendados == []
+
+
+def test_resposta_ao_ola_com_limite_cheio_nao_manda_toque():
+    at, repo, wa, ia, av = montar_sonda()
+    repo.config_set("limite_dia", 2)
+    quando = AGORA.strftime("%Y-%m-%dT%H:%M:%SZ")
+    wa.pendentes = [{"id": f"p{i}", "sendAt": quando, "jid": f"x{i}@s.whatsapp.net"} for i in range(2)]
+    assert at.tratar_mensagem(msg("Oi, quem é?"), AGORA) == "seguiu_toque" and wa.agendados == []
+    l = repo.lead_get("R0001")
+    assert l["sonda"]["liberada"] is True and not l.get("etapa") and l["situacao"] == "ativo"

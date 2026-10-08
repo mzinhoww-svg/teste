@@ -132,3 +132,36 @@ def test_completar_sondas_nao_manda_ola_novo_nem_roda_pausado(repo, saida):
     rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)
     repo.config_set("status", "pausado")
     assert completar_sondas(repo, cliente(wa), AGORA + timedelta(minutes=5), "https://f", saida) is None
+
+
+def _enviadas_hoje(wa, n):
+    wa.historico = [{"id": f"h{i}", "sendAt": (AGORA - timedelta(minutes=10 + i)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                     "jid": f"x{i}@s.whatsapp.net", "content": "Olá", "status": wa_akg.SENT} for i in range(n)]
+
+
+def test_ola_conta_no_limite_do_dia(repo, saida):
+    """O "Olá" entra no limite do dia: com 12 por dia e 12 já enviadas, nada mais sai."""
+    config(repo, limite_dia=12)
+    for i in range(1, 4):
+        repo.lead_put(lead(i))
+    wa = WaFalso()
+    _enviadas_hoje(wa, 12)
+    r = rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)
+    assert r["sonda"]["enviadas"] == 0 and r["agendados"] == 0 and wa.pendentes == []
+
+
+def test_ola_so_ocupa_as_vagas_que_sobram(repo, saida):
+    config(repo, limite_dia=12, por_lote=5)
+    for i in range(1, 6):
+        repo.lead_put(lead(i))
+    wa = WaFalso()
+    _enviadas_hoje(wa, 10)
+    r = rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)
+    assert r["sonda"]["enviadas"] == 2 and len(wa.pendentes) == 2
+
+
+def test_sem_conferir_o_agendador_nao_manda_ola():
+    class Quebrado:
+        def agendadas(self, aba):
+            raise RuntimeError("fora do ar")
+    assert sonda.vagas_hoje(Quebrado(), AGORA, 50) == 0
