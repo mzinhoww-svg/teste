@@ -2,7 +2,7 @@
 
 Serve para saber se do outro lado tem robô (menu, saudação) ou pessoa. O toque 1 só é liberado depois da espera.
 Resultado fica em `lead["sonda"]["resultado"]`: "sem_resposta", "robo" ou "humano". Se uma pessoa respondeu, o núcleo
-já marcou o lead como "respondeu" e a cadência não segue por aqui. Interruptor: config `sonda_ola` (padrão ligado)."""
+já marcou o lead como "respondeu" e a cadência não segue por aqui. Interruptor: config `sonda_ola` (padrão desligado)."""
 from datetime import datetime, timedelta
 
 from atendente.politica import e_saudacao_automatica
@@ -14,7 +14,7 @@ ESPACO = timedelta(seconds=90)              # entre uma sonda e a próxima (o Wh
 
 
 def ligada(repo) -> bool:
-    return bool(repo.config_get("sonda_ola", True))
+    return bool(repo.config_get("sonda_ola", False))
 
 
 def _numero(lead) -> str:

@@ -629,3 +629,40 @@ def test_main_nao_imprime_telefone_do_erro(tmp_path, capsys):
     assert main(["planejar", "--leads", leads, "--saida", saida], cliente=Quebra()) == 1
     err = capsys.readouterr().err
     assert "5565999900011" not in err and "[número]" in err
+
+
+# ---- número em recuperação de bloqueio: 12 novos/dia, só qualificados, toques 2 e 3 fora do teto
+def _qualificados(qtd, **kw):
+    return [lead(f"R{i:04d}", nome=f"Empresa {i} Ltda", score=90 - i, faixa="A", ordem=i, telefone=f"6599234{i:04d}",
+                 toques=[{"n": 1, "mensagem": "Oi, tudo bem? Toque 1."}], **kw) for i in range(1, qtd + 1)]
+
+
+def _existem(leads):
+    return {numero_whatsapp(l["telefone"]): jid(numero_whatsapp(l["telefone"])) for l in leads}
+
+
+def test_toque_1_so_para_lead_altamente_qualificado():
+    fraco = lead("R0100", score=70, faixa="B", ordem=100, toques=[{"n": 1, "mensagem": "Oi."}])
+    sem_celular = lead("R0101", score=95, faixa="A", ordem=101, telefone="6532345678", toques=[{"n": 1, "mensagem": "Oi."}])
+    forte = lead("R0102", score=88, faixa="A", ordem=102, toques=[{"n": 1, "mensagem": "Oi."}])
+    p = plano_de([fraco, sem_celular, forte], existem=_existem([fraco, sem_celular, forte]), so_qualificados=True)
+    assert [i["leadId"] for i in p["planos"]] == ["R0102"]
+    assert plano_de([fraco], existem=_existem([fraco]), so_qualificados=False)["planos"]  # sem o filtro, sai como antes
+
+
+def test_teto_de_12_contatos_novos_nao_segura_toque_2_e_3():
+    novos = _qualificados(15)
+    seguimento = lead("R0200", etapa=1, enviado1="2026-10-01T14:00:00Z", ordem=200, toques=[{"n": 2, "mensagem": "Toque 2."}])
+    p = plano_de(novos + [seguimento], existem=_existem(novos + [seguimento]), limite_novos=12, limite_dia=24)
+    ids = [i["leadId"] for i in p["planos"]]
+    assert ids[0] == "R0200" and len([i for i in p["planos"] if i["n"] == 1]) == 12
+    assert any("teto de 12" in x["motivo"] for x in p["pulados"])
+
+
+def test_novos_ja_enviados_hoje_gastam_o_teto_e_o_maior_score_sai_primeiro():
+    cinco = _qualificados(5)
+    p = plano_de(cinco, existem=_existem(cinco), limite_novos=3, novos_hoje=1)
+    assert [i["leadId"] for i in p["planos"]] == ["R0001", "R0002"]
+    hoje = lead("R0300", enviado1="2026-10-06T13:00:00Z")
+    amanha = lead("R0301", enviado1="2026-10-05T13:00:00Z")
+    assert wa_akg.contatos_novos_hoje([hoje, amanha, lead("R0302")], AGORA) == 1

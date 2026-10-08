@@ -12,7 +12,7 @@ from atendente import sonda
 from scripts import wa_akg
 
 JANELA_HORIZONTE_MIN = 480
-POR_LOTE_PADRAO, LIMITE_DIA_PADRAO = 5, 50
+POR_LOTE_PADRAO, LIMITE_DIA_PADRAO, LIMITE_NOVOS_PADRAO = 3, 24, 12
 
 
 def _inteiro(valor, padrao: int, minimo: int, maximo: int) -> int:
@@ -159,7 +159,9 @@ def rodada_envios(repo, wa, agora: datetime, fotos_url: str, saida_dir: str) -> 
         plano = os.path.join(pasta, "plano.json")
         rc = _rodar(["planejar", "--leads", _leads_em(repo, pasta, "leads2.json", segurar), "--saida", plano,
                      "--fotos-url", fotos_url or "", "--por-lote", str(por_lote), "--limite-dia", str(limite_dia),
-                     "--horizonte-min", str(JANELA_HORIZONTE_MIN), "--agora", wa_akg._iso(agora)], wa)
+                     "--horizonte-min", str(JANELA_HORIZONTE_MIN), "--agora", wa_akg._iso(agora),
+                     "--limite-novos", str(_inteiro(repo.config_get("limite_novos"), LIMITE_NOVOS_PADRAO, 0, wa_akg.LIMITE_DIA_MAX)),
+                     *(["--so-qualificados"] if repo.config_get("so_qualificados", True) else [])], wa)
         if rc == 3:
             return {"sessao_caida": True}
         if rc != 0 or not os.path.exists(plano):
