@@ -12,7 +12,7 @@ from atendente import sonda
 from scripts import wa_akg
 
 JANELA_HORIZONTE_MIN = 480
-POR_LOTE_PADRAO, LIMITE_DIA_PADRAO = 3, 12
+POR_LOTE_PADRAO, LIMITE_DIA_PADRAO = 3, 50
 
 
 def _inteiro(valor, padrao: int, minimo: int, maximo: int) -> int:
@@ -154,8 +154,8 @@ def rodada_envios(repo, wa, agora: datetime, fotos_url: str, saida_dir: str, so_
         sondas = {}
         if sonda.ligada(repo):
             sondas = sonda.resolver(repo, agora)
-            # o "Olá" também conta no limite do dia (antes não contava e o número passou do limite)
-            vagas = 0 if so_toques else sonda.vagas_hoje(wa, agora, limite_dia)
+            # "Olá" = conversa nova: até `novos_dia` por dia, e sempre dentro do teto total de mensagens do número
+            vagas = 0 if so_toques else min(sonda.vagas_novos(repo, agora), sonda.vagas_hoje(wa, agora, limite_dia))
             sondas["enviadas"] = sonda.enviar(repo, wa, agora, min(por_lote, vagas)) if vagas else 0
         segurar = sonda.seguram_o_toque(repo)               # primeiro contato só sai depois do "Olá" e da espera
         plano = os.path.join(pasta, "plano.json")

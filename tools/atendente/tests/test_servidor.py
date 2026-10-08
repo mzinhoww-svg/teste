@@ -241,7 +241,7 @@ def test_estado_traz_painel_e_gasto(ctx):
                         {"id": "h2", "sendAt": "2026-10-06T13:00:00Z", "status": "SENT"},
                         {"id": "h3", "sendAt": "2026-10-07T13:30:00Z", "status": "FAILED"}]
     e = json_de(pedir(ctx, "GET", "/api/estado", cookie=entrar(ctx)))
-    assert e["config"] == {"status": "pausado", "auto_resposta": False, "por_lote": 3, "limite_dia": 12,
+    assert e["config"] == {"status": "pausado", "auto_resposta": False, "por_lote": 3, "limite_dia": 50, "novos_dia": 12,
                            "modelo": e["config"]["modelo"], "teto_usd_mes": 5.0}
     assert e["config"]["modelo"]
     assert e["painel"] == {"naFila": 2, "enviadasHoje": 1, "respostasHoje": 3, "autoHoje": 1,
@@ -260,7 +260,7 @@ def test_estado_com_wa_fora_devolve_null(ctx):
 def test_config_valida_limites_e_recusa_invalido(ctx):
     ck = entrar(ctx)
     ok = {"status": "ativo", "auto_resposta": True, "por_lote": 10, "limite_dia": 60,
-          "modelo": "um/modelo", "teto_usd_mes": 50}
+          "novos_dia": 12, "modelo": "um/modelo", "teto_usd_mes": 50}
     r = pedir(ctx, "POST", "/api/config", ok, cookie=ck)
     assert r[0] == 200 and json_de(r)["config"] == ok
     assert ctx.repo.config_get("status") == "ativo" and ctx.repo.config_get("por_lote") == 10

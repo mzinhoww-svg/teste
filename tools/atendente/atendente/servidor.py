@@ -41,7 +41,7 @@ LOGIN_BLOQUEIO_S = 15 * 60
 STATUS_VALIDOS = ("ativo", "pausado", "parado", "aguardando")
 PREFIXO_VALIDO = re.compile(r"^/[a-z0-9_-]+$")
 SITUACOES = ("respondeu", "sair", "ativo", "fechou")
-PADRAO_CONFIG = {"status": "pausado", "auto_resposta": False, "por_lote": 3, "limite_dia": 12,
+PADRAO_CONFIG = {"status": "pausado", "auto_resposta": False, "por_lote": 3, "limite_dia": 50, "novos_dia": 12,
                  "modelo": _ia.MODELO_PADRAO, "teto_usd_mes": 5.0}
 RESPOSTAS_DO_LEAD = ("sozinha", "avisou", "sair", "ignorou")
 PASTA_WEB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
@@ -100,10 +100,11 @@ def validar_config(corpo) -> tuple[dict | None, str | None]:
         elif k == "auto_resposta":
             if not isinstance(v, bool):
                 return None, "Respostas automáticas deve ser ligado ou desligado (verdadeiro ou falso)."
-        elif k in ("por_lote", "limite_dia"):
+        elif k in ("por_lote", "limite_dia", "novos_dia"):
             maximo = 10 if k == "por_lote" else 60
             if isinstance(v, bool) or not isinstance(v, int) or not 1 <= v <= maximo:
-                nome = "Mensagens por lote" if k == "por_lote" else "Limite por dia"
+                nome = {"por_lote": "Mensagens por lote", "limite_dia": "Limite por dia",
+                        "novos_dia": "Conversas novas por dia"}[k]
                 return None, f"{nome} deve ser um número inteiro de 1 a {maximo}."
         elif k == "modelo":
             if not isinstance(v, str) or not v.strip() or len(v.strip()) > 80:

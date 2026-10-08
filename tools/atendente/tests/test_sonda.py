@@ -165,3 +165,22 @@ def test_sem_conferir_o_agendador_nao_manda_ola():
         def agendadas(self, aba):
             raise RuntimeError("fora do ar")
     assert sonda.vagas_hoje(Quebrado(), AGORA, 50) == 0
+
+
+def test_no_maximo_12_conversas_novas_por_dia(repo, saida):
+    """Conversa nova = "Olá". Passou de `novos_dia`, não abre mais nenhuma no dia, mesmo com folga no teto total."""
+    config(repo, por_lote=10)
+    repo.config_set("novos_dia", 3)
+    for i in range(1, 8):
+        repo.lead_put(lead(i))
+    wa = WaFalso()
+    assert rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)["sonda"]["enviadas"] == 3
+    r = rodada_envios(repo, cliente(wa), AGORA + timedelta(minutes=30), "https://f", saida)
+    assert r["sonda"]["enviadas"] == 0 and textos(wa).count("Olá") == 3
+    # no dia seguinte abre mais 3
+    r = rodada_envios(repo, cliente(wa), AGORA + timedelta(days=1), "https://f", saida)
+    assert r["sonda"]["enviadas"] == 3
+
+
+def test_padrao_e_12_conversas_novas(repo):
+    assert sonda.vagas_novos(repo, AGORA) == 12
