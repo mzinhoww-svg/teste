@@ -11,6 +11,7 @@ from scripts import wa_akg
 TEXTO = "Olá"
 ESPERA = timedelta(seconds=45)                # curta: "Olá" solto por muito tempo confunde quem é pessoa
 ESPACO = timedelta(seconds=90)              # entre uma sonda e a próxima (o WhatsApp não gosta de rajada)
+NOVOS_DIA_PADRAO = 12                       # conversas novas por dia (cada "Olá" abre uma)
 
 
 def ligada(repo) -> bool:
@@ -25,6 +26,26 @@ def vagas_hoje(wa, agora: datetime, limite_dia: int) -> int:
     except Exception:
         return 0
     return max(0, int(limite_dia) - ocupados.get(agora.astimezone(wa_akg.FUSO).date(), 0))
+
+
+def novos_hoje(repo, agora: datetime) -> int:
+    """Quantas conversas novas ("Olá" de primeiro contato) já foram abertas hoje, no dia de Cuiabá."""
+    hoje = agora.astimezone(wa_akg.FUSO).date()
+    n = 0
+    for l in repo.leads_todos():
+        d = wa_akg._data((l.get("sonda") or {}).get("enviadaEm"))
+        if d and d.astimezone(wa_akg.FUSO).date() == hoje:
+            n += 1
+    return n
+
+
+def vagas_novos(repo, agora: datetime) -> int:
+    """Conversas novas que ainda cabem hoje (config `novos_dia`, padrão 12). Quem já está em conversa não conta."""
+    try:
+        limite = int(repo.config_get("novos_dia", NOVOS_DIA_PADRAO))
+    except (TypeError, ValueError):
+        limite = NOVOS_DIA_PADRAO
+    return max(0, limite - novos_hoje(repo, agora))
 
 
 def _numero(lead) -> str:

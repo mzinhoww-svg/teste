@@ -76,7 +76,7 @@ class Atendente:
                 return False
             midia = f"{self.fotos_url.rstrip('/')}/{foto}.jpg"
         jid = m.jid or lead.get("jidWa")
-        limite = self.repo.config_get("limite_dia", 12)
+        limite = self.repo.config_get("limite_dia", 50)
         if sonda.vagas_hoje(self.wa, agora, limite) <= 0:
             # limite do dia cheio: libera a sonda e deixa o toque 1 para o planejador, que respeita o limite
             self.repo.aplicar(lead["id"], {
