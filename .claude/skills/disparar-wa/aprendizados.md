@@ -55,3 +55,9 @@ Exemplo real, enviado pela equipe (sem nomes). O lead respondeu ao toque 1, fez 
 - **Retomada de lead que foi consultar o sócio:** lembrar em 1 e 2 dias; não insistir antes.
 - **Prospecção por decisores:** testar todas as personas (dono, marketing, RH) ao mesmo tempo, medir a taxa de resposta por persona e por segmento, e concentrar o envio no que converte mais. Site da empresa não é o indicador principal, mas é central para qualificar. LGPD revisada pela equipe (06/10): pode seguir.
 - **Enriquecimento:** a Lusha via treg cobra por consulta (sem volume grátis pelo treg); entra só como último recurso na cascata.
+
+## 2026-10-08 · Primeiro dia da sonda "Olá" (3 conversas reais, sem dados pessoais)
+- **Robô de menu não bloqueia:** num escritório contábil, o menu numérico respondeu ao "Olá" e, 5 minutos depois, uma pessoa assumiu ("bom dia, como posso ajudar?"). **Decisão:** quando aparecer menu, não desistir; o toque 1 segue e a resposta humana costuma vir.
+- **"Olá" solto gera "Olá" de volta:** uma advogada respondeu só "Olá", sem entender. A resposta ideal pede desculpa pela abertura seca, diz quem somos em uma frase e termina em pergunta fácil ("posso te mandar uma mensagem rápida explicando?"). **Automatizar** no conhecimento quando a IA responder sozinha a esse caso.
+- **O tempo entre o "Olá" e o toque 1 estava longo demais** (3 min de espera + planejador a cada 30 min = até meia hora de silêncio). **Feito:** espera de 45 s e a conferência (a cada 2 min) já libera e agenda o toque 1 (`planejador.completar_sondas`).
+- **A saudação automática do WhatsApp Business da Reiners respondeu ao lead** ("A Reiners media agradece seu contato…"). Já estava anotado em 06/10; confirmado que continua ligada. **Desligar** em WhatsApp Business → Ferramentas comerciais → Mensagem de saudação.

@@ -9,7 +9,7 @@ from atendente.politica import e_saudacao_automatica
 from scripts import wa_akg
 
 TEXTO = "Olá"
-ESPERA = timedelta(minutes=3)
+ESPERA = timedelta(seconds=45)                # curta: "Olá" solto por muito tempo confunde quem é pessoa
 ESPACO = timedelta(seconds=90)              # entre uma sonda e a próxima (o WhatsApp não gosta de rajada)
 
 

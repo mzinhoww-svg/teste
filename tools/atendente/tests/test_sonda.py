@@ -5,7 +5,7 @@ import pytest
 
 from atendente import sonda
 from atendente.db import Repo
-from atendente.planejador import rodada_envios
+from atendente.planejador import completar_sondas, rodada_envios
 from scripts import wa_akg
 from test_planejador import WaFalso, cliente, config, lead, jid
 
@@ -49,7 +49,7 @@ def test_dentro_da_espera_o_toque_nao_sai(repo, saida):
     repo.lead_put(lead(1))
     wa = WaFalso()
     rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)
-    r = rodada_envios(repo, cliente(wa), AGORA + timedelta(minutes=1), "https://f", saida)
+    r = rodada_envios(repo, cliente(wa), AGORA + timedelta(seconds=20), "https://f", saida)
     assert r["agendados"] == 0 and textos(wa) == ["Olá"]
 
 
@@ -110,6 +110,25 @@ def test_ola_ainda_pendente_nao_e_adotado_como_toque_1(repo, saida):
     repo.lead_put(lead(1))
     wa = WaFalso()
     rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)
-    rodada_envios(repo, cliente(wa), AGORA + timedelta(minutes=1), "https://f", saida)     # "Olá" ainda pendente
+    rodada_envios(repo, cliente(wa), AGORA + timedelta(seconds=20), "https://f", saida)    # "Olá" ainda pendente
     l = repo.lead_get("R0001")
     assert not l.get("agendamento") and textos(wa) == ["Olá"]
+
+
+def test_conferencia_completa_a_sonda_e_agenda_o_toque_sem_esperar_o_planejador(repo, saida):
+    repo.lead_put(lead(1))
+    wa = WaFalso()
+    rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)              # manda o "Olá"
+    wa.pendentes = []                                                        # o "Olá" saiu
+    assert completar_sondas(repo, cliente(wa), AGORA + timedelta(seconds=20), "https://f", saida) is None
+    r = completar_sondas(repo, cliente(wa), AGORA + timedelta(seconds=50), "https://f", saida)
+    assert r["agendados"] == 1 and r["sonda"]["enviadas"] == 0 and textos(wa) == ["Oi, tudo bem?"]
+
+
+def test_completar_sondas_nao_manda_ola_novo_nem_roda_pausado(repo, saida):
+    repo.lead_put(lead(1))
+    wa = WaFalso()
+    assert completar_sondas(repo, cliente(wa), AGORA, "https://f", saida) is None and wa.pendentes == []
+    rodada_envios(repo, cliente(wa), AGORA, "https://f", saida)
+    repo.config_set("status", "pausado")
+    assert completar_sondas(repo, cliente(wa), AGORA + timedelta(minutes=5), "https://f", saida) is None
