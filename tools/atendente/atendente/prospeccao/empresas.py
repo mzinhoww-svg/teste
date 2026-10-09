@@ -83,6 +83,47 @@ def _completar(repo, cli, d: dict, orcamento, registro) -> dict:
     return novo
 
 
+CIDADES_PADRAO = ("Cuiabá", "Várzea Grande")      # campanha sem cidade: começa pela Grande Cuiabá
+
+
+def buscar_no_maps(repo, cli, campanha: dict, orcamento, registro=None) -> int:
+    """Quando a base de CNPJ não tem empresas do segmento: procura "<segmento> em <cidade> - MT" no Google Maps e grava
+    cada lugar como uma empresa da campanha (id `maps-<lugar>`, CNAE e porte da campanha). Devolve quantas entraram.
+    Lugar fechado ou sem identificação fica de fora; quem já existe não é gravado de novo."""
+    segmento = " ".join(str(campanha.get("segmento") or "").split())
+    cnaes = list(campanha.get("cnaes") or [])
+    if not segmento or not cnaes or cli is None:
+        return 0
+    portes = portes_da_campanha(campanha)
+    porte = "pequena" if "pequena" in portes else sorted(portes)[0]
+
+    def reg(evento):
+        orcamento.registrar(evento)
+        if registro:
+            registro(evento)
+    novas = 0
+    for cidade in list(campanha.get("cidades") or CIDADES_PADRAO):
+        if not orcamento.cabe(MAPS_MAX):
+            break
+        chave = re.sub(r"[^a-z0-9]+", "-", _sem_acento(f"{segmento} {cidade}"))[:80]
+        for p in treg_ops.maps(cli, segmento, cidade, MAPS_MAX, f"prosp-busca-{campanha.get('id')}-{chave}",
+                               registro=reg):
+            ident = re.sub(r"[^A-Za-z0-9_-]+", "", str(p.get("place_id") or ""))[:80]
+            if not ident or _fechado(p):
+                continue
+            cnpj = f"maps-{ident}"
+            if repo.cnpj_get(cnpj):
+                continue
+            site = p.get("site") or ""
+            repo.cnpj_put({"cnpj": cnpj, "fonte": "maps", "fantasia": p["nome"], "razao": p["nome"], "uf": "MT",
+                           "municipio": cidade, "situacao": "02", "cnae": cnaes[0], "porte": porte,
+                           "site": site, "dominio": _dominio(site) if site else "",
+                           "telefoneMaps": p.get("telefone") or "", "endereco": p.get("endereco") or "",
+                           "placeId": p.get("place_id"), "mapsEm": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+            novas += 1
+    return novas
+
+
 def achar(repo, cli, campanha: dict, orcamento, registro=None, limite: int | None = None) -> list[dict]:
     cidades = {_sem_acento(c) for c in campanha.get("cidades") or []}
     portes = portes_da_campanha(campanha)

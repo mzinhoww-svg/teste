@@ -46,6 +46,8 @@ TETO_DIA, TETO_CAMPANHA, META = "teto do dia", "teto da campanha", "meta do dia"
 SALDO, ERROS = "saldo insuficiente", "erros consecutivos"
 PARADO_EQUIPE, PARADO_TUDO, PAUSADA = enr.PARADO_EQUIPE, enr.PARADO_TUDO, "campanha pausada"
 FALHA, INTERROMPIDA = "falha inesperada", "interrompida"
+SEM_EMPRESAS = "sem empresas"
+SO_MAPS = "0000000"        # CNAE "nenhum": a base de CNPJ não tem nada com ele, então a campanha usa só o Google Maps
 TEXTO_MOTIVO = {
     None: "Rodada concluída: todas as empresas da campanha foram vistas.",
     TETO_DIA: "Parou no teto do dia desta campanha. Amanhã continua de onde parou.",
@@ -58,10 +60,12 @@ TEXTO_MOTIVO = {
     PAUSADA: "Campanha pausada.",
     FALHA: "A rodada parou por uma falha inesperada. O que já foi feito ficou gravado.",
     INTERROMPIDA: "A rodada foi interrompida porque o serviço reiniciou. A próxima continua de onde parou.",
+    SEM_EMPRESAS: "Não achamos empresas deste segmento nas cidades da campanha, nem na base de CNPJ nem no Google "
+                  "Maps. Confira o nome do segmento e as cidades.",
 }
 STATUS_DO_MOTIVO = {None: "concluida", TETO_DIA: "teto", TETO_CAMPANHA: "teto", META: "parada", SALDO: "erro",
                     ERROS: "erro", FALHA: "erro", PARADO_EQUIPE: "parada", PARADO_TUDO: "parada",
-                    PAUSADA: "pausada", INTERROMPIDA: "parada"}
+                    PAUSADA: "pausada", INTERROMPIDA: "parada", SEM_EMPRESAS: "parada"}
 PENDENTES = ("pessoa", "contato", "qualificado")
 
 # Segmento → CNAEs (quando a tela não manda os códigos). Chave sem acento, procurada dentro do segmento.
@@ -73,6 +77,14 @@ CNAES_DO_SEGMENTO = {
     "dentist": ["8630504"], "pet": ["4789004"], "imobiliaria": ["6821801", "6821802"],
     "oficina": ["4520001"], "autopeca": ["4530703"], "auto peca": ["4530703"], "escola": ["8512100", "8513900"],
     "hotel": ["5510801"], "construtora": ["4120400"], "otica": ["4774100"],
+    # serviços profissionais (os segmentos que a Reiners mais prospecta)
+    "contab": ["6920601", "6920602"], "contador": ["6920601"], "advoca": ["6911701"], "advogad": ["6911701"],
+    "juridic": ["6911701"], "arquitet": ["7111100"], "engenhar": ["7112000"], "consultor": ["7020400"],
+    "medic": ["8630503"], "fisioterap": ["8650004"], "psicolog": ["8650003"], "nutricion": ["8650002"],
+    "veterinar": ["7500100"], "laboratorio": ["8640202"], "corretora de seguro": ["6622300"],
+    "seguros": ["6622300"], "marketing": ["7311400"], "agencia de publicidade": ["7311400"],
+    "software": ["6201501", "6202300"], "tecnologia": ["6201501", "6202300", "6204000"],
+    "transportadora": ["4930202"], "faculdade": ["8531700"], "idiomas": ["8593700"],
 }
 
 try:
@@ -298,10 +310,8 @@ class Ciclo:
         if not isinstance(cnaes, list):
             raise ValueError("CNAEs precisam vir numa lista.")
         if not cnaes:
-            cnaes = cnaes_do_segmento(dados.get("segmento"))
-            if not cnaes:
-                raise ValueError("Não sei os códigos de atividade (CNAE) deste segmento. Informe os CNAEs, "
-                                 "como 5611-2/01.")
+            # segmento sem CNAE conhecido: a campanha procura direto no Google Maps pelo nome do segmento
+            cnaes = cnaes_do_segmento(dados.get("segmento")) or [SO_MAPS]
         cidades = dados.get("cidades")
         c = camp_mod.nova(dados.get("segmento"), cidades if isinstance(cidades, list) else None, cnaes,
                           dados.get("porte") or "pequena", dados.get("oferta") or "marketing",
@@ -460,7 +470,15 @@ class Ciclo:
                          and p.get("estado") in PENDENTES]
             feitas = {p.get("empresaId") for p in self.repo.prospectos(cid)
                       if p.get("tipo") == "empresa" and p.get("estado") != "empresa"}
-            lista = [e for e in empresas.achar(self.repo, None, c, Orcamento(0)) if e["id"] not in feitas]
+            todas = empresas.achar(self.repo, None, c, Orcamento(0))
+            if not todas and not pendentes and not c.get("mapsBuscadoEm"):
+                # a base de CNPJ não tem empresas deste segmento nestas cidades: procura no Google Maps (uma vez)
+                achadas = empresas.buscar_no_maps(self.repo, ctx.cli, c, ctx.orc, registro=self._registro(ctx))
+                c = self._mudar_campanha(cid, mapsBuscadoEm=_iso(self.relogio()), mapsAchadas=achadas)
+                todas = empresas.achar(self.repo, None, c, Orcamento(0))
+            if not todas and not pendentes:
+                raise _Parada(SEM_EMPRESAS)
+            lista = [e for e in todas if e["id"] not in feitas]
             ctx.total = len(pendentes) + len(lista)
             self._progresso(ctx)
             for p in pendentes:

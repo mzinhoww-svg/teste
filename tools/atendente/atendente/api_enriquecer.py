@@ -64,3 +64,45 @@ def parar(h, usuario, agora, m):
     except Recusado as e:
         return h._erro(e.status, str(e))
     h._json(200, est)
+
+
+def origem_do_lead(l: dict) -> str:
+    """De que base o lead veio, em palavras."""
+    if l.get("prospectoId") or l.get("prospeccao"):
+        return "Prospecção"
+    if l.get("baseExplee"):
+        return "Base Explee"
+    if l.get("explee"):
+        return "Explee"
+    f = l.get("fonte")
+    return f.split("·")[0].strip().capitalize() if isinstance(f, str) and f.strip() else "Central"
+
+
+def achados_da_rodada(repo, execucao: str, inicio: str | None, fim: str | None) -> list[dict]:
+    """Leads em que a rodada achou telefone: pelo treg (buscaTreg da execução) ou no site (siteContatos no período)."""
+    from .servidor import nome_da_empresa
+    out = []
+    for l in repo.leads_todos():
+        b, s = l.get("buscaTreg") or {}, l.get("siteContatos") or {}
+        via = None
+        if isinstance(b, dict) and b.get("execucaoId") == execucao and b.get("resultado") == "achou":
+            via = "Celular de quem decide (treg)"
+        elif (isinstance(s, dict) and s.get("achou") and inicio and fim
+              and inicio <= str(s.get("em") or "") <= fim):
+            via = "Contato no site da empresa"
+        if via:
+            out.append({"id": str(l["id"]), "empresa": nome_da_empresa(l), "segmento": l.get("segmento") or "",
+                        "origem": origem_do_lead(l), "via": via, "situacao": l.get("situacao") or "ativo"})
+    return sorted(out, key=lambda x: x["empresa"].lower())
+
+
+@rota("GET", r"/api/enriquecer/achados")
+def achados(h, usuario, agora, m):
+    from urllib.parse import parse_qs, urlsplit
+    execucao = (parse_qs(urlsplit(h.path).query).get("execucao") or [""])[0].strip()
+    hist = (h.server.repo.config_get("enriquecimento") or {}).get("historicoExecucoes") or []
+    rodada = next((x for x in hist if x.get("execucaoId") == execucao), None)
+    if not execucao or rodada is None:
+        return h._erro(404, "Rodada não encontrada.")
+    h._json(200, {"execucaoId": execucao,
+                  "leads": achados_da_rodada(h.server.repo, execucao, rodada.get("em"), rodada.get("terminadoEm"))})

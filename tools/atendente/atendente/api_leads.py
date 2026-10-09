@@ -16,7 +16,7 @@ from .rotas import rota
 
 NOMES_TOQUE = {1: "Visita", 2: "Diagnóstico", 3: "Piloto"}
 ATIVAS = (None, "", "ativo")
-VISOES = ("nao_enviados", "hoje", "enviado1", "enviado2", "enviado3", "responderam", "sem_contato")
+VISOES = ("nao_enviados", "hoje", "enviado1", "enviado2", "enviado3", "responderam", "sem_contato", "enriquecidos")
 
 
 # --------------------------------------------------------------------------- pequenos ajudantes
@@ -177,6 +177,8 @@ def visoes(l: dict, coluna: str, agora: datetime) -> list[str]:
             out.append("resp_wa")                           # respondeu pelo WhatsApp
     if coluna == "Sem contato":
         out.append("sem_contato")
+    if _dict(l.get("buscaTreg")).get("resultado") == "achou" or _dict(l.get("siteContatos")).get("achou"):
+        out.append("enriquecidos")                          # o enriquecimento achou telefone para este lead
     return out
 
 

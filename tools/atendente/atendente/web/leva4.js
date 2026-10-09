@@ -188,20 +188,47 @@ window.Atendente_leva4 = function (A) {
     if (!hist.length) { caixa.append(h('p', { class: 'vazio', text: 'Nenhuma rodada ainda.' })); return; }
     var corpo = h('tbody');
     hist.forEach(function (x) {
+      var total = (x.achados || 0) + (x.siteAchados || 0);
+      var ver = total && x.execucaoId && !x.simulado
+        ? h('button', { type: 'button', class: 'btn texto', text: 'Ver os ' + total + ' leads',
+            onclick: function (ev) { verAchados(x, ev.currentTarget); } })
+        : null;
       corpo.append(h('tr', null,
         h('td', null, h('time', { datetime: x.em || '', text: A.quando(x.em) })),
         h('td', { text: (x.por || '–') + (x.simulado ? ' (simulação)' : '') }),
         h('td', { class: 'num', text: String(x.consultados || 0) }),
         h('td', { class: 'num', text: String(x.achados || 0) }),
         h('td', { class: 'num', text: micro(x.gastoMicro) }),
-        h('td', { text: x.motivoParada ? (MOTIVO_CURTO[x.motivoParada] || x.motivoParada) : 'Concluída' })));
+        h('td', { text: x.motivoParada ? (MOTIVO_CURTO[x.motivoParada] || x.motivoParada) : 'Concluída' }),
+        h('td', null, ver)));
     });
     caixa.append(h('div', { class: 'enriq-tabela-rolagem' }, h('table', { class: 'enriq-tabela' },
       h('caption', { class: 'so-leitor', text: 'Rodadas de enriquecimento, da mais recente para a mais antiga' }),
-      h('thead', null, h('tr', null, ['Quando', 'Quem pediu', 'Consultados', 'Achados', 'Gasto', 'Resultado'].map(function (t) {
+      h('thead', null, h('tr', null, ['Quando', 'Quem pediu', 'Consultados', 'Achados', 'Gasto', 'Resultado', 'Leads'].map(function (t) {
         return h('th', { scope: 'col', text: t });
       }))),
       corpo)));
+  }
+
+  /* Lista dos leads em que uma rodada achou telefone, logo abaixo da tabela. Clicar abre o card. */
+  function verAchados(rodada, botao) {
+    var caixa = q('enriq-achados');
+    if (!caixa) { caixa = h('section', { id: 'enriq-achados', class: 'enriq-achados', 'aria-live': 'polite' }); q('enriq-hist').after(caixa); }
+    botao.disabled = true;
+    A.api('api/enriquecer/achados?execucao=' + encodeURIComponent(rodada.execucaoId)).then(function (r) {
+      A.limpar(caixa);
+      caixa.append(h('h3', { text: 'Leads com telefone achado na rodada de ' + A.quando(rodada.em) }));
+      if (!r.leads.length) { caixa.append(h('p', { class: 'vazio', text: 'Nenhum lead encontrado para esta rodada.' })); return; }
+      var lista = h('ul', { class: 'enriq-achados-lista' });
+      r.leads.forEach(function (l) {
+        lista.append(h('li', null, h('button', { type: 'button', class: 'btn texto', text: l.empresa || l.id,
+          onclick: function (ev) { A.abrirPainel(l.id, ev.currentTarget); } }),
+          h('span', { class: 'suave', text: ' · ' + [l.segmento, 'origem: ' + l.origem, l.via].filter(Boolean).join(' · ') })));
+      });
+      caixa.append(lista);
+      caixa.scrollIntoView({ block: 'nearest' });
+    }).catch(function (e) { A.aviso(A.eRede(e) ? A.ERRO_REDE : e.message, true); })
+      .then(function () { botao.disabled = false; });
   }
 
   /* ---------- resultado no painel do lead ---------- */
