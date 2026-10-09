@@ -165,6 +165,7 @@
     var conectado = estado.wa && estado.wa.conectado === true;
     wa.textContent = conectado ? 'WhatsApp conectado' : 'WhatsApp desconectado';
     wa.className = 'chip' + (conectado ? ' ok' : '');
+    $('faixa-wa').hidden = conectado || !estado.wa;
 
     $('r-fila').textContent = numero(p.naFila);
     $('r-enviadas').textContent = numero(p.enviadasHoje);
@@ -324,11 +325,12 @@
     if (!id) return Promise.resolve();
     return api('api/leads/' + encodeURIComponent(id)).then(function (lead) {
       if (estado.abertoId !== id) return;
-      var assinatura = JSON.stringify([lead.mensagens, lead.historico, lead.situacao, lead.etapa, lead.empresa]);
+      var assinatura = JSON.stringify([lead.mensagens, lead.historico, lead.situacao, lead.etapa, lead.empresa, lead.resumoIa]);
       if (!primeiraVez && assinatura === estado.assinaturaPainel) return;
       estado.assinaturaPainel = assinatura;
       pintarPainel(lead, primeiraVez);
       ganchos.painel.forEach(function (f) { f(lead, primeiraVez); });
+      if (primeiraVez) sincronizarConversa(id, false);
     }).catch(function (e) {
       if (e instanceof ErroApi && e.status === 404) { fecharPainel(true); aviso('Esse lead não existe mais.', true); }
       else if (primeiraVez && !(e instanceof ErroApi && e.status === 401)) aviso(eRede(e) ? ERRO_REDE : e.message, true);
@@ -358,6 +360,18 @@
         h('time', { datetime: m.em || '', text: quando(m.em) })));
     });
 
+    var r = lead.resumoIa, campos = $('resumo-ia'); limpar(campos);
+    if (r && r.resumo) {
+      [['Resumo', r.resumo], ['Momento', r.momento], ['Próximo passo', r.proximo]].forEach(function (p) {
+        if (p[1]) campos.append(h('div', null, h('dt', { text: p[0] }), h('dd', { text: p[1] })));
+      });
+      campos.append(h('div', { class: 'suave' }, h('dd', { text: 'Resumo de ' + quando(r.em) + '.' })));
+    } else {
+      campos.append(h('div', { class: 'suave' }, h('dd', { text: msgs.length
+        ? 'Clique em Resumir com IA para ver o que o lead quer e o próximo passo.' : 'Sem conversa ainda.' })));
+    }
+    $('btn-resumir').disabled = !msgs.length;
+
     var hist = $('painel-historico'); limpar(hist);
     var itens = (lead.historico || []).slice().reverse();
     if (!itens.length) hist.append(h('li', { class: 'vazio', text: 'Nada registrado ainda.' }));
@@ -368,6 +382,31 @@
     });
     if (primeiraVez) $('painel-titulo').focus({ preventScroll: true });
   }
+
+  // Conversa completa: traz do WhatsApp o que já aconteceu (o que mandamos, inclusive pelo celular)
+  function sincronizarConversa(id, avisar) {
+    var b = $('btn-sincronizar');
+    b.disabled = true;
+    return api('api/leads/' + encodeURIComponent(id) + '/sincronizar', { method: 'POST', corpo: {} })
+      .then(function (r) {
+        if (avisar) aviso(r.novas ? r.novas + ' mensagem(ns) nova(s) do WhatsApp.' : 'A conversa já estava em dia.');
+        if (r.novas && estado.abertoId === id) return carregarPainel(false);
+      })
+      .catch(function (e) { if (avisar) aviso(eRede(e) ? ERRO_REDE : e.message, true); })
+      .then(function () { b.disabled = false; });
+  }
+  $('btn-sincronizar').addEventListener('click', function () {
+    if (estado.abertoId) sincronizarConversa(estado.abertoId, true);
+  });
+  $('btn-resumir').addEventListener('click', function () {
+    var id = estado.abertoId, b = $('btn-resumir');
+    if (!id) return;
+    b.disabled = true; b.textContent = 'Resumindo...';
+    api('api/leads/' + encodeURIComponent(id) + '/resumo', { method: 'POST', corpo: {} })
+      .then(function () { return carregarPainel(false); })
+      .catch(function (e) { aviso(eRede(e) ? ERRO_REDE : e.message, true); })
+      .then(function () { b.disabled = false; b.textContent = 'Resumir com IA'; });
+  });
 
   $('painel-acoes').addEventListener('click', function (ev) {
     var b = ev.target.closest('button[data-sit]');

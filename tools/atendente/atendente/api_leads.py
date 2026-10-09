@@ -306,3 +306,46 @@ def ver_lead(h, usuario, agora, m):
     if lead is None:
         return h._erro(404, "Lead não encontrado.")
     return h._json(200, detalhe(lead, srv.repo, agora, srv.cfg.get("fotos_url") or ""))
+
+
+@rota("POST", r"/api/leads/(?P<id>[^/]+)/sincronizar")
+def sincronizar_conversa(h, usuario, agora, m):
+    """Traz do WhatsApp a conversa deste lead (o que mandamos, inclusive pelo celular, e o que ele já escreveu)."""
+    from urllib.parse import unquote
+    from . import conversas
+    srv = h.server
+    lead = srv.repo.lead_get(unquote(m["id"]))
+    _, falhou = h._json_do_corpo()
+    if falhou:
+        return
+    if lead is None:
+        return h._erro(404, "Lead não encontrado.")
+    try:
+        novas = conversas.sincronizar_lead(srv.repo, srv.wa, lead, agora)
+    except Exception as e:
+        return h._erro(502, f"Não consegui ler a conversa no WhatsApp agora ({type(e).__name__}).")
+    return h._json(200, {"novas": novas, "mensagens": srv.repo.msgs_do_lead(str(lead["id"]), 100)})
+
+
+@rota("POST", r"/api/leads/(?P<id>[^/]+)/resumo")
+def resumir_conversa(h, usuario, agora, m):
+    """Resumo da conversa feito pela IA (só para a equipe). Fica guardado no lead em `resumoIa`."""
+    from urllib.parse import unquote
+    from .servidor import nome_da_empresa
+    srv = h.server
+    lead = srv.repo.lead_get(unquote(m["id"]))
+    _, falhou = h._json_do_corpo()
+    if falhou:
+        return
+    if lead is None:
+        return h._erro(404, "Lead não encontrado.")
+    msgs = srv.repo.msgs_do_lead(str(lead["id"]), 100)
+    if not msgs:
+        return h._erro(409, "Ainda não há conversa com este lead para resumir.")
+    ia = getattr(srv.atendente, "ia", None)
+    r = ia.resumir(nome_da_empresa(lead), msgs, agora) if ia is not None and hasattr(ia, "resumir") else None
+    if r is None:
+        return h._erro(502, "A IA não conseguiu resumir agora. Tente de novo em instantes.")
+    r["em"] = wa_akg._iso(agora)
+    srv.repo.aplicar(lead["id"], {"resumoIa": r})
+    return h._json(200, r)

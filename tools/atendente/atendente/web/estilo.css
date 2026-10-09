@@ -164,3 +164,10 @@ main { padding: 12px 0 48px; }
   .chip { font-size: 12px; padding: 1px 8px; }
 }
 @media (prefers-reduced-motion: reduce) { .trilho, .bolinha { transition: none; } }
+
+.faixa-wa { margin: 8px 0 0; padding: 10px 14px; border-radius: 8px; background: #7a1f1f; color: #fff; border: 1px solid #b33; }
+.linha-titulo { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.resumo-ia { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--linha); border-radius: 10px; background: var(--papel); }
+.resumo-ia-campos { margin: 6px 0 0; display: grid; gap: 6px; }
+.resumo-ia-campos dt { font-size: 12px; color: var(--suave); }
+.resumo-ia-campos dd { margin: 0; overflow-wrap: anywhere; font: inherit; }
