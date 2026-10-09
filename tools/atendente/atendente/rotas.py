@@ -9,7 +9,8 @@ import importlib
 import re
 
 ROTAS: list[tuple[str, "re.Pattern", object]] = []
-MODULOS = ("api_leads", "api_acoes", "api_posvenda", "api_base", "api_enriquecer", "api_busca", "api_prospeccao")
+MODULOS = ("api_leads", "api_acoes", "api_posvenda", "api_base", "api_enriquecer", "api_busca", "api_prospeccao",
+           "api_funil")
 
 
 def rota(metodo: str, padrao: str):
