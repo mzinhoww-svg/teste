@@ -1,0 +1,18 @@
+#vista-funil { padding: 0 16px 24px; }
+.funil-topo { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.funil-topo h2 { margin: 0 auto 0 0; }
+.funil-etapas { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 8px; }
+.funil-col { background: var(--papel); border: 1px solid var(--linha); border-radius: 10px; padding: 10px; min-width: 0; }
+.funil-col header { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.funil-qtd { font-size: 22px; font-weight: 700; }
+.funil-passagem { margin: 4px 0 8px; font-size: 12px; }
+.funil-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 420px; overflow-y: auto; }
+.funil-card { display: grid; gap: 2px; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid var(--linha); border-radius: 8px; background: #fff; cursor: pointer; font: inherit; }
+.funil-card:hover, .funil-card:focus-visible { border-color: var(--ouro); }
+.funil-empresa { font-weight: 600; overflow-wrap: anywhere; }
+.funil-card .suave { font-size: 12px; }
+.tabela-rolagem { overflow-x: auto; }
+.funil-tabela { border-collapse: collapse; min-width: 560px; }
+.funil-tabela th, .funil-tabela td { padding: 6px 10px; border-bottom: 1px solid var(--linha); text-align: left; }
+.funil-tabela td:not(:first-child), .funil-tabela th:not(:first-child) { text-align: right; }
+#funil-acoes { margin: 8px 0; align-items: center; }
