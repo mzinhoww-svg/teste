@@ -30,8 +30,9 @@ class Treg:
     """Transporte falso do treg. Celular por nome da pessoa: `celulares[nome] = número | None`.
     `erro_em` (nomes) responde 500; `saldo_em` (nomes) responde 402 sem saldo; `antes(nome)` roda antes de responder."""
 
-    def __init__(self, celulares=None, erro_em=(), saldo_em=(), antes=None, custo=26_000):
+    def __init__(self, celulares=None, erro_em=(), saldo_em=(), antes=None, custo=26_000, lugares=None, decisores=None):
         self.celulares = celulares or {}
+        self.lugares, self.decisores = lugares or [], decisores or []
         self.erro_em, self.saldo_em, self.antes, self.custo = set(erro_em), set(saldo_em), antes, custo
         self.chamadas = []
 
@@ -52,9 +53,9 @@ class Treg:
         elif ep == "treg.people.email.find":
             st, hs, body = ok({"email": None}, "trykitt", 0)
         elif ep == "treg.google.serp.maps":
-            st, hs, body = ok({"places": []}, "serper", 2_000)
+            st, hs, body = ok({"places": self.lugares}, "serper", 2_000)
         else:
-            st, hs, body = ok({"people": []}, "pdl", 0)
+            st, hs, body = ok({"people": self.decisores}, "pdl", 0)
         return st, hs, json.dumps(body).encode()
 
     def de(self, endpoint):
@@ -379,8 +380,8 @@ def test_criar_valida(repo):
     # sem CNAE, o segmento conhecido decide
     camp = criar(c, cnaes=[], segmento="Restaurantes")
     assert camp["cnaes"] and camp["nome"] == "Mercados de Cuiabá" and camp["status"] == "nova"
-    with pytest.raises(ValueError):
-        criar(c, cnaes=[], segmento="Coisa que ninguém sabe")
+    # segmento sem CNAE conhecido não trava mais: a campanha vai direto ao Google Maps
+    assert criar(c, cnaes=[], segmento="Coisa que ninguém sabe")["cnaes"] == [cic.SO_MAPS]
     assert repo.campanha_get(camp["id"])["criadaPor"] == "ana"
 
 
@@ -390,3 +391,45 @@ def test_token_nunca_vai_para_o_banco(repo):
     rodar(c, cid)
     tudo = json.dumps([repo.config_get("prospeccao"), repo.campanhas(), repo.prospectos()])
     assert TOKEN not in tudo
+
+
+# ---------------------------------------------------------------- base de CNPJ sem o segmento: Google Maps
+
+LUGARES = [
+    {"title": "Contábil Exemplo", "placeId": "p1", "website": "https://contabil-exemplo.com.br",
+     "phoneNumber": "(65) 3322-1190", "category": "Escritório de contabilidade", "address": "Rua A, Cuiabá"},
+    {"title": "Escritório Fechado", "placeId": "p2", "category": "Permanentemente fechado"},
+    {"title": "Sem Identificação"},
+]
+
+
+def test_sem_empresa_na_base_busca_no_maps_uma_vez(repo):
+    treg = Treg(todos_celulares(), lugares=LUGARES,
+                decisores=[{"full_name": "Ana Exemplo de Souza", "job_title": "Sócia"}])
+    c = novo_ciclo(repo, treg)
+    camp = criar(c, cnaes=[], segmento="Escritório de contabilidade", nome="Contábeis")
+    assert camp["cnaes"][0] == "6920601"                     # contabilidade agora tem CNAE
+    est = rodar(c, camp["id"])
+    salvo = repo.cnpj_get("maps-p1")
+    assert salvo and salvo["fonte"] == "maps" and salvo["dominio"] == "contabil-exemplo.com.br"
+    assert repo.cnpj_get("maps-p2") is None                   # fechado não entra
+    assert len(treg.de("treg.google.serp.maps")) == 1         # uma busca: só Cuiabá
+    assert camp_de(est, camp["id"])["funil"]["empresas"] == 1
+    assert repo.campanha_get(camp["id"])["mapsAchadas"] == 1
+    rodar(c, camp["id"])                                      # de novo: não busca no Maps outra vez
+    assert len(treg.de("treg.google.serp.maps")) == 1
+
+
+def test_sem_empresa_nem_no_maps_para_com_motivo_claro(repo):
+    c = novo_ciclo(repo, Treg(todos_celulares()))
+    camp = criar(c, cnaes=[], segmento="Advocacia", nome="Advogados")
+    est = rodar(c, camp["id"])
+    r = camp_de(est, camp["id"])
+    assert r["status"] == "parada" and "Google Maps" in r["motivoTexto"]
+
+
+def test_segmentos_profissionais_tem_cnae():
+    for seg, cnae in (("Contabilidade", "6920601"), ("Advocacia", "6911701"), ("Escritório de advogados", "6911701"),
+                      ("Arquitetura", "7111100"), ("Clínicas de fisioterapia", "8650004"),
+                      ("Consultoria empresarial", "7020400")):
+        assert cnae in cic.cnaes_do_segmento(seg), seg

@@ -425,3 +425,26 @@ def test_api_cria_o_enriquecedor_pelo_ambiente_sem_token(repo):
         assert e is api_enriquecer.enriquecedor_do(srv) and e.estado()["disponivel"] is False
     finally:
         srv.server_close()
+
+
+def test_achados_da_rodada_lista_quem_ganhou_telefone_e_de_onde_veio():
+    from atendente.api_enriquecer import achados_da_rodada
+    from atendente.db import Repo
+    r = Repo(":memory:")
+    r.lead_put({"id": "A", "nome": "Alfa", "segmento": "Advocacia", "baseExplee": {"faixa": "B"},
+                "buscaTreg": {"execucaoId": "E1", "resultado": "achou"}})
+    r.lead_put({"id": "B", "nome": "Beta", "prospectoId": "p1", "buscaTreg": {"execucaoId": "E1", "resultado": "nao_achou"}})
+    r.lead_put({"id": "C", "nome": "Gama", "siteContatos": {"em": "2026-10-08T13:40:00Z", "achou": True}})
+    r.lead_put({"id": "D", "nome": "Delta", "buscaTreg": {"execucaoId": "E0", "resultado": "achou"}})
+    out = achados_da_rodada(r, "E1", "2026-10-08T13:37:00Z", "2026-10-08T14:00:00Z")
+    assert [(x["id"], x["origem"]) for x in out] == [("A", "Base Explee"), ("C", "Central")]
+    assert out[0]["via"].startswith("Celular") and out[1]["via"].startswith("Contato no site")
+
+
+def test_visao_enriquecidos_no_quadro():
+    from datetime import datetime, timezone
+    from atendente.api_leads import visoes
+    agora = datetime(2026, 10, 8, 15, 0, tzinfo=timezone.utc)
+    assert "enriquecidos" in visoes({"buscaTreg": {"resultado": "achou"}}, "Aguardando", agora)
+    assert "enriquecidos" in visoes({"siteContatos": {"achou": True}}, "Aguardando", agora)
+    assert "enriquecidos" not in visoes({"buscaTreg": {"resultado": "nao_achou"}}, "Aguardando", agora)

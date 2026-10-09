@@ -25,3 +25,5 @@
 .enriq-painel { margin: 12px 0; padding: 10px 12px; border: 1px solid var(--linha); border-radius: 8px; background: var(--papel); display: grid; gap: 4px; }
 .enriq-painel h3 { margin: 0; font-size: 15px; }
 .enriq-painel p { margin: 0; overflow-wrap: anywhere; }
+.enriq-achados { margin-top: 16px; }
+.enriq-achados-lista { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
